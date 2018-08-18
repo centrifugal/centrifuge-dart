@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import '../lib/centrifuge.dart';
+import 'package:centrifuge/centrifuge.dart';
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
@@ -36,8 +36,8 @@ void main() async {
   }
 }
 
-Function(String) _handleUserInput(CentrifugeClient centrifuge,
-    Subscription subscription) {
+Function(String) _handleUserInput(
+    CentrifugeClient centrifuge, Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
