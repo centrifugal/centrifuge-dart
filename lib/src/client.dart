@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:meta/meta.dart';
 
+import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'proto/client.pb.dart' hide Error;
@@ -25,7 +25,7 @@ class CentrifugeClient {
   StreamSubscription _streamSubscription;
   WebSocket _socket;
   final _handlers = Map<int, Completer<GeneratedMessage>>();
-  final _subscriptions = Map<String, Subscription>();
+  final _subscriptions = Map<String, _Subscription>();
 
   CentrifugeClient({@required this.url});
 
@@ -34,19 +34,38 @@ class CentrifugeClient {
     _streamSubscription = _socket.listen(
       _onData,
       onError: (error) => print(error),
-      onDone: () => print("Done"),
+      onDone: _onSocketDone,
     );
 
     final command = _createCommand(MethodType.CONNECT);
     await _send(command, ConnectResult());
   }
 
-  Future<void> subscribe(String channel, SubscriptionEvents eventHub) async {
-    _subscriptions[channel] = Subscription(channel, eventHub);
+  void _onSocketDone() {
+    final event = UnsubscribeEvent();
+    _subscriptions.values.forEach((s) => s.onUnsubscribe(event));
+    //TODO: Invoke onDisconnect handler
+  }
 
-    final command = _createCommand(MethodType.SUBSCRIBE)
-      ..params = (SubscribeRequest()..channel = channel).writeToBuffer();
-    await _send(command, SubscribeResult());
+  Subscription subscribe(String channel) {
+    final subscription = _Subscription(channel);
+
+    try {
+      _subscriptions[channel] = subscription;
+
+      final command = _createCommand(MethodType.SUBSCRIBE)
+        ..params = (SubscribeRequest()..channel = channel).writeToBuffer();
+      _send(command, SubscribeResult()).then((result) {
+        subscription
+            .onSubscribeSuccess(SubscribeSuccessEvent.from(result, false));
+      },
+          onError: (error) =>
+              subscription.onSubscribeError(SubscribeErrorEvent._(error)));
+    } catch (exception) {
+      final event = SubscribeErrorEvent._(exception);
+      subscription.onSubscribeError(event);
+    }
+    return subscription;
   }
 
   T _processReply<T extends GeneratedMessage>(T result, Reply reply) {
@@ -67,16 +86,22 @@ class CentrifugeClient {
   void _onData(dynamic input) {
     final List<int> data = input;
 
+    print('onData> ${utf8.decode(data)}');
+
     final reader = CodedBufferReader(data);
+    var count = 0;
     while (!reader.isAtEnd()) {
       final reply = Reply();
       reader.readMessage(reply, ExtensionRegistry.EMPTY);
-
+      count++;
       if (reply.id > 0) {
         _onResponse(reply);
       } else {
         _onPush(reply);
       }
+    }
+    if (count > 1) {
+      print('$count messages in ws frame.');
     }
   }
 
@@ -84,23 +109,23 @@ class CentrifugeClient {
     final push = Push.fromBuffer(reply.result);
 
     final subscription = _subscriptions[push.channel];
-    final events = subscription._events;
 
     switch (push.type) {
       case PushType.PUBLICATION:
         final pub = Publication.fromBuffer(push.data);
         final event = PublishEvent.from(pub);
-        events.onPublish?.call(subscription, event);
+        subscription.onPublish(event);
         break;
       case PushType.LEAVE:
         final leave = Leave.fromBuffer(push.data);
         final event = LeaveEvent.from(leave.info);
-        events.onLeave?.call(subscription, event);
+
+        subscription.onLeave(event);
         break;
       case PushType.JOIN:
         final join = Join.fromBuffer(push.data);
         final event = JoinEvent.from(join.info);
-        events.onJoin?.call(subscription, event);
+        subscription.onJoin(event);
         break;
       case PushType.MESSAGE:
         final message = Message.fromBuffer(push.data);
@@ -108,18 +133,19 @@ class CentrifugeClient {
         // TODO: Implement MESSAGE
         break;
       case PushType.UNSUB:
-        events.onUnsubscribe?.call(subscription);
+        final event = UnsubscribeEvent();
+        subscription.onUnsubscribe(event);
         break;
     }
   }
 
   void _onResponse(Reply reply) {
     assert(reply.id > 0);
-    _handlers[reply.id].complete(reply);
+    _handlers.remove(reply.id).complete(reply);
   }
 
   Future<Reply> _writeCommand(Command command) {
-    final completer = Completer<Reply>();
+    final completer = Completer<Reply>.sync();
 
     _handlers[command.id] = completer;
 
@@ -139,28 +165,69 @@ class CentrifugeClient {
   }
 }
 
-class Subscription {
+abstract class Subscription {
   final String channel;
-  final SubscriptionEvents _events;
 
-  Subscription(this.channel, this._events);
+  Subscription(this.channel);
+
+  Stream<PublishEvent> get publishStream;
+
+  Stream<JoinEvent> get joinStream;
+
+  Stream<LeaveEvent> get leaveStream;
+
+  Stream<SubscribeSuccessEvent> get subscribeSuccessStream;
+
+  Stream<SubscribeErrorEvent> get subscribeErrorStream;
+
+  Stream<UnsubscribeEvent> get unsubscribeStream;
 }
 
-class SubscriptionEvents {
-  final Function(Subscription, PublishEvent) onPublish;
-  final Function(Subscription, JoinEvent) onJoin;
-  final Function(Subscription, LeaveEvent) onLeave;
-  final Function(Subscription, SubscribeSuccessEvent) onSubscribeSuccess;
-  final Function(Subscription, Error) onSubscribeError;
-  final Function(Subscription) onUnsubscribe;
+class _Subscription implements Subscription {
+  final String channel;
 
-  SubscriptionEvents(
-      {this.onPublish,
-      this.onJoin,
-      this.onLeave,
-      this.onUnsubscribe,
-      this.onSubscribeSuccess,
-      this.onSubscribeError});
+  _Subscription(this.channel);
+
+  final _publishController =
+      StreamController<PublishEvent>.broadcast(sync: true);
+  final _joinController = StreamController<JoinEvent>.broadcast(sync: true);
+  final _leaveController = StreamController<LeaveEvent>.broadcast(sync: true);
+  final _subscribeSuccessController =
+      StreamController<SubscribeSuccessEvent>.broadcast(sync: true);
+  final _subscribeErrorController =
+      StreamController<SubscribeErrorEvent>.broadcast(sync: true);
+  final _unsubscribeController =
+      StreamController<UnsubscribeEvent>.broadcast(sync: true);
+
+  Stream<PublishEvent> get publishStream => _publishController.stream;
+
+  Stream<JoinEvent> get joinStream => _joinController.stream;
+
+  Stream<LeaveEvent> get leaveStream => _leaveController.stream;
+
+  Stream<SubscribeSuccessEvent> get subscribeSuccessStream =>
+      _subscribeSuccessController.stream;
+
+  Stream<SubscribeErrorEvent> get subscribeErrorStream =>
+      _subscribeErrorController.stream;
+
+  Stream<UnsubscribeEvent> get unsubscribeStream =>
+      _unsubscribeController.stream;
+
+  void onPublish(PublishEvent event) => _publishController.add(event);
+
+  void onJoin(JoinEvent event) => _joinController.add(event);
+
+  void onLeave(LeaveEvent event) => _leaveController.add(event);
+
+  void onSubscribeSuccess(SubscribeSuccessEvent event) =>
+      _subscribeSuccessController.add(event);
+
+  void onSubscribeError(SubscribeErrorEvent event) =>
+      _subscribeErrorController.add(event);
+
+  void onUnsubscribe(UnsubscribeEvent event) =>
+      _unsubscribeController.add(event);
 }
 
 class PublishEvent {
@@ -214,8 +281,30 @@ class SubscribeSuccessEvent {
 
   SubscribeSuccessEvent._(this.resubscribed, this.recovered);
 
+  static SubscribeSuccessEvent from(
+          SubscribeResult result, bool resubscribed) =>
+      SubscribeSuccessEvent._(resubscribed, result.recovered);
+
   @override
   String toString() {
     return 'SubscribeSuccessEvent{resubscribed: $resubscribed, recovered: $recovered}';
+  }
+}
+
+class SubscribeErrorEvent {
+  final Error error;
+
+  SubscribeErrorEvent._(this.error);
+
+  @override
+  String toString() {
+    return 'SubscribeErrorEvent{error: $error}';
+  }
+}
+
+class UnsubscribeEvent {
+  @override
+  String toString() {
+    return 'UnsubscribeEvent{}';
   }
 }
