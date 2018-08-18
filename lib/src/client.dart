@@ -12,16 +12,16 @@ class CentrifugeClient {
   final String url;
 
   WebSocket _socket;
-  final _handlers = Map<int, Completer<GeneratedMessage>>();
-  final _subscriptions = Map<String, _Subscription>();
+  final _handlers = <int, Completer<GeneratedMessage>>{};
+  final _subscriptions = <String, _Subscription>{};
 
   CentrifugeClient({@required this.url});
 
-  void connect() async {
+  Future connect() async {
     _socket = await WebSocket.connect(url);
     _socket.listen(
       _onData,
-      onError: (error) => print(error),
+      onError: (dynamic error) => print(error),
       onDone: _onSocketDone,
     );
 
@@ -197,6 +197,7 @@ abstract class Subscription {
 }
 
 class _Subscription implements Subscription {
+  @override
   final String channel;
   final CentrifugeClient _client;
 
@@ -213,18 +214,24 @@ class _Subscription implements Subscription {
   final _unsubscribeController =
       StreamController<UnsubscribeEvent>.broadcast(sync: true);
 
+  @override
   Stream<PublishEvent> get publishStream => _publishController.stream;
 
+  @override
   Stream<JoinEvent> get joinStream => _joinController.stream;
 
+  @override
   Stream<LeaveEvent> get leaveStream => _leaveController.stream;
 
+  @override
   Stream<SubscribeSuccessEvent> get subscribeSuccessStream =>
       _subscribeSuccessController.stream;
 
+  @override
   Stream<SubscribeErrorEvent> get subscribeErrorStream =>
       _subscribeErrorController.stream;
 
+  @override
   Stream<UnsubscribeEvent> get unsubscribeStream =>
       _unsubscribeController.stream;
 
@@ -244,13 +251,13 @@ class _Subscription implements Subscription {
       _unsubscribeController.add(event);
 
   @override
-  publish(List<int> data) => _client.publish(channel, data);
+  Future publish(List<int> data) => _client.publish(channel, data);
 
   @override
-  subscribe() => _resubscribe(false);
+  Future subscribe() => _resubscribe(false);
 
   @override
-  unsubscribe() async {
+  Future unsubscribe() async {
     await _client._sendUnsubscribe(channel);
     final event = UnsubscribeEvent();
     onUnsubscribe(event);

@@ -13,7 +13,7 @@ void main() async {
 
     final subscription = centrifuge.subscribe(channel);
 
-    final onEvent = (event) {
+    final onEvent = (dynamic event) {
       print('$channel> $event');
     };
 
@@ -48,7 +48,7 @@ Function(String) _handleUserInput(CentrifugeClient centrifuge,
         break;
       case '#disconnect':
         await centrifuge.disconnect();
-        Future.delayed(Duration(seconds: 1)).then((_) => exit(0));
+        Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
         break;
       default:
         final output = jsonEncode({'input': message});
