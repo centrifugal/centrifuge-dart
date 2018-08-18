@@ -44,7 +44,14 @@ const Command$json = const {
   '1': 'Command',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 13, '10': 'id'},
-    const {'1': 'method', '3': 2, '4': 1, '5': 14, '6': '.proto.MethodType', '10': 'method'},
+    const {
+      '1': 'method',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.proto.MethodType',
+      '10': 'method'
+    },
     const {'1': 'params', '3': 3, '4': 1, '5': 12, '10': 'params'},
   ],
 };
@@ -53,7 +60,14 @@ const Reply$json = const {
   '1': 'Reply',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 13, '10': 'id'},
-    const {'1': 'error', '3': 2, '4': 1, '5': 11, '6': '.proto.Error', '10': 'error'},
+    const {
+      '1': 'error',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.proto.Error',
+      '10': 'error'
+    },
     const {'1': 'result', '3': 3, '4': 1, '5': 12, '10': 'result'},
   ],
 };
@@ -61,7 +75,14 @@ const Reply$json = const {
 const Push$json = const {
   '1': 'Push',
   '2': const [
-    const {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.proto.PushType', '10': 'type'},
+    const {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.proto.PushType',
+      '10': 'type'
+    },
     const {'1': 'channel', '3': 2, '4': 1, '5': 9, '10': 'channel'},
     const {'1': 'data', '3': 3, '4': 1, '5': 12, '10': 'data'},
   ],
@@ -82,21 +103,42 @@ const Publication$json = const {
   '2': const [
     const {'1': 'uid', '3': 1, '4': 1, '5': 9, '10': 'uid'},
     const {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
-    const {'1': 'info', '3': 3, '4': 1, '5': 11, '6': '.proto.ClientInfo', '10': 'info'},
+    const {
+      '1': 'info',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.proto.ClientInfo',
+      '10': 'info'
+    },
   ],
 };
 
 const Join$json = const {
   '1': 'Join',
   '2': const [
-    const {'1': 'info', '3': 1, '4': 1, '5': 11, '6': '.proto.ClientInfo', '10': 'info'},
+    const {
+      '1': 'info',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.proto.ClientInfo',
+      '10': 'info'
+    },
   ],
 };
 
 const Leave$json = const {
   '1': 'Leave',
   '2': const [
-    const {'1': 'info', '3': 1, '4': 1, '5': 11, '6': '.proto.ClientInfo', '10': 'info'},
+    const {
+      '1': 'info',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.proto.ClientInfo',
+      '10': 'info'
+    },
   ],
 };
 
@@ -166,7 +208,14 @@ const SubscribeResult$json = const {
   '2': const [
     const {'1': 'last', '3': 1, '4': 1, '5': 9, '10': 'last'},
     const {'1': 'recovered', '3': 2, '4': 1, '5': 8, '10': 'recovered'},
-    const {'1': 'publications', '3': 3, '4': 3, '5': 11, '6': '.proto.Publication', '10': 'publications'},
+    const {
+      '1': 'publications',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.proto.Publication',
+      '10': 'publications'
+    },
     const {'1': 'expires', '3': 4, '4': 1, '5': 8, '10': 'expires'},
     const {'1': 'ttl', '3': 5, '4': 1, '5': 13, '10': 'ttl'},
   ],
@@ -221,7 +270,14 @@ const PresenceRequest$json = const {
 const PresenceResult$json = const {
   '1': 'PresenceResult',
   '2': const [
-    const {'1': 'presence', '3': 1, '4': 3, '5': 11, '6': '.proto.PresenceResult.PresenceEntry', '10': 'presence'},
+    const {
+      '1': 'presence',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.proto.PresenceResult.PresenceEntry',
+      '10': 'presence'
+    },
   ],
   '3': const [PresenceResult_PresenceEntry$json],
 };
@@ -230,7 +286,14 @@ const PresenceResult_PresenceEntry$json = const {
   '1': 'PresenceEntry',
   '2': const [
     const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
-    const {'1': 'value', '3': 2, '4': 1, '5': 11, '6': '.proto.ClientInfo', '10': 'value'},
+    const {
+      '1': 'value',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.proto.ClientInfo',
+      '10': 'value'
+    },
   ],
   '7': const {'7': true},
 };
@@ -260,7 +323,14 @@ const HistoryRequest$json = const {
 const HistoryResult$json = const {
   '1': 'HistoryResult',
   '2': const [
-    const {'1': 'publications', '3': 1, '4': 3, '5': 11, '6': '.proto.Publication', '10': 'publications'},
+    const {
+      '1': 'publications',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.proto.Publication',
+      '10': 'publications'
+    },
   ],
 };
 
@@ -298,4 +368,3 @@ const SendRequest$json = const {
     const {'1': 'data', '3': 1, '4': 1, '5': 12, '10': 'data'},
   ],
 };
-
