@@ -3,6 +3,9 @@ dart:
 - stable
 - dev
 sudo: false
+dart_task:
+- dartanalyzer: --fatal-warnings lib
+- dartfmt
 cache:
   directories:
   - $HOME/.pub-cache

@@ -7,11 +7,12 @@ void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
   final channel = 'chat:index';
 
-  final centrifuge = CentrifugeClient(url: url);
+  final centrifuge = Centrifuge(url: url);
   try {
+
     await centrifuge.connect();
 
-    final subscription = centrifuge.subscribe(channel);
+    final Subscription subscription = centrifuge.subscribe(channel);
 
     final onEvent = (dynamic event) {
       print('$channel> $event');
@@ -21,11 +22,13 @@ void main() async {
     subscription.joinStream.listen(onEvent);
     subscription.leaveStream.listen(onEvent);
 
+
     subscription.subscribeSuccessStream.listen(onEvent);
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
-
     final handler = _handleUserInput(centrifuge, subscription);
+
+    Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
 
     await for (List<int> codeUnit in stdin) {
       final message = utf8.decode(codeUnit).trim();
@@ -37,7 +40,7 @@ void main() async {
 }
 
 Function(String) _handleUserInput(
-    CentrifugeClient centrifuge, Subscription subscription) {
+    Centrifuge centrifuge, Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
