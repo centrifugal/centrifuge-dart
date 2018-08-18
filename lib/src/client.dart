@@ -108,9 +108,7 @@ class CentrifugeClient {
         // TODO: Implement MESSAGE
         break;
       case PushType.UNSUB:
-        final unsub = Unsub.fromBuffer(push.data);
-        final event = UnsubscribeEvent.from(unsub);
-        events.onUnsubscribe?.call(subscription, event);
+        events.onUnsubscribe?.call(subscription);
         break;
     }
   }
@@ -154,7 +152,7 @@ class SubscriptionEvents {
   final Function(Subscription, LeaveEvent) onLeave;
   final Function(Subscription, SubscribeSuccessEvent) onSubscribeSuccess;
   final Function(Subscription, Error) onSubscribeError;
-  final Function(Subscription, UnsubscribeEvent) onUnsubscribe;
+  final Function(Subscription) onUnsubscribe;
 
   SubscriptionEvents(
       {this.onPublish,
@@ -219,19 +217,5 @@ class SubscribeSuccessEvent {
   @override
   String toString() {
     return 'SubscribeSuccessEvent{resubscribed: $resubscribed, recovered: $recovered}';
-  }
-}
-
-class UnsubscribeEvent {
-  final bool resubscribe;
-
-  UnsubscribeEvent._(this.resubscribe);
-
-  static UnsubscribeEvent from(Unsub unsub) =>
-      UnsubscribeEvent._(unsub.resubscribe);
-
-  @override
-  String toString() {
-    return 'UnsubscribeEvent{resubscribe: $resubscribe}';
   }
 }

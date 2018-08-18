@@ -1,11 +1,11 @@
-name: centrifuge_dart
+name: centrifuge
 version: 0.0.1
 
 description: >
-  Dart client to communicate with Centrifugo from Flutter and VM over dart:io WebSocket
+  Dart client to communicate with Centrifuge and Centrifugo from Flutter and VM over dart:io WebSocket
 
 author: German Saprykin <saprykin.h@gmail.com>
-homepage: http://github.com/mogol/centrifuge_dart
+homepage: http://github.com/centrifugal/centrifuge-dart
 
 environment:
  sdk: '>=2.0.0 <3.0.0'

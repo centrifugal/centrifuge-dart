@@ -29,10 +29,9 @@ void main() async {
     }, onSubscribeError: (subscription, error) {
       final channel = subscription.channel;
       print('Subscribed to channel $channel with error $error');
-    }, onUnsubscribe: (subscription, event) {
+    }, onUnsubscribe: (subscription) {
       final channel = subscription.channel;
-      final resubscribe = event.resubscribe;
-      print('Unsubscribed from channel $channel with resubscribe $resubscribe');
+      print('Unsubscribed from channel $channel');
     });
 
     centrifuge.subscribe('chat:index', events);
