@@ -25,7 +25,6 @@ void main() async {
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
     final handler = _handleUserInput(centrifuge, subscription);
-
     Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
 
     await for (List<int> codeUnit in stdin) {
