@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'proto/client.pb.dart' hide Error;
+import 'proto/client.pb.dart' as proto show Error;
 
 class CentrifugeClient {
   final String url;
@@ -35,28 +36,20 @@ class CentrifugeClient {
   }
 
   Subscription subscribe(String channel) {
-    final subscription = _Subscription(channel);
+    final subscription = _Subscription(channel, this);
 
-    try {
-      _subscriptions[channel] = subscription;
+    _subscriptions[channel] = subscription;
 
-      final command = _createCommand(MethodType.SUBSCRIBE)
-        ..params = (SubscribeRequest()..channel = channel).writeToBuffer();
-      _send(command, SubscribeResult()).then((result) {
-        subscription
-            .onSubscribeSuccess(SubscribeSuccessEvent.from(result, false));
-      },
-          onError: (error) =>
-              subscription.onSubscribeError(SubscribeErrorEvent._(error)));
-    } catch (exception) {
-      final event = SubscribeErrorEvent._(exception);
-      subscription.onSubscribeError(event);
-    }
+    subscription._resubscribe(false);
+
     return subscription;
   }
 
   T _processReply<T extends GeneratedMessage>(T result, Reply reply) {
     result.mergeFromBuffer(reply.result);
+    if (reply.hasError()) {
+      throw reply.error;
+    }
     return result;
   }
 
@@ -71,15 +64,17 @@ class CentrifugeClient {
     ..method = methodType;
 
   void _onData(dynamic input) {
-    final List<int> data = input;
+    // TODO: Remove debug prints
 
-    print('onData> ${utf8.decode(data)}');
+    final List<int> data = input;
 
     final reader = CodedBufferReader(data);
     var count = 0;
     while (!reader.isAtEnd()) {
       final reply = Reply();
       reader.readMessage(reply, ExtensionRegistry.EMPTY);
+      print('onData> ${reply.id}');
+
       count++;
       if (reply.id > 0) {
         _onResponse(reply);
@@ -149,6 +144,32 @@ class CentrifugeClient {
   Future<void> disconnect() async {
     await _socket.close();
   }
+
+  Future publish(String channel, List<int> data) async {
+    final publish = PublishRequest()
+      ..channel = channel
+      ..data = data;
+
+    final command = _createCommand(MethodType.PUBLISH)
+      ..params = publish.writeToBuffer();
+
+    final result = await _send(command, PublishResult());
+    return result;
+  }
+
+  Future<UnsubscribeResult> _sendUnsubscribe(String channel) {
+    final command = _createCommand(MethodType.UNSUBSCRIBE)
+      ..params = (UnsubscribeRequest()..channel = channel).writeToBuffer();
+    final result = _send(command, UnsubscribeResult());
+    return result;
+  }
+
+  Future<SubscribeResult> _sendSubscribe(String channel) {
+    final command = _createCommand(MethodType.SUBSCRIBE)
+      ..params = (SubscribeRequest()..channel = channel).writeToBuffer();
+    final result = _send(command, SubscribeResult());
+    return result;
+  }
 }
 
 abstract class Subscription {
@@ -167,12 +188,19 @@ abstract class Subscription {
   Stream<SubscribeErrorEvent> get subscribeErrorStream;
 
   Stream<UnsubscribeEvent> get unsubscribeStream;
+
+  Future subscribe();
+
+  Future unsubscribe();
+
+  Future publish(List<int> data);
 }
 
 class _Subscription implements Subscription {
   final String channel;
+  final CentrifugeClient _client;
 
-  _Subscription(this.channel);
+  _Subscription(this.channel, this._client);
 
   final _publishController =
       StreamController<PublishEvent>.broadcast(sync: true);
@@ -214,6 +242,41 @@ class _Subscription implements Subscription {
 
   void onUnsubscribe(UnsubscribeEvent event) =>
       _unsubscribeController.add(event);
+
+  @override
+  publish(List<int> data) => _client.publish(channel, data);
+
+  @override
+  subscribe() => _resubscribe(false);
+
+  @override
+  unsubscribe() async {
+    await _client._sendUnsubscribe(channel);
+    final event = UnsubscribeEvent();
+    onUnsubscribe(event);
+  }
+
+  Future _resubscribe(bool isResubscribe) async {
+    try {
+      final result = await _client._sendSubscribe(channel);
+      final event = SubscribeSuccessEvent.from(result, isResubscribe);
+      onSubscribeSuccess(event);
+      _recover(result);
+    } catch (exception) {
+      if (exception is proto.Error) {
+        onSubscribeError(SubscribeErrorEvent.from(exception));
+      } else {
+        onSubscribeError(SubscribeErrorEvent._(exception.toString(), -1));
+      }
+    }
+  }
+
+  void _recover(SubscribeResult result) {
+    for (Publication publication in result.publications) {
+      final event = PublishEvent.from(publication);
+      onPublish(event);
+    }
+  }
 }
 
 class PublishEvent {
@@ -278,13 +341,17 @@ class SubscribeSuccessEvent {
 }
 
 class SubscribeErrorEvent {
-  final Error error;
+  final String message;
+  final int code;
 
-  SubscribeErrorEvent._(this.error);
+  SubscribeErrorEvent._(this.message, this.code);
+
+  static SubscribeErrorEvent from(proto.Error error) =>
+      SubscribeErrorEvent._(error.message, error.code);
 
   @override
   String toString() {
-    return 'SubscribeErrorEvent{error: $error}';
+    return 'SubscribeErrorEvent{message: $message, code: $code}';
   }
 }
 

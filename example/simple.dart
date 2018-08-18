@@ -5,13 +5,13 @@ import '../lib/centrifuge.dart';
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  final centrifuge = CentrifugeClient(url: url);
+  final channel = 'chat:index';
 
+  final centrifuge = CentrifugeClient(url: url);
   try {
     await centrifuge.connect();
 
-    final subscription = await centrifuge.subscribe('chat:index');
-    final channel = subscription.channel;
+    final subscription = centrifuge.subscribe(channel);
 
     final onEvent = (event) {
       print('$channel> $event');
@@ -25,14 +25,37 @@ void main() async {
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
 
+    final handler = _handleUserInput(centrifuge, subscription);
+
     await for (List<int> codeUnit in stdin) {
       final message = utf8.decode(codeUnit).trim();
-      if (message == 'disconnect') {
-        await centrifuge.disconnect();
-        Future.delayed(Duration(seconds: 1)).then((_) => exit(0));
-      }
+      handler(message);
     }
   } catch (ex) {
     print(ex);
   }
+}
+
+Function(String) _handleUserInput(CentrifugeClient centrifuge,
+    Subscription subscription) {
+  return (String message) async {
+    switch (message) {
+      case '#subscribe':
+        await subscription.subscribe();
+        break;
+      case '#unsubscribe':
+        await subscription.unsubscribe();
+        break;
+      case '#disconnect':
+        await centrifuge.disconnect();
+        Future.delayed(Duration(seconds: 1)).then((_) => exit(0));
+        break;
+      default:
+        final output = jsonEncode({'input': message});
+        final data = utf8.encode(output);
+        await subscription.publish(data);
+        break;
+    }
+    return;
+  };
 }
