@@ -7,22 +7,9 @@ import 'package:protobuf/protobuf.dart';
 
 import 'proto/client.pb.dart' hide Error;
 
-class _ProtobufCommandEncoder {
-  List<int> encode(Command command) {
-    final commandData = command.writeToBuffer();
-    final length = commandData.lengthInBytes;
-
-    final writer = CodedBufferWriter();
-    writer.writeInt32NoTag(length);
-
-    return writer.toBuffer() + commandData;
-  }
-}
-
 class CentrifugeClient {
   final String url;
 
-  StreamSubscription _streamSubscription;
   WebSocket _socket;
   final _handlers = Map<int, Completer<GeneratedMessage>>();
   final _subscriptions = Map<String, _Subscription>();
@@ -31,7 +18,7 @@ class CentrifugeClient {
 
   void connect() async {
     _socket = await WebSocket.connect(url);
-    _streamSubscription = _socket.listen(
+    _socket.listen(
       _onData,
       onError: (error) => print(error),
       onDone: _onSocketDone,
@@ -160,8 +147,7 @@ class CentrifugeClient {
   int _nextMessageId() => _messageId++;
 
   Future<void> disconnect() async {
-    await _streamSubscription.cancel();
-    _socket.close();
+    await _socket.close();
   }
 }
 
@@ -306,5 +292,17 @@ class UnsubscribeEvent {
   @override
   String toString() {
     return 'UnsubscribeEvent{}';
+  }
+}
+
+class _ProtobufCommandEncoder {
+  List<int> encode(Command command) {
+    final commandData = command.writeToBuffer();
+    final length = commandData.lengthInBytes;
+
+    final writer = CodedBufferWriter();
+    writer.writeInt32NoTag(length);
+
+    return writer.toBuffer() + commandData;
   }
 }

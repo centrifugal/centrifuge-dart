@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import '../lib/centrifuge.dart';
@@ -28,6 +29,7 @@ void main() async {
       final message = utf8.decode(codeUnit).trim();
       if (message == 'disconnect') {
         await centrifuge.disconnect();
+        Future.delayed(Duration(seconds: 1)).then((_) => exit(0));
       }
     }
   } catch (ex) {
