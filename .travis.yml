@@ -1,0 +1,13 @@
+matrix:
+  include:
+  # Job 1) Run analyzer
+  - language: dart
+    dart:
+      - stable
+    sudo: false
+    dart_task:
+    - test: --platform vm
+
+cache:
+  directories:
+  - $HOME/.pub-cache

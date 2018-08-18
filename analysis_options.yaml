@@ -23,7 +23,7 @@ analyzer:
     # allow having TODOs in the code
     todo: ignore
   exclude:
-  - 'lib/src/proto'
+    - lib/src/proto
 
 linter:
   rules:
