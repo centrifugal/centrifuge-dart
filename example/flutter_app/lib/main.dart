@@ -29,14 +29,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  CentrifugeClient _centrifuge;
+  Centrifuge _centrifuge;
   Subscription _subscription;
   final _items = <_ChatItem>[];
 
   @override
   void initState() {
     final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-    _centrifuge = CentrifugeClient(url: url);
+    _centrifuge = Centrifuge(url: url);
 
     super.initState();
   }
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _subscription.subscribeSuccessStream.listen(_show);
     _subscription.unsubscribeStream.listen(_show);
 
-    Function(_ChatItem) onNewItem = (item) {
+    final onNewItem = (_ChatItem item) {
       setState(() {
         _items.add(item);
       });

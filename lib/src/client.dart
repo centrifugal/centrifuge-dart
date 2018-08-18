@@ -6,20 +6,17 @@ import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'proto/client.pb.dart' hide Error;
-import 'proto/client.pb.dart' as proto show Error;
+import 'subscription.dart';
 
-class CentrifugeClient {
-  final String url;
-
-  WebSocket _socket;
+class Client {
+  WebSocket socket;
   final _handlers = <int, Completer<GeneratedMessage>>{};
-  final _subscriptions = <String, _Subscription>{};
+  final _subscriptions = <String, SubscriptionImpl>{};
 
-  CentrifugeClient({@required this.url});
+  Client({@required this.socket});
 
   Future connect() async {
-    _socket = await WebSocket.connect(url);
-    _socket.listen(
+    socket.listen(
       _onData,
       onError: (dynamic error) => print(error),
       onDone: _onSocketDone,
@@ -36,11 +33,11 @@ class CentrifugeClient {
   }
 
   Subscription subscribe(String channel) {
-    final subscription = _Subscription(channel, this);
+    final subscription = SubscriptionImpl(channel, this);
 
     _subscriptions[channel] = subscription;
 
-    subscription._resubscribe(false);
+    subscription.resubscribe(false);
 
     return subscription;
   }
@@ -132,7 +129,7 @@ class CentrifugeClient {
     _handlers[command.id] = completer;
 
     final data = _ProtobufCommandEncoder().encode(command);
-    _socket.add(data);
+    socket.add(data);
 
     return completer.future;
   }
@@ -142,7 +139,7 @@ class CentrifugeClient {
   int _nextMessageId() => _messageId++;
 
   Future<void> disconnect() async {
-    await _socket.close();
+    await socket.close();
   }
 
   Future publish(String channel, List<int> data) async {
@@ -157,215 +154,18 @@ class CentrifugeClient {
     return result;
   }
 
-  Future<UnsubscribeResult> _sendUnsubscribe(String channel) {
+  Future<UnsubscribeResult> sendUnsubscribe(String channel) {
     final command = _createCommand(MethodType.UNSUBSCRIBE)
       ..params = (UnsubscribeRequest()..channel = channel).writeToBuffer();
     final result = _send(command, UnsubscribeResult());
     return result;
   }
 
-  Future<SubscribeResult> _sendSubscribe(String channel) {
+  Future<SubscribeResult> sendSubscribe(String channel) {
     final command = _createCommand(MethodType.SUBSCRIBE)
       ..params = (SubscribeRequest()..channel = channel).writeToBuffer();
     final result = _send(command, SubscribeResult());
     return result;
-  }
-}
-
-abstract class Subscription {
-  final String channel;
-
-  Subscription(this.channel);
-
-  Stream<PublishEvent> get publishStream;
-
-  Stream<JoinEvent> get joinStream;
-
-  Stream<LeaveEvent> get leaveStream;
-
-  Stream<SubscribeSuccessEvent> get subscribeSuccessStream;
-
-  Stream<SubscribeErrorEvent> get subscribeErrorStream;
-
-  Stream<UnsubscribeEvent> get unsubscribeStream;
-
-  Future subscribe();
-
-  Future unsubscribe();
-
-  Future publish(List<int> data);
-}
-
-class _Subscription implements Subscription {
-  @override
-  final String channel;
-  final CentrifugeClient _client;
-
-  _Subscription(this.channel, this._client);
-
-  final _publishController =
-      StreamController<PublishEvent>.broadcast(sync: true);
-  final _joinController = StreamController<JoinEvent>.broadcast(sync: true);
-  final _leaveController = StreamController<LeaveEvent>.broadcast(sync: true);
-  final _subscribeSuccessController =
-      StreamController<SubscribeSuccessEvent>.broadcast(sync: true);
-  final _subscribeErrorController =
-      StreamController<SubscribeErrorEvent>.broadcast(sync: true);
-  final _unsubscribeController =
-      StreamController<UnsubscribeEvent>.broadcast(sync: true);
-
-  @override
-  Stream<PublishEvent> get publishStream => _publishController.stream;
-
-  @override
-  Stream<JoinEvent> get joinStream => _joinController.stream;
-
-  @override
-  Stream<LeaveEvent> get leaveStream => _leaveController.stream;
-
-  @override
-  Stream<SubscribeSuccessEvent> get subscribeSuccessStream =>
-      _subscribeSuccessController.stream;
-
-  @override
-  Stream<SubscribeErrorEvent> get subscribeErrorStream =>
-      _subscribeErrorController.stream;
-
-  @override
-  Stream<UnsubscribeEvent> get unsubscribeStream =>
-      _unsubscribeController.stream;
-
-  void onPublish(PublishEvent event) => _publishController.add(event);
-
-  void onJoin(JoinEvent event) => _joinController.add(event);
-
-  void onLeave(LeaveEvent event) => _leaveController.add(event);
-
-  void onSubscribeSuccess(SubscribeSuccessEvent event) =>
-      _subscribeSuccessController.add(event);
-
-  void onSubscribeError(SubscribeErrorEvent event) =>
-      _subscribeErrorController.add(event);
-
-  void onUnsubscribe(UnsubscribeEvent event) =>
-      _unsubscribeController.add(event);
-
-  @override
-  Future publish(List<int> data) => _client.publish(channel, data);
-
-  @override
-  Future subscribe() => _resubscribe(false);
-
-  @override
-  Future unsubscribe() async {
-    await _client._sendUnsubscribe(channel);
-    final event = UnsubscribeEvent();
-    onUnsubscribe(event);
-  }
-
-  Future _resubscribe(bool isResubscribe) async {
-    try {
-      final result = await _client._sendSubscribe(channel);
-      final event = SubscribeSuccessEvent.from(result, isResubscribe);
-      onSubscribeSuccess(event);
-      _recover(result);
-    } catch (exception) {
-      if (exception is proto.Error) {
-        onSubscribeError(SubscribeErrorEvent.from(exception));
-      } else {
-        onSubscribeError(SubscribeErrorEvent._(exception.toString(), -1));
-      }
-    }
-  }
-
-  void _recover(SubscribeResult result) {
-    for (Publication publication in result.publications) {
-      final event = PublishEvent.from(publication);
-      onPublish(event);
-    }
-  }
-}
-
-class PublishEvent {
-  final String uid;
-  final List<int> data;
-
-  PublishEvent._(this.uid, this.data);
-
-  static PublishEvent from(Publication pub) =>
-      PublishEvent._(pub.uid, pub.data);
-
-  @override
-  String toString() {
-    return 'PublishEvent{uid: $uid, data: $data}';
-  }
-}
-
-class JoinEvent {
-  final String user;
-  final String client;
-
-  JoinEvent._(this.user, this.client);
-
-  static JoinEvent from(ClientInfo clientInfo) =>
-      JoinEvent._(clientInfo.user, clientInfo.client);
-
-  @override
-  String toString() {
-    return 'JoinEvent{user: $user, client: $client}';
-  }
-}
-
-class LeaveEvent {
-  final String user;
-  final String client;
-
-  LeaveEvent._(this.user, this.client);
-
-  static LeaveEvent from(ClientInfo clientInfo) =>
-      LeaveEvent._(clientInfo.user, clientInfo.client);
-
-  @override
-  String toString() {
-    return 'LeaveEvent{user: $user, client: $client}';
-  }
-}
-
-class SubscribeSuccessEvent {
-  final bool resubscribed;
-  final bool recovered;
-
-  SubscribeSuccessEvent._(this.resubscribed, this.recovered);
-
-  static SubscribeSuccessEvent from(
-          SubscribeResult result, bool resubscribed) =>
-      SubscribeSuccessEvent._(resubscribed, result.recovered);
-
-  @override
-  String toString() {
-    return 'SubscribeSuccessEvent{resubscribed: $resubscribed, recovered: $recovered}';
-  }
-}
-
-class SubscribeErrorEvent {
-  final String message;
-  final int code;
-
-  SubscribeErrorEvent._(this.message, this.code);
-
-  static SubscribeErrorEvent from(proto.Error error) =>
-      SubscribeErrorEvent._(error.message, error.code);
-
-  @override
-  String toString() {
-    return 'SubscribeErrorEvent{message: $message, code: $code}';
-  }
-}
-
-class UnsubscribeEvent {
-  @override
-  String toString() {
-    return 'UnsubscribeEvent{}';
   }
 }
 

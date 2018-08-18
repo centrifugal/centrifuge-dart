@@ -1,1 +1,2 @@
-export 'src/client.dart';
+export 'src/centrifuge.dart';
+export 'src/subscription.dart';
