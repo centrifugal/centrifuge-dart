@@ -1,3 +1,0 @@
-[submodule "lib/src/proto/github.com/gogo/protobuf"]
-	path = lib/src/proto/github.com/gogo/protobuf
-	url = https://github.com/gogo/protobuf.git
