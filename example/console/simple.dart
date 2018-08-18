@@ -9,7 +9,6 @@ void main() async {
 
   final centrifuge = Centrifuge(url: url);
   try {
-
     await centrifuge.connect();
 
     final Subscription subscription = centrifuge.subscribe(channel);
@@ -21,7 +20,6 @@ void main() async {
     subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
     subscription.joinStream.listen(onEvent);
     subscription.leaveStream.listen(onEvent);
-
 
     subscription.subscribeSuccessStream.listen(onEvent);
     subscription.subscribeErrorStream.listen(onEvent);

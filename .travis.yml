@@ -5,7 +5,8 @@ dart:
 sudo: false
 dart_task:
 - dartanalyzer: --fatal-warnings lib
-- dartfmt
+- dartfmt: sdk
+- test: --platform vm
 cache:
   directories:
   - $HOME/.pub-cache
