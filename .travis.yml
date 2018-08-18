@@ -1,11 +1,8 @@
 language: dart
 dart:
-- "2.0.0"
 - stable
 - dev
 sudo: false
-dart_task:
-- test: --platform vm
 cache:
   directories:
   - $HOME/.pub-cache
