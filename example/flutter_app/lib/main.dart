@@ -34,10 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final _items = <_ChatItem>[];
 
   @override
-  void initState() async {
-    final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-    _centrifuge = await Centrifuge.connect(url);
-
+  void initState() {
     super.initState();
   }
 
@@ -82,7 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _connect() async {
     try {
-      await _centrifuge.connect();
+      final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
+      _centrifuge = await Centrifuge.connect(url);
     } catch (exception) {
       _show(exception);
     }
