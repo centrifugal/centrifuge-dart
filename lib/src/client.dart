@@ -8,10 +8,10 @@ import 'subscription.dart';
 import 'transport.dart';
 
 class CentrifugeClient {
-  CentrifugeTransport transport;
+  final CentrifugeTransport _transport;
   final _subscriptions = <String, SubscriptionImpl>{};
 
-  CentrifugeClient({@required this.transport});
+  CentrifugeClient(this._transport);
 
   final _connectController =
       StreamController<ConnectEvent>.broadcast(sync: true);
@@ -26,9 +26,9 @@ class CentrifugeClient {
   Stream<ErrorEvent> get errorStream => _errorController.stream;
 
   Future<void> connect() async {
-    transport.listen(_onPush);
+    _transport.listen(_onPush);
 
-    final result = await transport.send(ConnectRequest(), ConnectResult());
+    final result = await _transport.send(ConnectRequest(), ConnectResult());
     _connectController.add(ConnectEvent.from(result));
   }
 
@@ -49,19 +49,19 @@ class CentrifugeClient {
       ..channel = channel
       ..data = data;
 
-    final result = await transport.send(request, PublishResult());
+    final result = await _transport.send(request, PublishResult());
     return result;
   }
 
   Future<UnsubscribeResult> sendUnsubscribe(String channel) {
     final request = UnsubscribeRequest()..channel = channel;
-    final result = transport.send(request, UnsubscribeResult());
+    final result = _transport.send(request, UnsubscribeResult());
     return result;
   }
 
   Future<SubscribeResult> sendSubscribe(String channel) {
     final request = SubscribeRequest()..channel = channel;
-    final result = transport.send(request, SubscribeResult());
+    final result = _transport.send(request, SubscribeResult());
     return result;
   }
 
