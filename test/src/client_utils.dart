@@ -1,0 +1,6 @@
+class ClientHarness {
+
+  void setUp() {
+
+  }
+}

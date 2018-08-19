@@ -17,7 +17,7 @@ class Centrifuge {
       replyDecoder,
     );
 
-    final client = CentrifugeClient(transport);
+    final client = CentrifugeClientImpl(transport);
     await client.connect();
     return client;
   }

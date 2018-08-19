@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:centrifuge/src/proto/client.pb.dart';
-import 'package:matcher/matcher.dart';
+import 'package:centrifuge/src/transport.dart';
 import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
 
@@ -67,3 +67,7 @@ typedef CommandMatcher = Function(Command);
 
 CommandMatcher withMethod(MethodType type) =>
     (Command command) => command.method == type;
+
+class MockTransport extends Mock implements CentrifugeTransport {
+
+}

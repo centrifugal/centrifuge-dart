@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-
 import 'proto/client.pb.dart' hide Error;
 import 'subscription.dart';
 import 'transport.dart';
 
-class CentrifugeClient {
+abstract class CentrifugeClient {
+  Future<void> connect();
+  Future<void> disconnect();
+  Subscription subscribe(String channel);
+  Future publish(String channel, List<int> data);
+}
+
+class CentrifugeClientImpl implements CentrifugeClient {
   final CentrifugeTransport _transport;
   final _subscriptions = <String, SubscriptionImpl>{};
 
-  CentrifugeClient(this._transport);
+  CentrifugeClientImpl(this._transport);
 
   final _connectController =
       StreamController<ConnectEvent>.broadcast(sync: true);
@@ -25,6 +30,7 @@ class CentrifugeClient {
 
   Stream<ErrorEvent> get errorStream => _errorController.stream;
 
+  @override
   Future<void> connect() async {
     _transport.listen(_onPush);
 
@@ -32,6 +38,7 @@ class CentrifugeClient {
     _connectController.add(ConnectEvent.from(result));
   }
 
+  @override
   Subscription subscribe(String channel) {
     final subscription = SubscriptionImpl(channel, this);
 
@@ -42,8 +49,20 @@ class CentrifugeClient {
     return subscription;
   }
 
-  Future<void> disconnect() async {}
+  @override
+  Future<void> disconnect() async {
+    await _transport.close();
 
+    for (SubscriptionImpl subscription in _subscriptions.values) {
+      final unsubscribe = UnsubscribeEvent();
+      subscription.onUnsubscribe(unsubscribe);
+    }
+
+    final disconnect = DisconnectEvent._('clean disconnect', false);
+    _disconnectController.add(disconnect);
+  }
+
+  @override
   Future publish(String channel, List<int> data) async {
     final request = PublishRequest()
       ..channel = channel

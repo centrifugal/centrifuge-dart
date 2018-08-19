@@ -5,7 +5,6 @@ import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
 import 'proto/client.pb.dart' hide Error;
-import 'subscription.dart';
 
 class CentrifugeTransport extends StreamView<Push> {
   final WebSocket _socket;
@@ -42,6 +41,10 @@ class CentrifugeTransport extends StreamView<Push> {
 
     final filledResult = _processResult(result, reply);
     return filledResult;
+  }
+
+  Future close() {
+    return _socket.close();
   }
 
   Command _createCommand(GeneratedMessage request) => Command()
@@ -107,7 +110,7 @@ class CentrifugeTransport extends StreamView<Push> {
   }
 
   void _onSocketDone() {
-    final event = UnsubscribeEvent();
+//    final event = UnsubscribeEvent();
 //    _subscriptions.values.forEach((s) => s.onUnsubscribe(event));
 //
 //    _disconnectController.add(DisconnectEvent._('socket was closed', false));

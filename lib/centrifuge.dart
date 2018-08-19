@@ -1,5 +1,12 @@
 export 'src/centrifuge.dart';
-export 'src/client.dart';
+export 'src/client.dart'
+    show
+        CentrifugeClient,
+        PrivateSubEvent,
+        ConnectEvent,
+        DisconnectEvent,
+        ErrorEvent,
+        MessageEvent;
 export 'src/subscription.dart'
     show
         Subscription,

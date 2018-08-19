@@ -1,42 +1,104 @@
+import 'dart:async';
+
 import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart';
-import "package:test/test.dart";
+import 'package:centrifuge/src/subscription.dart';
+import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
-import 'utils/mocks.dart';
+import 'src/utils.dart';
 
 void main() {
-  CentrifugeClient client;
-  MockWebSocket webSocket;
+  CentrifugeClientImpl client;
+  MockTransport transport;
 
   setUp(() {
-    webSocket = MockWebSocket();
-    client = CentrifugeClient._(socket: webSocket);
+    transport = MockTransport();
+    client = CentrifugeClientImpl(transport);
   });
 
-  test("Client.connect() triggers connectStream", () async {
-    final future = client.connectStream.first;
-    final result = ConnectResult()
-      ..version = 'version A'
-      ..client = '123';
+  test('Client.connect sends ConnectRequest', () async {
+    ConnectEvent connect;
+    client.connectStream.listen((c) => connect = c);
 
-    webSocket.onCommand(withMethod(MethodType.CONNECT)).send(result);
+    when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
+          (_) =>
+          Future.value(ConnectResult()
+            ..client = 'client1'
+            ..version = 'v0.0.0'),
+    );
 
-    client.connect();
+    await client.connect();
 
-    final event = await future;
-
-    expect(event.client, equals('123'));
-    expect(event.version, equals('version A'));
-    expect(webSocket.commands, hasLength(1));
+    verify(transport.listen(any));
+    expect(connect, isNotNull);
+    expect(connect.client, 'client1');
+    expect(connect.version, 'v0.0.0');
   });
 
-  test("WebSocket done triggers disconnectStream", () async {
-    final future = client.disconnectStream.first;
-    webSocket.onCommand(withMethod(MethodType.CONNECT)).send(ConnectResult());
-    client.connect();
+  test('Client.disconnect closes transport', () async {
+    await client.disconnect();
 
-    webSocket.onDone();
+    verify(transport.close());
+  });
 
-    expect(future, completion(TypeMatcher<DisconnectEvent>()));
+  test('Client.disconnect unsubscribes subscriptions', () async {
+    UnsubscribeEvent unsubscribeEvent;
+
+    when(transport.send(ConnectRequest(), ConnectResult()))
+        .thenAnswer((_) => Future.value(ConnectResult()));
+    await client.connect();
+    final subscription = client.subscribe('any channel');
+
+    subscription.unsubscribeStream.listen((e) => unsubscribeEvent = e);
+
+    await client.disconnect();
+
+    expect(unsubscribeEvent, isNotNull);
+  });
+
+  test('Client.disconnect sends DisconnectEvent', () async {
+    DisconnectEvent disconnectEvent;
+    client.disconnectStream.listen((e) => disconnectEvent = e);
+
+    await client.disconnect();
+
+    expect(disconnectEvent, isNotNull);
+  });
+
+  test('Client.sendSubscribe sends SubscribeRequest', () async {
+
+    client.sendSubscribe('any channel');
+
+    verify(transport.send(SubscribeRequest()
+      ..channel = 'any channel', SubscribeResult()));
+  });
+
+  test('Client.sendUnsubscribe sends SubscribeRequest', () async {
+
+    client.sendUnsubscribe('any channel');
+
+    verify(transport.send(UnsubscribeRequest()
+      ..channel = 'any channel', UnsubscribeResult()));
+  });
+
+  test('Client.subscribe sends SubscribeSuccessEvent', () async {
+    SubscribeSuccessEvent subscribeSuccessEvent;
+    final completer = Completer<SubscribeResult>.sync();
+
+    when(transport.send(ConnectRequest(), ConnectResult()))
+        .thenAnswer((_) => Future.value(ConnectResult()));
+    when(transport.send(SubscribeRequest()
+      ..channel = 'any channel', SubscribeResult()))
+        .thenAnswer((_) => completer.future);
+    await client.connect();
+
+    final subscription = client.subscribe('any channel');
+    subscription.subscribeSuccessStream
+        .listen((e) => subscribeSuccessEvent = e);
+
+    completer.complete(SubscribeResult());
+
+    expect(subscribeSuccessEvent, isNotNull);
   });
 }
