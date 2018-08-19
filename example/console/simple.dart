@@ -7,9 +7,8 @@ void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
   final channel = 'chat:index';
 
-  final centrifuge = Centrifuge(url: url);
   try {
-    await centrifuge.connect();
+    final centrifuge = await Centrifuge.connect(url);
 
     final Subscription subscription = centrifuge.subscribe(channel);
 
@@ -37,7 +36,7 @@ void main() async {
 }
 
 Function(String) _handleUserInput(
-    Centrifuge centrifuge, Subscription subscription) {
+    CentrifugeClient centrifuge, Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':

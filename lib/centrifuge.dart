@@ -1,4 +1,5 @@
 export 'src/centrifuge.dart';
+export 'src/client.dart';
 export 'src/subscription.dart'
     show
         Subscription,
