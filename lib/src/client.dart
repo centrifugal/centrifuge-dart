@@ -68,8 +68,7 @@ class CentrifugeClientImpl implements CentrifugeClient {
       ..channel = channel
       ..data = data;
 
-    final result = await _transport.send(request, PublishResult());
-    return result;
+    await _transport.send(request, PublishResult());
   }
 
   Future<UnsubscribeResult> sendUnsubscribe(String channel) {

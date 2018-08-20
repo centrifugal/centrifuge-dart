@@ -22,10 +22,9 @@ void main() {
     client.connectStream.listen((c) => connect = c);
 
     when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
-          (_) =>
-          Future.value(ConnectResult()
-            ..client = 'client1'
-            ..version = 'v0.0.0'),
+      (_) => Future.value(ConnectResult()
+        ..client = 'client1'
+        ..version = 'v0.0.0'),
     );
 
     await client.connect();
@@ -66,20 +65,29 @@ void main() {
     expect(disconnectEvent, isNotNull);
   });
 
-  test('Client.sendSubscribe sends SubscribeRequest', () async {
+  test('Client.publish sends DisconnectEvent', () async {
+    await client.publish('any channel', [1, 2, 3]);
 
+    verify(transport.send(
+      PublishRequest()
+        ..channel = 'any channel'
+        ..data = [1, 2, 3],
+      PublishResult(),
+    ));
+  });
+
+  test('Client.sendSubscribe sends SubscribeRequest', () async {
     client.sendSubscribe('any channel');
 
-    verify(transport.send(SubscribeRequest()
-      ..channel = 'any channel', SubscribeResult()));
+    verify(transport.send(
+        SubscribeRequest()..channel = 'any channel', SubscribeResult()));
   });
 
   test('Client.sendUnsubscribe sends SubscribeRequest', () async {
-
     client.sendUnsubscribe('any channel');
 
-    verify(transport.send(UnsubscribeRequest()
-      ..channel = 'any channel', UnsubscribeResult()));
+    verify(transport.send(
+        UnsubscribeRequest()..channel = 'any channel', UnsubscribeResult()));
   });
 
   test('Client.subscribe sends SubscribeSuccessEvent', () async {
@@ -88,8 +96,8 @@ void main() {
 
     when(transport.send(ConnectRequest(), ConnectResult()))
         .thenAnswer((_) => Future.value(ConnectResult()));
-    when(transport.send(SubscribeRequest()
-      ..channel = 'any channel', SubscribeResult()))
+    when(transport.send(
+            SubscribeRequest()..channel = 'any channel', SubscribeResult()))
         .thenAnswer((_) => completer.future);
     await client.connect();
 

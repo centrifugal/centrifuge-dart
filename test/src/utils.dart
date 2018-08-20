@@ -68,6 +68,4 @@ typedef CommandMatcher = Function(Command);
 CommandMatcher withMethod(MethodType type) =>
     (Command command) => command.method == type;
 
-class MockTransport extends Mock implements CentrifugeTransport {
-
-}
+class MockTransport extends Mock implements CentrifugeTransport {}
