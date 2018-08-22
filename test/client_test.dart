@@ -40,43 +40,20 @@ void main() {
       expect(connect.version, 'v0.0.0');
     });
   });
-  setUp(() async {
-    when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
-      (_) => Future.value(ConnectResult()
-        ..client = 'client1'
-        ..version = 'v0.0.0'),
-    );
-    await client.connect();
-  });
-  group('Connected', () {
+  group('Connected client', () {
+    setUp(() async {
+      when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
+        (_) => Future.value(ConnectResult()
+          ..client = 'client1'
+          ..version = 'v0.0.0'),
+      );
+      await client.connect();
+    });
+
     test('Client.disconnect closes transport', () async {
       await client.disconnect();
 
       verify(transport.close());
-    });
-
-    test('Client.disconnect unsubscribes subscriptions', () async {
-      UnsubscribeEvent unsubscribeEvent;
-
-      when(transport.send(ConnectRequest(), ConnectResult()))
-          .thenAnswer((_) => Future.value(ConnectResult()));
-      await client.connect();
-      final subscription = client.subscribe('any channel');
-
-      subscription.unsubscribeStream.listen((e) => unsubscribeEvent = e);
-
-      await client.disconnect();
-
-      expect(unsubscribeEvent, isNotNull);
-    });
-
-    test('Client.disconnect sends DisconnectEvent', () async {
-      DisconnectEvent disconnectEvent;
-      client.disconnectStream.listen((e) => disconnectEvent = e);
-
-      await client.disconnect();
-
-      expect(disconnectEvent, isNotNull);
     });
 
     test('Client.publish sends DisconnectEvent', () async {
@@ -122,6 +99,26 @@ void main() {
       completer.complete(SubscribeResult());
 
       expect(subscribeSuccessEvent, isNotNull);
+    });
+
+    test('Client unsubscribes subscriptions on onDone', () async {
+      UnsubscribeEvent unsubscribeEvent;
+
+      final subscription = client.subscribe('any channel');
+      subscription.unsubscribeStream.listen((e) => unsubscribeEvent = e);
+
+      transport.triggerOnDone();
+
+      expect(unsubscribeEvent, isNotNull);
+    });
+
+    test('Client sends DisconnectEvent on onDone', () async {
+      DisconnectEvent disconnectEvent;
+      client.disconnectStream.listen((e) => disconnectEvent = e);
+
+      transport.triggerOnDone();
+
+      expect(disconnectEvent, isNotNull);
     });
   });
 }
