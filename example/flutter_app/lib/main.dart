@@ -105,8 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _items.add(item);
       });
-      Future.delayed(
-          Duration(milliseconds: 125), () => _controller.jumpTo(64.0 + _controller.offset));
+      Future.delayed(Duration(milliseconds: 125),
+          () => _controller.jumpTo(64.0 + _controller.offset));
     };
 
     _subscription.joinStream.listen((event) {
