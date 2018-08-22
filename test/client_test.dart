@@ -9,12 +9,12 @@ import 'package:test/test.dart';
 import 'src/utils.dart';
 
 void main() {
-  CentrifugeClientImpl client;
+  ClientImpl client;
   MockTransport transport;
 
   setUp(() {
     transport = MockTransport();
-    client = CentrifugeClientImpl(() => Future.value(transport));
+    client = ClientImpl(transport);
   });
 
   group('Not connected', () {
@@ -23,15 +23,18 @@ void main() {
       client.connectStream.listen((c) => connect = c);
 
       when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
-            (_) =>
-            Future.value(ConnectResult()
-              ..client = 'client1'
-              ..version = 'v0.0.0'),
+        (_) => Future.value(ConnectResult()
+          ..client = 'client1'
+          ..version = 'v0.0.0'),
       );
 
       await client.connect();
 
-      verify(transport.listen(any));
+      verify(transport.open(
+        any,
+        onError: anyNamed('onError'),
+        onDone: anyNamed('onDone'),
+      ));
       expect(connect, isNotNull);
       expect(connect.client, 'client1');
       expect(connect.version, 'v0.0.0');
@@ -39,10 +42,9 @@ void main() {
   });
   setUp(() async {
     when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
-          (_) =>
-          Future.value(ConnectResult()
-            ..client = 'client1'
-            ..version = 'v0.0.0'),
+      (_) => Future.value(ConnectResult()
+        ..client = 'client1'
+        ..version = 'v0.0.0'),
     );
     await client.connect();
   });
@@ -92,16 +94,14 @@ void main() {
       client.sendSubscribe('any channel');
 
       verify(transport.send(
-          SubscribeRequest()
-            ..channel = 'any channel', SubscribeResult()));
+          SubscribeRequest()..channel = 'any channel', SubscribeResult()));
     });
 
     test('Client.sendUnsubscribe sends SubscribeRequest', () async {
       client.sendUnsubscribe('any channel');
 
       verify(transport.send(
-          UnsubscribeRequest()
-            ..channel = 'any channel', UnsubscribeResult()));
+          UnsubscribeRequest()..channel = 'any channel', UnsubscribeResult()));
     });
 
     test('Client.subscribe sends SubscribeSuccessEvent', () async {
@@ -111,8 +111,7 @@ void main() {
       when(transport.send(ConnectRequest(), ConnectResult()))
           .thenAnswer((_) => Future.value(ConnectResult()));
       when(transport.send(
-          SubscribeRequest()
-            ..channel = 'any channel', SubscribeResult()))
+              SubscribeRequest()..channel = 'any channel', SubscribeResult()))
           .thenAnswer((_) => completer.future);
       await client.connect();
 

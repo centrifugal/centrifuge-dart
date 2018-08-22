@@ -6,28 +6,37 @@ import 'package:protobuf/protobuf.dart';
 import 'codec.dart';
 import 'proto/client.pb.dart' hide Error;
 
-typedef TransportBuilder = Future<Transport> Function();
+typedef Future<Transport> TransportBuilder({Function(Push) onPush});
+typedef Future<WebSocket> WebSocketBuilder();
 
-class Transport extends StreamView<Push> {
-  final WebSocket _socket;
+Transport createProtobufTransport(String url) {
+  final replyDecoder = ProtobufReplyDecoder();
+  final commandEncoder = ProtobufCommandEncoder();
+
+  final transport = Transport(
+    () => WebSocket.connect(url),
+    commandEncoder,
+    replyDecoder,
+  );
+
+  return transport;
+}
+
+class Transport {
+  final WebSocketBuilder _socketBuilder;
+  WebSocket _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
-  final StreamController<Push> _pushController;
 
-  factory Transport(WebSocket socket, CommandEncoder commandEncoder,
-      ReplyDecoder replyDecoder) {
-    final transport = Transport._(socket, commandEncoder, replyDecoder,
-        StreamController.broadcast(sync: true));
-    return transport;
-  }
+  Transport(this._socketBuilder, this._commandEncoder, this._replyDecoder);
 
-  Transport._(this._socket, this._commandEncoder, this._replyDecoder,
-      this._pushController)
-      : super(_pushController.stream) {
+  Future open(void onPush(Push push), {Function onError, void onDone()}) async {
+    _socket = await _socketBuilder();
+
     _socket.listen(
-      _onData,
-      onError: (dynamic error) => print(error),
-      onDone: _onSocketDone,
+      _onData(onPush),
+      onError: onError,
+      onDone: onDone,
     );
   }
 
@@ -90,25 +99,19 @@ class Transport extends StreamView<Push> {
     }
   }
 
-  void _onData(dynamic input) {
-    final replies = _replyDecoder.convert(input);
-    replies.forEach((reply) {
-      if (reply.id > 0) {
-        _onResponse(reply);
-      } else {
-        _onPush(reply);
-      }
-    });
-  }
+  Function _onData(void onPush(Push push)) {
+    return (dynamic input) {
+      final replies = _replyDecoder.convert(input);
+      replies.forEach((reply) {
+        if (reply.id > 0) {
+          _completers.remove(reply.id).complete(reply);
+        } else {
+          final push = Push.fromBuffer(reply.result);
 
-  void _onPush(Reply reply) {
-    final push = Push.fromBuffer(reply.result);
-    _pushController.add(push);
-  }
-
-  void _onResponse(Reply reply) {
-    assert(reply.id > 0);
-    _completers.remove(reply.id).complete(reply);
+          onPush(push);
+        }
+      });
+    };
   }
 
   void _onSocketDone() {

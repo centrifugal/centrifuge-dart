@@ -31,7 +31,7 @@ abstract class Subscription {
 class SubscriptionImpl implements Subscription {
   @override
   final String channel;
-  final CentrifugeClientImpl _client;
+  final ClientImpl _client;
 
   SubscriptionImpl(this.channel, this._client);
 

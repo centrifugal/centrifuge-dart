@@ -5,7 +5,13 @@ import 'proto/client.pb.dart' hide Error;
 import 'subscription.dart';
 import 'transport.dart';
 
-abstract class CentrifugeClient {
+Client createClient(String url) {
+  final transport = createProtobufTransport(url);
+  final client = ClientImpl(transport);
+  return client;
+}
+
+abstract class Client {
   Future<void> connect();
 
   Future<void> disconnect();
@@ -13,14 +19,19 @@ abstract class CentrifugeClient {
   Subscription subscribe(String channel);
 
   Future publish(String channel, List<int> data);
+
+  Stream<ConnectEvent> get connectStream;
+
+  Stream<DisconnectEvent> get disconnectStream;
+
+  Stream<ErrorEvent> get errorStream;
 }
 
-class CentrifugeClientImpl implements CentrifugeClient {
-  Transport _connection;
-  final TransportBuilder _connectionBuilder;
+class ClientImpl implements Client {
+  final Transport _transport;
   final _subscriptions = <String, SubscriptionImpl>{};
 
-  CentrifugeClientImpl(this._connectionBuilder);
+  ClientImpl(this._transport);
 
   final _connectController =
       StreamController<ConnectEvent>.broadcast(sync: true);
@@ -28,18 +39,27 @@ class CentrifugeClientImpl implements CentrifugeClient {
       StreamController<DisconnectEvent>.broadcast(sync: true);
   final _errorController = StreamController<ErrorEvent>.broadcast(sync: true);
 
+  @override
   Stream<ConnectEvent> get connectStream => _connectController.stream;
 
+  @override
   Stream<DisconnectEvent> get disconnectStream => _disconnectController.stream;
 
+  @override
   Stream<ErrorEvent> get errorStream => _errorController.stream;
 
   @override
   Future<void> connect() async {
-    _connection = await _connectionBuilder();
-    _connection.listen(_onPush);
+    await _transport.open(
+      _onPush,
+      onError: (dynamic error) {
+        _errorController.add(ErrorEvent._(error.toString()));
+        _processDisconnect(error.toString(), false);
+      },
+      onDone: () => _processDisconnect('done', false),
+    );
 
-    final result = await _connection.send(ConnectRequest(), ConnectResult());
+    final result = await _transport.send(ConnectRequest(), ConnectResult());
     _connectController.add(ConnectEvent.from(result));
   }
 
@@ -56,14 +76,16 @@ class CentrifugeClientImpl implements CentrifugeClient {
 
   @override
   Future<void> disconnect() async {
-    await _connection.close();
+    await _transport.close();
+  }
 
+  void _processDisconnect(String reason, bool reconnect) {
     for (SubscriptionImpl subscription in _subscriptions.values) {
       final unsubscribe = UnsubscribeEvent();
       subscription.onUnsubscribe(unsubscribe);
     }
 
-    final disconnect = DisconnectEvent._('clean disconnect', false);
+    final disconnect = DisconnectEvent._(reason, reconnect);
     _disconnectController.add(disconnect);
   }
 
@@ -73,18 +95,18 @@ class CentrifugeClientImpl implements CentrifugeClient {
       ..channel = channel
       ..data = data;
 
-    await _connection.send(request, PublishResult());
+    await _transport.send(request, PublishResult());
   }
 
   Future<UnsubscribeResult> sendUnsubscribe(String channel) {
     final request = UnsubscribeRequest()..channel = channel;
-    final result = _connection.send(request, UnsubscribeResult());
+    final result = _transport.send(request, UnsubscribeResult());
     return result;
   }
 
   Future<SubscribeResult> sendSubscribe(String channel) {
     final request = SubscribeRequest()..channel = channel;
-    final result = _connection.send(request, SubscribeResult());
+    final result = _transport.send(request, SubscribeResult());
     return result;
   }
 
