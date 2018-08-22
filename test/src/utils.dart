@@ -76,6 +76,7 @@ class MockTransport extends Mock implements Transport {
   Function get triggerOnDone => _openCaptured[2];
 
   List get _openCaptured => verify(open(captureAny,
-          onError: captureAnyNamed('onError'), onDone: captureAnyNamed('onDone')))
+          onError: captureAnyNamed('onError'),
+          onDone: captureAnyNamed('onDone')))
       .captured;
 }
