@@ -14,99 +14,115 @@ void main() {
 
   setUp(() {
     transport = MockTransport();
-    client = CentrifugeClientImpl(transport);
+    client = CentrifugeClientImpl(() => Future.value(transport));
   });
 
-  test('Client.connect sends ConnectRequest', () async {
-    ConnectEvent connect;
-    client.connectStream.listen((c) => connect = c);
+  group('Not connected', () {
+    test('Client.connect sends ConnectRequest', () async {
+      ConnectEvent connect;
+      client.connectStream.listen((c) => connect = c);
 
+      when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
+            (_) =>
+            Future.value(ConnectResult()
+              ..client = 'client1'
+              ..version = 'v0.0.0'),
+      );
+
+      await client.connect();
+
+      verify(transport.listen(any));
+      expect(connect, isNotNull);
+      expect(connect.client, 'client1');
+      expect(connect.version, 'v0.0.0');
+    });
+  });
+  setUp(() async {
     when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
-      (_) => Future.value(ConnectResult()
-        ..client = 'client1'
-        ..version = 'v0.0.0'),
+          (_) =>
+          Future.value(ConnectResult()
+            ..client = 'client1'
+            ..version = 'v0.0.0'),
     );
-
     await client.connect();
-
-    verify(transport.listen(any));
-    expect(connect, isNotNull);
-    expect(connect.client, 'client1');
-    expect(connect.version, 'v0.0.0');
   });
+  group('Connected', () {
+    test('Client.disconnect closes transport', () async {
+      await client.disconnect();
 
-  test('Client.disconnect closes transport', () async {
-    await client.disconnect();
+      verify(transport.close());
+    });
 
-    verify(transport.close());
-  });
+    test('Client.disconnect unsubscribes subscriptions', () async {
+      UnsubscribeEvent unsubscribeEvent;
 
-  test('Client.disconnect unsubscribes subscriptions', () async {
-    UnsubscribeEvent unsubscribeEvent;
+      when(transport.send(ConnectRequest(), ConnectResult()))
+          .thenAnswer((_) => Future.value(ConnectResult()));
+      await client.connect();
+      final subscription = client.subscribe('any channel');
 
-    when(transport.send(ConnectRequest(), ConnectResult()))
-        .thenAnswer((_) => Future.value(ConnectResult()));
-    await client.connect();
-    final subscription = client.subscribe('any channel');
+      subscription.unsubscribeStream.listen((e) => unsubscribeEvent = e);
 
-    subscription.unsubscribeStream.listen((e) => unsubscribeEvent = e);
+      await client.disconnect();
 
-    await client.disconnect();
+      expect(unsubscribeEvent, isNotNull);
+    });
 
-    expect(unsubscribeEvent, isNotNull);
-  });
+    test('Client.disconnect sends DisconnectEvent', () async {
+      DisconnectEvent disconnectEvent;
+      client.disconnectStream.listen((e) => disconnectEvent = e);
 
-  test('Client.disconnect sends DisconnectEvent', () async {
-    DisconnectEvent disconnectEvent;
-    client.disconnectStream.listen((e) => disconnectEvent = e);
+      await client.disconnect();
 
-    await client.disconnect();
+      expect(disconnectEvent, isNotNull);
+    });
 
-    expect(disconnectEvent, isNotNull);
-  });
+    test('Client.publish sends DisconnectEvent', () async {
+      await client.publish('any channel', [1, 2, 3]);
 
-  test('Client.publish sends DisconnectEvent', () async {
-    await client.publish('any channel', [1, 2, 3]);
+      verify(transport.send(
+        PublishRequest()
+          ..channel = 'any channel'
+          ..data = [1, 2, 3],
+        PublishResult(),
+      ));
+    });
 
-    verify(transport.send(
-      PublishRequest()
-        ..channel = 'any channel'
-        ..data = [1, 2, 3],
-      PublishResult(),
-    ));
-  });
+    test('Client.sendSubscribe sends SubscribeRequest', () async {
+      client.sendSubscribe('any channel');
 
-  test('Client.sendSubscribe sends SubscribeRequest', () async {
-    client.sendSubscribe('any channel');
+      verify(transport.send(
+          SubscribeRequest()
+            ..channel = 'any channel', SubscribeResult()));
+    });
 
-    verify(transport.send(
-        SubscribeRequest()..channel = 'any channel', SubscribeResult()));
-  });
+    test('Client.sendUnsubscribe sends SubscribeRequest', () async {
+      client.sendUnsubscribe('any channel');
 
-  test('Client.sendUnsubscribe sends SubscribeRequest', () async {
-    client.sendUnsubscribe('any channel');
+      verify(transport.send(
+          UnsubscribeRequest()
+            ..channel = 'any channel', UnsubscribeResult()));
+    });
 
-    verify(transport.send(
-        UnsubscribeRequest()..channel = 'any channel', UnsubscribeResult()));
-  });
+    test('Client.subscribe sends SubscribeSuccessEvent', () async {
+      SubscribeSuccessEvent subscribeSuccessEvent;
+      final completer = Completer<SubscribeResult>.sync();
 
-  test('Client.subscribe sends SubscribeSuccessEvent', () async {
-    SubscribeSuccessEvent subscribeSuccessEvent;
-    final completer = Completer<SubscribeResult>.sync();
+      when(transport.send(ConnectRequest(), ConnectResult()))
+          .thenAnswer((_) => Future.value(ConnectResult()));
+      when(transport.send(
+          SubscribeRequest()
+            ..channel = 'any channel', SubscribeResult()))
+          .thenAnswer((_) => completer.future);
+      await client.connect();
 
-    when(transport.send(ConnectRequest(), ConnectResult()))
-        .thenAnswer((_) => Future.value(ConnectResult()));
-    when(transport.send(
-            SubscribeRequest()..channel = 'any channel', SubscribeResult()))
-        .thenAnswer((_) => completer.future);
-    await client.connect();
+      final subscription = client.subscribe('any channel');
+      subscription.subscribeSuccessStream
+          .listen((e) => subscribeSuccessEvent = e);
 
-    final subscription = client.subscribe('any channel');
-    subscription.subscribeSuccessStream
-        .listen((e) => subscribeSuccessEvent = e);
+      completer.complete(SubscribeResult());
 
-    completer.complete(SubscribeResult());
-
-    expect(subscribeSuccessEvent, isNotNull);
+      expect(subscribeSuccessEvent, isNotNull);
+    });
   });
 }

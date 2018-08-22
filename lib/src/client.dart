@@ -7,16 +7,20 @@ import 'transport.dart';
 
 abstract class CentrifugeClient {
   Future<void> connect();
+
   Future<void> disconnect();
+
   Subscription subscribe(String channel);
+
   Future publish(String channel, List<int> data);
 }
 
 class CentrifugeClientImpl implements CentrifugeClient {
-  final CentrifugeTransport _transport;
+  Transport _connection;
+  final TransportBuilder _connectionBuilder;
   final _subscriptions = <String, SubscriptionImpl>{};
 
-  CentrifugeClientImpl(this._transport);
+  CentrifugeClientImpl(this._connectionBuilder);
 
   final _connectController =
       StreamController<ConnectEvent>.broadcast(sync: true);
@@ -32,9 +36,10 @@ class CentrifugeClientImpl implements CentrifugeClient {
 
   @override
   Future<void> connect() async {
-    _transport.listen(_onPush);
+    _connection = await _connectionBuilder();
+    _connection.listen(_onPush);
 
-    final result = await _transport.send(ConnectRequest(), ConnectResult());
+    final result = await _connection.send(ConnectRequest(), ConnectResult());
     _connectController.add(ConnectEvent.from(result));
   }
 
@@ -51,7 +56,7 @@ class CentrifugeClientImpl implements CentrifugeClient {
 
   @override
   Future<void> disconnect() async {
-    await _transport.close();
+    await _connection.close();
 
     for (SubscriptionImpl subscription in _subscriptions.values) {
       final unsubscribe = UnsubscribeEvent();
@@ -68,18 +73,18 @@ class CentrifugeClientImpl implements CentrifugeClient {
       ..channel = channel
       ..data = data;
 
-    await _transport.send(request, PublishResult());
+    await _connection.send(request, PublishResult());
   }
 
   Future<UnsubscribeResult> sendUnsubscribe(String channel) {
     final request = UnsubscribeRequest()..channel = channel;
-    final result = _transport.send(request, UnsubscribeResult());
+    final result = _connection.send(request, UnsubscribeResult());
     return result;
   }
 
   Future<SubscribeResult> sendSubscribe(String channel) {
     final request = SubscribeRequest()..channel = channel;
-    final result = _transport.send(request, SubscribeResult());
+    final result = _connection.send(request, SubscribeResult());
     return result;
   }
 

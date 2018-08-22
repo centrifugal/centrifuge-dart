@@ -6,20 +6,22 @@ import 'package:protobuf/protobuf.dart';
 import 'codec.dart';
 import 'proto/client.pb.dart' hide Error;
 
-class CentrifugeTransport extends StreamView<Push> {
+typedef TransportBuilder = Future<Transport> Function();
+
+class Transport extends StreamView<Push> {
   final WebSocket _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
   final StreamController<Push> _pushController;
 
-  factory CentrifugeTransport(WebSocket socket, CommandEncoder commandEncoder,
+  factory Transport(WebSocket socket, CommandEncoder commandEncoder,
       ReplyDecoder replyDecoder) {
-    final transport = CentrifugeTransport._(socket, commandEncoder,
-        replyDecoder, StreamController.broadcast(sync: true));
+    final transport = Transport._(socket, commandEncoder, replyDecoder,
+        StreamController.broadcast(sync: true));
     return transport;
   }
 
-  CentrifugeTransport._(this._socket, this._commandEncoder, this._replyDecoder,
+  Transport._(this._socket, this._commandEncoder, this._replyDecoder,
       this._pushController)
       : super(_pushController.stream) {
     _socket.listen(
