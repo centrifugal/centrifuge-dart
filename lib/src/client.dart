@@ -1,37 +1,69 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:meta/meta.dart';
-import 'package:protobuf/protobuf.dart';
 
 import 'proto/client.pb.dart' hide Error;
 import 'subscription.dart';
+import 'transport.dart';
 
-class Client {
-  WebSocket socket;
-  final _handlers = <int, Completer<GeneratedMessage>>{};
+Client createClient(String url) {
+  final transport = createProtobufTransport(url);
+  final client = ClientImpl(transport);
+  return client;
+}
+
+abstract class Client {
+  Future<void> connect();
+
+  Future<void> disconnect();
+
+  Subscription subscribe(String channel);
+
+  Future publish(String channel, List<int> data);
+
+  Stream<ConnectEvent> get connectStream;
+
+  Stream<DisconnectEvent> get disconnectStream;
+
+  Stream<ErrorEvent> get errorStream;
+}
+
+class ClientImpl implements Client {
+  final Transport _transport;
   final _subscriptions = <String, SubscriptionImpl>{};
 
-  Client({@required this.socket});
+  ClientImpl(this._transport);
 
-  Future connect() async {
-    socket.listen(
-      _onData,
-      onError: (dynamic error) => print(error),
-      onDone: _onSocketDone,
+  final _connectController =
+      StreamController<ConnectEvent>.broadcast(sync: true);
+  final _disconnectController =
+      StreamController<DisconnectEvent>.broadcast(sync: true);
+  final _errorController = StreamController<ErrorEvent>.broadcast(sync: true);
+
+  @override
+  Stream<ConnectEvent> get connectStream => _connectController.stream;
+
+  @override
+  Stream<DisconnectEvent> get disconnectStream => _disconnectController.stream;
+
+  @override
+  Stream<ErrorEvent> get errorStream => _errorController.stream;
+
+  @override
+  Future<void> connect() async {
+    await _transport.open(
+      _onPush,
+      onError: (dynamic error) {
+        _errorController.add(ErrorEvent._(error.toString()));
+        _processDisconnect(error.toString(), false);
+      },
+      onDone: () => _processDisconnect('done', false),
     );
 
-    final command = _createCommand(MethodType.CONNECT);
-    await _send(command, ConnectResult());
+    final result = await _transport.send(ConnectRequest(), ConnectResult());
+    _connectController.add(ConnectEvent.from(result));
   }
 
-  void _onSocketDone() {
-    final event = UnsubscribeEvent();
-    _subscriptions.values.forEach((s) => s.onUnsubscribe(event));
-    //TODO: Invoke onDisconnect handler
-  }
-
+  @override
   Subscription subscribe(String channel) {
     final subscription = SubscriptionImpl(channel, this);
 
@@ -42,51 +74,43 @@ class Client {
     return subscription;
   }
 
-  T _processReply<T extends GeneratedMessage>(T result, Reply reply) {
-    result.mergeFromBuffer(reply.result);
-    if (reply.hasError()) {
-      throw reply.error;
+  @override
+  Future<void> disconnect() async {
+    await _transport.close();
+  }
+
+  void _processDisconnect(String reason, bool reconnect) {
+    for (SubscriptionImpl subscription in _subscriptions.values) {
+      final unsubscribe = UnsubscribeEvent();
+      subscription.onUnsubscribe(unsubscribe);
     }
+
+    final disconnect = DisconnectEvent._(reason, reconnect);
+    _disconnectController.add(disconnect);
+  }
+
+  @override
+  Future publish(String channel, List<int> data) async {
+    final request = PublishRequest()
+      ..channel = channel
+      ..data = data;
+
+    await _transport.send(request, PublishResult());
+  }
+
+  Future<UnsubscribeResult> sendUnsubscribe(String channel) {
+    final request = UnsubscribeRequest()..channel = channel;
+    final result = _transport.send(request, UnsubscribeResult());
     return result;
   }
 
-  Future<T> _send<T extends GeneratedMessage>(Command command, T result) async {
-    final reply = await _writeCommand(command);
-    final filledResult = _processReply(result, reply);
-    return filledResult;
+  Future<SubscribeResult> sendSubscribe(String channel) {
+    final request = SubscribeRequest()..channel = channel;
+    final result = _transport.send(request, SubscribeResult());
+    return result;
   }
 
-  Command _createCommand(MethodType methodType) => Command()
-    ..id = _nextMessageId()
-    ..method = methodType;
-
-  void _onData(dynamic input) {
-    // TODO: Remove debug prints
-
-    final List<int> data = input;
-
-    final reader = CodedBufferReader(data);
-    var count = 0;
-    while (!reader.isAtEnd()) {
-      final reply = Reply();
-      reader.readMessage(reply, ExtensionRegistry.EMPTY);
-      print('onData> ${reply.id}');
-
-      count++;
-      if (reply.id > 0) {
-        _onResponse(reply);
-      } else {
-        _onPush(reply);
-      }
-    }
-    if (count > 1) {
-      print('$count messages in ws frame.');
-    }
-  }
-
-  void _onPush(Reply reply) {
-    final push = Push.fromBuffer(reply.result);
-
+  void _onPush(Push push) {
     final subscription = _subscriptions[push.channel];
 
     switch (push.type) {
@@ -117,66 +141,66 @@ class Client {
         break;
     }
   }
+}
 
-  void _onResponse(Reply reply) {
-    assert(reply.id > 0);
-    _handlers.remove(reply.id).complete(reply);
-  }
+class PrivateSubEvent {
+  final String clientID;
+  final String channel;
 
-  Future<Reply> _writeCommand(Command command) {
-    final completer = Completer<Reply>.sync();
+  PrivateSubEvent._(this.clientID, this.channel);
 
-    _handlers[command.id] = completer;
-
-    final data = _ProtobufCommandEncoder().encode(command);
-    socket.add(data);
-
-    return completer.future;
-  }
-
-  int _messageId = 1;
-
-  int _nextMessageId() => _messageId++;
-
-  Future<void> disconnect() async {
-    await socket.close();
-  }
-
-  Future publish(String channel, List<int> data) async {
-    final publish = PublishRequest()
-      ..channel = channel
-      ..data = data;
-
-    final command = _createCommand(MethodType.PUBLISH)
-      ..params = publish.writeToBuffer();
-
-    final result = await _send(command, PublishResult());
-    return result;
-  }
-
-  Future<UnsubscribeResult> sendUnsubscribe(String channel) {
-    final command = _createCommand(MethodType.UNSUBSCRIBE)
-      ..params = (UnsubscribeRequest()..channel = channel).writeToBuffer();
-    final result = _send(command, UnsubscribeResult());
-    return result;
-  }
-
-  Future<SubscribeResult> sendSubscribe(String channel) {
-    final command = _createCommand(MethodType.SUBSCRIBE)
-      ..params = (SubscribeRequest()..channel = channel).writeToBuffer();
-    final result = _send(command, SubscribeResult());
-    return result;
+  @override
+  String toString() {
+    return 'PrivateSubEvent{clientID: $clientID, channel: $channel}';
   }
 }
 
-class _ProtobufCommandEncoder {
-  List<int> encode(Command command) {
-    final commandData = command.writeToBuffer();
-    final length = commandData.lengthInBytes;
+class ConnectEvent {
+  final String client;
+  final String version;
+  final List<int> data;
 
-    final writer = CodedBufferWriter();
-    writer.writeInt32NoTag(length);
+  ConnectEvent._(this.client, this.version, this.data);
 
-    return writer.toBuffer() + commandData;
+  static ConnectEvent from(ConnectResult result) =>
+      ConnectEvent._(result.client, result.version, result.data);
+
+  @override
+  String toString() {
+    return 'ConnectEvent{client: $client, version: $version, data: ${utf8.decode(data, allowMalformed: true)}}';
+  }
+}
+
+class DisconnectEvent {
+  final String reason;
+  final bool reconnect;
+
+  DisconnectEvent._(this.reason, this.reconnect);
+
+  @override
+  String toString() {
+    return 'DisconnectEvent{reason: $reason, reconnect: $reconnect}';
+  }
+}
+
+class ErrorEvent {
+  final String message;
+
+  ErrorEvent._(this.message);
+
+  @override
+  String toString() {
+    return 'ErrorEvent{message: $message}';
+  }
+}
+
+class MessageEvent {
+  final List<int> data;
+
+  MessageEvent._(this.data);
+
+  @override
+  String toString() {
+    return 'MessageEvent{data: ${utf8.decode(data, allowMalformed: true)}';
   }
 }

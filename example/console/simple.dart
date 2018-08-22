@@ -1,21 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:centrifuge/centrifuge.dart';
+import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
   final channel = 'chat:index';
 
-  final centrifuge = Centrifuge(url: url);
+  final onEvent = (dynamic event) {
+    print('$channel> $event');
+  };
+
   try {
-    await centrifuge.connect();
+    final client = centrifuge.createClient(url);
 
-    final Subscription subscription = centrifuge.subscribe(channel);
+    client.connectStream.listen(onEvent);
+    client.errorStream.listen(onEvent);
+    client.disconnectStream.listen(onEvent);
 
-    final onEvent = (dynamic event) {
-      print('$channel> $event');
-    };
+    await client.connect();
+
+    final subscription = client.subscribe(channel);
 
     subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
     subscription.joinStream.listen(onEvent);
@@ -24,9 +29,9 @@ void main() async {
     subscription.subscribeSuccessStream.listen(onEvent);
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
-    final handler = _handleUserInput(centrifuge, subscription);
 
-    Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
+    final handler = _handleUserInput(client, subscription);
+//    Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
 
     await for (List<int> codeUnit in stdin) {
       final message = utf8.decode(codeUnit).trim();
@@ -38,7 +43,7 @@ void main() async {
 }
 
 Function(String) _handleUserInput(
-    Centrifuge centrifuge, Subscription subscription) {
+    centrifuge.Client centrifuge, centrifuge.Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':

@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:centrifuge/centrifuge.dart';
+import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() => runApp(MyApp());
 
@@ -29,15 +30,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Centrifuge _centrifuge;
-  Subscription _subscription;
+  centrifuge.Client _centrifuge;
+  centrifuge.Subscription _subscription;
+  ScrollController _controller;
+
   final _items = <_ChatItem>[];
 
   @override
   void initState() {
     final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-    _centrifuge = Centrifuge(url: url);
+    _centrifuge = centrifuge.createClient(url);
 
+    _controller = ScrollController();
     super.initState();
   }
 
@@ -70,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView.builder(
           itemCount: _items.length,
+          controller: _controller,
           itemBuilder: (context, index) {
             final item = _items[index];
             return ListTile(
@@ -100,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _items.add(item);
       });
+      Future.delayed(Duration(milliseconds: 125),
+          () => _controller.jumpTo(64.0 + _controller.offset));
     };
 
     _subscription.joinStream.listen((event) {
