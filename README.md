@@ -52,6 +52,7 @@ await subscription.publish(data);
 - [x] handle asynchronous messages from server
 - [ ] send RPC commands
 - [ ] connect with JWT
+- [ ] connect with custom header
 - [ ] subscribe to private channels with JWT
 - [ ] call publish, presence, presence_stats, history methods.
 - [ ] support connection JWT refresh
