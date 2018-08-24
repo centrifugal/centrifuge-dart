@@ -44,17 +44,20 @@ await subscription.publish(data);
 
 - [ ] connect to server using JSON protocol format
 - [x] connect to server using Protobuf protocol format
+- [ ] connect with JWT
+- [ ] connect with custom header
 - [ ] support automatic reconnect in case of errors, network problems etc
+- [ ] connect and disconnect events
+- [ ] handle disconnect reason
 - [x] subscribe on channel and handle asynchronous Publications
 - [x] handle Join and Leave messages
 - [x] handle unsubscribe notifications
+- [ ] handle subscribe error
+- [ ] support publish, presence, presence stats and history methods
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [ ] send RPC commands
-- [ ] connect with JWT
-- [ ] connect with custom header
 - [ ] subscribe to private channels with JWT
-- [ ] call publish, presence, presence_stats, history methods.
 - [ ] support connection JWT refresh
 - [ ] support private channel subscription JWT refresh
 - [ ] ping/pong to find broken connection
