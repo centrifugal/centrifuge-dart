@@ -42,22 +42,22 @@ await subscription.publish(data);
 
 ## Checklist:
 
-[]connect to server using JSON protocol format
-[x]connect to server using Protobuf protocol format
-[]support automatic reconnect in case of errors, network problems etc
-[x]subscribe on channel and handle asynchronous Publications
-[x]handle Join and Leave messages
-[x]handle unsubscribe notifications
-[]send asynchronous messages to server
-[x]handle asynchronous messages from server
-[]send RPC commands
-[]connect with JWT
-[]subscribe to private channels with JWT
-[]call publish, presence, presence_stats, history methods.
-[]support connection JWT refresh
-[]support private channel subscription JWT refresh
-[]ping/pong to find broken connection
-[]support message recovery mechanism
+- [ ] connect to server using JSON protocol format
+- [x] connect to server using Protobuf protocol format
+- [ ] support automatic reconnect in case of errors, network problems etc
+- [x] subscribe on channel and handle asynchronous Publications
+- [x] handle Join and Leave messages
+- [x] handle unsubscribe notifications
+- [ ] send asynchronous messages to server
+- [x] handle asynchronous messages from server
+- [ ] send RPC commands
+- [ ] connect with JWT
+- [ ] subscribe to private channels with JWT
+- [ ] call publish, presence, presence_stats, history methods.
+- [ ] support connection JWT refresh
+- [ ] support private channel subscription JWT refresh
+- [ ] ping/pong to find broken connection
+- [ ] support message recovery mechanism
 
 ## Author
 
