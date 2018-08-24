@@ -25,6 +25,8 @@ abstract class Client {
   Stream<DisconnectEvent> get disconnectStream;
 
   Stream<ErrorEvent> get errorStream;
+
+  Stream<MessageEvent> get messageStream;
 }
 
 class ClientImpl implements Client {
@@ -38,6 +40,8 @@ class ClientImpl implements Client {
   final _disconnectController =
       StreamController<DisconnectEvent>.broadcast(sync: true);
   final _errorController = StreamController<ErrorEvent>.broadcast(sync: true);
+  final _messageController =
+      StreamController<MessageEvent>.broadcast(sync: true);
 
   @override
   Stream<ConnectEvent> get connectStream => _connectController.stream;
@@ -47,6 +51,9 @@ class ClientImpl implements Client {
 
   @override
   Stream<ErrorEvent> get errorStream => _errorController.stream;
+
+  @override
+  Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
   Future<void> connect() async {
@@ -111,34 +118,37 @@ class ClientImpl implements Client {
   }
 
   void _onPush(Push push) {
-    final subscription = _subscriptions[push.channel];
-
     switch (push.type) {
       case PushType.PUBLICATION:
         final pub = Publication.fromBuffer(push.data);
         final event = PublishEvent.from(pub);
+        final subscription = _subscriptions[push.channel];
 
         subscription.onPublish(event);
         break;
       case PushType.LEAVE:
         final leave = Leave.fromBuffer(push.data);
         final event = LeaveEvent.from(leave.info);
+        final subscription = _subscriptions[push.channel];
 
         subscription.onLeave(event);
         break;
       case PushType.JOIN:
         final join = Join.fromBuffer(push.data);
         final event = JoinEvent.from(join.info);
+        final subscription = _subscriptions[push.channel];
 
         subscription.onJoin(event);
         break;
       case PushType.MESSAGE:
         final message = Message.fromBuffer(push.data);
-        print(utf8.decode(message.data));
-        // TODO: Implement MESSAGE
+        final event = MessageEvent._(message.data);
+
+        _messageController.add(event);
         break;
       case PushType.UNSUB:
         final event = UnsubscribeEvent();
+        final subscription = _subscriptions[push.channel];
 
         subscription.onUnsubscribe(event);
         break;

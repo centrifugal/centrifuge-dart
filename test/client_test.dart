@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart';
@@ -119,6 +120,17 @@ void main() {
       transport.triggerOnDone();
 
       expect(disconnectEvent, isNotNull);
+    });
+
+    test('Client sends MessageEvent', () async {
+      String message;
+      client.messageStream.listen((e) => message = utf8.decode(e.data));
+
+      transport.triggerOnPush(Push()
+        ..type = PushType.MESSAGE
+        ..data = (Message()..data = utf8.encode('hello')).writeToBuffer());
+
+      expect(message, equals('hello'));
     });
   });
 }
