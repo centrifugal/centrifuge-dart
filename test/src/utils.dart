@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:centrifuge/src/proto/client.pb.dart';
+import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/transport.dart';
 import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
 
-class MockWebSocket extends Mock implements WebSocket {
+class MockWebSocket implements WebSocket {
   final List<Command> commands = <Command>[];
 
   final _stubs = <CommandMatcher, SendAction>{};
@@ -19,9 +19,12 @@ class MockWebSocket extends Mock implements WebSocket {
 
     for (CommandMatcher func in _stubs.keys) {
       if (func(command)) {
-        final reply = Reply()
-          ..id = command.id
-          ..result = _stubs[func]._payload.writeToBuffer();
+        final reply = Reply()..id = command.id;
+        if (_stubs[func]._error != null) {
+          reply.error = _stubs[func]._error;
+        } else if (_stubs[func].result != null) {
+          reply.result = _stubs[func]._result.writeToBuffer();
+        }
 
         final replyData = reply.writeToBuffer();
         final length = replyData.lengthInBytes;
@@ -53,13 +56,21 @@ class MockWebSocket extends Mock implements WebSocket {
     this.onDone = onDone;
     return null;
   }
+
+  @override
+  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class SendAction {
-  GeneratedMessage _payload;
+  GeneratedMessage _error;
+  GeneratedMessage _result;
 
-  void send(GeneratedMessage payload) {
-    _payload = payload;
+  void result(GeneratedMessage result) {
+    _result = result;
+  }
+
+  void error(GeneratedMessage error) {
+    _error = error;
   }
 }
 

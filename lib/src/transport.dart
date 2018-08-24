@@ -113,11 +113,4 @@ class Transport {
       });
     };
   }
-
-  void _onSocketDone() {
-//    final event = UnsubscribeEvent();
-//    _subscriptions.values.forEach((s) => s.onUnsubscribe(event));
-//
-//    _disconnectController.add(DisconnectEvent._('socket was closed', false));
-  }
 }

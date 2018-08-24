@@ -117,6 +117,7 @@ class ClientImpl implements Client {
       case PushType.PUBLICATION:
         final pub = Publication.fromBuffer(push.data);
         final event = PublishEvent.from(pub);
+
         subscription.onPublish(event);
         break;
       case PushType.LEAVE:
@@ -128,6 +129,7 @@ class ClientImpl implements Client {
       case PushType.JOIN:
         final join = Join.fromBuffer(push.data);
         final event = JoinEvent.from(join.info);
+
         subscription.onJoin(event);
         break;
       case PushType.MESSAGE:
@@ -137,6 +139,7 @@ class ClientImpl implements Client {
         break;
       case PushType.UNSUB:
         final event = UnsubscribeEvent();
+
         subscription.onUnsubscribe(event);
         break;
     }

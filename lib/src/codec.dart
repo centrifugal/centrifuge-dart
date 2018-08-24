@@ -35,3 +35,26 @@ class ProtobufReplyDecoder extends ReplyDecoder {
     return replies;
   }
 }
+
+class JsonCommandEncoder extends CommandEncoder {
+  @override
+  List<int> convert(Command input) {
+    return utf8.encode(input.writeToJson());
+  }
+}
+
+class JsonReplyDecoder extends ReplyDecoder {
+  @override
+  List<Reply> convert(List<int> input) {
+    final replies = <Reply>[];
+
+    final List<Map<String, dynamic>> data = jsonDecode(utf8.decode(input));
+    for (Map<String, dynamic> map in data) {
+      final reply = Reply();
+      reply.mergeFromJsonMap(map);
+      replies.add(reply);
+    }
+
+    return replies;
+  }
+}
