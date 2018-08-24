@@ -15,7 +15,8 @@ void main() {
   MockWebSocket webSocket;
 
   Function(Push) onPush = (_) => fail('unexpected invocation');
-  final Function(dynamic) onError = (dynamic error) => fail('unexpected invocation');
+  final Function(dynamic) onError =
+      (dynamic error) => fail('unexpected invocation');
   final Function onDone = () => fail('unexpected invocation');
 
   setUp(() {
