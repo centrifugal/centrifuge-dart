@@ -18,7 +18,7 @@ abstract class Client {
 
   Future<void> disconnect();
 
-  Subscription subscribe(String channel);
+  Subscription subscribe(String channel, {String token});
 
   Future publish(String channel, List<int> data);
 
@@ -85,8 +85,8 @@ class ClientImpl implements Client {
   }
 
   @override
-  Subscription subscribe(String channel) {
-    final subscription = SubscriptionImpl(channel, this);
+  Subscription subscribe(String channel, {String token}) {
+    final subscription = SubscriptionImpl(channel, this, token: token);
 
     _subscriptions[channel] = subscription;
 
@@ -125,8 +125,12 @@ class ClientImpl implements Client {
     return result;
   }
 
-  Future<SubscribeResult> sendSubscribe(String channel) {
+  Future<SubscribeResult> sendSubscribe(String channel, {String token}) {
     final request = SubscribeRequest()..channel = channel;
+    if (token != null) {
+      request.token = token;
+    }
+
     final result = _transport.send(request, SubscribeResult());
     return result;
   }

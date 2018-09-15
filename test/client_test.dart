@@ -100,6 +100,16 @@ void main() {
           SubscribeRequest()..channel = 'any channel', SubscribeResult()));
     });
 
+    test('Client.sendSubscribe sends SubscribeRequest with token', () async {
+      client.sendSubscribe('any channel', token: 'some_token');
+
+      verify(transport.send(
+          SubscribeRequest()
+            ..channel = 'any channel'
+            ..token = 'some_token',
+          SubscribeResult()));
+    });
+
     test('Client.sendUnsubscribe sends SubscribeRequest', () async {
       client.sendUnsubscribe('any channel');
 

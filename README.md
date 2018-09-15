@@ -31,6 +31,8 @@ subscription.leaveStream.listen(onEvent);
 subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
+
+final privateSubscription = client.subscribe(channel, token: 'token');
 ```
 Publish:
 ```dart
@@ -57,7 +59,7 @@ await subscription.publish(data);
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [ ] send RPC commands
-- [ ] subscribe to private channels with JWT
+- [x] subscribe to private channels with JWT
 - [ ] support connection JWT refresh
 - [ ] support private channel subscription JWT refresh
 - [ ] ping/pong to find broken connection

@@ -32,8 +32,9 @@ class SubscriptionImpl implements Subscription {
   @override
   final String channel;
   final ClientImpl _client;
+  final String token;
 
-  SubscriptionImpl(this.channel, this._client);
+  SubscriptionImpl(this.channel, this._client, {this.token});
 
   final _publishController =
       StreamController<PublishEvent>.broadcast(sync: true);
@@ -97,7 +98,7 @@ class SubscriptionImpl implements Subscription {
 
   Future resubscribe(bool isResubscribe) async {
     try {
-      final result = await _client.sendSubscribe(channel);
+      final result = await _client.sendSubscribe(channel, token: token);
       final event = SubscribeSuccessEvent.from(result, isResubscribe);
       onSubscribeSuccess(event);
       _recover(result);
