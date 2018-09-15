@@ -40,6 +40,7 @@ void main() {
       expect(connect.client, 'client1');
       expect(connect.version, 'v0.0.0');
     });
+
     test('Client.connect sends ConnectRequest with token', () async {
       client.setToken('abcd');
       ConnectEvent connect;
@@ -64,6 +65,7 @@ void main() {
       expect(connect.version, 'v0.0.0');
     });
   });
+
   group('Connected client', () {
     setUp(() async {
       when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
