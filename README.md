@@ -44,7 +44,7 @@ await subscription.publish(data);
 
 - [ ] connect to server using JSON protocol format
 - [x] connect to server using Protobuf protocol format
-- [ ] connect with JWT
+- [x] connect with JWT
 - [ ] connect with custom header
 - [ ] support automatic reconnect in case of errors, network problems etc
 - [ ] connect and disconnect events
