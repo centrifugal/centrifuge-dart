@@ -51,7 +51,7 @@ await subscription.publish(data);
 - [x] connect with JWT
 - [ ] connect with custom header
 - [ ] support automatic reconnect in case of errors, network problems etc
-- [ ] connect and disconnect events
+- [x] connect and disconnect events
 - [ ] handle disconnect reason
 - [x] subscribe on channel and handle asynchronous Publications
 - [x] handle Join and Leave messages
