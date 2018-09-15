@@ -12,11 +12,13 @@ Client createClient(String url) {
 }
 
 abstract class Client {
+  void setToken(String token);
+
   Future<void> connect();
 
   Future<void> disconnect();
 
-  Subscription subscribe(String channel);
+  Subscription subscribe(String channel, {String token});
 
   Future publish(String channel, List<int> data);
 
@@ -32,6 +34,7 @@ abstract class Client {
 class ClientImpl implements Client {
   final Transport _transport;
   final _subscriptions = <String, SubscriptionImpl>{};
+  String _token;
 
   ClientImpl(this._transport);
 
@@ -56,6 +59,9 @@ class ClientImpl implements Client {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
+  void setToken(String token) => _token = token;
+
+  @override
   Future<void> connect() async {
     await _transport.open(
       _onPush,
@@ -66,13 +72,21 @@ class ClientImpl implements Client {
       onDone: () => _processDisconnect('done', false),
     );
 
-    final result = await _transport.send(ConnectRequest(), ConnectResult());
+    final request = ConnectRequest();
+    if (_token != null) {
+      request.token = _token;
+    }
+
+    final result = await _transport.send(
+      request,
+      ConnectResult(),
+    );
     _connectController.add(ConnectEvent.from(result));
   }
 
   @override
-  Subscription subscribe(String channel) {
-    final subscription = SubscriptionImpl(channel, this);
+  Subscription subscribe(String channel, {String token}) {
+    final subscription = SubscriptionImpl(channel, this, token: token);
 
     _subscriptions[channel] = subscription;
 
@@ -111,8 +125,12 @@ class ClientImpl implements Client {
     return result;
   }
 
-  Future<SubscribeResult> sendSubscribe(String channel) {
+  Future<SubscribeResult> sendSubscribe(String channel, {String token}) {
     final request = SubscribeRequest()..channel = channel;
+    if (token != null) {
+      request.token = token;
+    }
+
     final result = _transport.send(request, SubscribeResult());
     return result;
   }

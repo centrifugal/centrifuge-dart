@@ -32,6 +32,10 @@ subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
 ```
+Subscribe to private channel:
+```dart
+final privateSubscription = client.subscribe(channel, token: 'token');
+```
 Publish:
 ```dart
 final output = jsonEncode({'input': message});
@@ -44,7 +48,7 @@ await subscription.publish(data);
 
 - [ ] connect to server using JSON protocol format
 - [x] connect to server using Protobuf protocol format
-- [ ] connect with JWT
+- [x] connect with JWT
 - [ ] connect with custom header
 - [ ] support automatic reconnect in case of errors, network problems etc
 - [ ] connect and disconnect events
@@ -57,7 +61,7 @@ await subscription.publish(data);
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [ ] send RPC commands
-- [ ] subscribe to private channels with JWT
+- [x] subscribe to private channels with JWT
 - [ ] support connection JWT refresh
 - [ ] support private channel subscription JWT refresh
 - [ ] ping/pong to find broken connection

@@ -40,7 +40,32 @@ void main() {
       expect(connect.client, 'client1');
       expect(connect.version, 'v0.0.0');
     });
+
+    test('Client.connect sends ConnectRequest with token', () async {
+      client.setToken('abcd');
+      ConnectEvent connect;
+      client.connectStream.listen((c) => connect = c);
+
+      when(transport.send(ConnectRequest()..token = 'abcd', ConnectResult()))
+          .thenAnswer(
+        (_) => Future.value(ConnectResult()
+          ..client = 'client1'
+          ..version = 'v0.0.0'),
+      );
+
+      await client.connect();
+
+      verify(transport.open(
+        any,
+        onError: anyNamed('onError'),
+        onDone: anyNamed('onDone'),
+      ));
+      expect(connect, isNotNull);
+      expect(connect.client, 'client1');
+      expect(connect.version, 'v0.0.0');
+    });
   });
+
   group('Connected client', () {
     setUp(() async {
       when(transport.send(ConnectRequest(), ConnectResult())).thenAnswer(
@@ -73,6 +98,16 @@ void main() {
 
       verify(transport.send(
           SubscribeRequest()..channel = 'any channel', SubscribeResult()));
+    });
+
+    test('Client.sendSubscribe sends SubscribeRequest with token', () async {
+      client.sendSubscribe('any channel', token: 'some_token');
+
+      verify(transport.send(
+          SubscribeRequest()
+            ..channel = 'any channel'
+            ..token = 'some_token',
+          SubscribeResult()));
     });
 
     test('Client.sendUnsubscribe sends SubscribeRequest', () async {

@@ -18,6 +18,10 @@ void main() async {
     client.errorStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
 
+//  Authorization via JWT
+//    client.setToken(
+//        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzcwOTY0MDIsImlhdCI6MTUzNzAxMDAwMiwicGxkIjp7ImluZm8iOnsibmFtZSI6Ikdlcm1hbiBTYXByeWtpbiJ9fSwic3ViIjoiNjQifQ==.KiTCZbRxUK73SSB2UNvaGQr8YVWAdb_ZSv5j8CKEWmE=');
+
     await client.connect();
 
     final subscription = client.subscribe(channel);
@@ -52,9 +56,11 @@ Function(String) _handleUserInput(
       case '#unsubscribe':
         await subscription.unsubscribe();
         break;
+      case '#connect':
+        await centrifuge.connect();
+        break;
       case '#disconnect':
         await centrifuge.disconnect();
-        Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
         break;
       default:
         final output = jsonEncode({'input': message});
