@@ -101,11 +101,13 @@ const ClientInfo$json = const {
 const Publication$json = const {
   '1': 'Publication',
   '2': const [
-    const {'1': 'uid', '3': 1, '4': 1, '5': 9, '10': 'uid'},
-    const {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'seq', '3': 1, '4': 1, '5': 13, '10': 'seq'},
+    const {'1': 'gen', '3': 2, '4': 1, '5': 13, '10': 'gen'},
+    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
+    const {'1': 'data', '3': 4, '4': 1, '5': 12, '10': 'data'},
     const {
       '1': 'info',
-      '3': 3,
+      '3': 5,
       '4': 1,
       '5': 11,
       '6': '.proto.ClientInfo',
@@ -196,28 +198,32 @@ const SubscribeRequest$json = const {
   '1': 'SubscribeRequest',
   '2': const [
     const {'1': 'channel', '3': 1, '4': 1, '5': 9, '10': 'channel'},
-    const {'1': 'recover', '3': 2, '4': 1, '5': 8, '10': 'recover'},
-    const {'1': 'last', '3': 3, '4': 1, '5': 9, '10': 'last'},
-    const {'1': 'away', '3': 4, '4': 1, '5': 13, '10': 'away'},
-    const {'1': 'token', '3': 5, '4': 1, '5': 9, '10': 'token'},
+    const {'1': 'token', '3': 2, '4': 1, '5': 9, '10': 'token'},
+    const {'1': 'recover', '3': 3, '4': 1, '5': 8, '10': 'recover'},
+    const {'1': 'seq', '3': 4, '4': 1, '5': 13, '10': 'seq'},
+    const {'1': 'gen', '3': 5, '4': 1, '5': 13, '10': 'gen'},
+    const {'1': 'epoch', '3': 6, '4': 1, '5': 9, '10': 'epoch'},
   ],
 };
 
 const SubscribeResult$json = const {
   '1': 'SubscribeResult',
   '2': const [
-    const {'1': 'last', '3': 1, '4': 1, '5': 9, '10': 'last'},
-    const {'1': 'recovered', '3': 2, '4': 1, '5': 8, '10': 'recovered'},
+    const {'1': 'expires', '3': 1, '4': 1, '5': 8, '10': 'expires'},
+    const {'1': 'ttl', '3': 2, '4': 1, '5': 13, '10': 'ttl'},
+    const {'1': 'recoverable', '3': 3, '4': 1, '5': 8, '10': 'recoverable'},
+    const {'1': 'seq', '3': 4, '4': 1, '5': 13, '10': 'seq'},
+    const {'1': 'gen', '3': 5, '4': 1, '5': 13, '10': 'gen'},
+    const {'1': 'epoch', '3': 6, '4': 1, '5': 9, '10': 'epoch'},
     const {
       '1': 'publications',
-      '3': 3,
+      '3': 7,
       '4': 3,
       '5': 11,
       '6': '.proto.Publication',
       '10': 'publications'
     },
-    const {'1': 'expires', '3': 4, '4': 1, '5': 8, '10': 'expires'},
-    const {'1': 'ttl', '3': 5, '4': 1, '5': 13, '10': 'ttl'},
+    const {'1': 'recovered', '3': 8, '4': 1, '5': 8, '10': 'recovered'},
   ],
 };
 
@@ -336,16 +342,10 @@ const HistoryResult$json = const {
 
 const PingRequest$json = const {
   '1': 'PingRequest',
-  '2': const [
-    const {'1': 'data', '3': 1, '4': 1, '5': 9, '10': 'data'},
-  ],
 };
 
 const PingResult$json = const {
   '1': 'PingResult',
-  '2': const [
-    const {'1': 'data', '3': 1, '4': 1, '5': 9, '10': 'data'},
-  ],
 };
 
 const RPCRequest$json = const {

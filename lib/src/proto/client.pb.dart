@@ -1,7 +1,7 @@
 ///
 //  Generated code. Do not modify.
 ///
-// ignore_for_file: non_constant_identifier_names,library_prefixes, annotate_overrides, camel_case_types
+// ignore_for_file: non_constant_identifier_names,library_prefixes
 
 // ignore: UNUSED_SHOWN_NAME
 import 'dart:core' show int, bool, double, String, List, override;
@@ -283,10 +283,12 @@ class _ReadonlyClientInfo extends ClientInfo with ReadonlyMessageMixin {}
 
 class Publication extends GeneratedMessage {
   static final BuilderInfo _i = new BuilderInfo('Publication')
-    ..aOS(1, 'uid')
-    ..a<List<int>>(2, 'data', PbFieldType.OY)
+    ..a<int>(1, 'seq', PbFieldType.OU3)
+    ..a<int>(2, 'gen', PbFieldType.OU3)
+    ..aOS(3, 'uid')
+    ..a<List<int>>(4, 'data', PbFieldType.OY)
     ..a<ClientInfo>(
-        3, 'info', PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
+        5, 'info', PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
     ..hasRequiredFields = false;
 
   Publication() : super();
@@ -310,29 +312,45 @@ class Publication extends GeneratedMessage {
     if (v is! Publication) checkItemFailed(v, 'Publication');
   }
 
-  String get uid => $_getS(0, '');
+  int get seq => $_get(0, 0);
+  set seq(int v) {
+    $_setUnsignedInt32(0, v);
+  }
+
+  bool hasSeq() => $_has(0);
+  void clearSeq() => clearField(1);
+
+  int get gen => $_get(1, 0);
+  set gen(int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
+  bool hasGen() => $_has(1);
+  void clearGen() => clearField(2);
+
+  String get uid => $_getS(2, '');
   set uid(String v) {
-    $_setString(0, v);
+    $_setString(2, v);
   }
 
-  bool hasUid() => $_has(0);
-  void clearUid() => clearField(1);
+  bool hasUid() => $_has(2);
+  void clearUid() => clearField(3);
 
-  List<int> get data => $_getN(1);
+  List<int> get data => $_getN(3);
   set data(List<int> v) {
-    $_setBytes(1, v);
+    $_setBytes(3, v);
   }
 
-  bool hasData() => $_has(1);
-  void clearData() => clearField(2);
+  bool hasData() => $_has(3);
+  void clearData() => clearField(4);
 
-  ClientInfo get info => $_getN(2);
+  ClientInfo get info => $_getN(4);
   set info(ClientInfo v) {
-    setField(3, v);
+    setField(5, v);
   }
 
-  bool hasInfo() => $_has(2);
-  void clearInfo() => clearField(3);
+  bool hasInfo() => $_has(4);
+  void clearInfo() => clearField(5);
 }
 
 class _ReadonlyPublication extends Publication with ReadonlyMessageMixin {}
@@ -711,10 +729,11 @@ class _ReadonlyRefreshResult extends RefreshResult with ReadonlyMessageMixin {}
 class SubscribeRequest extends GeneratedMessage {
   static final BuilderInfo _i = new BuilderInfo('SubscribeRequest')
     ..aOS(1, 'channel')
-    ..aOB(2, 'recover')
-    ..aOS(3, 'last')
-    ..a<int>(4, 'away', PbFieldType.OU3)
-    ..aOS(5, 'token')
+    ..aOS(2, 'token')
+    ..aOB(3, 'recover')
+    ..a<int>(4, 'seq', PbFieldType.OU3)
+    ..a<int>(5, 'gen', PbFieldType.OU3)
+    ..aOS(6, 'epoch')
     ..hasRequiredFields = false;
 
   SubscribeRequest() : super();
@@ -748,37 +767,45 @@ class SubscribeRequest extends GeneratedMessage {
   bool hasChannel() => $_has(0);
   void clearChannel() => clearField(1);
 
-  bool get recover => $_get(1, false);
+  String get token => $_getS(1, '');
+  set token(String v) {
+    $_setString(1, v);
+  }
+
+  bool hasToken() => $_has(1);
+  void clearToken() => clearField(2);
+
+  bool get recover => $_get(2, false);
   set recover(bool v) {
-    $_setBool(1, v);
+    $_setBool(2, v);
   }
 
-  bool hasRecover() => $_has(1);
-  void clearRecover() => clearField(2);
+  bool hasRecover() => $_has(2);
+  void clearRecover() => clearField(3);
 
-  String get last => $_getS(2, '');
-  set last(String v) {
-    $_setString(2, v);
-  }
-
-  bool hasLast() => $_has(2);
-  void clearLast() => clearField(3);
-
-  int get away => $_get(3, 0);
-  set away(int v) {
+  int get seq => $_get(3, 0);
+  set seq(int v) {
     $_setUnsignedInt32(3, v);
   }
 
-  bool hasAway() => $_has(3);
-  void clearAway() => clearField(4);
+  bool hasSeq() => $_has(3);
+  void clearSeq() => clearField(4);
 
-  String get token => $_getS(4, '');
-  set token(String v) {
-    $_setString(4, v);
+  int get gen => $_get(4, 0);
+  set gen(int v) {
+    $_setUnsignedInt32(4, v);
   }
 
-  bool hasToken() => $_has(4);
-  void clearToken() => clearField(5);
+  bool hasGen() => $_has(4);
+  void clearGen() => clearField(5);
+
+  String get epoch => $_getS(5, '');
+  set epoch(String v) {
+    $_setString(5, v);
+  }
+
+  bool hasEpoch() => $_has(5);
+  void clearEpoch() => clearField(6);
 }
 
 class _ReadonlySubscribeRequest extends SubscribeRequest
@@ -786,12 +813,15 @@ class _ReadonlySubscribeRequest extends SubscribeRequest
 
 class SubscribeResult extends GeneratedMessage {
   static final BuilderInfo _i = new BuilderInfo('SubscribeResult')
-    ..aOS(1, 'last')
-    ..aOB(2, 'recovered')
-    ..pp<Publication>(3, 'publications', PbFieldType.PM, Publication.$checkItem,
+    ..aOB(1, 'expires')
+    ..a<int>(2, 'ttl', PbFieldType.OU3)
+    ..aOB(3, 'recoverable')
+    ..a<int>(4, 'seq', PbFieldType.OU3)
+    ..a<int>(5, 'gen', PbFieldType.OU3)
+    ..aOS(6, 'epoch')
+    ..pp<Publication>(7, 'publications', PbFieldType.PM, Publication.$checkItem,
         Publication.create)
-    ..aOB(4, 'expires')
-    ..a<int>(5, 'ttl', PbFieldType.OU3)
+    ..aOB(8, 'recovered')
     ..hasRequiredFields = false;
 
   SubscribeResult() : super();
@@ -817,39 +847,63 @@ class SubscribeResult extends GeneratedMessage {
     if (v is! SubscribeResult) checkItemFailed(v, 'SubscribeResult');
   }
 
-  String get last => $_getS(0, '');
-  set last(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasLast() => $_has(0);
-  void clearLast() => clearField(1);
-
-  bool get recovered => $_get(1, false);
-  set recovered(bool v) {
-    $_setBool(1, v);
-  }
-
-  bool hasRecovered() => $_has(1);
-  void clearRecovered() => clearField(2);
-
-  List<Publication> get publications => $_getList(2);
-
-  bool get expires => $_get(3, false);
+  bool get expires => $_get(0, false);
   set expires(bool v) {
-    $_setBool(3, v);
+    $_setBool(0, v);
   }
 
-  bool hasExpires() => $_has(3);
-  void clearExpires() => clearField(4);
+  bool hasExpires() => $_has(0);
+  void clearExpires() => clearField(1);
 
-  int get ttl => $_get(4, 0);
+  int get ttl => $_get(1, 0);
   set ttl(int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
+  bool hasTtl() => $_has(1);
+  void clearTtl() => clearField(2);
+
+  bool get recoverable => $_get(2, false);
+  set recoverable(bool v) {
+    $_setBool(2, v);
+  }
+
+  bool hasRecoverable() => $_has(2);
+  void clearRecoverable() => clearField(3);
+
+  int get seq => $_get(3, 0);
+  set seq(int v) {
+    $_setUnsignedInt32(3, v);
+  }
+
+  bool hasSeq() => $_has(3);
+  void clearSeq() => clearField(4);
+
+  int get gen => $_get(4, 0);
+  set gen(int v) {
     $_setUnsignedInt32(4, v);
   }
 
-  bool hasTtl() => $_has(4);
-  void clearTtl() => clearField(5);
+  bool hasGen() => $_has(4);
+  void clearGen() => clearField(5);
+
+  String get epoch => $_getS(5, '');
+  set epoch(String v) {
+    $_setString(5, v);
+  }
+
+  bool hasEpoch() => $_has(5);
+  void clearEpoch() => clearField(6);
+
+  List<Publication> get publications => $_getList(6);
+
+  bool get recovered => $_get(7, false);
+  set recovered(bool v) {
+    $_setBool(7, v);
+  }
+
+  bool hasRecovered() => $_has(7);
+  void clearRecovered() => clearField(8);
 }
 
 class _ReadonlySubscribeResult extends SubscribeResult
@@ -1401,7 +1455,6 @@ class _ReadonlyHistoryResult extends HistoryResult with ReadonlyMessageMixin {}
 
 class PingRequest extends GeneratedMessage {
   static final BuilderInfo _i = new BuilderInfo('PingRequest')
-    ..aOS(1, 'data')
     ..hasRequiredFields = false;
 
   PingRequest() : super();
@@ -1424,21 +1477,12 @@ class PingRequest extends GeneratedMessage {
   static void $checkItem(PingRequest v) {
     if (v is! PingRequest) checkItemFailed(v, 'PingRequest');
   }
-
-  String get data => $_getS(0, '');
-  set data(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasData() => $_has(0);
-  void clearData() => clearField(1);
 }
 
 class _ReadonlyPingRequest extends PingRequest with ReadonlyMessageMixin {}
 
 class PingResult extends GeneratedMessage {
   static final BuilderInfo _i = new BuilderInfo('PingResult')
-    ..aOS(1, 'data')
     ..hasRequiredFields = false;
 
   PingResult() : super();
@@ -1460,14 +1504,6 @@ class PingResult extends GeneratedMessage {
   static void $checkItem(PingResult v) {
     if (v is! PingResult) checkItemFailed(v, 'PingResult');
   }
-
-  String get data => $_getS(0, '');
-  set data(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasData() => $_has(0);
-  void clearData() => clearField(1);
 }
 
 class _ReadonlyPingResult extends PingResult with ReadonlyMessageMixin {}
