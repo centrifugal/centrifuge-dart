@@ -31,7 +31,9 @@ subscription.leaveStream.listen(onEvent);
 subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
-
+```
+Subscribe to private channel:
+```dart
 final privateSubscription = client.subscribe(channel, token: 'token');
 ```
 Publish:
