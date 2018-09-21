@@ -14,8 +14,11 @@ Create client:
 ```dart
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
-final client = centrifuge.createClient(url);
+final client = centrifuge.createClient("ws://localhost:8000/connection/websocket?format=protobuf");
 ```
+
+Note that `?format=protobuf` is required because this library only works with Protobuf protocol.
+
 Connect to server:
 ```dart
 await client.connect();
@@ -61,7 +64,7 @@ await subscription.publish(data);
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [ ] send RPC commands
-- [x] subscribe to private channels with JWT
+- [ ] subscribe to private channels with JWT
 - [ ] support connection JWT refresh
 - [ ] support private channel subscription JWT refresh
 - [ ] ping/pong to find broken connection
