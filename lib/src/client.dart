@@ -32,11 +32,12 @@ abstract class Client {
 }
 
 class ClientImpl implements Client {
+  ClientImpl(this._transport);
+
   final Transport _transport;
   final _subscriptions = <String, SubscriptionImpl>{};
-  String _token;
 
-  ClientImpl(this._transport);
+  String _token;
 
   final _connectController =
       StreamController<ConnectEvent>.broadcast(sync: true);
@@ -175,10 +176,10 @@ class ClientImpl implements Client {
 }
 
 class PrivateSubEvent {
+  PrivateSubEvent._(this.clientID, this.channel);
+
   final String clientID;
   final String channel;
-
-  PrivateSubEvent._(this.clientID, this.channel);
 
   @override
   String toString() {
@@ -187,11 +188,11 @@ class PrivateSubEvent {
 }
 
 class ConnectEvent {
+  ConnectEvent._(this.client, this.version, this.data);
+
   final String client;
   final String version;
   final List<int> data;
-
-  ConnectEvent._(this.client, this.version, this.data);
 
   static ConnectEvent from(ConnectResult result) =>
       ConnectEvent._(result.client, result.version, result.data);
@@ -203,10 +204,10 @@ class ConnectEvent {
 }
 
 class DisconnectEvent {
+  DisconnectEvent._(this.reason, this.reconnect);
+
   final String reason;
   final bool reconnect;
-
-  DisconnectEvent._(this.reason, this.reconnect);
 
   @override
   String toString() {
@@ -215,9 +216,9 @@ class DisconnectEvent {
 }
 
 class ErrorEvent {
-  final String message;
-
   ErrorEvent._(this.message);
+
+  final String message;
 
   @override
   String toString() {
@@ -226,9 +227,9 @@ class ErrorEvent {
 }
 
 class MessageEvent {
-  final List<int> data;
-
   MessageEvent._(this.data);
+
+  final List<int> data;
 
   @override
   String toString() {

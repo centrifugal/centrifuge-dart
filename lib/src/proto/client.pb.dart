@@ -1,40 +1,43 @@
 ///
 //  Generated code. Do not modify.
+//  source: client.proto
 ///
-// ignore_for_file: non_constant_identifier_names,library_prefixes
+// ignore_for_file: non_constant_identifier_names,library_prefixes,unused_import
 
 // ignore: UNUSED_SHOWN_NAME
-import 'dart:core' show int, bool, double, String, List, override;
+import 'dart:core' show int, bool, double, String, List, Map, override;
 
-import 'package:protobuf/protobuf.dart';
+import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'client.pbenum.dart';
 
 export 'client.pbenum.dart';
 
-class Error extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Error')
-    ..a<int>(1, 'code', PbFieldType.OU3)
-    ..aOS(2, 'message')
-    ..hasRequiredFields = false;
+class Error extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('Error', package: const $pb.PackageName('proto'))
+        ..a<int>(1, 'code', $pb.PbFieldType.OU3)
+        ..aOS(2, 'message')
+        ..hasRequiredFields = false;
 
   Error() : super();
-  Error.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Error.fromBuffer(List<int> i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Error.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Error.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Error clone() => new Error()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Error copyWith(void Function(Error) updates) =>
+      super.copyWith((message) => updates(message as Error));
+  $pb.BuilderInfo get info_ => _i;
   static Error create() => new Error();
-  static PbList<Error> createRepeated() => new PbList<Error>();
-  static Error getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyError();
-    return _defaultInstance;
-  }
-
+  Error createEmptyInstance() => create();
+  static $pb.PbList<Error> createRepeated() => new $pb.PbList<Error>();
+  static Error getDefault() => _defaultInstance ??= create()..freeze();
   static Error _defaultInstance;
   static void $checkItem(Error v) {
-    if (v is! Error) checkItemFailed(v, 'Error');
+    if (v is! Error) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   int get code => $_get(0, 0);
@@ -54,34 +57,33 @@ class Error extends GeneratedMessage {
   void clearMessage() => clearField(2);
 }
 
-class _ReadonlyError extends Error with ReadonlyMessageMixin {}
-
-class Command extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Command')
-    ..a<int>(1, 'id', PbFieldType.OU3)
-    ..e<MethodType>(2, 'method', PbFieldType.OE, MethodType.CONNECT,
-        MethodType.valueOf, MethodType.values)
-    ..a<List<int>>(3, 'params', PbFieldType.OY)
-    ..hasRequiredFields = false;
+class Command extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('Command', package: const $pb.PackageName('proto'))
+        ..a<int>(1, 'id', $pb.PbFieldType.OU3)
+        ..e<MethodType>(2, 'method', $pb.PbFieldType.OE, MethodType.CONNECT,
+            MethodType.valueOf, MethodType.values)
+        ..a<List<int>>(3, 'params', $pb.PbFieldType.OY)
+        ..hasRequiredFields = false;
 
   Command() : super();
   Command.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Command.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Command.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Command clone() => new Command()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Command copyWith(void Function(Command) updates) =>
+      super.copyWith((message) => updates(message as Command));
+  $pb.BuilderInfo get info_ => _i;
   static Command create() => new Command();
-  static PbList<Command> createRepeated() => new PbList<Command>();
-  static Command getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyCommand();
-    return _defaultInstance;
-  }
-
+  Command createEmptyInstance() => create();
+  static $pb.PbList<Command> createRepeated() => new $pb.PbList<Command>();
+  static Command getDefault() => _defaultInstance ??= create()..freeze();
   static Command _defaultInstance;
   static void $checkItem(Command v) {
-    if (v is! Command) checkItemFailed(v, 'Command');
+    if (v is! Command) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   int get id => $_get(0, 0);
@@ -109,32 +111,32 @@ class Command extends GeneratedMessage {
   void clearParams() => clearField(3);
 }
 
-class _ReadonlyCommand extends Command with ReadonlyMessageMixin {}
-
-class Reply extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Reply')
-    ..a<int>(1, 'id', PbFieldType.OU3)
-    ..a<Error>(2, 'error', PbFieldType.OM, Error.getDefault, Error.create)
-    ..a<List<int>>(3, 'result', PbFieldType.OY)
+class Reply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Reply',
+      package: const $pb.PackageName('proto'))
+    ..a<int>(1, 'id', $pb.PbFieldType.OU3)
+    ..a<Error>(2, 'error', $pb.PbFieldType.OM, Error.getDefault, Error.create)
+    ..a<List<int>>(3, 'result', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   Reply() : super();
-  Reply.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Reply.fromBuffer(List<int> i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Reply.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Reply.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Reply clone() => new Reply()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Reply copyWith(void Function(Reply) updates) =>
+      super.copyWith((message) => updates(message as Reply));
+  $pb.BuilderInfo get info_ => _i;
   static Reply create() => new Reply();
-  static PbList<Reply> createRepeated() => new PbList<Reply>();
-  static Reply getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyReply();
-    return _defaultInstance;
-  }
-
+  Reply createEmptyInstance() => create();
+  static $pb.PbList<Reply> createRepeated() => new $pb.PbList<Reply>();
+  static Reply getDefault() => _defaultInstance ??= create()..freeze();
   static Reply _defaultInstance;
   static void $checkItem(Reply v) {
-    if (v is! Reply) checkItemFailed(v, 'Reply');
+    if (v is! Reply) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   int get id => $_get(0, 0);
@@ -162,33 +164,33 @@ class Reply extends GeneratedMessage {
   void clearResult() => clearField(3);
 }
 
-class _ReadonlyReply extends Reply with ReadonlyMessageMixin {}
-
-class Push extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Push')
-    ..e<PushType>(1, 'type', PbFieldType.OE, PushType.PUBLICATION,
-        PushType.valueOf, PushType.values)
-    ..aOS(2, 'channel')
-    ..a<List<int>>(3, 'data', PbFieldType.OY)
-    ..hasRequiredFields = false;
+class Push extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('Push', package: const $pb.PackageName('proto'))
+        ..e<PushType>(1, 'type', $pb.PbFieldType.OE, PushType.PUBLICATION,
+            PushType.valueOf, PushType.values)
+        ..aOS(2, 'channel')
+        ..a<List<int>>(3, 'data', $pb.PbFieldType.OY)
+        ..hasRequiredFields = false;
 
   Push() : super();
-  Push.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Push.fromBuffer(List<int> i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Push.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Push.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Push clone() => new Push()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Push copyWith(void Function(Push) updates) =>
+      super.copyWith((message) => updates(message as Push));
+  $pb.BuilderInfo get info_ => _i;
   static Push create() => new Push();
-  static PbList<Push> createRepeated() => new PbList<Push>();
-  static Push getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyPush();
-    return _defaultInstance;
-  }
-
+  Push createEmptyInstance() => create();
+  static $pb.PbList<Push> createRepeated() => new $pb.PbList<Push>();
+  static Push getDefault() => _defaultInstance ??= create()..freeze();
   static Push _defaultInstance;
   static void $checkItem(Push v) {
-    if (v is! Push) checkItemFailed(v, 'Push');
+    if (v is! Push) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   PushType get type => $_getN(0);
@@ -216,34 +218,34 @@ class Push extends GeneratedMessage {
   void clearData() => clearField(3);
 }
 
-class _ReadonlyPush extends Push with ReadonlyMessageMixin {}
-
-class ClientInfo extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('ClientInfo')
-    ..aOS(1, 'user')
-    ..aOS(2, 'client')
-    ..a<List<int>>(3, 'connInfo', PbFieldType.OY)
-    ..a<List<int>>(4, 'chanInfo', PbFieldType.OY)
-    ..hasRequiredFields = false;
+class ClientInfo extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('ClientInfo', package: const $pb.PackageName('proto'))
+        ..aOS(1, 'user')
+        ..aOS(2, 'client')
+        ..a<List<int>>(3, 'connInfo', $pb.PbFieldType.OY)
+        ..a<List<int>>(4, 'chanInfo', $pb.PbFieldType.OY)
+        ..hasRequiredFields = false;
 
   ClientInfo() : super();
   ClientInfo.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  ClientInfo.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  ClientInfo.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   ClientInfo clone() => new ClientInfo()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  ClientInfo copyWith(void Function(ClientInfo) updates) =>
+      super.copyWith((message) => updates(message as ClientInfo));
+  $pb.BuilderInfo get info_ => _i;
   static ClientInfo create() => new ClientInfo();
-  static PbList<ClientInfo> createRepeated() => new PbList<ClientInfo>();
-  static ClientInfo getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyClientInfo();
-    return _defaultInstance;
-  }
-
+  ClientInfo createEmptyInstance() => create();
+  static $pb.PbList<ClientInfo> createRepeated() =>
+      new $pb.PbList<ClientInfo>();
+  static ClientInfo getDefault() => _defaultInstance ??= create()..freeze();
   static ClientInfo _defaultInstance;
   static void $checkItem(ClientInfo v) {
-    if (v is! ClientInfo) checkItemFailed(v, 'ClientInfo');
+    if (v is! ClientInfo) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get user => $_getS(0, '');
@@ -279,37 +281,36 @@ class ClientInfo extends GeneratedMessage {
   void clearChanInfo() => clearField(4);
 }
 
-class _ReadonlyClientInfo extends ClientInfo with ReadonlyMessageMixin {}
-
-class Publication extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Publication')
-    ..a<int>(1, 'seq', PbFieldType.OU3)
-    ..a<int>(2, 'gen', PbFieldType.OU3)
+class Publication extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Publication',
+      package: const $pb.PackageName('proto'))
+    ..a<int>(1, 'seq', $pb.PbFieldType.OU3)
+    ..a<int>(2, 'gen', $pb.PbFieldType.OU3)
     ..aOS(3, 'uid')
-    ..a<List<int>>(4, 'data', PbFieldType.OY)
+    ..a<List<int>>(4, 'data', $pb.PbFieldType.OY)
     ..a<ClientInfo>(
-        5, 'info', PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
+        5, 'info', $pb.PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
     ..hasRequiredFields = false;
 
   Publication() : super();
   Publication.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   Publication.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Publication clone() => new Publication()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Publication copyWith(void Function(Publication) updates) =>
+      super.copyWith((message) => updates(message as Publication));
+  $pb.BuilderInfo get info_ => _i;
   static Publication create() => new Publication();
-  static PbList<Publication> createRepeated() => new PbList<Publication>();
-  static Publication getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyPublication();
-    return _defaultInstance;
-  }
-
+  Publication createEmptyInstance() => create();
+  static $pb.PbList<Publication> createRepeated() =>
+      new $pb.PbList<Publication>();
+  static Publication getDefault() => _defaultInstance ??= create()..freeze();
   static Publication _defaultInstance;
   static void $checkItem(Publication v) {
-    if (v is! Publication) checkItemFailed(v, 'Publication');
+    if (v is! Publication) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   int get seq => $_get(0, 0);
@@ -353,31 +354,31 @@ class Publication extends GeneratedMessage {
   void clearInfo() => clearField(5);
 }
 
-class _ReadonlyPublication extends Publication with ReadonlyMessageMixin {}
-
-class Join extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Join')
+class Join extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Join',
+      package: const $pb.PackageName('proto'))
     ..a<ClientInfo>(
-        1, 'info', PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
+        1, 'info', $pb.PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
     ..hasRequiredFields = false;
 
   Join() : super();
-  Join.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Join.fromBuffer(List<int> i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Join.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Join.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Join clone() => new Join()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Join copyWith(void Function(Join) updates) =>
+      super.copyWith((message) => updates(message as Join));
+  $pb.BuilderInfo get info_ => _i;
   static Join create() => new Join();
-  static PbList<Join> createRepeated() => new PbList<Join>();
-  static Join getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyJoin();
-    return _defaultInstance;
-  }
-
+  Join createEmptyInstance() => create();
+  static $pb.PbList<Join> createRepeated() => new $pb.PbList<Join>();
+  static Join getDefault() => _defaultInstance ??= create()..freeze();
   static Join _defaultInstance;
   static void $checkItem(Join v) {
-    if (v is! Join) checkItemFailed(v, 'Join');
+    if (v is! Join) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   ClientInfo get info => $_getN(0);
@@ -389,31 +390,31 @@ class Join extends GeneratedMessage {
   void clearInfo() => clearField(1);
 }
 
-class _ReadonlyJoin extends Join with ReadonlyMessageMixin {}
-
-class Leave extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Leave')
+class Leave extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Leave',
+      package: const $pb.PackageName('proto'))
     ..a<ClientInfo>(
-        1, 'info', PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
+        1, 'info', $pb.PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
     ..hasRequiredFields = false;
 
   Leave() : super();
-  Leave.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Leave.fromBuffer(List<int> i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Leave.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Leave.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Leave clone() => new Leave()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Leave copyWith(void Function(Leave) updates) =>
+      super.copyWith((message) => updates(message as Leave));
+  $pb.BuilderInfo get info_ => _i;
   static Leave create() => new Leave();
-  static PbList<Leave> createRepeated() => new PbList<Leave>();
-  static Leave getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyLeave();
-    return _defaultInstance;
-  }
-
+  Leave createEmptyInstance() => create();
+  static $pb.PbList<Leave> createRepeated() => new $pb.PbList<Leave>();
+  static Leave getDefault() => _defaultInstance ??= create()..freeze();
   static Leave _defaultInstance;
   static void $checkItem(Leave v) {
-    if (v is! Leave) checkItemFailed(v, 'Leave');
+    if (v is! Leave) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   ClientInfo get info => $_getN(0);
@@ -425,30 +426,30 @@ class Leave extends GeneratedMessage {
   void clearInfo() => clearField(1);
 }
 
-class _ReadonlyLeave extends Leave with ReadonlyMessageMixin {}
-
-class Unsub extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Unsub')
-    ..aOB(1, 'resubscribe')
-    ..hasRequiredFields = false;
+class Unsub extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('Unsub', package: const $pb.PackageName('proto'))
+        ..aOB(1, 'resubscribe')
+        ..hasRequiredFields = false;
 
   Unsub() : super();
-  Unsub.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Unsub.fromBuffer(List<int> i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Unsub.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Unsub.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Unsub clone() => new Unsub()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Unsub copyWith(void Function(Unsub) updates) =>
+      super.copyWith((message) => updates(message as Unsub));
+  $pb.BuilderInfo get info_ => _i;
   static Unsub create() => new Unsub();
-  static PbList<Unsub> createRepeated() => new PbList<Unsub>();
-  static Unsub getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyUnsub();
-    return _defaultInstance;
-  }
-
+  Unsub createEmptyInstance() => create();
+  static $pb.PbList<Unsub> createRepeated() => new $pb.PbList<Unsub>();
+  static Unsub getDefault() => _defaultInstance ??= create()..freeze();
   static Unsub _defaultInstance;
   static void $checkItem(Unsub v) {
-    if (v is! Unsub) checkItemFailed(v, 'Unsub');
+    if (v is! Unsub) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   bool get resubscribe => $_get(0, false);
@@ -460,31 +461,30 @@ class Unsub extends GeneratedMessage {
   void clearResubscribe() => clearField(1);
 }
 
-class _ReadonlyUnsub extends Unsub with ReadonlyMessageMixin {}
-
-class Message extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('Message')
-    ..a<List<int>>(1, 'data', PbFieldType.OY)
-    ..hasRequiredFields = false;
+class Message extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('Message', package: const $pb.PackageName('proto'))
+        ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
+        ..hasRequiredFields = false;
 
   Message() : super();
   Message.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  Message.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  Message.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   Message clone() => new Message()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  Message copyWith(void Function(Message) updates) =>
+      super.copyWith((message) => updates(message as Message));
+  $pb.BuilderInfo get info_ => _i;
   static Message create() => new Message();
-  static PbList<Message> createRepeated() => new PbList<Message>();
-  static Message getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyMessage();
-    return _defaultInstance;
-  }
-
+  Message createEmptyInstance() => create();
+  static $pb.PbList<Message> createRepeated() => new $pb.PbList<Message>();
+  static Message getDefault() => _defaultInstance ??= create()..freeze();
   static Message _defaultInstance;
   static void $checkItem(Message v) {
-    if (v is! Message) checkItemFailed(v, 'Message');
+    if (v is! Message) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   List<int> get data => $_getN(0);
@@ -496,35 +496,32 @@ class Message extends GeneratedMessage {
   void clearData() => clearField(1);
 }
 
-class _ReadonlyMessage extends Message with ReadonlyMessageMixin {}
-
-class ConnectRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('ConnectRequest')
+class ConnectRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('ConnectRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'token')
-    ..a<List<int>>(2, 'data', PbFieldType.OY)
+    ..a<List<int>>(2, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   ConnectRequest() : super();
   ConnectRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   ConnectRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   ConnectRequest clone() => new ConnectRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  ConnectRequest copyWith(void Function(ConnectRequest) updates) =>
+      super.copyWith((message) => updates(message as ConnectRequest));
+  $pb.BuilderInfo get info_ => _i;
   static ConnectRequest create() => new ConnectRequest();
-  static PbList<ConnectRequest> createRepeated() =>
-      new PbList<ConnectRequest>();
-  static ConnectRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyConnectRequest();
-    return _defaultInstance;
-  }
-
+  ConnectRequest createEmptyInstance() => create();
+  static $pb.PbList<ConnectRequest> createRepeated() =>
+      new $pb.PbList<ConnectRequest>();
+  static ConnectRequest getDefault() => _defaultInstance ??= create()..freeze();
   static ConnectRequest _defaultInstance;
   static void $checkItem(ConnectRequest v) {
-    if (v is! ConnectRequest) checkItemFailed(v, 'ConnectRequest');
+    if (v is! ConnectRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get token => $_getS(0, '');
@@ -544,38 +541,35 @@ class ConnectRequest extends GeneratedMessage {
   void clearData() => clearField(2);
 }
 
-class _ReadonlyConnectRequest extends ConnectRequest with ReadonlyMessageMixin {
-}
-
-class ConnectResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('ConnectResult')
+class ConnectResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('ConnectResult',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'client')
     ..aOS(2, 'version')
     ..aOB(3, 'expires')
-    ..a<int>(4, 'ttl', PbFieldType.OU3)
-    ..a<List<int>>(5, 'data', PbFieldType.OY)
+    ..a<int>(4, 'ttl', $pb.PbFieldType.OU3)
+    ..a<List<int>>(5, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   ConnectResult() : super();
   ConnectResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   ConnectResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   ConnectResult clone() => new ConnectResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  ConnectResult copyWith(void Function(ConnectResult) updates) =>
+      super.copyWith((message) => updates(message as ConnectResult));
+  $pb.BuilderInfo get info_ => _i;
   static ConnectResult create() => new ConnectResult();
-  static PbList<ConnectResult> createRepeated() => new PbList<ConnectResult>();
-  static ConnectResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyConnectResult();
-    return _defaultInstance;
-  }
-
+  ConnectResult createEmptyInstance() => create();
+  static $pb.PbList<ConnectResult> createRepeated() =>
+      new $pb.PbList<ConnectResult>();
+  static ConnectResult getDefault() => _defaultInstance ??= create()..freeze();
   static ConnectResult _defaultInstance;
   static void $checkItem(ConnectResult v) {
-    if (v is! ConnectResult) checkItemFailed(v, 'ConnectResult');
+    if (v is! ConnectResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get client => $_getS(0, '');
@@ -619,34 +613,31 @@ class ConnectResult extends GeneratedMessage {
   void clearData() => clearField(5);
 }
 
-class _ReadonlyConnectResult extends ConnectResult with ReadonlyMessageMixin {}
-
-class RefreshRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('RefreshRequest')
+class RefreshRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('RefreshRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'token')
     ..hasRequiredFields = false;
 
   RefreshRequest() : super();
   RefreshRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   RefreshRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   RefreshRequest clone() => new RefreshRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  RefreshRequest copyWith(void Function(RefreshRequest) updates) =>
+      super.copyWith((message) => updates(message as RefreshRequest));
+  $pb.BuilderInfo get info_ => _i;
   static RefreshRequest create() => new RefreshRequest();
-  static PbList<RefreshRequest> createRepeated() =>
-      new PbList<RefreshRequest>();
-  static RefreshRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyRefreshRequest();
-    return _defaultInstance;
-  }
-
+  RefreshRequest createEmptyInstance() => create();
+  static $pb.PbList<RefreshRequest> createRepeated() =>
+      new $pb.PbList<RefreshRequest>();
+  static RefreshRequest getDefault() => _defaultInstance ??= create()..freeze();
   static RefreshRequest _defaultInstance;
   static void $checkItem(RefreshRequest v) {
-    if (v is! RefreshRequest) checkItemFailed(v, 'RefreshRequest');
+    if (v is! RefreshRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get token => $_getS(0, '');
@@ -658,37 +649,34 @@ class RefreshRequest extends GeneratedMessage {
   void clearToken() => clearField(1);
 }
 
-class _ReadonlyRefreshRequest extends RefreshRequest with ReadonlyMessageMixin {
-}
-
-class RefreshResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('RefreshResult')
+class RefreshResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('RefreshResult',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'client')
     ..aOS(2, 'version')
     ..aOB(3, 'expires')
-    ..a<int>(4, 'ttl', PbFieldType.OU3)
+    ..a<int>(4, 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   RefreshResult() : super();
   RefreshResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   RefreshResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   RefreshResult clone() => new RefreshResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  RefreshResult copyWith(void Function(RefreshResult) updates) =>
+      super.copyWith((message) => updates(message as RefreshResult));
+  $pb.BuilderInfo get info_ => _i;
   static RefreshResult create() => new RefreshResult();
-  static PbList<RefreshResult> createRepeated() => new PbList<RefreshResult>();
-  static RefreshResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyRefreshResult();
-    return _defaultInstance;
-  }
-
+  RefreshResult createEmptyInstance() => create();
+  static $pb.PbList<RefreshResult> createRepeated() =>
+      new $pb.PbList<RefreshResult>();
+  static RefreshResult getDefault() => _defaultInstance ??= create()..freeze();
   static RefreshResult _defaultInstance;
   static void $checkItem(RefreshResult v) {
-    if (v is! RefreshResult) checkItemFailed(v, 'RefreshResult');
+    if (v is! RefreshResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get client => $_getS(0, '');
@@ -724,39 +712,37 @@ class RefreshResult extends GeneratedMessage {
   void clearTtl() => clearField(4);
 }
 
-class _ReadonlyRefreshResult extends RefreshResult with ReadonlyMessageMixin {}
-
-class SubscribeRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('SubscribeRequest')
+class SubscribeRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubscribeRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
     ..aOS(2, 'token')
     ..aOB(3, 'recover')
-    ..a<int>(4, 'seq', PbFieldType.OU3)
-    ..a<int>(5, 'gen', PbFieldType.OU3)
+    ..a<int>(4, 'seq', $pb.PbFieldType.OU3)
+    ..a<int>(5, 'gen', $pb.PbFieldType.OU3)
     ..aOS(6, 'epoch')
     ..hasRequiredFields = false;
 
   SubscribeRequest() : super();
   SubscribeRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   SubscribeRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   SubscribeRequest clone() => new SubscribeRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  SubscribeRequest copyWith(void Function(SubscribeRequest) updates) =>
+      super.copyWith((message) => updates(message as SubscribeRequest));
+  $pb.BuilderInfo get info_ => _i;
   static SubscribeRequest create() => new SubscribeRequest();
-  static PbList<SubscribeRequest> createRepeated() =>
-      new PbList<SubscribeRequest>();
-  static SubscribeRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlySubscribeRequest();
-    return _defaultInstance;
-  }
-
+  SubscribeRequest createEmptyInstance() => create();
+  static $pb.PbList<SubscribeRequest> createRepeated() =>
+      new $pb.PbList<SubscribeRequest>();
+  static SubscribeRequest getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static SubscribeRequest _defaultInstance;
   static void $checkItem(SubscribeRequest v) {
-    if (v is! SubscribeRequest) checkItemFailed(v, 'SubscribeRequest');
+    if (v is! SubscribeRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -808,43 +794,40 @@ class SubscribeRequest extends GeneratedMessage {
   void clearEpoch() => clearField(6);
 }
 
-class _ReadonlySubscribeRequest extends SubscribeRequest
-    with ReadonlyMessageMixin {}
-
-class SubscribeResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('SubscribeResult')
+class SubscribeResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubscribeResult',
+      package: const $pb.PackageName('proto'))
     ..aOB(1, 'expires')
-    ..a<int>(2, 'ttl', PbFieldType.OU3)
+    ..a<int>(2, 'ttl', $pb.PbFieldType.OU3)
     ..aOB(3, 'recoverable')
-    ..a<int>(4, 'seq', PbFieldType.OU3)
-    ..a<int>(5, 'gen', PbFieldType.OU3)
+    ..a<int>(4, 'seq', $pb.PbFieldType.OU3)
+    ..a<int>(5, 'gen', $pb.PbFieldType.OU3)
     ..aOS(6, 'epoch')
-    ..pp<Publication>(7, 'publications', PbFieldType.PM, Publication.$checkItem,
-        Publication.create)
+    ..pp<Publication>(7, 'publications', $pb.PbFieldType.PM,
+        Publication.$checkItem, Publication.create)
     ..aOB(8, 'recovered')
     ..hasRequiredFields = false;
 
   SubscribeResult() : super();
   SubscribeResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   SubscribeResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   SubscribeResult clone() => new SubscribeResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  SubscribeResult copyWith(void Function(SubscribeResult) updates) =>
+      super.copyWith((message) => updates(message as SubscribeResult));
+  $pb.BuilderInfo get info_ => _i;
   static SubscribeResult create() => new SubscribeResult();
-  static PbList<SubscribeResult> createRepeated() =>
-      new PbList<SubscribeResult>();
-  static SubscribeResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlySubscribeResult();
-    return _defaultInstance;
-  }
-
+  SubscribeResult createEmptyInstance() => create();
+  static $pb.PbList<SubscribeResult> createRepeated() =>
+      new $pb.PbList<SubscribeResult>();
+  static SubscribeResult getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static SubscribeResult _defaultInstance;
   static void $checkItem(SubscribeResult v) {
-    if (v is! SubscribeResult) checkItemFailed(v, 'SubscribeResult');
+    if (v is! SubscribeResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   bool get expires => $_get(0, false);
@@ -906,36 +889,34 @@ class SubscribeResult extends GeneratedMessage {
   void clearRecovered() => clearField(8);
 }
 
-class _ReadonlySubscribeResult extends SubscribeResult
-    with ReadonlyMessageMixin {}
-
-class SubRefreshRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('SubRefreshRequest')
+class SubRefreshRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubRefreshRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
     ..aOS(2, 'token')
     ..hasRequiredFields = false;
 
   SubRefreshRequest() : super();
   SubRefreshRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   SubRefreshRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   SubRefreshRequest clone() => new SubRefreshRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) =>
+      super.copyWith((message) => updates(message as SubRefreshRequest));
+  $pb.BuilderInfo get info_ => _i;
   static SubRefreshRequest create() => new SubRefreshRequest();
-  static PbList<SubRefreshRequest> createRepeated() =>
-      new PbList<SubRefreshRequest>();
-  static SubRefreshRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlySubRefreshRequest();
-    return _defaultInstance;
-  }
-
+  SubRefreshRequest createEmptyInstance() => create();
+  static $pb.PbList<SubRefreshRequest> createRepeated() =>
+      new $pb.PbList<SubRefreshRequest>();
+  static SubRefreshRequest getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static SubRefreshRequest _defaultInstance;
   static void $checkItem(SubRefreshRequest v) {
-    if (v is! SubRefreshRequest) checkItemFailed(v, 'SubRefreshRequest');
+    if (v is! SubRefreshRequest)
+      $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -955,36 +936,33 @@ class SubRefreshRequest extends GeneratedMessage {
   void clearToken() => clearField(2);
 }
 
-class _ReadonlySubRefreshRequest extends SubRefreshRequest
-    with ReadonlyMessageMixin {}
-
-class SubRefreshResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('SubRefreshResult')
+class SubRefreshResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubRefreshResult',
+      package: const $pb.PackageName('proto'))
     ..aOB(1, 'expires')
-    ..a<int>(2, 'ttl', PbFieldType.OU3)
+    ..a<int>(2, 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   SubRefreshResult() : super();
   SubRefreshResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   SubRefreshResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   SubRefreshResult clone() => new SubRefreshResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  SubRefreshResult copyWith(void Function(SubRefreshResult) updates) =>
+      super.copyWith((message) => updates(message as SubRefreshResult));
+  $pb.BuilderInfo get info_ => _i;
   static SubRefreshResult create() => new SubRefreshResult();
-  static PbList<SubRefreshResult> createRepeated() =>
-      new PbList<SubRefreshResult>();
-  static SubRefreshResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlySubRefreshResult();
-    return _defaultInstance;
-  }
-
+  SubRefreshResult createEmptyInstance() => create();
+  static $pb.PbList<SubRefreshResult> createRepeated() =>
+      new $pb.PbList<SubRefreshResult>();
+  static SubRefreshResult getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static SubRefreshResult _defaultInstance;
   static void $checkItem(SubRefreshResult v) {
-    if (v is! SubRefreshResult) checkItemFailed(v, 'SubRefreshResult');
+    if (v is! SubRefreshResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   bool get expires => $_get(0, false);
@@ -1004,36 +982,34 @@ class SubRefreshResult extends GeneratedMessage {
   void clearTtl() => clearField(2);
 }
 
-class _ReadonlySubRefreshResult extends SubRefreshResult
-    with ReadonlyMessageMixin {}
-
-class UnsubscribeRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('UnsubscribeRequest')
+class UnsubscribeRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('UnsubscribeRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
     ..hasRequiredFields = false;
 
   UnsubscribeRequest() : super();
   UnsubscribeRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   UnsubscribeRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   UnsubscribeRequest clone() =>
       new UnsubscribeRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) =>
+      super.copyWith((message) => updates(message as UnsubscribeRequest));
+  $pb.BuilderInfo get info_ => _i;
   static UnsubscribeRequest create() => new UnsubscribeRequest();
-  static PbList<UnsubscribeRequest> createRepeated() =>
-      new PbList<UnsubscribeRequest>();
-  static UnsubscribeRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyUnsubscribeRequest();
-    return _defaultInstance;
-  }
-
+  UnsubscribeRequest createEmptyInstance() => create();
+  static $pb.PbList<UnsubscribeRequest> createRepeated() =>
+      new $pb.PbList<UnsubscribeRequest>();
+  static UnsubscribeRequest getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static UnsubscribeRequest _defaultInstance;
   static void $checkItem(UnsubscribeRequest v) {
-    if (v is! UnsubscribeRequest) checkItemFailed(v, 'UnsubscribeRequest');
+    if (v is! UnsubscribeRequest)
+      $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -1045,67 +1021,61 @@ class UnsubscribeRequest extends GeneratedMessage {
   void clearChannel() => clearField(1);
 }
 
-class _ReadonlyUnsubscribeRequest extends UnsubscribeRequest
-    with ReadonlyMessageMixin {}
-
-class UnsubscribeResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('UnsubscribeResult')
+class UnsubscribeResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('UnsubscribeResult',
+      package: const $pb.PackageName('proto'))
     ..hasRequiredFields = false;
 
   UnsubscribeResult() : super();
   UnsubscribeResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   UnsubscribeResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   UnsubscribeResult clone() => new UnsubscribeResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) =>
+      super.copyWith((message) => updates(message as UnsubscribeResult));
+  $pb.BuilderInfo get info_ => _i;
   static UnsubscribeResult create() => new UnsubscribeResult();
-  static PbList<UnsubscribeResult> createRepeated() =>
-      new PbList<UnsubscribeResult>();
-  static UnsubscribeResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyUnsubscribeResult();
-    return _defaultInstance;
-  }
-
+  UnsubscribeResult createEmptyInstance() => create();
+  static $pb.PbList<UnsubscribeResult> createRepeated() =>
+      new $pb.PbList<UnsubscribeResult>();
+  static UnsubscribeResult getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static UnsubscribeResult _defaultInstance;
   static void $checkItem(UnsubscribeResult v) {
-    if (v is! UnsubscribeResult) checkItemFailed(v, 'UnsubscribeResult');
+    if (v is! UnsubscribeResult)
+      $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 }
 
-class _ReadonlyUnsubscribeResult extends UnsubscribeResult
-    with ReadonlyMessageMixin {}
-
-class PublishRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PublishRequest')
+class PublishRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PublishRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
-    ..a<List<int>>(2, 'data', PbFieldType.OY)
+    ..a<List<int>>(2, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   PublishRequest() : super();
   PublishRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PublishRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PublishRequest clone() => new PublishRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PublishRequest copyWith(void Function(PublishRequest) updates) =>
+      super.copyWith((message) => updates(message as PublishRequest));
+  $pb.BuilderInfo get info_ => _i;
   static PublishRequest create() => new PublishRequest();
-  static PbList<PublishRequest> createRepeated() =>
-      new PbList<PublishRequest>();
-  static PublishRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPublishRequest();
-    return _defaultInstance;
-  }
-
+  PublishRequest createEmptyInstance() => create();
+  static $pb.PbList<PublishRequest> createRepeated() =>
+      new $pb.PbList<PublishRequest>();
+  static PublishRequest getDefault() => _defaultInstance ??= create()..freeze();
   static PublishRequest _defaultInstance;
   static void $checkItem(PublishRequest v) {
-    if (v is! PublishRequest) checkItemFailed(v, 'PublishRequest');
+    if (v is! PublishRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -1125,64 +1095,59 @@ class PublishRequest extends GeneratedMessage {
   void clearData() => clearField(2);
 }
 
-class _ReadonlyPublishRequest extends PublishRequest with ReadonlyMessageMixin {
-}
-
-class PublishResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PublishResult')
+class PublishResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PublishResult',
+      package: const $pb.PackageName('proto'))
     ..hasRequiredFields = false;
 
   PublishResult() : super();
   PublishResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PublishResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PublishResult clone() => new PublishResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PublishResult copyWith(void Function(PublishResult) updates) =>
+      super.copyWith((message) => updates(message as PublishResult));
+  $pb.BuilderInfo get info_ => _i;
   static PublishResult create() => new PublishResult();
-  static PbList<PublishResult> createRepeated() => new PbList<PublishResult>();
-  static PublishResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPublishResult();
-    return _defaultInstance;
-  }
-
+  PublishResult createEmptyInstance() => create();
+  static $pb.PbList<PublishResult> createRepeated() =>
+      new $pb.PbList<PublishResult>();
+  static PublishResult getDefault() => _defaultInstance ??= create()..freeze();
   static PublishResult _defaultInstance;
   static void $checkItem(PublishResult v) {
-    if (v is! PublishResult) checkItemFailed(v, 'PublishResult');
+    if (v is! PublishResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 }
 
-class _ReadonlyPublishResult extends PublishResult with ReadonlyMessageMixin {}
-
-class PresenceRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PresenceRequest')
+class PresenceRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
     ..hasRequiredFields = false;
 
   PresenceRequest() : super();
   PresenceRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PresenceRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PresenceRequest clone() => new PresenceRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PresenceRequest copyWith(void Function(PresenceRequest) updates) =>
+      super.copyWith((message) => updates(message as PresenceRequest));
+  $pb.BuilderInfo get info_ => _i;
   static PresenceRequest create() => new PresenceRequest();
-  static PbList<PresenceRequest> createRepeated() =>
-      new PbList<PresenceRequest>();
-  static PresenceRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPresenceRequest();
-    return _defaultInstance;
-  }
-
+  PresenceRequest createEmptyInstance() => create();
+  static $pb.PbList<PresenceRequest> createRepeated() =>
+      new $pb.PbList<PresenceRequest>();
+  static PresenceRequest getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static PresenceRequest _defaultInstance;
   static void $checkItem(PresenceRequest v) {
-    if (v is! PresenceRequest) checkItemFailed(v, 'PresenceRequest');
+    if (v is! PresenceRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -1194,128 +1159,73 @@ class PresenceRequest extends GeneratedMessage {
   void clearChannel() => clearField(1);
 }
 
-class _ReadonlyPresenceRequest extends PresenceRequest
-    with ReadonlyMessageMixin {}
-
-class PresenceResult_PresenceEntry extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PresenceResult_PresenceEntry')
-    ..aOS(1, 'key')
-    ..a<ClientInfo>(
-        2, 'value', PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
-    ..hasRequiredFields = false;
-
-  PresenceResult_PresenceEntry() : super();
-  PresenceResult_PresenceEntry.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PresenceResult_PresenceEntry.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PresenceResult_PresenceEntry clone() =>
-      new PresenceResult_PresenceEntry()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
-  static PresenceResult_PresenceEntry create() =>
-      new PresenceResult_PresenceEntry();
-  static PbList<PresenceResult_PresenceEntry> createRepeated() =>
-      new PbList<PresenceResult_PresenceEntry>();
-  static PresenceResult_PresenceEntry getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPresenceResult_PresenceEntry();
-    return _defaultInstance;
-  }
-
-  static PresenceResult_PresenceEntry _defaultInstance;
-  static void $checkItem(PresenceResult_PresenceEntry v) {
-    if (v is! PresenceResult_PresenceEntry)
-      checkItemFailed(v, 'PresenceResult_PresenceEntry');
-  }
-
-  String get key => $_getS(0, '');
-  set key(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasKey() => $_has(0);
-  void clearKey() => clearField(1);
-
-  ClientInfo get value => $_getN(1);
-  set value(ClientInfo v) {
-    setField(2, v);
-  }
-
-  bool hasValue() => $_has(1);
-  void clearValue() => clearField(2);
-}
-
-class _ReadonlyPresenceResult_PresenceEntry extends PresenceResult_PresenceEntry
-    with ReadonlyMessageMixin {}
-
-class PresenceResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PresenceResult')
-    ..pp<PresenceResult_PresenceEntry>(
+class PresenceResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceResult',
+      package: const $pb.PackageName('proto'))
+    ..m<String, ClientInfo>(
         1,
         'presence',
-        PbFieldType.PM,
-        PresenceResult_PresenceEntry.$checkItem,
-        PresenceResult_PresenceEntry.create)
+        'PresenceResult.PresenceEntry',
+        $pb.PbFieldType.OS,
+        $pb.PbFieldType.OM,
+        ClientInfo.create,
+        null,
+        null,
+        const $pb.PackageName('proto'))
     ..hasRequiredFields = false;
 
   PresenceResult() : super();
   PresenceResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PresenceResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PresenceResult clone() => new PresenceResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PresenceResult copyWith(void Function(PresenceResult) updates) =>
+      super.copyWith((message) => updates(message as PresenceResult));
+  $pb.BuilderInfo get info_ => _i;
   static PresenceResult create() => new PresenceResult();
-  static PbList<PresenceResult> createRepeated() =>
-      new PbList<PresenceResult>();
-  static PresenceResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPresenceResult();
-    return _defaultInstance;
-  }
-
+  PresenceResult createEmptyInstance() => create();
+  static $pb.PbList<PresenceResult> createRepeated() =>
+      new $pb.PbList<PresenceResult>();
+  static PresenceResult getDefault() => _defaultInstance ??= create()..freeze();
   static PresenceResult _defaultInstance;
   static void $checkItem(PresenceResult v) {
-    if (v is! PresenceResult) checkItemFailed(v, 'PresenceResult');
+    if (v is! PresenceResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
-  List<PresenceResult_PresenceEntry> get presence => $_getList(0);
+  Map<String, ClientInfo> get presence => $_getMap(0);
 }
 
-class _ReadonlyPresenceResult extends PresenceResult with ReadonlyMessageMixin {
-}
-
-class PresenceStatsRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PresenceStatsRequest')
+class PresenceStatsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceStatsRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
     ..hasRequiredFields = false;
 
   PresenceStatsRequest() : super();
   PresenceStatsRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PresenceStatsRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PresenceStatsRequest clone() =>
       new PresenceStatsRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) =>
+      super.copyWith((message) => updates(message as PresenceStatsRequest));
+  $pb.BuilderInfo get info_ => _i;
   static PresenceStatsRequest create() => new PresenceStatsRequest();
-  static PbList<PresenceStatsRequest> createRepeated() =>
-      new PbList<PresenceStatsRequest>();
-  static PresenceStatsRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPresenceStatsRequest();
-    return _defaultInstance;
-  }
-
+  PresenceStatsRequest createEmptyInstance() => create();
+  static $pb.PbList<PresenceStatsRequest> createRepeated() =>
+      new $pb.PbList<PresenceStatsRequest>();
+  static PresenceStatsRequest getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static PresenceStatsRequest _defaultInstance;
   static void $checkItem(PresenceStatsRequest v) {
-    if (v is! PresenceStatsRequest) checkItemFailed(v, 'PresenceStatsRequest');
+    if (v is! PresenceStatsRequest)
+      $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -1327,37 +1237,35 @@ class PresenceStatsRequest extends GeneratedMessage {
   void clearChannel() => clearField(1);
 }
 
-class _ReadonlyPresenceStatsRequest extends PresenceStatsRequest
-    with ReadonlyMessageMixin {}
-
-class PresenceStatsResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PresenceStatsResult')
-    ..a<int>(1, 'numClients', PbFieldType.OU3)
-    ..a<int>(2, 'numUsers', PbFieldType.OU3)
+class PresenceStatsResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceStatsResult',
+      package: const $pb.PackageName('proto'))
+    ..a<int>(1, 'numClients', $pb.PbFieldType.OU3)
+    ..a<int>(2, 'numUsers', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   PresenceStatsResult() : super();
   PresenceStatsResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PresenceStatsResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PresenceStatsResult clone() =>
       new PresenceStatsResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) =>
+      super.copyWith((message) => updates(message as PresenceStatsResult));
+  $pb.BuilderInfo get info_ => _i;
   static PresenceStatsResult create() => new PresenceStatsResult();
-  static PbList<PresenceStatsResult> createRepeated() =>
-      new PbList<PresenceStatsResult>();
-  static PresenceStatsResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyPresenceStatsResult();
-    return _defaultInstance;
-  }
-
+  PresenceStatsResult createEmptyInstance() => create();
+  static $pb.PbList<PresenceStatsResult> createRepeated() =>
+      new $pb.PbList<PresenceStatsResult>();
+  static PresenceStatsResult getDefault() =>
+      _defaultInstance ??= create()..freeze();
   static PresenceStatsResult _defaultInstance;
   static void $checkItem(PresenceStatsResult v) {
-    if (v is! PresenceStatsResult) checkItemFailed(v, 'PresenceStatsResult');
+    if (v is! PresenceStatsResult)
+      $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   int get numClients => $_get(0, 0);
@@ -1377,35 +1285,31 @@ class PresenceStatsResult extends GeneratedMessage {
   void clearNumUsers() => clearField(2);
 }
 
-class _ReadonlyPresenceStatsResult extends PresenceStatsResult
-    with ReadonlyMessageMixin {}
-
-class HistoryRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('HistoryRequest')
+class HistoryRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('HistoryRequest',
+      package: const $pb.PackageName('proto'))
     ..aOS(1, 'channel')
     ..hasRequiredFields = false;
 
   HistoryRequest() : super();
   HistoryRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   HistoryRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   HistoryRequest clone() => new HistoryRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  HistoryRequest copyWith(void Function(HistoryRequest) updates) =>
+      super.copyWith((message) => updates(message as HistoryRequest));
+  $pb.BuilderInfo get info_ => _i;
   static HistoryRequest create() => new HistoryRequest();
-  static PbList<HistoryRequest> createRepeated() =>
-      new PbList<HistoryRequest>();
-  static HistoryRequest getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyHistoryRequest();
-    return _defaultInstance;
-  }
-
+  HistoryRequest createEmptyInstance() => create();
+  static $pb.PbList<HistoryRequest> createRepeated() =>
+      new $pb.PbList<HistoryRequest>();
+  static HistoryRequest getDefault() => _defaultInstance ??= create()..freeze();
   static HistoryRequest _defaultInstance;
   static void $checkItem(HistoryRequest v) {
-    if (v is! HistoryRequest) checkItemFailed(v, 'HistoryRequest');
+    if (v is! HistoryRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   String get channel => $_getS(0, '');
@@ -1417,120 +1321,116 @@ class HistoryRequest extends GeneratedMessage {
   void clearChannel() => clearField(1);
 }
 
-class _ReadonlyHistoryRequest extends HistoryRequest with ReadonlyMessageMixin {
-}
-
-class HistoryResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('HistoryResult')
-    ..pp<Publication>(1, 'publications', PbFieldType.PM, Publication.$checkItem,
-        Publication.create)
+class HistoryResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('HistoryResult',
+      package: const $pb.PackageName('proto'))
+    ..pp<Publication>(1, 'publications', $pb.PbFieldType.PM,
+        Publication.$checkItem, Publication.create)
     ..hasRequiredFields = false;
 
   HistoryResult() : super();
   HistoryResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   HistoryResult.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   HistoryResult clone() => new HistoryResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  HistoryResult copyWith(void Function(HistoryResult) updates) =>
+      super.copyWith((message) => updates(message as HistoryResult));
+  $pb.BuilderInfo get info_ => _i;
   static HistoryResult create() => new HistoryResult();
-  static PbList<HistoryResult> createRepeated() => new PbList<HistoryResult>();
-  static HistoryResult getDefault() {
-    if (_defaultInstance == null)
-      _defaultInstance = new _ReadonlyHistoryResult();
-    return _defaultInstance;
-  }
-
+  HistoryResult createEmptyInstance() => create();
+  static $pb.PbList<HistoryResult> createRepeated() =>
+      new $pb.PbList<HistoryResult>();
+  static HistoryResult getDefault() => _defaultInstance ??= create()..freeze();
   static HistoryResult _defaultInstance;
   static void $checkItem(HistoryResult v) {
-    if (v is! HistoryResult) checkItemFailed(v, 'HistoryResult');
+    if (v is! HistoryResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   List<Publication> get publications => $_getList(0);
 }
 
-class _ReadonlyHistoryResult extends HistoryResult with ReadonlyMessageMixin {}
-
-class PingRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PingRequest')
+class PingRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PingRequest',
+      package: const $pb.PackageName('proto'))
     ..hasRequiredFields = false;
 
   PingRequest() : super();
   PingRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   PingRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PingRequest clone() => new PingRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PingRequest copyWith(void Function(PingRequest) updates) =>
+      super.copyWith((message) => updates(message as PingRequest));
+  $pb.BuilderInfo get info_ => _i;
   static PingRequest create() => new PingRequest();
-  static PbList<PingRequest> createRepeated() => new PbList<PingRequest>();
-  static PingRequest getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyPingRequest();
-    return _defaultInstance;
-  }
-
+  PingRequest createEmptyInstance() => create();
+  static $pb.PbList<PingRequest> createRepeated() =>
+      new $pb.PbList<PingRequest>();
+  static PingRequest getDefault() => _defaultInstance ??= create()..freeze();
   static PingRequest _defaultInstance;
   static void $checkItem(PingRequest v) {
-    if (v is! PingRequest) checkItemFailed(v, 'PingRequest');
+    if (v is! PingRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 }
 
-class _ReadonlyPingRequest extends PingRequest with ReadonlyMessageMixin {}
-
-class PingResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('PingResult')
-    ..hasRequiredFields = false;
+class PingResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('PingResult', package: const $pb.PackageName('proto'))
+        ..hasRequiredFields = false;
 
   PingResult() : super();
   PingResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  PingResult.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  PingResult.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   PingResult clone() => new PingResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  PingResult copyWith(void Function(PingResult) updates) =>
+      super.copyWith((message) => updates(message as PingResult));
+  $pb.BuilderInfo get info_ => _i;
   static PingResult create() => new PingResult();
-  static PbList<PingResult> createRepeated() => new PbList<PingResult>();
-  static PingResult getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyPingResult();
-    return _defaultInstance;
-  }
-
+  PingResult createEmptyInstance() => create();
+  static $pb.PbList<PingResult> createRepeated() =>
+      new $pb.PbList<PingResult>();
+  static PingResult getDefault() => _defaultInstance ??= create()..freeze();
   static PingResult _defaultInstance;
   static void $checkItem(PingResult v) {
-    if (v is! PingResult) checkItemFailed(v, 'PingResult');
+    if (v is! PingResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 }
 
-class _ReadonlyPingResult extends PingResult with ReadonlyMessageMixin {}
-
-class RPCRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('RPCRequest')
-    ..a<List<int>>(1, 'data', PbFieldType.OY)
-    ..hasRequiredFields = false;
+class RPCRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('RPCRequest', package: const $pb.PackageName('proto'))
+        ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
+        ..hasRequiredFields = false;
 
   RPCRequest() : super();
   RPCRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  RPCRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  RPCRequest.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   RPCRequest clone() => new RPCRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  RPCRequest copyWith(void Function(RPCRequest) updates) =>
+      super.copyWith((message) => updates(message as RPCRequest));
+  $pb.BuilderInfo get info_ => _i;
   static RPCRequest create() => new RPCRequest();
-  static PbList<RPCRequest> createRepeated() => new PbList<RPCRequest>();
-  static RPCRequest getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyRPCRequest();
-    return _defaultInstance;
-  }
-
+  RPCRequest createEmptyInstance() => create();
+  static $pb.PbList<RPCRequest> createRepeated() =>
+      new $pb.PbList<RPCRequest>();
+  static RPCRequest getDefault() => _defaultInstance ??= create()..freeze();
   static RPCRequest _defaultInstance;
   static void $checkItem(RPCRequest v) {
-    if (v is! RPCRequest) checkItemFailed(v, 'RPCRequest');
+    if (v is! RPCRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   List<int> get data => $_getN(0);
@@ -1542,31 +1442,30 @@ class RPCRequest extends GeneratedMessage {
   void clearData() => clearField(1);
 }
 
-class _ReadonlyRPCRequest extends RPCRequest with ReadonlyMessageMixin {}
-
-class RPCResult extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('RPCResult')
-    ..a<List<int>>(1, 'data', PbFieldType.OY)
-    ..hasRequiredFields = false;
+class RPCResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i =
+      new $pb.BuilderInfo('RPCResult', package: const $pb.PackageName('proto'))
+        ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
+        ..hasRequiredFields = false;
 
   RPCResult() : super();
   RPCResult.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
-  RPCResult.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+  RPCResult.fromJson(String i,
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   RPCResult clone() => new RPCResult()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  RPCResult copyWith(void Function(RPCResult) updates) =>
+      super.copyWith((message) => updates(message as RPCResult));
+  $pb.BuilderInfo get info_ => _i;
   static RPCResult create() => new RPCResult();
-  static PbList<RPCResult> createRepeated() => new PbList<RPCResult>();
-  static RPCResult getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlyRPCResult();
-    return _defaultInstance;
-  }
-
+  RPCResult createEmptyInstance() => create();
+  static $pb.PbList<RPCResult> createRepeated() => new $pb.PbList<RPCResult>();
+  static RPCResult getDefault() => _defaultInstance ??= create()..freeze();
   static RPCResult _defaultInstance;
   static void $checkItem(RPCResult v) {
-    if (v is! RPCResult) checkItemFailed(v, 'RPCResult');
+    if (v is! RPCResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   List<int> get data => $_getN(0);
@@ -1578,32 +1477,31 @@ class RPCResult extends GeneratedMessage {
   void clearData() => clearField(1);
 }
 
-class _ReadonlyRPCResult extends RPCResult with ReadonlyMessageMixin {}
-
-class SendRequest extends GeneratedMessage {
-  static final BuilderInfo _i = new BuilderInfo('SendRequest')
-    ..a<List<int>>(1, 'data', PbFieldType.OY)
+class SendRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SendRequest',
+      package: const $pb.PackageName('proto'))
+    ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   SendRequest() : super();
   SendRequest.fromBuffer(List<int> i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromBuffer(i, r);
   SendRequest.fromJson(String i,
-      [ExtensionRegistry r = ExtensionRegistry.EMPTY])
+      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
   SendRequest clone() => new SendRequest()..mergeFromMessage(this);
-  BuilderInfo get info_ => _i;
+  SendRequest copyWith(void Function(SendRequest) updates) =>
+      super.copyWith((message) => updates(message as SendRequest));
+  $pb.BuilderInfo get info_ => _i;
   static SendRequest create() => new SendRequest();
-  static PbList<SendRequest> createRepeated() => new PbList<SendRequest>();
-  static SendRequest getDefault() {
-    if (_defaultInstance == null) _defaultInstance = new _ReadonlySendRequest();
-    return _defaultInstance;
-  }
-
+  SendRequest createEmptyInstance() => create();
+  static $pb.PbList<SendRequest> createRepeated() =>
+      new $pb.PbList<SendRequest>();
+  static SendRequest getDefault() => _defaultInstance ??= create()..freeze();
   static SendRequest _defaultInstance;
   static void $checkItem(SendRequest v) {
-    if (v is! SendRequest) checkItemFailed(v, 'SendRequest');
+    if (v is! SendRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
   }
 
   List<int> get data => $_getN(0);
@@ -1614,5 +1512,3 @@ class SendRequest extends GeneratedMessage {
   bool hasData() => $_has(0);
   void clearData() => clearField(1);
 }
-
-class _ReadonlySendRequest extends SendRequest with ReadonlyMessageMixin {}

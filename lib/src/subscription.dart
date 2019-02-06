@@ -5,9 +5,9 @@ import 'proto/client.pb.dart' hide Error;
 import 'proto/client.pb.dart' as proto show Error;
 
 abstract class Subscription {
-  final String channel;
-
   Subscription(this.channel);
+
+  final String channel;
 
   Stream<PublishEvent> get publishStream;
 
@@ -29,12 +29,12 @@ abstract class Subscription {
 }
 
 class SubscriptionImpl implements Subscription {
+  SubscriptionImpl(this.channel, this._client, {this.token});
+
   @override
   final String channel;
   final ClientImpl _client;
   final String token;
-
-  SubscriptionImpl(this.channel, this._client, {this.token});
 
   final _publishController =
       StreamController<PublishEvent>.broadcast(sync: true);
@@ -120,10 +120,10 @@ class SubscriptionImpl implements Subscription {
 }
 
 class PublishEvent {
+  PublishEvent._(this.uid, this.data);
+
   final String uid;
   final List<int> data;
-
-  PublishEvent._(this.uid, this.data);
 
   static PublishEvent from(Publication pub) =>
       PublishEvent._(pub.uid, pub.data);
@@ -135,10 +135,10 @@ class PublishEvent {
 }
 
 class JoinEvent {
+  JoinEvent._(this.user, this.client);
+
   final String user;
   final String client;
-
-  JoinEvent._(this.user, this.client);
 
   static JoinEvent from(ClientInfo clientInfo) =>
       JoinEvent._(clientInfo.user, clientInfo.client);
@@ -150,10 +150,10 @@ class JoinEvent {
 }
 
 class LeaveEvent {
+  LeaveEvent._(this.user, this.client);
+
   final String user;
   final String client;
-
-  LeaveEvent._(this.user, this.client);
 
   static LeaveEvent from(ClientInfo clientInfo) =>
       LeaveEvent._(clientInfo.user, clientInfo.client);
@@ -165,10 +165,10 @@ class LeaveEvent {
 }
 
 class SubscribeSuccessEvent {
+  SubscribeSuccessEvent._(this.resubscribed, this.recovered);
+
   final bool resubscribed;
   final bool recovered;
-
-  SubscribeSuccessEvent._(this.resubscribed, this.recovered);
 
   static SubscribeSuccessEvent from(
           SubscribeResult result, bool resubscribed) =>
@@ -181,10 +181,10 @@ class SubscribeSuccessEvent {
 }
 
 class SubscribeErrorEvent {
+  SubscribeErrorEvent._(this.message, this.code);
+
   final String message;
   final int code;
-
-  SubscribeErrorEvent._(this.message, this.code);
 
   static SubscribeErrorEvent from(proto.Error error) =>
       SubscribeErrorEvent._(error.message, error.code);

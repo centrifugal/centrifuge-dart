@@ -23,12 +23,12 @@ Transport createProtobufTransport(String url) {
 }
 
 class Transport {
+  Transport(this._socketBuilder, this._commandEncoder, this._replyDecoder);
+
   final WebSocketBuilder _socketBuilder;
   WebSocket _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
-
-  Transport(this._socketBuilder, this._commandEncoder, this._replyDecoder);
 
   Future open(void onPush(Push push), {Function onError, void onDone()}) async {
     _socket = await _socketBuilder();

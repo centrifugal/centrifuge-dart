@@ -11,8 +11,6 @@
 # https://github.com/flutter/flutter/blob/master/analysis_options.yaml
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
@@ -22,7 +20,7 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
-  exclude: [lib/src/proto/**]
+  exclude: [lib/src/proto/**, example/flutter/**]
 
 linter:
   rules:
