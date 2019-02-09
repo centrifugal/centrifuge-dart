@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
 import 'proto/client.pb.dart' hide Error;
 
-typedef Future<Transport> TransportBuilder({Function(Push) onPush});
+typedef Transport TransportBuilder(
+    {@required String url, @required Map<String, dynamic> headers});
+
 typedef Future<WebSocket> WebSocketBuilder();
 
-Transport createProtobufTransport(String url, {Map<String, dynamic> headers}) {
+Transport protobufTransportBuilder(
+    {@required String url, @required Map<String, dynamic> headers}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 

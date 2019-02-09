@@ -12,11 +12,14 @@ void main() async {
   };
 
   try {
-    final client = centrifuge.createClient(url,
-        headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'});
+    final client = centrifuge.createClient(
+      url,
+      config: centrifuge.ClientConfig(
+        headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
+      ),
+    );
 
     client.connectStream.listen(onEvent);
-    client.errorStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
 
     await client.connect();

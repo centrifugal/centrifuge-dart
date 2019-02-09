@@ -11,8 +11,6 @@
 # https://github.com/flutter/flutter/blob/master/analysis_options.yaml
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:

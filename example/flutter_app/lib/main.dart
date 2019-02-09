@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
+import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
 
@@ -149,8 +149,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class _ChatItem {
+  _ChatItem({this.title, this.subtitle});
+
   final String title;
   final String subtitle;
-
-  _ChatItem({this.title, this.subtitle});
 }
