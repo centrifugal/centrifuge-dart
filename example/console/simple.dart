@@ -12,15 +12,12 @@ void main() async {
   };
 
   try {
-    final client = centrifuge.createClient(url);
+    final client = centrifuge.createClient(url,
+        headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'});
 
     client.connectStream.listen(onEvent);
     client.errorStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
-
-//  Authorization via JWT
-//    client.setToken(
-//        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzcwOTY0MDIsImlhdCI6MTUzNzAxMDAwMiwicGxkIjp7ImluZm8iOnsibmFtZSI6Ikdlcm1hbiBTYXByeWtpbiJ9fSwic3ViIjoiNjQifQ==.KiTCZbRxUK73SSB2UNvaGQr8YVWAdb_ZSv5j8CKEWmE=');
 
     await client.connect();
 
@@ -35,7 +32,6 @@ void main() async {
     subscription.unsubscribeStream.listen(onEvent);
 
     final handler = _handleUserInput(client, subscription);
-//    Future<void>.delayed(Duration(seconds: 1)).then((_) => exit(0));
 
     await for (List<int> codeUnit in stdin) {
       final message = utf8.decode(codeUnit).trim();
