@@ -5,8 +5,8 @@ import 'proto/client.pb.dart' hide Error;
 import 'subscription.dart';
 import 'transport.dart';
 
-Client createClient(String url) {
-  final transport = createProtobufTransport(url);
+Client createClient(String url, {Map<String, dynamic> headers}) {
+  final transport = createProtobufTransport(url, headers: headers);
   final client = ClientImpl(transport);
   return client;
 }

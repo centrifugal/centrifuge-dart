@@ -28,7 +28,7 @@ Subscribe to channel:
 final subscription = client.subscribe(channel);
 
 subscription.publishStream.listen(onEvent);
-subscription.joinStream.listen(onEvent);
+subscription.joinStream.listen(onEvent);  
 subscription.leaveStream.listen(onEvent);
 
 subscription.subscribeSuccessStream.listen(onEvent);
@@ -52,7 +52,7 @@ await subscription.publish(data);
 - [ ] connect to server using JSON protocol format
 - [x] connect to server using Protobuf protocol format
 - [x] connect with JWT
-- [ ] connect with custom header
+- [x] connect with custom header
 - [ ] support automatic reconnect in case of errors, network problems etc
 - [x] connect and disconnect events
 - [ ] handle disconnect reason

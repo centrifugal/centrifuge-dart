@@ -5,22 +5,22 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  final channel = 'chat';
+  final channel = 'chat:index';
 
   final onEvent = (dynamic event) {
     print('$channel> $event');
   };
 
   try {
-    final client = centrifuge.createClient(url);
+    final client = centrifuge.createClient(url,
+        headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'});
 
     client.connectStream.listen(onEvent);
     client.errorStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
 
-//  Authorization via JWT
 //    client.setToken(
-//        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzcwOTY0MDIsImlhdCI6MTUzNzAxMDAwMiwicGxkIjp7ImluZm8iOnsibmFtZSI6Ikdlcm1hbiBTYXByeWtpbiJ9fSwic3ViIjoiNjQifQ==.KiTCZbRxUK73SSB2UNvaGQr8YVWAdb_ZSv5j8CKEWmE=');
+//        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkYXJ0IiwiZXhwIjoxNTgwOTg2MzY4LCJpYXQiOjE1NDk0NTAzNjgsImlzcyI6ImxvY2FsaG9zdC5jb20iLCJqdGkiOiJHdElrdGpLUTY4SFV6TEJsem84VkNSekIzVktiRzNrZyIsInN1YiI6ImRhcnQifQ.mUOf9rV7bb_RLtF4gzs84mkUyLC_o-19PZ0xiC3vCN0');
 
     await client.connect();
 

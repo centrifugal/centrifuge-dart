@@ -9,12 +9,15 @@ import 'proto/client.pb.dart' hide Error;
 typedef Future<Transport> TransportBuilder({Function(Push) onPush});
 typedef Future<WebSocket> WebSocketBuilder();
 
-Transport createProtobufTransport(String url) {
+Transport createProtobufTransport(String url, {Map<String, dynamic> headers}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
   final transport = Transport(
-    () => WebSocket.connect(url),
+    () => WebSocket.connect(
+          url,
+          headers: headers,
+        ),
     commandEncoder,
     replyDecoder,
   );
