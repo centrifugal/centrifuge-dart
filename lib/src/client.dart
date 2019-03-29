@@ -6,8 +6,7 @@ import 'events.dart';
 import 'proto/client.pb.dart';
 import 'transport.dart';
 
-Client createClient(String url, {ClientConfig config = const ClientConfig()}) =>
-    _Client(
+Client createClient(String url, {ClientConfig config = const ClientConfig()}) => _Client(
       url,
       config,
       protobufTransportBuilder,
@@ -161,6 +160,13 @@ class _Client implements Client, SubscriptionClient {
     return result;
   }
 
+  @override
+  Future<HistoryResult> sendHistory(String channel) {
+    final request = HistoryRequest()..channel = channel;
+    final result = _transport.send(request, HistoryResult());
+    return result;
+  }
+
   void _onPush(Push push) {
     switch (push.type) {
       case PushType.PUBLICATION:
@@ -222,12 +228,16 @@ abstract class Subscription {
   Future unsubscribe();
 
   Future publish(List<int> data);
+
+  Future history();
 }
 
 abstract class SubscriptionClient {
   Future<SubscribeResult> sendSubscribe(String channel, {String token});
 
   Future<UnsubscribeResult> sendUnsubscribe(String channel);
+
+  Future<HistoryResult> sendHistory(String channel);
 
   Future publish(String channel, List<int> data);
 }
@@ -247,10 +257,8 @@ class _Subscription implements Subscription {
   final _publishController = StreamController<PublishEvent>.broadcast();
   final _joinController = StreamController<JoinEvent>.broadcast();
   final _leaveController = StreamController<LeaveEvent>.broadcast();
-  final _subscribeSuccessController =
-      StreamController<SubscribeSuccessEvent>.broadcast();
-  final _subscribeErrorController =
-      StreamController<SubscribeErrorEvent>.broadcast();
+  final _subscribeSuccessController = StreamController<SubscribeSuccessEvent>.broadcast();
+  final _subscribeErrorController = StreamController<SubscribeErrorEvent>.broadcast();
   final _unsubscribeController = StreamController<UnsubscribeEvent>.broadcast();
 
   @override
@@ -263,16 +271,13 @@ class _Subscription implements Subscription {
   Stream<LeaveEvent> get leaveStream => _leaveController.stream;
 
   @override
-  Stream<SubscribeSuccessEvent> get subscribeSuccessStream =>
-      _subscribeSuccessController.stream;
+  Stream<SubscribeSuccessEvent> get subscribeSuccessStream => _subscribeSuccessController.stream;
 
   @override
-  Stream<SubscribeErrorEvent> get subscribeErrorStream =>
-      _subscribeErrorController.stream;
+  Stream<SubscribeErrorEvent> get subscribeErrorStream => _subscribeErrorController.stream;
 
   @override
-  Stream<UnsubscribeEvent> get unsubscribeStream =>
-      _unsubscribeController.stream;
+  Stream<UnsubscribeEvent> get unsubscribeStream => _unsubscribeController.stream;
 
   @override
   Future publish(List<int> data) => client.publish(channel, data);
@@ -287,20 +292,23 @@ class _Subscription implements Subscription {
     onUnsubscribe(event);
   }
 
+  @override
+  Future history() async {
+    final result = await client.sendHistory(channel);
+    print(result.publications);
+  }
+
   void onPublish(PublishEvent event) => _publishController.add(event);
 
   void onJoin(JoinEvent event) => _joinController.add(event);
 
   void onLeave(LeaveEvent event) => _leaveController.add(event);
 
-  void onSubscribeSuccess(SubscribeSuccessEvent event) =>
-      _subscribeSuccessController.add(event);
+  void onSubscribeSuccess(SubscribeSuccessEvent event) => _subscribeSuccessController.add(event);
 
-  void onSubscribeError(SubscribeErrorEvent event) =>
-      _subscribeErrorController.add(event);
+  void onSubscribeError(SubscribeErrorEvent event) => _subscribeErrorController.add(event);
 
-  void onUnsubscribe(UnsubscribeEvent event) =>
-      _unsubscribeController.add(event);
+  void onUnsubscribe(UnsubscribeEvent event) => _unsubscribeController.add(event);
 
   Future _resubscribe({@required bool isResubscribed}) async {
     try {

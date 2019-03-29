@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
+    final url = 'ws://10.78.202.34:8001/connection/websocket?format=protobuf';
     _centrifuge = centrifuge.createClient(url);
 
     _controller = ScrollController();
@@ -86,9 +86,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _connect() async {
+    print('connecting...');
     try {
       await _centrifuge.connect();
+      print('connected');
     } catch (exception) {
+      print('exception $exception');
       _show(exception);
     }
   }
@@ -105,26 +108,24 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _items.add(item);
       });
-      Future.delayed(Duration(milliseconds: 125),
-          () => _controller.jumpTo(64.0 + _controller.offset));
+      Future.delayed(
+          Duration(milliseconds: 125), () => _controller.jumpTo(64.0 + _controller.offset));
     };
 
     _subscription.joinStream.listen((event) {
       final user = event.user;
       final client = event.client;
 
-      final item = _ChatItem(
-          title: 'User $user joined channel $channel',
-          subtitle: '(client ID $client)');
+      final item =
+          _ChatItem(title: 'User $user joined channel $channel', subtitle: '(client ID $client)');
       onNewItem(item);
     });
 
     _subscription.leaveStream.listen((event) {
       final user = event.user;
       final client = event.client;
-      final item = _ChatItem(
-          title: 'User $user left channel $channel',
-          subtitle: '(client ID $client)');
+      final item =
+          _ChatItem(title: 'User $user left channel $channel', subtitle: '(client ID $client)');
       onNewItem(item);
     });
 
