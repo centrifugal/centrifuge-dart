@@ -293,9 +293,10 @@ class _Subscription implements Subscription {
   }
 
   @override
-  Future history() async {
+  Future<List<HistoryEvent>> history() async {
     final result = await client.sendHistory(channel);
-    print(result.publications);
+    final events = result.publications.map(HistoryEvent.from).toList();
+    return events;
   }
 
   void onPublish(PublishEvent event) => _publishController.add(event);
