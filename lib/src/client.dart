@@ -229,7 +229,7 @@ abstract class Subscription {
 
   Future publish(List<int> data);
 
-  Future history();
+  Future<List<HistoryEvent>> history();
 }
 
 abstract class SubscriptionClient {
