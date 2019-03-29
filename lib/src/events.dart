@@ -59,7 +59,8 @@ class PublishEvent {
   final String uid;
   final List<int> data;
 
-  static PublishEvent from(proto.Publication pub) => PublishEvent(pub.uid, pub.data);
+  static PublishEvent from(proto.Publication pub) =>
+      PublishEvent(pub.uid, pub.data);
 
   @override
   String toString() {
@@ -73,7 +74,8 @@ class HistoryEvent {
   final String uid;
   final List<int> data;
 
-  static HistoryEvent from(proto.Publication pub) => HistoryEvent(pub.uid, pub.data);
+  static HistoryEvent from(proto.Publication pub) =>
+      HistoryEvent(pub.uid, pub.data);
 
   @override
   String toString() {
@@ -117,7 +119,8 @@ class SubscribeSuccessEvent {
   final bool isResubscribed;
   final bool isRecovered;
 
-  static SubscribeSuccessEvent from(proto.SubscribeResult result, bool resubscribed) =>
+  static SubscribeSuccessEvent from(
+          proto.SubscribeResult result, bool resubscribed) =>
       SubscribeSuccessEvent(resubscribed, result.recovered);
 
   @override

@@ -6,7 +6,8 @@ import 'events.dart';
 import 'proto/client.pb.dart';
 import 'transport.dart';
 
-Client createClient(String url, {ClientConfig config = const ClientConfig()}) => _Client(
+Client createClient(String url, {ClientConfig config = const ClientConfig()}) =>
+    _Client(
       url,
       config,
       protobufTransportBuilder,
@@ -257,8 +258,10 @@ class _Subscription implements Subscription {
   final _publishController = StreamController<PublishEvent>.broadcast();
   final _joinController = StreamController<JoinEvent>.broadcast();
   final _leaveController = StreamController<LeaveEvent>.broadcast();
-  final _subscribeSuccessController = StreamController<SubscribeSuccessEvent>.broadcast();
-  final _subscribeErrorController = StreamController<SubscribeErrorEvent>.broadcast();
+  final _subscribeSuccessController =
+      StreamController<SubscribeSuccessEvent>.broadcast();
+  final _subscribeErrorController =
+      StreamController<SubscribeErrorEvent>.broadcast();
   final _unsubscribeController = StreamController<UnsubscribeEvent>.broadcast();
 
   @override
@@ -271,13 +274,16 @@ class _Subscription implements Subscription {
   Stream<LeaveEvent> get leaveStream => _leaveController.stream;
 
   @override
-  Stream<SubscribeSuccessEvent> get subscribeSuccessStream => _subscribeSuccessController.stream;
+  Stream<SubscribeSuccessEvent> get subscribeSuccessStream =>
+      _subscribeSuccessController.stream;
 
   @override
-  Stream<SubscribeErrorEvent> get subscribeErrorStream => _subscribeErrorController.stream;
+  Stream<SubscribeErrorEvent> get subscribeErrorStream =>
+      _subscribeErrorController.stream;
 
   @override
-  Stream<UnsubscribeEvent> get unsubscribeStream => _unsubscribeController.stream;
+  Stream<UnsubscribeEvent> get unsubscribeStream =>
+      _unsubscribeController.stream;
 
   @override
   Future publish(List<int> data) => client.publish(channel, data);
@@ -305,11 +311,14 @@ class _Subscription implements Subscription {
 
   void onLeave(LeaveEvent event) => _leaveController.add(event);
 
-  void onSubscribeSuccess(SubscribeSuccessEvent event) => _subscribeSuccessController.add(event);
+  void onSubscribeSuccess(SubscribeSuccessEvent event) =>
+      _subscribeSuccessController.add(event);
 
-  void onSubscribeError(SubscribeErrorEvent event) => _subscribeErrorController.add(event);
+  void onSubscribeError(SubscribeErrorEvent event) =>
+      _subscribeErrorController.add(event);
 
-  void onUnsubscribe(UnsubscribeEvent event) => _unsubscribeController.add(event);
+  void onUnsubscribe(UnsubscribeEvent event) =>
+      _unsubscribeController.add(event);
 
   Future _resubscribe({@required bool isResubscribed}) async {
     try {
