@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
+    final url = 'ws://localhost:8001/connection/websocket?format=protobuf';
     _centrifuge = centrifuge.createClient(url);
 
     _controller = ScrollController();
@@ -86,9 +86,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _connect() async {
+    print('connecting...');
     try {
       await _centrifuge.connect();
+      print('connected');
     } catch (exception) {
+      print('exception $exception');
       _show(exception);
     }
   }

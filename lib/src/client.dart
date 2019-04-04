@@ -161,6 +161,13 @@ class _Client implements Client, SubscriptionClient {
     return result;
   }
 
+  @override
+  Future<HistoryResult> sendHistory(String channel) {
+    final request = HistoryRequest()..channel = channel;
+    final result = _transport.send(request, HistoryResult());
+    return result;
+  }
+
   void _onPush(Push push) {
     switch (push.type) {
       case PushType.PUBLICATION:
@@ -222,12 +229,16 @@ abstract class Subscription {
   Future unsubscribe();
 
   Future publish(List<int> data);
+
+  Future<List<HistoryEvent>> history();
 }
 
 abstract class SubscriptionClient {
   Future<SubscribeResult> sendSubscribe(String channel, {String token});
 
   Future<UnsubscribeResult> sendUnsubscribe(String channel);
+
+  Future<HistoryResult> sendHistory(String channel);
 
   Future publish(String channel, List<int> data);
 }
@@ -285,6 +296,13 @@ class _Subscription implements Subscription {
     await client.sendUnsubscribe(channel);
     final event = UnsubscribeEvent();
     onUnsubscribe(event);
+  }
+
+  @override
+  Future<List<HistoryEvent>> history() async {
+    final result = await client.sendHistory(channel);
+    final events = result.publications.map(HistoryEvent.from).toList();
+    return events;
   }
 
   void onPublish(PublishEvent event) => _publishController.add(event);

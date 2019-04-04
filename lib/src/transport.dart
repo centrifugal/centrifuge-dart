@@ -7,8 +7,10 @@ import 'package:protobuf/protobuf.dart';
 import 'codec.dart';
 import 'proto/client.pb.dart' hide Error;
 
-typedef Transport TransportBuilder(
-    {@required String url, @required Map<String, dynamic> headers});
+typedef Transport TransportBuilder({
+  @required String url,
+  @required Map<String, dynamic> headers,
+});
 
 typedef Future<WebSocket> WebSocketBuilder();
 
