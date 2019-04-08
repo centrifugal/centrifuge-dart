@@ -86,12 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _connect() async {
-    print('connecting...');
     try {
       await _centrifuge.connect();
-      print('connected');
     } catch (exception) {
-      print('exception $exception');
       _show(exception);
     }
   }
