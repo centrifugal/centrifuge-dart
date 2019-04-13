@@ -52,6 +52,10 @@ class Client {
       request.token = _token;
     }
 
+    if (_connectData != null) {
+      request.data = _connectData;
+    }
+
     final result = await _transport.send(
       request,
       ConnectResult(),
