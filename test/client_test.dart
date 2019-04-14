@@ -85,4 +85,20 @@ void main() {
       expect(utf8.decode(event.data), equals('test data'));
     });
   });
+
+  group('Connected client', () {
+    setUp(() {
+      client.connect();
+      transport.completeOpen();
+    });
+
+    test('publish sends correct data', () async {
+      client.publish('test channel', utf8.encode('test message'));
+
+      final publish =
+          transport.sendListLast<PublishRequest, PublishResult>().request;
+      expect(publish.channel, equals('test channel'));
+      expect(utf8.decode(publish.data), equals('test message'));
+    });
+  });
 }

@@ -92,10 +92,10 @@ class MockTransport implements Transport {
   void Function(dynamic) onError;
   void Function() onDone;
 
-  final openCompleter = Completer<void>.sync();
+  final _openCompleter = Completer<void>.sync();
 
   void completeOpen() {
-    openCompleter.complete();
+    _openCompleter.complete();
   }
 
   @override
@@ -105,7 +105,7 @@ class MockTransport implements Transport {
     this.onError = onError;
     this.onDone = onDone;
 
-    return openCompleter.future;
+    return _openCompleter.future;
   }
 
   final sendList = <Triplet>[];
