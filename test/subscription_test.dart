@@ -60,4 +60,26 @@ void main() {
     final error = await errorFuture;
     expect(error.message, 'test error');
   });
+
+  test('history sends correct data', () async {
+    final historyFuture = subscription.history();
+
+    final send = transport.sendListLast<HistoryRequest, HistoryResult>();
+
+    send.completeWith2(
+      (result) => result
+        ..publications.addAll(
+          [
+            Publication()..data = utf8.encode('test history 1'),
+            Publication()..data = utf8.encode('test history 2')
+          ],
+        ),
+    );
+
+    final events = await historyFuture;
+
+    expect(events, hasLength(equals(2)));
+    expect(utf8.decode(events[0].data), equals('test history 1'));
+    expect(utf8.decode(events[1].data), equals('test history 2'));
+  });
 }
