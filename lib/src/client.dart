@@ -94,7 +94,7 @@ class Client {
       return _subscriptions[channel];
     }
 
-    final subscription = Subscription(
+    final subscription = Subscription._(
       channel: channel,
       client: this,
     );
@@ -175,7 +175,7 @@ class Client {
 }
 
 class Subscription {
-  Subscription({
+  Subscription._({
     @required this.channel,
     @required this.client,
     this.token,
