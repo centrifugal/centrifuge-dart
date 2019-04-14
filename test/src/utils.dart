@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/transport.dart';
+import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
 
 class MockWebSocket implements WebSocket {
@@ -134,6 +136,11 @@ class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
 
   void completeWith(Res result) => completer.complete(result);
 
+  void completeWith2(Res Function(Res) updates) =>
+      completer.complete(updates(result));
+
+  void completeWithError(dynamic error) => completer.completeError(error);
+
   void complete() => completer.complete(result);
 
   @override
@@ -150,3 +157,5 @@ class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
   @override
   int get hashCode => request.hashCode ^ completer.hashCode ^ result.hashCode;
 }
+
+class MockClient extends Mock implements Client {}

@@ -95,10 +95,7 @@ class Client {
       return _subscriptions[channel];
     }
 
-    final subscription = Subscription._(
-      channel: channel,
-      client: this,
-    );
+    final subscription = Subscription(channel, this, _transport);
 
     _subscriptions[channel] = subscription;
 
@@ -119,10 +116,6 @@ class Client {
     final disconnect = DisconnectEvent(reason, shouldReconnect);
     _disconnectController.add(disconnect);
   }
-
-  Future<Rep> _send<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result) =>
-      _transport.send(request, result);
 
   void _onPush(Push push) {
     switch (push.type) {
@@ -164,13 +157,12 @@ class Client {
 }
 
 class Subscription {
-  Subscription._({
-    @required this.channel,
-    @required this.client,
-  });
+  @visibleForTesting
+  Subscription(this.channel, this._client, this._transport);
 
   final String channel;
-  final Client client;
+  final Client _client;
+  final Transport _transport;
 
   final _publishController = StreamController<PublishEvent>.broadcast();
   final _joinController = StreamController<JoinEvent>.broadcast();
@@ -196,13 +188,13 @@ class Subscription {
   Stream<UnsubscribeEvent> get unsubscribeStream =>
       _unsubscribeController.stream;
 
-  Future publish(List<int> data) => client.publish(channel, data);
+  Future publish(List<int> data) => _client.publish(channel, data);
 
   Future subscribe() => _resubscribe(isResubscribed: false);
 
   Future unsubscribe() async {
     final request = UnsubscribeRequest()..channel = channel;
-    await client._send(request, UnsubscribeResult());
+    await _transport.send(request, UnsubscribeResult());
     final event = UnsubscribeEvent();
     _onUnsubscribe(event);
   }
@@ -211,7 +203,7 @@ class Subscription {
 
   Future<List<HistoryEvent>> history() async {
     final request = HistoryRequest()..channel = channel;
-    final result = await client._send(request, HistoryResult());
+    final result = await _transport.send(request, HistoryResult());
     final events = result.publications.map(HistoryEvent.from).toList();
     return events;
   }
@@ -232,7 +224,7 @@ class Subscription {
   Future _resubscribe({@required bool isResubscribed}) async {
     try {
       final request = SubscribeRequest()..channel = channel;
-      final result = await client._send(request, SubscribeResult());
+      final result = await _transport.send(request, SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
       _recover(result);
