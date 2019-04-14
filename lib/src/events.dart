@@ -68,6 +68,21 @@ class PublishEvent {
   }
 }
 
+class HistoryEvent {
+  HistoryEvent(this.uid, this.data);
+
+  final String uid;
+  final List<int> data;
+
+  static HistoryEvent from(proto.Publication pub) =>
+      HistoryEvent(pub.uid, pub.data);
+
+  @override
+  String toString() {
+    return 'HistoryEvent{uid: $uid, data: $data}';
+  }
+}
+
 class JoinEvent {
   JoinEvent(this.user, this.client);
 

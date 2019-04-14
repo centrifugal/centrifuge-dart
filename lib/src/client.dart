@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:protobuf/protobuf.dart';
 
 import 'client_config.dart';
 import 'events.dart';
@@ -119,21 +120,9 @@ class Client {
     _disconnectController.add(disconnect);
   }
 
-  Future<UnsubscribeResult> _sendUnsubscribe(String channel) {
-    final request = UnsubscribeRequest()..channel = channel;
-    final result = _transport.send(request, UnsubscribeResult());
-    return result;
-  }
-
-  Future<SubscribeResult> _sendSubscribe(String channel, {String token}) {
-    final request = SubscribeRequest()..channel = channel;
-    if (token != null) {
-      request.token = token;
-    }
-
-    final result = _transport.send(request, SubscribeResult());
-    return result;
-  }
+  Future<Rep> _send<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+          Req request, Rep result) =>
+      _transport.send(request, result);
 
   void _onPush(Push push) {
     switch (push.type) {
@@ -178,11 +167,9 @@ class Subscription {
   Subscription._({
     @required this.channel,
     @required this.client,
-    this.token,
   });
 
   final String channel;
-  final String token;
   final Client client;
 
   final _publishController = StreamController<PublishEvent>.broadcast();
@@ -214,12 +201,20 @@ class Subscription {
   Future subscribe() => _resubscribe(isResubscribed: false);
 
   Future unsubscribe() async {
-    await client._sendUnsubscribe(channel);
+    final request = UnsubscribeRequest()..channel = channel;
+    await client._send(request, UnsubscribeResult());
     final event = UnsubscribeEvent();
     _onUnsubscribe(event);
   }
 
   void _onPublish(PublishEvent event) => _publishController.add(event);
+
+  Future<List<HistoryEvent>> history() async {
+    final request = HistoryRequest()..channel = channel;
+    final result = await client._send(request, HistoryResult());
+    final events = result.publications.map(HistoryEvent.from).toList();
+    return events;
+  }
 
   void _onJoin(JoinEvent event) => _joinController.add(event);
 
@@ -236,7 +231,8 @@ class Subscription {
 
   Future _resubscribe({@required bool isResubscribed}) async {
     try {
-      final result = await client._sendSubscribe(channel, token: token);
+      final request = SubscribeRequest()..channel = channel;
+      final result = await client._send(request, SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
       _recover(result);
