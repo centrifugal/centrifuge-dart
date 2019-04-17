@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:centrifuge/centrifuge.dart';
+import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/transport.dart';
 import 'package:mockito/mockito.dart';
@@ -117,8 +117,9 @@ class MockTransport implements Transport {
       sendList.last;
 
   @override
-  Future<Rep> send<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-      Req request, Rep result) {
+  Future<Rep>
+      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+          Req request, Rep result) {
     final completer = Completer<Rep>.sync();
 
     sendList.add(Triplet<Req, Rep>(request, result, completer));
@@ -158,4 +159,4 @@ class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
   int get hashCode => request.hashCode ^ completer.hashCode ^ result.hashCode;
 }
 
-class MockClient extends Mock implements Client {}
+class MockClient extends Mock with MockTransport implements ClientImpl {}

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/proto/client.pb.dart';
+import 'package:centrifuge/src/client.dart';
 import 'package:test/test.dart';
 
 import 'src/utils.dart';
@@ -17,7 +18,7 @@ void main() {
     transport = MockTransport();
     config = ClientConfig();
 
-    client = Client(
+    client = ClientImpl(
         url,
         config,
         ({url, headers}) => transport

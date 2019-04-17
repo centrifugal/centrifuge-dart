@@ -31,7 +31,13 @@ Transport protobufTransportBuilder(
   return transport;
 }
 
-class Transport {
+abstract class GeneratedMessageSender {
+  Future<Rep>
+      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+          Req request, Rep result);
+}
+
+class Transport implements GeneratedMessageSender {
   Transport(this._socketBuilder, this._commandEncoder, this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
@@ -53,8 +59,10 @@ class Transport {
 
   final _completers = <int, Completer<GeneratedMessage>>{};
 
-  Future<Rep> send<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-      Req request, Rep result) async {
+  @override
+  Future<Rep>
+      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+          Req request, Rep result) async {
     final command = _createCommand(request);
 
     final reply = await _sendCommand(command);

@@ -47,7 +47,8 @@ void main() {
         ..client = 'c1'
         ..version = 'v2');
 
-      final result = await transport.send(ConnectRequest(), ConnectResult());
+      final result =
+          await transport.sendMessage(ConnectRequest(), ConnectResult());
 
       expect(result.client, equals('c1'));
       expect(result.version, equals('v2'));
@@ -58,8 +59,8 @@ void main() {
         ..message = 'some exception'
         ..code = 999);
 
-      expect(
-          transport.send(ConnectRequest(), ConnectResult()), throwsA(anything));
+      expect(transport.sendMessage(ConnectRequest(), ConnectResult()),
+          throwsA(anything));
     });
 
     test('Transport.send() throws error', () async {
@@ -67,8 +68,8 @@ void main() {
         ..message = 'some exception'
         ..code = 999);
 
-      expect(
-          transport.send(ConnectRequest(), ConnectResult()), throwsA(anything));
+      expect(transport.sendMessage(ConnectRequest(), ConnectResult()),
+          throwsA(anything));
     });
 
     test('Transport processes push', () async {
