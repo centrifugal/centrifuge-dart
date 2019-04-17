@@ -24,7 +24,8 @@ void main() async {
 
     await client.connect();
 
-    final subscription = client.subscribe(channel);
+    final subscription = client.getSubscription(channel);
+    await subscription.subscribe();
 
     subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
     subscription.joinStream.listen(onEvent);
