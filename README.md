@@ -25,7 +25,8 @@ await client.connect();
 ```
 Subscribe to channel:
 ```dart
-final subscription = client.subscribe(channel);
+final subscription = client.getSubscription(channel);
+await subscription.subscribe();
 
 subscription.publishStream.listen(onEvent);
 subscription.joinStream.listen(onEvent);  
