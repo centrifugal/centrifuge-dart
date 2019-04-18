@@ -8,6 +8,7 @@
 set -e
 
 # Run pub get to fetch packages.
+pub global activate coverage
 pub get
 
 # Verify that the libraries are error and warning-free.
@@ -27,24 +28,24 @@ echo "Running tests..."
 pub run test --reporter expanded
 
 # Gather coverage and upload to Coveralls.
-if [ "$COVERALLS_TOKEN" ]; then
+if [ "$COVERALLS_TOKEN" ] && [ "$TRAVIS_DART_VERSION" = "dev" ]; then
   OBS_PORT=9292
   echo "Collecting coverage on port $OBS_PORT..."
 
   # Start tests in one VM.
-  dart \
+  dart --disable-service-auth-codes \
     --pause-isolates-on-exit \
     test/* &
 
   # Run the coverage collector to generate the JSON coverage report.
-  pub run coverage \
+  pub global run coverage \
     --port=$OBS_PORT \
     --out=var/coverage.json \
     --wait-paused \
     --resume-isolates
 
   echo "Generating LCOV report..."
-  pub run coverage:format_coverage \
+  pub global run coverage:format_coverage \
     --lcov \
     --in=var/coverage.json \
     --out=var/lcov.info \
