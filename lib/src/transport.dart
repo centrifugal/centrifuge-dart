@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -46,13 +47,15 @@ class Transport implements GeneratedMessageSender {
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
 
-  Future open(void onPush(Push push), {Function onError, void onDone()}) async {
+  Future open(void onPush(Push push),
+      {Function onError,
+      void onDone(String reason, bool shouldReconnect)}) async {
     _socket = await _socketBuilder();
 
     _socket.listen(
       _onData(onPush),
       onError: onError,
-      onDone: onDone,
+      onDone: _onDone(onDone),
     );
   }
 
@@ -117,6 +120,21 @@ class Transport implements GeneratedMessageSender {
       default:
         throw ArgumentError('unknown request type');
     }
+  }
+
+  Function _onDone(void Function(String, bool) onDone) {
+    return () {
+      String reason;
+      bool reconnect = true;
+      if (_socket.closeReason != null) {
+        try {
+          final Map<String, dynamic> info = jsonDecode(_socket.closeReason);
+          reason = info['reason'];
+          reconnect = info['reconnect'];
+        } catch (_) {}
+      }
+      onDone(reason, reconnect);
+    };
   }
 
   Function _onData(void onPush(Push push)) {

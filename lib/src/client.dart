@@ -81,7 +81,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _onPush,
       onError: (dynamic error) =>
           _processDisconnect(reason: error.toString(), shouldReconnect: false),
-      onDone: () => _processDisconnect(reason: 'done', shouldReconnect: false),
+      onDone: (reason, reconnect) =>
+          _processDisconnect(reason: reason, shouldReconnect: reconnect),
     );
 
     final request = ConnectRequest();

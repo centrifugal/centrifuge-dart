@@ -17,7 +17,8 @@ void main() {
   Function(Push) onPush = (_) => fail('unexpected invocation');
   final Function(dynamic) onError =
       (dynamic error) => fail('unexpected invocation');
-  final Function onDone = () => fail('unexpected invocation');
+  Function(String, bool) onDone =
+      (String reason, bool reconnect) => fail('unexpected invocation');
 
   setUp(() {
     webSocket = MockWebSocket();
@@ -30,8 +31,11 @@ void main() {
   });
 
   test('Transport.open() triggers websocket\'s listen', () async {
-    await transport.open((p) => onPush(p),
-        onError: (dynamic e) => onError(e), onDone: () => onDone());
+    await transport.open(
+      (p) => onPush(p),
+      onError: (dynamic e) => onError(e),
+      onDone: (reason, reconnect) => onDone(reason, reconnect),
+    );
 
     expect(webSocket.onData, isNotNull);
     expect(webSocket.onError, isNotNull);
@@ -39,8 +43,11 @@ void main() {
   });
 
   group('Opened transport', () {
-    setUp(() => transport.open((p) => onPush(p),
-        onError: (dynamic e) => onError(e), onDone: () => onDone()));
+    setUp(() => transport.open(
+          (p) => onPush(p),
+          onError: (dynamic e) => onError(e),
+          onDone: (reason, reconnect) => onDone(reason, reconnect),
+        ));
 
     test('Transport.send() returns result', () async {
       webSocket.onCommand(withMethod(MethodType.CONNECT)).result(ConnectResult()
@@ -84,6 +91,51 @@ void main() {
       webSocket.onData(writer.toBuffer() + replyData);
 
       expect(utf8.decode(push.data), equals('hello'));
+    });
+
+    test('Transport processes socket close reason', () async {
+      String reason;
+      bool reconnect;
+
+      onDone = (r, rc) {
+        reason = r;
+        reconnect = rc;
+      };
+
+      webSocket.close(3001, '{"reason":"test reason", "reconnect":true}');
+
+      expect(reason, equals('test reason'));
+      expect(reconnect, isTrue);
+    });
+
+    test('Transport handles socket close with not-json reason', () async {
+      String reason;
+      bool reconnect;
+
+      onDone = (r, rc) {
+        reason = r;
+        reconnect = rc;
+      };
+
+      webSocket.close(3001, '{"reason":');
+
+      expect(reason, isNull);
+      expect(reconnect, isTrue);
+    });
+
+    test('Transport handles socket close with empty reason', () async {
+      String reason;
+      bool reconnect;
+
+      onDone = (r, rc) {
+        reason = r;
+        reconnect = rc;
+      };
+
+      webSocket.close(3001, null);
+
+      expect(reason, isNull);
+      expect(reconnect, isTrue);
     });
   });
 }
