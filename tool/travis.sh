@@ -38,7 +38,7 @@ if [ "$COVERALLS_TOKEN" ] && [ "$TRAVIS_DART_VERSION" = "dev" ]; then
     test/* &
 
   # Run the coverage collector to generate the JSON coverage report.
-  pub global run coverage \
+  pub global run collect_coverage \
     --port=$OBS_PORT \
     --out=var/coverage.json \
     --wait-paused \
