@@ -130,7 +130,7 @@ class Transport implements GeneratedMessageSender {
         try {
           final Map<String, dynamic> info = jsonDecode(_socket.closeReason);
           reason = info['reason'];
-          reconnect = info['reconnect'];
+          reconnect = info['reconnect'] ?? true;
         } catch (_) {}
       }
       onDone(reason, reconnect);

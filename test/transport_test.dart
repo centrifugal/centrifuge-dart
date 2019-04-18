@@ -123,6 +123,22 @@ void main() {
       expect(reconnect, isTrue);
     });
 
+    test('Transport handles socket close with invalid format of reason',
+        () async {
+      String reason;
+      bool reconnect;
+
+      onDone = (r, rc) {
+        reason = r;
+        reconnect = rc;
+      };
+
+      webSocket.close(3001, '{}');
+
+      expect(reason, isNull);
+      expect(reconnect, isTrue);
+    });
+
     test('Transport handles socket close with empty reason', () async {
       String reason;
       bool reconnect;
