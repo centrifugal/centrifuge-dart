@@ -36,7 +36,7 @@ if [ "$COVERALLS_TOKEN" ] && [ "$TRAVIS_DART_VERSION" = "dev" ]; then
   dart --disable-service-auth-codes \
     --enable-vm-service=$OBS_PORT \
     --pause-isolates-on-exit \
-    test/* &
+    test/test_all.dart &
 
   # Run the coverage collector to generate the JSON coverage report.
   pub global run coverage:collect_coverage \
