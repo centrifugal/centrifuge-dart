@@ -101,5 +101,12 @@ void main() {
       expect(publish.channel, equals('test channel'));
       expect(utf8.decode(publish.data), equals('test message'));
     });
+
+    test('rpc sends correct data', () async {
+      client.rpc(utf8.encode('test rpc message'));
+
+      final rpc = transport.sendListLast<RPCRequest, RPCResult>().request;
+      expect(utf8.decode(rpc.data), equals('test rpc message'));
+    });
   });
 }

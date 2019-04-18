@@ -68,7 +68,7 @@ await subscription.publish(data);
 - [x] history method of Subscription
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
-- [ ] send RPC commands
+- [x] send RPC commands
 - [ ] publish to channel without being subscribed
 - [ ] subscribe to private channels with JWT
 - [ ] connection JWT refresh

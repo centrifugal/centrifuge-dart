@@ -32,7 +32,8 @@ abstract class Client {
 
   Future publish(String channel, List<int> data);
 
-  @alwaysThrows
+  /// Send RPC  command
+  ///
   Future<RPCResult> rpc(List<int> data);
 
   @alwaysThrows
@@ -115,10 +116,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  @alwaysThrows
-  Future<RPCResult> rpc(List<int> data) async {
-    throw UnimplementedError;
-  }
+  Future<RPCResult> rpc(List<int> data) => _transport.sendMessage(
+        RPCRequest()..data = data,
+        RPCResult(),
+      );
 
   @override
   @alwaysThrows

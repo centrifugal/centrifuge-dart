@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
+import 'error.dart' as centrifuge;
 import 'proto/client.pb.dart' hide Error;
 
 typedef Transport TransportBuilder({
@@ -93,7 +94,7 @@ class Transport implements GeneratedMessageSender {
 
   T _processResult<T extends GeneratedMessage>(T result, Reply reply) {
     if (reply.hasError()) {
-      throw reply.error;
+      throw centrifuge.Error.custom(reply.error.code, reply.error.message);
     }
     result.mergeFromBuffer(reply.result);
     return result;
@@ -111,6 +112,8 @@ class Transport implements GeneratedMessageSender {
         return MethodType.SUBSCRIBE;
       case HistoryRequest:
         return MethodType.HISTORY;
+      case RPCRequest:
+        return MethodType.RPC;
       default:
         throw ArgumentError('unknown request type');
     }
