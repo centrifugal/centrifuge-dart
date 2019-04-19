@@ -10,10 +10,9 @@ import 'proto/client.pb.dart';
 import 'subscription.dart';
 import 'transport.dart';
 
-Client createClient(String url, {ClientConfig config = const ClientConfig()}) =>
-    ClientImpl(
+Client createClient(String url, {ClientConfig config}) => ClientImpl(
       url,
-      config,
+      config ?? ClientConfig(),
       protobufTransportBuilder,
     );
 
@@ -75,30 +74,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Future<void> connect() async {
-    _transport = _transportBuilder(url: _url, headers: _config.headers);
-
-    await _transport.open(
-      _onPush,
-      onError: (dynamic error) =>
-          _processDisconnect(reason: error.toString(), reconnect: true),
-      onDone: (reason, reconnect) =>
-          _processDisconnect(reason: reason, reconnect: reconnect),
-    );
-
-    final request = ConnectRequest();
-    if (_token != null) {
-      request.token = _token;
-    }
-
-    if (_connectData != null) {
-      request.data = _connectData;
-    }
-
-    final result = await _transport.sendMessage(
-      request,
-      ConnectResult(),
-    );
-    _connectController.add(ConnectEvent.from(result));
+    return _connect();
   }
 
   @override
@@ -164,7 +140,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
               Req request, Rep result) =>
           _transport.sendMessage(request, result);
 
-  void _processDisconnect({@required String reason, bool reconnect}) {
+  int _retryCount;
+
+  void _processDisconnect({@required String reason, bool reconnect}) async {
     for (SubscriptionImpl subscription in _subscriptions.values) {
       final unsubscribe = UnsubscribeEvent();
       subscription.addUnsubscribe(unsubscribe);
@@ -172,6 +150,45 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
     final disconnect = DisconnectEvent(reason, reconnect);
     _disconnectController.add(disconnect);
+
+    if (reconnect) {
+      _retryCount += 1;
+      await _config.retry(_retryCount);
+      _connect();
+    }
+  }
+
+  Future<void> _connect() async {
+    try {
+      _transport = _transportBuilder(url: _url, headers: _config.headers);
+
+      await _transport.open(
+        _onPush,
+        onError: (dynamic error) =>
+            _processDisconnect(reason: error.toString(), reconnect: true),
+        onDone: (reason, reconnect) =>
+            _processDisconnect(reason: reason, reconnect: reconnect),
+      );
+
+      final request = ConnectRequest();
+      if (_token != null) {
+        request.token = _token;
+      }
+
+      if (_connectData != null) {
+        request.data = _connectData;
+      }
+
+      final result = await _transport.sendMessage(
+        request,
+        ConnectResult(),
+      );
+
+      _retryCount = 0;
+      _connectController.add(ConnectEvent.from(result));
+    } catch (ex) {
+      _processDisconnect(reason: ex.toString(), reconnect: true);
+    }
   }
 
   void _onPush(Push push) {

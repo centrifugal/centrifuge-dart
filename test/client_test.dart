@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:centrifuge/centrifuge.dart';
-import 'package:centrifuge/src/proto/client.pb.dart';
 import 'package:centrifuge/src/client.dart';
+import 'package:centrifuge/src/proto/client.pb.dart';
 import 'package:test/test.dart';
 
 import 'src/utils.dart';
@@ -13,10 +14,11 @@ void main() {
   Client client;
   MockTransport transport;
   ClientConfig config;
+  WaitRetry retry;
 
   setUp(() {
     transport = MockTransport();
-    config = ClientConfig();
+    config = ClientConfig(retry: (count) => retry?.call(count));
 
     client = ClientImpl(
         url,
@@ -110,10 +112,11 @@ void main() {
     });
   });
 
-  group('Diconnect', () {
+  group('Disconnect', () {
     setUp(() {
       client.connect();
       transport.completeOpen();
+      transport.sendListLast<ConnectRequest, ConnectResult>().complete();
     });
 
     test('socket closing triggers the corresponding events', () async {
@@ -152,6 +155,62 @@ void main() {
 
       expect(unsubscribeOneFuture, completion(isNotNull));
       expect(unsubscribeTwoFuture, completion(isNotNull));
+    });
+
+    test('client doesn\'t reconnect if reconnect = false', () async {
+      bool retryCalled = false;
+
+      retry = (_) {
+        retryCalled = true;
+      };
+
+      for (var i = 1; i < 20; i++) {
+        transport.onDone('test reason', false);
+        expect(retryCalled, isFalse);
+      }
+    });
+
+    test('client reconnects on error', () async {
+      Completer<void> retryCompleter;
+      int count;
+
+      retry = (c) {
+        count = c;
+        return retryCompleter.future;
+      };
+
+      for (var i = 1; i < 20; i++) {
+        final connectFuture = client.connectStream.first;
+
+        retryCompleter = Completer<void>.sync();
+        transport.onError('test error');
+
+        expect(count, 1);
+        retryCompleter.complete();
+        transport.completeOpen();
+        transport.sendListLast<ConnectRequest, ConnectResult>().complete();
+        expect(connectFuture, completion(isNotNull));
+      }
+    });
+
+    test('client reconnect increases retry count', () async {
+      Completer<void> retryCompleter = Completer<void>.sync();
+      int count;
+
+      retry = (c) {
+        count = c;
+        return retryCompleter.future;
+      };
+
+      transport.onError('test error');
+
+      for (var i = 1; i < 20; i++) {
+        expect(count, i);
+        retryCompleter.complete();
+
+        retryCompleter = Completer<void>.sync();
+        transport.completeOpenError('test server not available');
+      }
     });
   });
 }
