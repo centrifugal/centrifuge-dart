@@ -109,4 +109,49 @@ void main() {
       expect(utf8.decode(rpc.data), equals('test rpc message'));
     });
   });
+
+  group('Diconnect', () {
+    setUp(() {
+      client.connect();
+      transport.completeOpen();
+    });
+
+    test('socket closing triggers the corresponding events', () async {
+      final unsubscribeOneFuture =
+          client.getSubscription('test one').unsubscribeStream.first;
+      final unsubscribeTwoFuture =
+          client.getSubscription('test two').unsubscribeStream.first;
+
+      final disconnectFuture = client.disconnectStream.first;
+
+      transport.onDone('test reason', true);
+
+      final disconnect = await disconnectFuture;
+
+      expect(disconnect.reason, equals('test reason'));
+      expect(disconnect.shouldReconnect, isTrue);
+
+      expect(unsubscribeOneFuture, completion(isNotNull));
+      expect(unsubscribeTwoFuture, completion(isNotNull));
+    });
+
+    test('socket error triggers the corresponding events', () async {
+      final unsubscribeOneFuture =
+          client.getSubscription('test one').unsubscribeStream.first;
+      final unsubscribeTwoFuture =
+          client.getSubscription('test two').unsubscribeStream.first;
+
+      final disconnectFuture = client.disconnectStream.first;
+
+      transport.onError('test error');
+
+      final disconnect = await disconnectFuture;
+
+      expect(disconnect.reason, equals('test error'));
+      expect(disconnect.shouldReconnect, isTrue);
+
+      expect(unsubscribeOneFuture, completion(isNotNull));
+      expect(unsubscribeTwoFuture, completion(isNotNull));
+    });
+  });
 }

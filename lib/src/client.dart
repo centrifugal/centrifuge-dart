@@ -80,9 +80,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
     await _transport.open(
       _onPush,
       onError: (dynamic error) =>
-          _processDisconnect(reason: error.toString(), shouldReconnect: false),
+          _processDisconnect(reason: error.toString(), reconnect: true),
       onDone: (reason, reconnect) =>
-          _processDisconnect(reason: reason, shouldReconnect: reconnect),
+          _processDisconnect(reason: reason, reconnect: reconnect),
     );
 
     final request = ConnectRequest();
@@ -164,13 +164,13 @@ class ClientImpl implements Client, GeneratedMessageSender {
               Req request, Rep result) =>
           _transport.sendMessage(request, result);
 
-  void _processDisconnect({@required String reason, bool shouldReconnect}) {
+  void _processDisconnect({@required String reason, bool reconnect}) {
     for (SubscriptionImpl subscription in _subscriptions.values) {
       final unsubscribe = UnsubscribeEvent();
       subscription.addUnsubscribe(unsubscribe);
     }
 
-    final disconnect = DisconnectEvent(reason, shouldReconnect);
+    final disconnect = DisconnectEvent(reason, reconnect);
     _disconnectController.add(disconnect);
   }
 
