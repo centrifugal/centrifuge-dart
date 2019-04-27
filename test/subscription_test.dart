@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
 
-import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/proto/client.pb.dart';
 import 'package:centrifuge/src/subscription.dart';
 import 'package:test/test.dart';

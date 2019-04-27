@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
