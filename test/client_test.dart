@@ -199,6 +199,17 @@ void main() {
       }
     });
 
+    test('client doesn\'t reconnect on disconnect()', () async {
+      final expectedMessages = transport.sendList.length;
+
+      retry = (_) => fail('retry shouldn\'t be called');
+
+      client.disconnect();
+      transport.onDone(null, true);
+
+      expect(transport.sendList, hasLength(expectedMessages));
+    });
+
     test('client reconnect increases retry count', () async {
       Completer<void> retryCompleter = Completer<void>.sync();
       int count;

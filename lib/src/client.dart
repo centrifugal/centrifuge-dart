@@ -130,6 +130,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Future<void> disconnect() async {
+    _processDisconnect(reason: 'Manual disconnect', reconnect: false);
     await _transport.close();
   }
 
@@ -167,6 +168,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
   int _retryCount;
 
   void _processDisconnect({@required String reason, bool reconnect}) async {
+    if (_state == _ClientState.disconnected) {
+      return;
+    }
+
     if (_state == _ClientState.connected) {
       _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
 
