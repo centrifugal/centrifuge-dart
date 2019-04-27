@@ -53,23 +53,23 @@ await subscription.publish(data);
 - [x] connect to server using Protobuf protocol format
 - [x] connect with JWT
 - [x] connect with custom header
-- [ ] automatic reconnect in case of errors, network problems etc
-- [ ] exponential backoff for reconnect
+- [x] automatic reconnect in case of errors, network problems etc
+- [x] exponential backoff for reconnect
 - [x] connect and disconnect events
-- [ ] handle disconnect reason
+- [x] handle disconnect reason
 - [x] subscribe on channel and handle asynchronous Publications
 - [x] handle Join and Leave messages
 - [x] handle Unsubscribe notifications
 - [ ] reconnect on subscribe timeout
-- [ ] publish method of Subscription
-- [ ] unsubscribe method of Subscription
-- [x] presence method of Subscription
-- [x] presence stats method of Subscription
+- [x] publish method of Subscription
+- [x] unsubscribe method of Subscription
+- [ ] presence method of Subscription
+- [ ] presence stats method of Subscription
 - [x] history method of Subscription
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [x] send RPC commands
-- [ ] publish to channel without being subscribed
+- [x] publish to channel without being subscribed
 - [ ] subscribe to private channels with JWT
 - [ ] connection JWT refresh
 - [ ] private channel subscription JWT refresh
