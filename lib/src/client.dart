@@ -23,23 +23,45 @@ abstract class Client {
 
   Stream<MessageEvent> get messageStream;
 
+  /// Connect to the server.
+  ///
   Future<void> connect();
 
+  /// Set token for connection request.
+  ///
+  /// Whenever the client connects to a server, it adds token to the
+  /// connection request.
+  ///
+  /// To remove previous token, call with null.
   void setToken(String token);
 
+  /// Set data for connection request.
+  ///
+  /// Whenever the client connects to a server, it adds connectData to the
+  /// connection request.
+  ///
+  /// To remove previous connectData, call with null.
   void setConnectData(List<int> connectData);
 
+  /// Publish data to the channel
+  ///
   Future publish(String channel, List<int> data);
 
-  /// Send RPC  command
+  /// Send RPC command
   ///
   Future<RPCResult> rpc(List<int> data);
 
   @alwaysThrows
   Future<void> send(List<int> data);
 
+  /// Disconnect from the server.
+  ///
   Future<void> disconnect();
 
+  /// Get subscription to the channel.
+  ///
+  /// You need to call [Subscription.subscribe] to start receiving events
+  /// in the channel.
   Subscription getSubscription(String channel);
 
   @alwaysThrows
