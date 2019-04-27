@@ -28,6 +28,6 @@ class ClientConfig {
 typedef WaitRetry = Future Function(int);
 
 WaitRetry _defaultRetry(int maxReconnectDelay) => (int count) {
-      return Future<void>.delayed(
-          Duration(seconds: max(2 * pow(2, count), maxReconnectDelay)));
+      final seconds = min(0.5 * pow(2, count), maxReconnectDelay).toInt();
+      return Future<void>.delayed(Duration(seconds: seconds));
     };
