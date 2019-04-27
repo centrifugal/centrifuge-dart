@@ -63,6 +63,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
 
+  _ClientState _state = _ClientState.disconnected;
+
   @override
   Stream<ConnectEvent> get connectStream => _connectController.stream;
 
@@ -143,23 +145,28 @@ class ClientImpl implements Client, GeneratedMessageSender {
   int _retryCount;
 
   void _processDisconnect({@required String reason, bool reconnect}) async {
-    for (SubscriptionImpl subscription in _subscriptions.values) {
-      final unsubscribe = UnsubscribeEvent();
-      subscription.addUnsubscribe(unsubscribe);
+    if (_state == _ClientState.connected) {
+      _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
+
+      final disconnect = DisconnectEvent(reason, reconnect);
+      _disconnectController.add(disconnect);
     }
 
-    final disconnect = DisconnectEvent(reason, reconnect);
-    _disconnectController.add(disconnect);
-
     if (reconnect) {
+      _state = _ClientState.connecting;
+
       _retryCount += 1;
       await _config.retry(_retryCount);
       _connect();
+    } else {
+      _state = _ClientState.disconnected;
     }
   }
 
   Future<void> _connect() async {
     try {
+      _state = _ClientState.connecting;
+
       _transport = _transportBuilder(url: _url, headers: _config.headers);
 
       await _transport.open(
@@ -186,6 +193,11 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
       _retryCount = 0;
       _connectController.add(ConnectEvent.from(result));
+
+      for (SubscriptionImpl subscription in _subscriptions.values) {
+        subscription.resubscribeIfNeeded();
+      }
+      _state = _ClientState.connected;
     } catch (ex) {
       _processDisconnect(reason: ex.toString(), reconnect: true);
     }
@@ -229,3 +241,5 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
   }
 }
+
+enum _ClientState { connected, disconnected, connecting }

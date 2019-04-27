@@ -46,6 +46,8 @@ class SubscriptionImpl implements Subscription {
       StreamController<SubscribeErrorEvent>.broadcast();
   final _unsubscribeController = StreamController<UnsubscribeEvent>.broadcast();
 
+  var _state = _SubscriptionState.unsubscribed;
+
   @override
   Stream<PublishEvent> get publishStream => _publishController.stream;
 
@@ -71,12 +73,36 @@ class SubscriptionImpl implements Subscription {
   Future publish(List<int> data) => _client.publish(channel, data);
 
   @override
-  Future subscribe() => _resubscribe(isResubscribed: false);
+  Future subscribe() {
+    _state = _SubscriptionState.subscribed;
+    return _resubscribe(isResubscribed: false);
+  }
+
+  Future resubscribeIfNeeded() {
+    if (_state != _SubscriptionState.subscribed) {
+      return Future<void>.value(null);
+    }
+
+    return _resubscribe(isResubscribed: true);
+  }
 
   @override
   Future unsubscribe() async {
+    if (_state != _SubscriptionState.subscribed) {
+      return Future<void>.value(null);
+    }
+    _state = _SubscriptionState.unsubscribed;
+
     final request = UnsubscribeRequest()..channel = channel;
     await _client.sendMessage(request, UnsubscribeResult());
+    final event = UnsubscribeEvent();
+    addUnsubscribe(event);
+  }
+
+  void sendUnsubscribeEventIfNeeded() {
+    if (_state != _SubscriptionState.subscribed) {
+      return;
+    }
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
@@ -127,3 +153,5 @@ class SubscriptionImpl implements Subscription {
     }
   }
 }
+
+enum _SubscriptionState { subscribed, unsubscribed }

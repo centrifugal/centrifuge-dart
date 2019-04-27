@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
@@ -15,6 +16,7 @@ void main() {
   MockTransport transport;
   ClientConfig config;
   WaitRetry retry;
+  final subscription = (String name) => client.getSubscription(name);
 
   setUp(() {
     transport = MockTransport();
@@ -30,9 +32,9 @@ void main() {
 
   group('Subscription', () {
     test('getSubscription returns valid subscriptions', () {
-      final s1 = client.getSubscription('some_channel');
-      final s2 = client.getSubscription('some_channel');
-      final s3 = client.getSubscription('some_another_channel');
+      final s1 = subscription('some_channel');
+      final s2 = subscription('some_channel');
+      final s3 = subscription('some_another_channel');
 
       expect(s1, same(s2));
       expect(s1.channel, 'some_channel');
@@ -120,10 +122,13 @@ void main() {
     });
 
     test('socket closing triggers the corresponding events', () async {
+      subscription('test one').subscribe();
+
       final unsubscribeOneFuture =
-          client.getSubscription('test one').unsubscribeStream.first;
+          subscription('test one').unsubscribeStream.first;
+
       final unsubscribeTwoFuture =
-          client.getSubscription('test two').unsubscribeStream.first;
+          subscription('test two').unsubscribeStream.first;
 
       final disconnectFuture = client.disconnectStream.first;
 
@@ -135,14 +140,16 @@ void main() {
       expect(disconnect.shouldReconnect, isTrue);
 
       expect(unsubscribeOneFuture, completion(isNotNull));
-      expect(unsubscribeTwoFuture, completion(isNotNull));
+      expect(unsubscribeTwoFuture, doesNotComplete);
     });
 
     test('socket error triggers the corresponding events', () async {
+      subscription('test one').subscribe();
+
       final unsubscribeOneFuture =
-          client.getSubscription('test one').unsubscribeStream.first;
+          subscription('test one').unsubscribeStream.first;
       final unsubscribeTwoFuture =
-          client.getSubscription('test two').unsubscribeStream.first;
+          subscription('test two').unsubscribeStream.first;
 
       final disconnectFuture = client.disconnectStream.first;
 
@@ -154,7 +161,7 @@ void main() {
       expect(disconnect.shouldReconnect, isTrue);
 
       expect(unsubscribeOneFuture, completion(isNotNull));
-      expect(unsubscribeTwoFuture, completion(isNotNull));
+      expect(unsubscribeTwoFuture, doesNotComplete);
     });
 
     test('client doesn\'t reconnect if reconnect = false', () async {
@@ -211,6 +218,123 @@ void main() {
         retryCompleter = Completer<void>.sync();
         transport.completeOpenError('test server not available');
       }
+    });
+
+    test(
+        'client reconnect sends diconnect and unsubscribe events only once for the first error',
+        () async {
+      var countOneChannelSubscribe = 0;
+      var countOneChannelUnsubscribe = 0;
+      var countTwoChannelSubscribe = 0;
+      var countTwoChannelUnsubscribe = 0;
+      var countClientConnect = 0;
+      var countClientDisconnect = 0;
+
+      subscription('test one').subscribe();
+
+      subscription('test one')
+          .unsubscribeStream
+          .listen((_) => countOneChannelUnsubscribe += 1);
+      subscription('test two')
+          .unsubscribeStream
+          .listen((_) => countTwoChannelUnsubscribe += 1);
+
+      subscription('test one')
+          .subscribeSuccessStream
+          .listen((_) => countOneChannelSubscribe += 1);
+      subscription('test two')
+          .subscribeSuccessStream
+          .listen((_) => countTwoChannelSubscribe += 1);
+
+      client.connectStream.listen((_) => countClientConnect += 1);
+      client.disconnectStream.listen((_) => countClientDisconnect += 1);
+
+      Completer<void> retryCompleter = Completer<void>.sync();
+      retry = (c) => retryCompleter.future;
+
+      transport.onError('test error');
+
+      for (var i = 1; i < 20; i++) {
+        retryCompleter.complete();
+        retryCompleter = Completer<void>.sync();
+        transport.completeOpenError('test server not available');
+      }
+
+      await Future<void>.delayed(Duration(milliseconds: 1));
+
+      expect(countClientConnect, 0);
+      expect(countClientDisconnect, 1);
+
+      expect(countOneChannelSubscribe, 0);
+      expect(countOneChannelUnsubscribe, 1);
+
+      expect(countTwoChannelSubscribe, 0);
+      expect(countTwoChannelUnsubscribe, 0);
+    });
+
+    test(
+        'client reconnect notifies client and subscription every success and error',
+        () async {
+      var countOneChannelSubscribe = 0;
+      var countOneChannelUnsubscribe = 0;
+      var countTwoChannelSubscribe = 0;
+      var countTwoChannelUnsubscribe = 0;
+      var countClientConnect = 0;
+      var countClientDisconnect = 0;
+
+      subscription('test one').subscribe();
+
+      subscription('test one')
+          .subscribeSuccessStream
+          .listen((_) => countOneChannelSubscribe += 1);
+      subscription('test one')
+          .unsubscribeStream
+          .listen((_) => countOneChannelUnsubscribe += 1);
+
+      subscription('test two')
+          .subscribeSuccessStream
+          .listen((_) => countTwoChannelSubscribe += 1);
+      subscription('test two')
+          .unsubscribeStream
+          .listen((_) => countTwoChannelUnsubscribe += 1);
+
+      client.connectStream.listen((_) => countClientConnect += 1);
+      client.disconnectStream.listen((_) => countClientDisconnect += 1);
+
+      Completer<void> retryCompleter;
+
+      retry = (c) => retryCompleter.future;
+
+      for (var i = 0; i < 20; i++) {
+        final connectFuture = client.connectStream.first;
+
+        retryCompleter = Completer<void>.sync();
+
+        final disconnect = client.disconnectStream.first;
+        transport.onError('test error');
+        await disconnect;
+
+        retryCompleter.complete();
+        transport.completeOpen();
+        transport.sendListLast<ConnectRequest, ConnectResult>().complete();
+        expect(connectFuture, completion(isNotNull));
+
+        transport.sendList
+            .where((t) => t is Triplet<SubscribeRequest, SubscribeResult>)
+            .where((t) => !t.completer.isCompleted)
+            .forEach((t) => t.complete());
+      }
+
+      await Future<void>.delayed(Duration(milliseconds: 1));
+
+      expect(countClientConnect, 20);
+      expect(countClientDisconnect, 20);
+
+      expect(countOneChannelSubscribe, 21);
+      expect(countOneChannelUnsubscribe, 20);
+
+      expect(countTwoChannelSubscribe, 0);
+      expect(countTwoChannelUnsubscribe, 0);
     });
   });
 }
