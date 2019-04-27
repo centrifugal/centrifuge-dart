@@ -10,10 +10,9 @@ import 'proto/client.pb.dart';
 import 'subscription.dart';
 import 'transport.dart';
 
-Client createClient(String url, {ClientConfig config = const ClientConfig()}) =>
-    ClientImpl(
+Client createClient(String url, {ClientConfig config}) => ClientImpl(
       url,
-      config,
+      config ?? ClientConfig(),
       protobufTransportBuilder,
     );
 
@@ -64,6 +63,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
 
+  _ClientState _state = _ClientState.disconnected;
+
   @override
   Stream<ConnectEvent> get connectStream => _connectController.stream;
 
@@ -75,29 +76,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Future<void> connect() async {
-    _transport = _transportBuilder(url: _url, headers: _config.headers);
-
-    await _transport.open(
-      _onPush,
-      onError: (dynamic error) =>
-          _processDisconnect(reason: error.toString(), shouldReconnect: false),
-      onDone: () => _processDisconnect(reason: 'done', shouldReconnect: false),
-    );
-
-    final request = ConnectRequest();
-    if (_token != null) {
-      request.token = _token;
-    }
-
-    if (_connectData != null) {
-      request.data = _connectData;
-    }
-
-    final result = await _transport.sendMessage(
-      request,
-      ConnectResult(),
-    );
-    _connectController.add(ConnectEvent.from(result));
+    return _connect();
   }
 
   @override
@@ -163,14 +142,65 @@ class ClientImpl implements Client, GeneratedMessageSender {
               Req request, Rep result) =>
           _transport.sendMessage(request, result);
 
-  void _processDisconnect({@required String reason, bool shouldReconnect}) {
-    for (SubscriptionImpl subscription in _subscriptions.values) {
-      final unsubscribe = UnsubscribeEvent();
-      subscription.addUnsubscribe(unsubscribe);
+  int _retryCount;
+
+  void _processDisconnect({@required String reason, bool reconnect}) async {
+    if (_state == _ClientState.connected) {
+      _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
+
+      final disconnect = DisconnectEvent(reason, reconnect);
+      _disconnectController.add(disconnect);
     }
 
-    final disconnect = DisconnectEvent(reason, shouldReconnect);
-    _disconnectController.add(disconnect);
+    if (reconnect) {
+      _state = _ClientState.connecting;
+
+      _retryCount += 1;
+      await _config.retry(_retryCount);
+      _connect();
+    } else {
+      _state = _ClientState.disconnected;
+    }
+  }
+
+  Future<void> _connect() async {
+    try {
+      _state = _ClientState.connecting;
+
+      _transport = _transportBuilder(url: _url, headers: _config.headers);
+
+      await _transport.open(
+        _onPush,
+        onError: (dynamic error) =>
+            _processDisconnect(reason: error.toString(), reconnect: true),
+        onDone: (reason, reconnect) =>
+            _processDisconnect(reason: reason, reconnect: reconnect),
+      );
+
+      final request = ConnectRequest();
+      if (_token != null) {
+        request.token = _token;
+      }
+
+      if (_connectData != null) {
+        request.data = _connectData;
+      }
+
+      final result = await _transport.sendMessage(
+        request,
+        ConnectResult(),
+      );
+
+      _retryCount = 0;
+      _connectController.add(ConnectEvent.from(result));
+
+      for (SubscriptionImpl subscription in _subscriptions.values) {
+        subscription.resubscribeIfNeeded();
+      }
+      _state = _ClientState.connected;
+    } catch (ex) {
+      _processDisconnect(reason: ex.toString(), reconnect: true);
+    }
   }
 
   void _onPush(Push push) {
@@ -211,3 +241,5 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
   }
 }
+
+enum _ClientState { connected, disconnected, connecting }

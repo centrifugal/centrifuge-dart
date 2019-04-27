@@ -13,6 +13,9 @@ class MockWebSocket implements WebSocket {
   final _stubs = <CommandMatcher, SendAction>{};
 
   @override
+  String closeReason;
+
+  @override
   void add(dynamic data) {
     final reader = CodedBufferReader(data);
     final command = Command();
@@ -59,6 +62,13 @@ class MockWebSocket implements WebSocket {
   }
 
   @override
+  Future close([int code, String reason]) {
+    closeReason = reason;
+    onDone();
+    return null;
+  }
+
+  @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -92,17 +102,30 @@ class MockTransport implements Transport {
 
   void Function(Push push) onPush;
   void Function(dynamic) onError;
-  void Function() onDone;
+  void Function(String, bool) onDone;
 
-  final _openCompleter = Completer<void>.sync();
+  Completer<void> _openCompleter;
 
   void completeOpen() {
+    assert(_openCompleter != null);
+
     _openCompleter.complete();
+    _openCompleter = null;
+  }
+
+  void completeOpenError(dynamic error) {
+    assert(_openCompleter != null);
+
+    _openCompleter.completeError(error);
+    _openCompleter = null;
   }
 
   @override
   Future open(void Function(Push push) onPush,
-      {Function onError, void Function() onDone}) {
+      {Function onError, void Function(String, bool) onDone}) {
+    assert(_openCompleter == null);
+    _openCompleter = Completer<void>.sync();
+
     this.onPush = onPush;
     this.onError = onError;
     this.onDone = onDone;

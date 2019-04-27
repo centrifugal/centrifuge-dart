@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/proto/client.pb.dart';
 import 'package:centrifuge/src/subscription.dart';
 import 'package:test/test.dart';
@@ -9,7 +8,7 @@ import 'src/utils.dart';
 
 void main() {
   MockClient client;
-  Subscription subscription;
+  SubscriptionImpl subscription;
 
   setUp(() {
     client = MockClient();
@@ -27,6 +26,71 @@ void main() {
 
     expect(event.isRecovered, isTrue);
     expect(event.isResubscribed, isFalse);
+  });
+
+  test('subscription resubscribes if was subscribed', () async {
+    final subscribeSuccess = subscription.subscribeSuccessStream.first;
+    subscription.subscribe();
+
+    final send = client.sendListLast<SubscribeRequest, SubscribeResult>();
+
+    final expectedLength = client.sendList.length;
+    send.completeWith(send.result..recovered = true);
+
+    await subscribeSuccess;
+
+    subscription.resubscribeIfNeeded();
+
+    expect(client.sendList, hasLength(expectedLength + 1));
+  });
+
+  test('subscription doesn\'t resubscribe if wasn\'t subscribed', () async {
+    final expectedLength = client.sendList.length;
+
+    subscription.resubscribeIfNeeded();
+
+    expect(client.sendList, hasLength(expectedLength));
+  });
+
+  test('subscription unsubscribes if wasn subscribed', () async {
+    final subscribeSuccess = subscription.subscribeSuccessStream.first;
+    final unsubscribe = subscription.unsubscribeStream.first;
+    subscription.subscribe();
+
+    final send = client.sendListLast<SubscribeRequest, SubscribeResult>();
+    send.completeWith(send.result..recovered = true);
+    await subscribeSuccess;
+
+    subscription.unsubscribe();
+    final sendUnsubscribe =
+        client.sendListLast<UnsubscribeRequest, UnsubscribeResult>();
+    sendUnsubscribe.complete();
+    expect(unsubscribe, completion(isNotNull));
+  });
+
+  test('subscription doesn\'t unsubscribe if wasn\'t subscribed', () async {
+    final expectedLength = client.sendList.length;
+
+    subscription.unsubscribe();
+
+    expect(client.sendList, hasLength(expectedLength));
+  });
+
+  test('subscription sends event if was subscribed', () async {
+    final unsubscribe = subscription.unsubscribeStream.first;
+    subscription.subscribe();
+
+    subscription.sendUnsubscribeEventIfNeeded();
+
+    expect(unsubscribe, completion(isNotNull));
+  });
+
+  test('subscription doesn\'t send event if wasn\'t subscribed', () async {
+    final unsubscribe = subscription.unsubscribeStream.first;
+
+    subscription.sendUnsubscribeEventIfNeeded();
+
+    expect(unsubscribe, doesNotComplete);
   });
 
   test('success subscribe triggers publish events', () async {
