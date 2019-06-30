@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'client.dart';
+import 'error.dart' as errors;
 import 'events.dart';
 import 'proto/client.pb.dart';
 
@@ -138,8 +139,8 @@ class SubscriptionImpl implements Subscription {
       _onSubscribeSuccess(event);
       _recover(result);
     } catch (exception) {
-      if (exception is Error) {
-        _onSubscribeError(SubscribeErrorEvent.from(exception));
+      if (exception is errors.Error) {
+        _onSubscribeError(SubscribeErrorEvent.from(exception.code, exception.message));
       } else {
         _onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
       }

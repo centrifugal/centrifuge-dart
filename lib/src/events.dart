@@ -135,8 +135,8 @@ class SubscribeErrorEvent {
   final String message;
   final int code;
 
-  static SubscribeErrorEvent from(proto.Error error) =>
-      SubscribeErrorEvent(error.message, error.code);
+  static SubscribeErrorEvent from(int code, String message) =>
+      SubscribeErrorEvent(message, code);
 
   @override
   String toString() {
