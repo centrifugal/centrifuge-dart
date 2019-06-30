@@ -96,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _subscribe() async {
     final channel = 'chat:index';
     _subscription = _centrifuge.getSubscription(channel);
-    await _subscription.subscribe();
 
     _subscription.subscribeErrorStream.listen(_show);
     _subscription.subscribeSuccessStream.listen(_show);
@@ -135,6 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
       final item = _ChatItem(title: message, subtitle: 'User: user');
       onNewItem(item);
     });
+
+    await _subscription.subscribe();
   }
 
   void _show(dynamic error) {
