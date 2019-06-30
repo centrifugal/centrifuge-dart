@@ -135,9 +135,6 @@ class SubscribeErrorEvent {
   final String message;
   final int code;
 
-  static SubscribeErrorEvent from(int code, String message) =>
-      SubscribeErrorEvent(message, code);
-
   @override
   String toString() {
     return 'SubscribeErrorEvent{message: $message, code: $code}';

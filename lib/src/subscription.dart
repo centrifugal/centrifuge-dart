@@ -141,7 +141,7 @@ class SubscriptionImpl implements Subscription {
     } catch (exception) {
       if (exception is errors.Error) {
         _onSubscribeError(
-            SubscribeErrorEvent.from(exception.code, exception.message));
+            SubscribeErrorEvent(exception.message, exception.code));
       } else {
         _onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
       }
