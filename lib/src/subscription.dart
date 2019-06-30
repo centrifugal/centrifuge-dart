@@ -140,7 +140,8 @@ class SubscriptionImpl implements Subscription {
       _recover(result);
     } catch (exception) {
       if (exception is errors.Error) {
-        _onSubscribeError(SubscribeErrorEvent.from(exception.code, exception.message));
+        _onSubscribeError(
+            SubscribeErrorEvent.from(exception.code, exception.message));
       } else {
         _onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
       }
