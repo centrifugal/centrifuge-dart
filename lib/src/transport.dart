@@ -23,9 +23,9 @@ Transport protobufTransportBuilder(
 
   final transport = Transport(
     () => WebSocket.connect(
-          url,
-          headers: headers,
-        ),
+      url,
+      headers: headers,
+    ),
     commandEncoder,
     replyDecoder,
   );

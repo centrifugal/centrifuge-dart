@@ -165,7 +165,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
               Req request, Rep result) =>
           _transport.sendMessage(request, result);
 
-  int _retryCount;
+  int _retryCount = 0;
 
   void _processDisconnect({@required String reason, bool reconnect}) async {
     if (_state == _ClientState.disconnected) {
@@ -181,7 +181,6 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
     if (reconnect) {
       _state = _ClientState.connecting;
-
       _retryCount += 1;
       await _config.retry(_retryCount);
       _connect();

@@ -26,15 +26,15 @@ await client.connect();
 Subscribe to channel:
 ```dart
 final subscription = client.getSubscription(channel);
-await subscription.subscribe();
 
 subscription.publishStream.listen(onEvent);
 subscription.joinStream.listen(onEvent);  
 subscription.leaveStream.listen(onEvent);
-
 subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
+
+await subscription.subscribe();
 ```
 Subscribe to private channel:
 ```dart

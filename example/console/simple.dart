@@ -5,7 +5,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  final channel = 'chat';
+  final channel = 'chat:index';
 
   final onEvent = (dynamic event) {
     print('$channel> $event');
@@ -22,10 +22,11 @@ void main() async {
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
 
+    // Uncomment to use example token based on secret key `secret`.
+    // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
     await client.connect();
 
     final subscription = client.getSubscription(channel);
-    await subscription.subscribe();
 
     subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
     subscription.joinStream.listen(onEvent);
@@ -34,6 +35,8 @@ void main() async {
     subscription.subscribeSuccessStream.listen(onEvent);
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
+
+    await subscription.subscribe();
 
     final handler = _handleUserInput(client, subscription);
 
