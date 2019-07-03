@@ -36,6 +36,7 @@ subscription.unsubscribeStream.listen(onEvent);
 
 await subscription.subscribe();
 ```
+
 Publish:
 ```dart
 final output = jsonEncode({'input': message});

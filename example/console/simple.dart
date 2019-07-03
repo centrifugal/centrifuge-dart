@@ -5,7 +5,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  final channel = '\$chat:index';
+  final channel = 'chat:index';
 
   final onEvent = (dynamic event) {
     print('$channel> $event');

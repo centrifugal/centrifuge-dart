@@ -145,12 +145,11 @@ class SubscriptionImpl implements Subscription {
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
       _recover(result);
-    } catch (exception, st) {
+    } catch (exception) {
       if (exception is errors.Error) {
         _onSubscribeError(
             SubscribeErrorEvent(exception.message, exception.code));
       } else {
-        print(st);
         _onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
       }
     }
