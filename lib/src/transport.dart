@@ -11,21 +11,31 @@ import 'proto/client.pb.dart' hide Error;
 
 typedef Transport TransportBuilder({
   @required String url,
-  @required Map<String, dynamic> headers,
+  @required TransportConfig config,
 });
 
 typedef Future<WebSocket> WebSocketBuilder();
 
+class TransportConfig {
+  TransportConfig(
+      {this.pingInterval = const Duration(seconds: 25),
+      this.headers = const <String, dynamic>{}});
+
+  final Duration pingInterval;
+  final Map<String, dynamic> headers;
+}
+
 Transport protobufTransportBuilder(
-    {@required String url, @required Map<String, dynamic> headers}) {
+    {@required String url, @required TransportConfig config}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
   final transport = Transport(
     () => WebSocket.connect(
       url,
-      headers: headers,
+      headers: config.headers,
     ),
+    config,
     commandEncoder,
     replyDecoder,
   );
@@ -40,17 +50,21 @@ abstract class GeneratedMessageSender {
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._commandEncoder, this._replyDecoder);
+  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
   WebSocket _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
+  final TransportConfig _config;
 
   Future open(void onPush(Push push),
       {Function onError,
       void onDone(String reason, bool shouldReconnect)}) async {
     _socket = await _socketBuilder();
+    if (_config.pingInterval != Duration.zero) {
+      _socket.pingInterval = _config.pingInterval;
+    }
 
     _socket.listen(
       _onData(onPush),
@@ -90,6 +104,9 @@ class Transport implements GeneratedMessageSender {
     _completers[command.id] = completer;
 
     final data = _commandEncoder.convert(command);
+    if (_socket == null) {
+      throw centrifuge.ClientDisconnectedError;
+    }
     _socket.add(data);
 
     return completer.future;

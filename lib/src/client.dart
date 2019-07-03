@@ -35,6 +35,8 @@ abstract class Client {
   /// To remove previous token, call with null.
   void setToken(String token);
 
+  bool connected();
+
   /// Set data for connection request.
   ///
   /// Whenever the client connects to a server, it adds connectData to the
@@ -79,7 +81,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   final String _url;
   ClientConfig _config;
+  ClientConfig get config => _config;
   List<int> _connectData;
+  String _clientID;
+  String get id => _clientID;
 
   final _connectController = StreamController<ConnectEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
@@ -100,6 +105,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Future<void> connect() async {
     return _connect();
   }
+
+  @override
+  bool connected() => _state == _ClientState.connected;
 
   @override
   void setToken(String token) => _token = token;
@@ -130,7 +138,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Future<void> disconnect() async {
-    _processDisconnect(reason: 'Manual disconnect', reconnect: false);
+    _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
   }
 
@@ -171,6 +179,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
     if (_state == _ClientState.disconnected) {
       return;
     }
+    _clientID = '';
 
     if (_state == _ClientState.connected) {
       _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
@@ -193,7 +202,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
     try {
       _state = _ClientState.connecting;
 
-      _transport = _transportBuilder(url: _url, headers: _config.headers);
+      _transport = _transportBuilder(url: _url, config: TransportConfig(headers: _config.headers, pingInterval: _config.pingInterval));
 
       await _transport.open(
         _onPush,
@@ -217,13 +226,14 @@ class ClientImpl implements Client, GeneratedMessageSender {
         ConnectResult(),
       );
 
+      _clientID = result.client;
       _retryCount = 0;
+      _state = _ClientState.connected;
       _connectController.add(ConnectEvent.from(result));
 
       for (SubscriptionImpl subscription in _subscriptions.values) {
         subscription.resubscribeIfNeeded();
       }
-      _state = _ClientState.connected;
     } catch (ex) {
       _processDisconnect(reason: ex.toString(), reconnect: true);
     }

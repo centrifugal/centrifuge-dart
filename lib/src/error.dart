@@ -10,3 +10,11 @@ class Error {
     return 'Error{code: $code, message: $message}';
   }
 }
+
+class ClientDisconnectedError {
+
+  @override
+  String toString() {
+    return 'Client disconnected';
+  }
+}

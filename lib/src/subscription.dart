@@ -76,6 +76,9 @@ class SubscriptionImpl implements Subscription {
   @override
   Future subscribe() {
     _state = _SubscriptionState.subscribed;
+    if (!_client.connected()) {
+        return Future<void>.value(null);
+    }
     return _resubscribe(isResubscribed: false);
   }
 
@@ -83,7 +86,6 @@ class SubscriptionImpl implements Subscription {
     if (_state != _SubscriptionState.subscribed) {
       return Future<void>.value(null);
     }
-
     return _resubscribe(isResubscribed: true);
   }
 
@@ -133,16 +135,22 @@ class SubscriptionImpl implements Subscription {
 
   Future _resubscribe({@required bool isResubscribed}) async {
     try {
-      final request = SubscribeRequest()..channel = channel;
+      final request = SubscribeRequest()
+        ..channel = channel;
+      if (channel.startsWith(_client.config.privateChannelPrefix)) {
+        final token = _client.config.onPrivateSub(PrivateSubEvent(_client.id, channel));
+        request..token = token;
+      }
       final result = await _client.sendMessage(request, SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
       _recover(result);
-    } catch (exception) {
+    } catch (exception, st) {
       if (exception is errors.Error) {
         _onSubscribeError(
             SubscribeErrorEvent(exception.message, exception.code));
       } else {
+        print(st);
         _onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
       }
     }

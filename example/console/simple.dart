@@ -5,7 +5,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  final channel = 'chat:index';
+  final channel = '\$chat:index';
 
   final onEvent = (dynamic event) {
     print('$channel> $event');
@@ -16,6 +16,9 @@ void main() async {
       url,
       config: centrifuge.ClientConfig(
         headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
+        onPrivateSub: (centrifuge.PrivateSubEvent event) {
+          return '<SUBSCRIPTION JWT>';
+        }
       ),
     );
 
@@ -24,7 +27,7 @@ void main() async {
 
     // Uncomment to use example token based on secret key `secret`.
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
-    await client.connect();
+    client.connect();
 
     final subscription = client.getSubscription(channel);
 
@@ -36,7 +39,7 @@ void main() async {
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
 
-    await subscription.subscribe();
+    subscription.subscribe();
 
     final handler = _handleUserInput(client, subscription);
 
@@ -68,7 +71,11 @@ Function(String) _handleUserInput(
       default:
         final output = jsonEncode({'input': message});
         final data = utf8.encode(output);
-        await subscription.publish(data);
+        try {
+          await subscription.publish(data);
+        } catch (ClientDisconnectedError) {
+          print("can't publish: client not connected");
+        }
         break;
     }
     return;
