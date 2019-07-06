@@ -283,14 +283,13 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Future<String> getToken(String channel) async {
     if (_isPrivateChannel(channel)) {
       final event = PrivateSubEvent(_clientID, channel);
-      return await onPrivateSub(event);
+      return onPrivateSub(event);
     }
-    return Future.value(null);
+    return null;
   }
 
-  Future<String> onPrivateSub(PrivateSubEvent event) {
-      return _config.onPrivateSub(event);
-  }
+  Future<String> onPrivateSub(PrivateSubEvent event) =>
+      _config.onPrivateSub(event);
 
   bool _isPrivateChannel(String channel) =>
       channel.startsWith(_config.privateChannelPrefix);

@@ -39,6 +39,4 @@ WaitRetry _defaultRetry(int maxReconnectDelay) => (int count) {
       return Future<void>.delayed(Duration(seconds: seconds));
     };
 
-Future<String> _defaultPrivateSubCallback(PrivateSubEvent event) {
-    return Future.value("");
-}
+Future<String> _defaultPrivateSubCallback(PrivateSubEvent event) => Future.value("");
