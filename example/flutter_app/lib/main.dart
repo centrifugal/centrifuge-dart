@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _connect() async {
     try {
-      await _centrifuge.connect();
+      _centrifuge.connect();
     } catch (exception) {
       _show(exception);
     }
@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
       onNewItem(item);
     });
 
-    await _subscription.subscribe();
+    _subscription.subscribe();
   }
 
   void _show(dynamic error) {

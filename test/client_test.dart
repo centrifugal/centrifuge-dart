@@ -72,7 +72,8 @@ void main() {
     test('connect sends request and emits connect event', () async {
       final eventFuture = client.connectStream.first;
 
-      final connectFinish = client.connect();
+      final connectFinish = client.connectStream.first;
+      client.connect();
       transport.completeOpen();
 
       final send = transport.sendListLast<ConnectRequest, ConnectResult>();

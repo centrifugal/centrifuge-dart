@@ -25,7 +25,7 @@ abstract class Client {
 
   /// Connect to the server.
   ///
-  Future<void> connect();
+  void connect();
 
   /// Set token for connection request.
   ///
@@ -58,7 +58,7 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  Future<void> disconnect();
+  void disconnect();
 
   /// Get subscription to the channel.
   ///
@@ -67,7 +67,7 @@ abstract class Client {
   Subscription getSubscription(String channel);
 
   @alwaysThrows
-  Future<void> removeSubscription(Subscription subscription);
+  void removeSubscription(Subscription subscription);
 }
 
 class ClientImpl implements Client, GeneratedMessageSender {
@@ -86,8 +86,6 @@ class ClientImpl implements Client, GeneratedMessageSender {
   List<int> _connectData;
   String _clientID;
 
-  String get id => _clientID;
-
   final _connectController = StreamController<ConnectEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
@@ -104,7 +102,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  Future<void> connect() async {
+  void connect() async {
     return _connect();
   }
 
@@ -139,7 +137,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  Future<void> disconnect() async {
+  void disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
   }
@@ -284,7 +282,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   String getToken(String channel) {
     if (_isPrivateChannel(channel)) {
-      final event = PrivateSubEvent(id, channel);
+      final event = PrivateSubEvent(_clientID, channel);
       return onPrivateSub(event);
     }
     return null;

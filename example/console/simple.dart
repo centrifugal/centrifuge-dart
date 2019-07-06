@@ -52,28 +52,28 @@ void main() async {
 }
 
 Function(String) _handleUserInput(
-    centrifuge.Client centrifuge, centrifuge.Subscription subscription) {
+    centrifuge.Client client, centrifuge.Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
-        await subscription.subscribe();
+        subscription.subscribe();
         break;
       case '#unsubscribe':
-        await subscription.unsubscribe();
+        subscription.unsubscribe();
         break;
       case '#connect':
-        await centrifuge.connect();
+        client.connect();
         break;
       case '#disconnect':
-        await centrifuge.disconnect();
+        client.disconnect();
         break;
       default:
         final output = jsonEncode({'input': message});
         final data = utf8.encode(output);
         try {
           await subscription.publish(data);
-        } catch (ClientDisconnectedError) {
-          print("can't publish: client not connected");
+        } catch (ex) {
+          print("can't publish: $ex");
         }
         break;
     }

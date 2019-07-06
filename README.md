@@ -21,7 +21,7 @@ Note that `?format=protobuf` is required because this library only works with Pr
 
 Connect to server:
 ```dart
-await client.connect();
+client.connect();
 ```
 Subscribe to channel:
 ```dart
@@ -34,7 +34,7 @@ subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
 
-await subscription.subscribe();
+subscription.subscribe();
 ```
 
 Publish:

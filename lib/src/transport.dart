@@ -83,7 +83,6 @@ class Transport implements GeneratedMessageSender {
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
           Req request, Rep result) async {
     final command = _createCommand(request);
-
     final reply = await _sendCommand(command);
 
     final filledResult = _processResult(result, reply);
