@@ -139,9 +139,11 @@ class SubscriptionImpl implements Subscription {
 
   Future _resubscribe({@required bool isResubscribed}) async {
     try {
+      final token = await _client.getToken(channel);
+
       final request = SubscribeRequest()
         ..channel = channel
-        ..token = _client.getToken(channel) ?? '';
+        ..token = token ?? '';
 
       final result = await _client.sendMessage(request, SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);

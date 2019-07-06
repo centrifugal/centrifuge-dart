@@ -32,13 +32,13 @@ class ClientConfig {
 
 typedef WaitRetry = Future Function(int);
 
-typedef PrivateSubCallback = String Function(PrivateSubEvent);
+typedef PrivateSubCallback = Function(PrivateSubEvent, Completer<String>);
 
 WaitRetry _defaultRetry(int maxReconnectDelay) => (int count) {
       final seconds = min(0.5 * pow(2, count), maxReconnectDelay).toInt();
       return Future<void>.delayed(Duration(seconds: seconds));
     };
 
-String _defaultPrivateSubCallback(PrivateSubEvent event) {
-  throw UnimplementedError();
+void _defaultPrivateSubCallback(PrivateSubEvent event, Completer<String> completer) {
+  completer.complete("");
 }
