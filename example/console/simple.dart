@@ -17,8 +17,8 @@ void main() async {
       url,
       config: centrifuge.ClientConfig(
           headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
-          onPrivateSub: (centrifuge.PrivateSubEvent event, Completer<String> completer) {
-            completer.complete('<SUBSCRIPTION JWT>');
+          onPrivateSub: (centrifuge.PrivateSubEvent event) {
+            return Future.value('<SUBSCRIPTION JWT>');
           }),
     );
 
