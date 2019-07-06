@@ -35,7 +35,7 @@ abstract class Client {
   /// To remove previous token, call with null.
   void setToken(String token);
 
-  bool connected();
+  bool get connected;
 
   /// Set data for connection request.
   ///
@@ -81,9 +81,11 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   final String _url;
   ClientConfig _config;
+
   ClientConfig get config => _config;
   List<int> _connectData;
   String _clientID;
+
   String get id => _clientID;
 
   final _connectController = StreamController<ConnectEvent>.broadcast();
@@ -107,7 +109,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  bool connected() => _state == _ClientState.connected;
+  bool get connected => _state == _ClientState.connected;
 
   @override
   void setToken(String token) => _token = token;
@@ -202,7 +204,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
     try {
       _state = _ClientState.connecting;
 
-      _transport = _transportBuilder(url: _url, config: TransportConfig(headers: _config.headers, pingInterval: _config.pingInterval));
+      _transport = _transportBuilder(
+          url: _url,
+          config: TransportConfig(
+              headers: _config.headers, pingInterval: _config.pingInterval));
 
       await _transport.open(
         _onPush,
@@ -276,6 +281,19 @@ class ClientImpl implements Client, GeneratedMessageSender {
         break;
     }
   }
+
+  String getToken(String channel) {
+    if (_isPrivateChannel(channel)) {
+      final event = PrivateSubEvent(id, channel);
+      return onPrivateSub(event);
+    }
+    return null;
+  }
+
+  String onPrivateSub(PrivateSubEvent event) => _config.onPrivateSub(event);
+
+  bool _isPrivateChannel(String channel) =>
+      channel.startsWith(_config.privateChannelPrefix);
 }
 
 enum _ClientState { connected, disconnected, connecting }

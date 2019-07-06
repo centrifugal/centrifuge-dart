@@ -13,20 +13,22 @@ void main() {
 
   Client client;
   MockTransport transport;
-  ClientConfig config;
+  ClientConfig clientConfig;
   WaitRetry retry;
+
   final subscription = (String name) => client.getSubscription(name);
 
   setUp(() {
     transport = MockTransport();
-    config = ClientConfig(retry: (count) => retry?.call(count));
+    clientConfig = ClientConfig(retry: (count) => retry?.call(count));
 
     client = ClientImpl(
-        url,
-        config,
-        ({url, headers}) => transport
-          ..url = url
-          ..headers = headers);
+      url,
+      clientConfig,
+      ({url, config}) => transport
+        ..url = url
+        ..transportConfig = config,
+    );
   });
 
   group('Subscription', () {
@@ -50,7 +52,7 @@ void main() {
       transport.completeOpen();
 
       expect(transport.url, equals(url));
-      expect(transport.headers, same(config.headers));
+      expect(transport.transportConfig.headers, same(clientConfig.headers));
     });
     test('connect sends request with data and token', () async {
       client.setToken('test token');

@@ -12,6 +12,7 @@ void main() {
 
   setUp(() {
     client = MockClient();
+    client.connected = true;
     subscription = SubscriptionImpl('test channel', client);
   });
 

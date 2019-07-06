@@ -12,7 +12,6 @@ class Error {
 }
 
 class ClientDisconnectedError {
-
   @override
   String toString() {
     return 'Client disconnected';

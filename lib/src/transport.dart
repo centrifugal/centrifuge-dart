@@ -50,7 +50,8 @@ abstract class GeneratedMessageSender {
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder);
+  Transport(this._socketBuilder, this._config, this._commandEncoder,
+      this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
   WebSocket _socket;
@@ -104,9 +105,11 @@ class Transport implements GeneratedMessageSender {
     _completers[command.id] = completer;
 
     final data = _commandEncoder.convert(command);
+
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
+
     _socket.add(data);
 
     return completer.future;

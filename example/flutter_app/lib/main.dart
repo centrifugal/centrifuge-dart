@@ -60,15 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
           PopupMenuButton<Function>(
             onSelected: (f) => f(),
             itemBuilder: (context) => <PopupMenuItem<Function>>[
-                  PopupMenuItem(
-                    value: () => _connect(),
-                    child: Text('Connect'),
-                  ),
-                  PopupMenuItem(
-                    value: () => _subscribe(),
-                    child: Text('Subscribe'),
-                  ),
-                ],
+              PopupMenuItem(
+                value: () => _connect(),
+                child: Text('Connect'),
+              ),
+              PopupMenuItem(
+                value: () => _subscribe(),
+                child: Text('Subscribe'),
+              ),
+            ],
           )
         ],
       ),
@@ -142,10 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog<AlertDialog>(
       context: context,
       builder: (_) => AlertDialog(
-            content: Text(
-              error.toString(),
-            ),
-          ),
+        content: Text(
+          error.toString(),
+        ),
+      ),
     );
   }
 }

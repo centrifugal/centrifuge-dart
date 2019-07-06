@@ -40,5 +40,5 @@ WaitRetry _defaultRetry(int maxReconnectDelay) => (int count) {
     };
 
 String _defaultPrivateSubCallback(PrivateSubEvent event) {
-    throw UnimplementedError();
-    }
+  throw UnimplementedError();
+}

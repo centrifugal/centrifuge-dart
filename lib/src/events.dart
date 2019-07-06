@@ -58,8 +58,7 @@ class PublishEvent {
 
   final List<int> data;
 
-  static PublishEvent from(proto.Publication pub) =>
-      PublishEvent(pub.data);
+  static PublishEvent from(proto.Publication pub) => PublishEvent(pub.data);
 
   @override
   String toString() {
@@ -72,8 +71,7 @@ class HistoryEvent {
 
   final List<int> data;
 
-  static HistoryEvent from(proto.Publication pub) =>
-      HistoryEvent(pub.data);
+  static HistoryEvent from(proto.Publication pub) => HistoryEvent(pub.data);
 
   @override
   String toString() {

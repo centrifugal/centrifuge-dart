@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/transport.dart';
@@ -11,6 +12,9 @@ class MockWebSocket implements WebSocket {
   final List<Command> commands = <Command>[];
 
   final _stubs = <CommandMatcher, SendAction>{};
+
+  @override
+  Duration pingInterval;
 
   @override
   String closeReason;
@@ -92,7 +96,7 @@ CommandMatcher withMethod(MethodType type) =>
 
 class MockTransport implements Transport {
   String url;
-  Map<String, dynamic> headers;
+  TransportConfig transportConfig;
 
   @override
   Future close() {
@@ -182,4 +186,10 @@ class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
   int get hashCode => request.hashCode ^ completer.hashCode ^ result.hashCode;
 }
 
-class MockClient extends Mock with MockTransport implements ClientImpl {}
+class MockClient extends Mock with MockTransport implements ClientImpl {
+  @override
+  ClientConfig config;
+
+  @override
+  bool connected;
+}

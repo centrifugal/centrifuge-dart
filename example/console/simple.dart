@@ -15,11 +15,10 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       config: centrifuge.ClientConfig(
-        headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
-        onPrivateSub: (centrifuge.PrivateSubEvent event) {
-          return '<SUBSCRIPTION JWT>';
-        }
-      ),
+          headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
+          onPrivateSub: (centrifuge.PrivateSubEvent event) {
+            return '<SUBSCRIPTION JWT>';
+          }),
     );
 
     client.connectStream.listen(onEvent);
