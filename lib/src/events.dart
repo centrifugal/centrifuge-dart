@@ -54,32 +54,28 @@ class MessageEvent {
 }
 
 class PublishEvent {
-  PublishEvent(this.uid, this.data);
+  PublishEvent(this.data);
 
-  final String uid;
   final List<int> data;
 
-  static PublishEvent from(proto.Publication pub) =>
-      PublishEvent(pub.uid, pub.data);
+  static PublishEvent from(proto.Publication pub) => PublishEvent(pub.data);
 
   @override
   String toString() {
-    return 'PublishEvent{uid: $uid, data: $data}';
+    return 'PublishEvent{data: $data}';
   }
 }
 
 class HistoryEvent {
-  HistoryEvent(this.uid, this.data);
+  HistoryEvent(this.data);
 
-  final String uid;
   final List<int> data;
 
-  static HistoryEvent from(proto.Publication pub) =>
-      HistoryEvent(pub.uid, pub.data);
+  static HistoryEvent from(proto.Publication pub) => HistoryEvent(pub.data);
 
   @override
   String toString() {
-    return 'HistoryEvent{uid: $uid, data: $data}';
+    return 'HistoryEvent{data: $data}';
   }
 }
 

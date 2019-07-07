@@ -60,15 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
           PopupMenuButton<Function>(
             onSelected: (f) => f(),
             itemBuilder: (context) => <PopupMenuItem<Function>>[
-                  PopupMenuItem(
-                    value: () => _connect(),
-                    child: Text('Connect'),
-                  ),
-                  PopupMenuItem(
-                    value: () => _subscribe(),
-                    child: Text('Subscribe'),
-                  ),
-                ],
+              PopupMenuItem(
+                value: () => _connect(),
+                child: Text('Connect'),
+              ),
+              PopupMenuItem(
+                value: () => _subscribe(),
+                child: Text('Subscribe'),
+              ),
+            ],
           )
         ],
       ),
@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _connect() async {
     try {
-      await _centrifuge.connect();
+      _centrifuge.connect();
     } catch (exception) {
       _show(exception);
     }
@@ -135,17 +135,17 @@ class _MyHomePageState extends State<MyHomePage> {
       onNewItem(item);
     });
 
-    await _subscription.subscribe();
+    _subscription.subscribe();
   }
 
   void _show(dynamic error) {
     showDialog<AlertDialog>(
       context: context,
       builder: (_) => AlertDialog(
-            content: Text(
-              error.toString(),
-            ),
-          ),
+        content: Text(
+          error.toString(),
+        ),
+      ),
     );
   }
 }

@@ -21,7 +21,7 @@ Note that `?format=protobuf` is required because this library only works with Pr
 
 Connect to server:
 ```dart
-await client.connect();
+client.connect();
 ```
 Subscribe to channel:
 ```dart
@@ -34,12 +34,9 @@ subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
 
-await subscription.subscribe();
+subscription.subscribe();
 ```
-Subscribe to private channel:
-```dart
-final privateSubscription = client.subscribe(channel, token: 'token');
-```
+
 Publish:
 ```dart
 final output = jsonEncode({'input': message});
@@ -70,7 +67,7 @@ await subscription.publish(data);
 - [x] handle asynchronous messages from server
 - [x] send RPC commands
 - [x] publish to channel without being subscribed
-- [ ] subscribe to private channels with JWT
+- [x] subscribe to private channels with JWT
 - [ ] connection JWT refresh
 - [ ] private channel subscription JWT refresh
 - [ ] handle connection expired error

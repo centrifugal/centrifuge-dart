@@ -25,6 +25,7 @@ void main() {
 
     transport = Transport(
       () => Future.value(webSocket),
+      TransportConfig(),
       ProtobufCommandEncoder(),
       ProtobufReplyDecoder(),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,8 +16,10 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       config: centrifuge.ClientConfig(
-        headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
-      ),
+          headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
+          onPrivateSub: (centrifuge.PrivateSubEvent event) {
+            return Future.value('<SUBSCRIPTION JWT>');
+          }),
     );
 
     client.connectStream.listen(onEvent);
@@ -24,7 +27,7 @@ void main() async {
 
     // Uncomment to use example token based on secret key `secret`.
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
-    await client.connect();
+    client.connect();
 
     final subscription = client.getSubscription(channel);
 
@@ -36,7 +39,7 @@ void main() async {
     subscription.subscribeErrorStream.listen(onEvent);
     subscription.unsubscribeStream.listen(onEvent);
 
-    await subscription.subscribe();
+    subscription.subscribe();
 
     final handler = _handleUserInput(client, subscription);
 
@@ -50,25 +53,29 @@ void main() async {
 }
 
 Function(String) _handleUserInput(
-    centrifuge.Client centrifuge, centrifuge.Subscription subscription) {
+    centrifuge.Client client, centrifuge.Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
-        await subscription.subscribe();
+        subscription.subscribe();
         break;
       case '#unsubscribe':
-        await subscription.unsubscribe();
+        subscription.unsubscribe();
         break;
       case '#connect':
-        await centrifuge.connect();
+        client.connect();
         break;
       case '#disconnect':
-        await centrifuge.disconnect();
+        client.disconnect();
         break;
       default:
         final output = jsonEncode({'input': message});
         final data = utf8.encode(output);
-        await subscription.publish(data);
+        try {
+          await subscription.publish(data);
+        } catch (ex) {
+          print("can't publish: $ex");
+        }
         break;
     }
     return;

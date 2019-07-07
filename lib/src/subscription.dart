@@ -22,9 +22,9 @@ abstract class Subscription {
 
   Stream<UnsubscribeEvent> get unsubscribeStream;
 
-  Future subscribe();
+  void subscribe();
 
-  Future unsubscribe();
+  void unsubscribe();
 
   Future publish(List<int> data);
 
@@ -74,25 +74,31 @@ class SubscriptionImpl implements Subscription {
   Future publish(List<int> data) => _client.publish(channel, data);
 
   @override
-  Future subscribe() {
+  void subscribe() {
     _state = _SubscriptionState.subscribed;
-    return _resubscribe(isResubscribed: false);
+    if (!_client.connected) {
+      return;
+    }
+    _resubscribe(isResubscribed: false);
   }
 
-  Future resubscribeIfNeeded() {
+  void resubscribeIfNeeded() {
     if (_state != _SubscriptionState.subscribed) {
-      return Future<void>.value(null);
+      return null;
     }
-
-    return _resubscribe(isResubscribed: true);
+    _resubscribe(isResubscribed: true);
   }
 
   @override
-  Future unsubscribe() async {
+  void unsubscribe() async {
     if (_state != _SubscriptionState.subscribed) {
-      return Future<void>.value(null);
+      return;
     }
     _state = _SubscriptionState.unsubscribed;
+
+    if (!_client.connected) {
+      return;
+    }
 
     final request = UnsubscribeRequest()..channel = channel;
     await _client.sendMessage(request, UnsubscribeResult());
@@ -133,7 +139,11 @@ class SubscriptionImpl implements Subscription {
 
   Future _resubscribe({@required bool isResubscribed}) async {
     try {
-      final request = SubscribeRequest()..channel = channel;
+      final token = await _client.getToken(channel);
+      final request = SubscribeRequest()
+        ..channel = channel
+        ..token = token ?? '';
+
       final result = await _client.sendMessage(request, SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
