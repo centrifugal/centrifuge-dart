@@ -186,7 +186,7 @@ class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
   int get hashCode => request.hashCode ^ completer.hashCode ^ result.hashCode;
 }
 
-class MockClient extends Mock with MockTransport implements ClientImpl {
+class MockClient extends Mock implements ClientImpl {
   @override
   ClientConfig config;
 

@@ -8,7 +8,7 @@ author: German Saprykin <saprykin.h@gmail.com>
 homepage: http://github.com/centrifugal/centrifuge-dart
 
 environment:
- sdk: '>=2.0.0  <3.0.0'
+ sdk: '>=2.1.0  <3.0.0'
 
 dependencies:
  meta: ^1.1.5
