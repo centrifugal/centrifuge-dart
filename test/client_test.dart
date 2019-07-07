@@ -343,7 +343,7 @@ void main() {
       expect(countClientConnect, 20);
       expect(countClientDisconnect, 20);
 
-      expect(countOneChannelSubscribe, 21);
+      expect(countOneChannelSubscribe, 20);
       expect(countOneChannelUnsubscribe, 20);
 
       expect(countTwoChannelSubscribe, 0);

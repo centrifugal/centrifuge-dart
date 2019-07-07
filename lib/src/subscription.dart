@@ -74,19 +74,19 @@ class SubscriptionImpl implements Subscription {
   Future publish(List<int> data) => _client.publish(channel, data);
 
   @override
-  void subscribe() async {
+  void subscribe() {
     _state = _SubscriptionState.subscribed;
     if (!_client.connected) {
       return;
     }
-    await _resubscribe(isResubscribed: false);
+    _resubscribe(isResubscribed: false);
   }
 
-  Future resubscribeIfNeeded() {
+  void resubscribeIfNeeded() {
     if (_state != _SubscriptionState.subscribed) {
-      return Future<void>.value(null);
+      return null;
     }
-    return _resubscribe(isResubscribed: true);
+    _resubscribe(isResubscribed: true);
   }
 
   @override
