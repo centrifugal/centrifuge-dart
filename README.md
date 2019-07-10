@@ -72,7 +72,7 @@ await subscription.publish(data);
 - [ ] private channel subscription JWT refresh
 - [ ] handle connection expired error
 - [ ] handle subscription expired error
-- [ ] ping/pong to find broken connection
+- [x] ping/pong to find broken connection
 - [ ] message recovery mechanism
 
 ## Author
