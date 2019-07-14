@@ -35,8 +35,6 @@ abstract class Client {
   /// To remove previous token, call with null.
   void setToken(String token);
 
-  bool get connected;
-
   /// Set data for connection request.
   ///
   /// Whenever the client connects to a server, it adds connectData to the

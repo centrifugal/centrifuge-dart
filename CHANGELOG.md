@@ -1,3 +1,6 @@
+## [0.4.0]
+* **Breaking changes** `connected` property removed
+
 ## [0.3.0]
 * **Breaking changes** Changed API to avoid returning futures where they do not make sense – in `connect` and `subscribe` methods.
 * Client now uses Websocket Ping/Pong frames to find broken connection
