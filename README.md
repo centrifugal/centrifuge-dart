@@ -23,7 +23,19 @@ Connect to server:
 ```dart
 client.connect();
 ```
+
+Note that `.connect()` method is asynchronous. This means that client will be properly connected and authenticated on server at some point in future. To handle connect and disconnect events you can listen to `connectStream` and `disconnectStream`:
+
+```dart
+client.connectStream.listen(onEvent);
+client.disconnectStream.listen(onEvent);
+client.connect();
+```
+
+Connect and disconnect events can happen many times throughout client lifetime.
+
 Subscribe to channel:
+
 ```dart
 final subscription = client.getSubscription(channel);
 
