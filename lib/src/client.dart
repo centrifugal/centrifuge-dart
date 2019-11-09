@@ -104,7 +104,6 @@ class ClientImpl implements Client, GeneratedMessageSender {
     return _connect();
   }
 
-  @override
   bool get connected => _state == _ClientState.connected;
 
   @override
