@@ -27,11 +27,15 @@ class Error extends $pb.GeneratedMessage {
   Error.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Error clone() => new Error()..mergeFromMessage(this);
+  @override
   Error copyWith(void Function(Error) updates) =>
       super.copyWith((message) => updates(message as Error));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Error create() => new Error();
+  @override
   Error createEmptyInstance() => create();
   static $pb.PbList<Error> createRepeated() => new $pb.PbList<Error>();
   static Error getDefault() => _defaultInstance ??= create()..freeze();
@@ -73,11 +77,15 @@ class Command extends $pb.GeneratedMessage {
   Command.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Command clone() => new Command()..mergeFromMessage(this);
+  @override
   Command copyWith(void Function(Command) updates) =>
       super.copyWith((message) => updates(message as Command));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Command create() => new Command();
+  @override
   Command createEmptyInstance() => create();
   static $pb.PbList<Command> createRepeated() => new $pb.PbList<Command>();
   static Command getDefault() => _defaultInstance ??= create()..freeze();
@@ -126,11 +134,15 @@ class Reply extends $pb.GeneratedMessage {
   Reply.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Reply clone() => new Reply()..mergeFromMessage(this);
+  @override
   Reply copyWith(void Function(Reply) updates) =>
       super.copyWith((message) => updates(message as Reply));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Reply create() => new Reply();
+  @override
   Reply createEmptyInstance() => create();
   static $pb.PbList<Reply> createRepeated() => new $pb.PbList<Reply>();
   static Reply getDefault() => _defaultInstance ??= create()..freeze();
@@ -180,11 +192,15 @@ class Push extends $pb.GeneratedMessage {
   Push.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Push clone() => new Push()..mergeFromMessage(this);
+  @override
   Push copyWith(void Function(Push) updates) =>
       super.copyWith((message) => updates(message as Push));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Push create() => new Push();
+  @override
   Push createEmptyInstance() => create();
   static $pb.PbList<Push> createRepeated() => new $pb.PbList<Push>();
   static Push getDefault() => _defaultInstance ??= create()..freeze();
@@ -234,11 +250,15 @@ class ClientInfo extends $pb.GeneratedMessage {
   ClientInfo.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   ClientInfo clone() => new ClientInfo()..mergeFromMessage(this);
+  @override
   ClientInfo copyWith(void Function(ClientInfo) updates) =>
       super.copyWith((message) => updates(message as ClientInfo));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static ClientInfo create() => new ClientInfo();
+  @override
   ClientInfo createEmptyInstance() => create();
   static $pb.PbList<ClientInfo> createRepeated() =>
       new $pb.PbList<ClientInfo>();
@@ -299,11 +319,15 @@ class Publication extends $pb.GeneratedMessage {
   Publication.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Publication clone() => new Publication()..mergeFromMessage(this);
+  @override
   Publication copyWith(void Function(Publication) updates) =>
       super.copyWith((message) => updates(message as Publication));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Publication create() => new Publication();
+  @override
   Publication createEmptyInstance() => create();
   static $pb.PbList<Publication> createRepeated() =>
       new $pb.PbList<Publication>();
@@ -368,11 +392,15 @@ class Join extends $pb.GeneratedMessage {
   Join.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Join clone() => new Join()..mergeFromMessage(this);
+  @override
   Join copyWith(void Function(Join) updates) =>
       super.copyWith((message) => updates(message as Join));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Join create() => new Join();
+  @override
   Join createEmptyInstance() => create();
   static $pb.PbList<Join> createRepeated() => new $pb.PbList<Join>();
   static Join getDefault() => _defaultInstance ??= create()..freeze();
@@ -404,11 +432,15 @@ class Leave extends $pb.GeneratedMessage {
   Leave.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Leave clone() => new Leave()..mergeFromMessage(this);
+  @override
   Leave copyWith(void Function(Leave) updates) =>
       super.copyWith((message) => updates(message as Leave));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Leave create() => new Leave();
+  @override
   Leave createEmptyInstance() => create();
   static $pb.PbList<Leave> createRepeated() => new $pb.PbList<Leave>();
   static Leave getDefault() => _defaultInstance ??= create()..freeze();
@@ -439,11 +471,15 @@ class Unsub extends $pb.GeneratedMessage {
   Unsub.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Unsub clone() => new Unsub()..mergeFromMessage(this);
+  @override
   Unsub copyWith(void Function(Unsub) updates) =>
       super.copyWith((message) => updates(message as Unsub));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Unsub create() => new Unsub();
+  @override
   Unsub createEmptyInstance() => create();
   static $pb.PbList<Unsub> createRepeated() => new $pb.PbList<Unsub>();
   static Unsub getDefault() => _defaultInstance ??= create()..freeze();
@@ -474,11 +510,15 @@ class Message extends $pb.GeneratedMessage {
   Message.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   Message clone() => new Message()..mergeFromMessage(this);
+  @override
   Message copyWith(void Function(Message) updates) =>
       super.copyWith((message) => updates(message as Message));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static Message create() => new Message();
+  @override
   Message createEmptyInstance() => create();
   static $pb.PbList<Message> createRepeated() => new $pb.PbList<Message>();
   static Message getDefault() => _defaultInstance ??= create()..freeze();
@@ -510,11 +550,15 @@ class ConnectRequest extends $pb.GeneratedMessage {
   ConnectRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   ConnectRequest clone() => new ConnectRequest()..mergeFromMessage(this);
+  @override
   ConnectRequest copyWith(void Function(ConnectRequest) updates) =>
       super.copyWith((message) => updates(message as ConnectRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static ConnectRequest create() => new ConnectRequest();
+  @override
   ConnectRequest createEmptyInstance() => create();
   static $pb.PbList<ConnectRequest> createRepeated() =>
       new $pb.PbList<ConnectRequest>();
@@ -558,11 +602,15 @@ class ConnectResult extends $pb.GeneratedMessage {
   ConnectResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   ConnectResult clone() => new ConnectResult()..mergeFromMessage(this);
+  @override
   ConnectResult copyWith(void Function(ConnectResult) updates) =>
       super.copyWith((message) => updates(message as ConnectResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static ConnectResult create() => new ConnectResult();
+  @override
   ConnectResult createEmptyInstance() => create();
   static $pb.PbList<ConnectResult> createRepeated() =>
       new $pb.PbList<ConnectResult>();
@@ -626,11 +674,15 @@ class RefreshRequest extends $pb.GeneratedMessage {
   RefreshRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   RefreshRequest clone() => new RefreshRequest()..mergeFromMessage(this);
+  @override
   RefreshRequest copyWith(void Function(RefreshRequest) updates) =>
       super.copyWith((message) => updates(message as RefreshRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static RefreshRequest create() => new RefreshRequest();
+  @override
   RefreshRequest createEmptyInstance() => create();
   static $pb.PbList<RefreshRequest> createRepeated() =>
       new $pb.PbList<RefreshRequest>();
@@ -665,11 +717,15 @@ class RefreshResult extends $pb.GeneratedMessage {
   RefreshResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   RefreshResult clone() => new RefreshResult()..mergeFromMessage(this);
+  @override
   RefreshResult copyWith(void Function(RefreshResult) updates) =>
       super.copyWith((message) => updates(message as RefreshResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static RefreshResult create() => new RefreshResult();
+  @override
   RefreshResult createEmptyInstance() => create();
   static $pb.PbList<RefreshResult> createRepeated() =>
       new $pb.PbList<RefreshResult>();
@@ -730,11 +786,15 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   SubscribeRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   SubscribeRequest clone() => new SubscribeRequest()..mergeFromMessage(this);
+  @override
   SubscribeRequest copyWith(void Function(SubscribeRequest) updates) =>
       super.copyWith((message) => updates(message as SubscribeRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static SubscribeRequest create() => new SubscribeRequest();
+  @override
   SubscribeRequest createEmptyInstance() => create();
   static $pb.PbList<SubscribeRequest> createRepeated() =>
       new $pb.PbList<SubscribeRequest>();
@@ -815,11 +875,15 @@ class SubscribeResult extends $pb.GeneratedMessage {
   SubscribeResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   SubscribeResult clone() => new SubscribeResult()..mergeFromMessage(this);
+  @override
   SubscribeResult copyWith(void Function(SubscribeResult) updates) =>
       super.copyWith((message) => updates(message as SubscribeResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static SubscribeResult create() => new SubscribeResult();
+  @override
   SubscribeResult createEmptyInstance() => create();
   static $pb.PbList<SubscribeResult> createRepeated() =>
       new $pb.PbList<SubscribeResult>();
@@ -903,11 +967,15 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
   SubRefreshRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   SubRefreshRequest clone() => new SubRefreshRequest()..mergeFromMessage(this);
+  @override
   SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) =>
       super.copyWith((message) => updates(message as SubRefreshRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static SubRefreshRequest create() => new SubRefreshRequest();
+  @override
   SubRefreshRequest createEmptyInstance() => create();
   static $pb.PbList<SubRefreshRequest> createRepeated() =>
       new $pb.PbList<SubRefreshRequest>();
@@ -950,11 +1018,15 @@ class SubRefreshResult extends $pb.GeneratedMessage {
   SubRefreshResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   SubRefreshResult clone() => new SubRefreshResult()..mergeFromMessage(this);
+  @override
   SubRefreshResult copyWith(void Function(SubRefreshResult) updates) =>
       super.copyWith((message) => updates(message as SubRefreshResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static SubRefreshResult create() => new SubRefreshResult();
+  @override
   SubRefreshResult createEmptyInstance() => create();
   static $pb.PbList<SubRefreshResult> createRepeated() =>
       new $pb.PbList<SubRefreshResult>();
@@ -995,12 +1067,16 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
   UnsubscribeRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   UnsubscribeRequest clone() =>
       new UnsubscribeRequest()..mergeFromMessage(this);
+  @override
   UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) =>
       super.copyWith((message) => updates(message as UnsubscribeRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static UnsubscribeRequest create() => new UnsubscribeRequest();
+  @override
   UnsubscribeRequest createEmptyInstance() => create();
   static $pb.PbList<UnsubscribeRequest> createRepeated() =>
       new $pb.PbList<UnsubscribeRequest>();
@@ -1033,11 +1109,15 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
   UnsubscribeResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   UnsubscribeResult clone() => new UnsubscribeResult()..mergeFromMessage(this);
+  @override
   UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) =>
       super.copyWith((message) => updates(message as UnsubscribeResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static UnsubscribeResult create() => new UnsubscribeResult();
+  @override
   UnsubscribeResult createEmptyInstance() => create();
   static $pb.PbList<UnsubscribeResult> createRepeated() =>
       new $pb.PbList<UnsubscribeResult>();
@@ -1064,11 +1144,15 @@ class PublishRequest extends $pb.GeneratedMessage {
   PublishRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PublishRequest clone() => new PublishRequest()..mergeFromMessage(this);
+  @override
   PublishRequest copyWith(void Function(PublishRequest) updates) =>
       super.copyWith((message) => updates(message as PublishRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PublishRequest create() => new PublishRequest();
+  @override
   PublishRequest createEmptyInstance() => create();
   static $pb.PbList<PublishRequest> createRepeated() =>
       new $pb.PbList<PublishRequest>();
@@ -1107,11 +1191,15 @@ class PublishResult extends $pb.GeneratedMessage {
   PublishResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PublishResult clone() => new PublishResult()..mergeFromMessage(this);
+  @override
   PublishResult copyWith(void Function(PublishResult) updates) =>
       super.copyWith((message) => updates(message as PublishResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PublishResult create() => new PublishResult();
+  @override
   PublishResult createEmptyInstance() => create();
   static $pb.PbList<PublishResult> createRepeated() =>
       new $pb.PbList<PublishResult>();
@@ -1135,11 +1223,15 @@ class PresenceRequest extends $pb.GeneratedMessage {
   PresenceRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PresenceRequest clone() => new PresenceRequest()..mergeFromMessage(this);
+  @override
   PresenceRequest copyWith(void Function(PresenceRequest) updates) =>
       super.copyWith((message) => updates(message as PresenceRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PresenceRequest create() => new PresenceRequest();
+  @override
   PresenceRequest createEmptyInstance() => create();
   static $pb.PbList<PresenceRequest> createRepeated() =>
       new $pb.PbList<PresenceRequest>();
@@ -1181,11 +1273,15 @@ class PresenceResult extends $pb.GeneratedMessage {
   PresenceResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PresenceResult clone() => new PresenceResult()..mergeFromMessage(this);
+  @override
   PresenceResult copyWith(void Function(PresenceResult) updates) =>
       super.copyWith((message) => updates(message as PresenceResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PresenceResult create() => new PresenceResult();
+  @override
   PresenceResult createEmptyInstance() => create();
   static $pb.PbList<PresenceResult> createRepeated() =>
       new $pb.PbList<PresenceResult>();
@@ -1211,12 +1307,16 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
   PresenceStatsRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PresenceStatsRequest clone() =>
       new PresenceStatsRequest()..mergeFromMessage(this);
+  @override
   PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) =>
       super.copyWith((message) => updates(message as PresenceStatsRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PresenceStatsRequest create() => new PresenceStatsRequest();
+  @override
   PresenceStatsRequest createEmptyInstance() => create();
   static $pb.PbList<PresenceStatsRequest> createRepeated() =>
       new $pb.PbList<PresenceStatsRequest>();
@@ -1251,12 +1351,16 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
   PresenceStatsResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PresenceStatsResult clone() =>
       new PresenceStatsResult()..mergeFromMessage(this);
+  @override
   PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) =>
       super.copyWith((message) => updates(message as PresenceStatsResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PresenceStatsResult create() => new PresenceStatsResult();
+  @override
   PresenceStatsResult createEmptyInstance() => create();
   static $pb.PbList<PresenceStatsResult> createRepeated() =>
       new $pb.PbList<PresenceStatsResult>();
@@ -1298,11 +1402,15 @@ class HistoryRequest extends $pb.GeneratedMessage {
   HistoryRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   HistoryRequest clone() => new HistoryRequest()..mergeFromMessage(this);
+  @override
   HistoryRequest copyWith(void Function(HistoryRequest) updates) =>
       super.copyWith((message) => updates(message as HistoryRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static HistoryRequest create() => new HistoryRequest();
+  @override
   HistoryRequest createEmptyInstance() => create();
   static $pb.PbList<HistoryRequest> createRepeated() =>
       new $pb.PbList<HistoryRequest>();
@@ -1335,11 +1443,15 @@ class HistoryResult extends $pb.GeneratedMessage {
   HistoryResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   HistoryResult clone() => new HistoryResult()..mergeFromMessage(this);
+  @override
   HistoryResult copyWith(void Function(HistoryResult) updates) =>
       super.copyWith((message) => updates(message as HistoryResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static HistoryResult create() => new HistoryResult();
+  @override
   HistoryResult createEmptyInstance() => create();
   static $pb.PbList<HistoryResult> createRepeated() =>
       new $pb.PbList<HistoryResult>();
@@ -1364,11 +1476,15 @@ class PingRequest extends $pb.GeneratedMessage {
   PingRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PingRequest clone() => new PingRequest()..mergeFromMessage(this);
+  @override
   PingRequest copyWith(void Function(PingRequest) updates) =>
       super.copyWith((message) => updates(message as PingRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PingRequest create() => new PingRequest();
+  @override
   PingRequest createEmptyInstance() => create();
   static $pb.PbList<PingRequest> createRepeated() =>
       new $pb.PbList<PingRequest>();
@@ -1391,11 +1507,15 @@ class PingResult extends $pb.GeneratedMessage {
   PingResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   PingResult clone() => new PingResult()..mergeFromMessage(this);
+  @override
   PingResult copyWith(void Function(PingResult) updates) =>
       super.copyWith((message) => updates(message as PingResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static PingResult create() => new PingResult();
+  @override
   PingResult createEmptyInstance() => create();
   static $pb.PbList<PingResult> createRepeated() =>
       new $pb.PbList<PingResult>();
@@ -1419,11 +1539,15 @@ class RPCRequest extends $pb.GeneratedMessage {
   RPCRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   RPCRequest clone() => new RPCRequest()..mergeFromMessage(this);
+  @override
   RPCRequest copyWith(void Function(RPCRequest) updates) =>
       super.copyWith((message) => updates(message as RPCRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static RPCRequest create() => new RPCRequest();
+  @override
   RPCRequest createEmptyInstance() => create();
   static $pb.PbList<RPCRequest> createRepeated() =>
       new $pb.PbList<RPCRequest>();
@@ -1455,11 +1579,15 @@ class RPCResult extends $pb.GeneratedMessage {
   RPCResult.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   RPCResult clone() => new RPCResult()..mergeFromMessage(this);
+  @override
   RPCResult copyWith(void Function(RPCResult) updates) =>
       super.copyWith((message) => updates(message as RPCResult));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static RPCResult create() => new RPCResult();
+  @override
   RPCResult createEmptyInstance() => create();
   static $pb.PbList<RPCResult> createRepeated() => new $pb.PbList<RPCResult>();
   static RPCResult getDefault() => _defaultInstance ??= create()..freeze();
@@ -1490,11 +1618,15 @@ class SendRequest extends $pb.GeneratedMessage {
   SendRequest.fromJson(String i,
       [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
       : super.fromJson(i, r);
+  @override
   SendRequest clone() => new SendRequest()..mergeFromMessage(this);
+  @override
   SendRequest copyWith(void Function(SendRequest) updates) =>
       super.copyWith((message) => updates(message as SendRequest));
+  @override
   $pb.BuilderInfo get info_ => _i;
   static SendRequest create() => new SendRequest();
+  @override
   SendRequest createEmptyInstance() => create();
   static $pb.PbList<SendRequest> createRepeated() =>
       new $pb.PbList<SendRequest>();
