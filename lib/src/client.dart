@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
