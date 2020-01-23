@@ -64,7 +64,7 @@ abstract class Client {
   /// in the channel.
   Subscription getSubscription(String channel);
 
-  @alwaysThrows
+  /// Unsubscribe and remove subscription.
   void removeSubscription(Subscription subscription);
 }
 
@@ -154,9 +154,12 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  @alwaysThrows
   Future<void> removeSubscription(Subscription subscription) async {
-    throw UnimplementedError;
+    if (subscription != null) {
+      String _channel = subscription.channel;
+      subscription.unsubscribe();
+      _subscriptions.remove(_channel);
+    }
   }
 
   Future<UnsubscribeEvent> unsubscribe(String channel) async {
