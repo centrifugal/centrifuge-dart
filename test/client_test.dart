@@ -43,6 +43,16 @@ void main() {
       expect(s3, isNot(same(s1)));
       expect(s3.channel, 'some_another_channel');
     });
+
+    test('removeSubscription works correctly', () {
+      final channel = 'some_channel';
+      final s1 = subscription(channel);
+      expect(true, client.hasSubscription(channel));
+      final unsubscribeFuture = s1.unsubscribeStream.first;
+      client.removeSubscription(s1);
+      expect(unsubscribeFuture, completion(isNotNull));
+      expect(false, client.hasSubscription(channel));
+    });
   });
 
   group('Connection', () {

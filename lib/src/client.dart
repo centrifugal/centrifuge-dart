@@ -58,13 +58,18 @@ abstract class Client {
   ///
   void disconnect();
 
+  /// Detect that the subscription already exists.
+  ///
+  bool hasSubscription(String channel);
+
   /// Get subscription to the channel.
   ///
   /// You need to call [Subscription.subscribe] to start receiving events
   /// in the channel.
   Subscription getSubscription(String channel);
 
-  /// Unsubscribe and remove subscription.
+  /// Remove the [subscription] and unsubscribe from [subscription.channel].
+  ///
   void removeSubscription(Subscription subscription);
 }
 
@@ -141,8 +146,13 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
+  bool hasSubscription(String channel) {
+    return _subscriptions.containsKey(channel);
+  }
+
+  @override
   Subscription getSubscription(String channel) {
-    if (_subscriptions.containsKey(channel)) {
+    if (hasSubscription(channel)) {
       return _subscriptions[channel];
     }
 
@@ -156,9 +166,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
   @override
   Future<void> removeSubscription(Subscription subscription) async {
     if (subscription != null) {
-      String _channel = subscription.channel;
+      final String channel = subscription.channel;
       subscription.unsubscribe();
-      _subscriptions.remove(_channel);
+      _subscriptions.remove(channel);
     }
   }
 
