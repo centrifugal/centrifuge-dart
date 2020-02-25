@@ -1,3 +1,6 @@
+## [0.4.1]
+* Implement `removeSubscription` method, thanks [@tiamo](https://github.com/tiamo)
+
 ## [0.4.0]
 * **Breaking changes** `connected` property removed
 
