@@ -85,6 +85,7 @@ await subscription.publish(data);
 - [ ] handle connection expired error
 - [ ] handle subscription expired error
 - [x] ping/pong to find broken connection
+- [ ] server-side subscriptions
 - [ ] message recovery mechanism
 
 ## Author
