@@ -1,3 +1,6 @@
+## [0.5.0]
+* Update protobuf dependency to `^1.0.1`, thanks [@Holofox](https://github.com/Holofox)
+
 ## [0.4.1]
 * Implement `removeSubscription` method, thanks [@tiamo](https://github.com/tiamo)
 

@@ -23,7 +23,7 @@ class MethodType extends $pb.ProtobufEnum {
   static const MethodType REFRESH = MethodType._(10, 'REFRESH');
   static const MethodType SUB_REFRESH = MethodType._(11, 'SUB_REFRESH');
 
-  static const $core.List<MethodType> values = <MethodType> [
+  static const $core.List<MethodType> values = <MethodType>[
     CONNECT,
     SUBSCRIBE,
     UNSUBSCRIBE,
@@ -38,7 +38,8 @@ class MethodType extends $pb.ProtobufEnum {
     SUB_REFRESH,
   ];
 
-  static final $core.Map<$core.int, MethodType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, MethodType> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static MethodType valueOf($core.int value) => _byValue[value];
 
   const MethodType._($core.int v, $core.String n) : super(v, n);
@@ -52,7 +53,7 @@ class PushType extends $pb.ProtobufEnum {
   static const PushType MESSAGE = PushType._(4, 'MESSAGE');
   static const PushType SUB = PushType._(5, 'SUB');
 
-  static const $core.List<PushType> values = <PushType> [
+  static const $core.List<PushType> values = <PushType>[
     PUBLICATION,
     JOIN,
     LEAVE,
@@ -61,9 +62,9 @@ class PushType extends $pb.ProtobufEnum {
     SUB,
   ];
 
-  static final $core.Map<$core.int, PushType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, PushType> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static PushType valueOf($core.int value) => _byValue[value];
 
   const PushType._($core.int v, $core.String n) : super(v, n);
 }
-

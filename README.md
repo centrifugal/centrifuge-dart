@@ -88,6 +88,19 @@ await subscription.publish(data);
 - [ ] server-side subscriptions
 - [ ] message recovery mechanism
 
+## Instructions to update protobuf
+
+1) Install `protoc` compiler
+2) Install `protoc_plugin` https://pub.dev/packages/protoc_plugin
+3) cd `lib/src/proto` and run `protoc --dart_out=. -I . client.proto`
+4) cd to root and run `dartfmt -w lib/ test/`
+
+## Instructions to release
+
+1) Update changelog
+2) Bump version in `pubspec.yaml`, push, create new tag
+3) `pub publish`
+
 ## Author
 
 German Saprykin, saprykin.h@gmail.com
