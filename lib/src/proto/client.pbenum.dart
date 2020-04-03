@@ -50,6 +50,7 @@ class PushType extends $pb.ProtobufEnum {
   static const PushType LEAVE = PushType._(2, 'LEAVE');
   static const PushType UNSUB = PushType._(3, 'UNSUB');
   static const PushType MESSAGE = PushType._(4, 'MESSAGE');
+  static const PushType SUB = PushType._(5, 'SUB');
 
   static const $core.List<PushType> values = <PushType> [
     PUBLICATION,
@@ -57,6 +58,7 @@ class PushType extends $pb.ProtobufEnum {
     LEAVE,
     UNSUB,
     MESSAGE,
+    SUB,
   ];
 
   static final $core.Map<$core.int, PushType> _byValue = $pb.ProtobufEnum.initByValue(values);

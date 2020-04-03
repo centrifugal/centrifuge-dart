@@ -14,7 +14,7 @@ import 'client.pbenum.dart';
 export 'client.pbenum.dart';
 
 class Error extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Error', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Error', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, 'code', $pb.PbFieldType.OU3)
     ..aOS(2, 'message')
     ..hasRequiredFields = false
@@ -55,7 +55,7 @@ class Error extends $pb.GeneratedMessage {
 }
 
 class Command extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Command', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Command', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, 'id', $pb.PbFieldType.OU3)
     ..e<MethodType>(2, 'method', $pb.PbFieldType.OE, defaultOrMaker: MethodType.CONNECT, valueOf: MethodType.valueOf, enumValues: MethodType.values)
     ..a<$core.List<$core.int>>(3, 'params', $pb.PbFieldType.OY)
@@ -106,7 +106,7 @@ class Command extends $pb.GeneratedMessage {
 }
 
 class Reply extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Reply', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Reply', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, 'id', $pb.PbFieldType.OU3)
     ..aOM<Error>(2, 'error', subBuilder: Error.create)
     ..a<$core.List<$core.int>>(3, 'result', $pb.PbFieldType.OY)
@@ -159,7 +159,7 @@ class Reply extends $pb.GeneratedMessage {
 }
 
 class Push extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Push', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Push', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..e<PushType>(1, 'type', $pb.PbFieldType.OE, defaultOrMaker: PushType.PUBLICATION, valueOf: PushType.valueOf, enumValues: PushType.values)
     ..aOS(2, 'channel')
     ..a<$core.List<$core.int>>(3, 'data', $pb.PbFieldType.OY)
@@ -210,7 +210,7 @@ class Push extends $pb.GeneratedMessage {
 }
 
 class ClientInfo extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ClientInfo', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ClientInfo', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'user')
     ..aOS(2, 'client')
     ..a<$core.List<$core.int>>(3, 'connInfo', $pb.PbFieldType.OY)
@@ -271,7 +271,7 @@ class ClientInfo extends $pb.GeneratedMessage {
 }
 
 class Publication extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Publication', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Publication', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, 'seq', $pb.PbFieldType.OU3)
     ..a<$core.int>(2, 'gen', $pb.PbFieldType.OU3)
     ..aOS(3, 'uid')
@@ -344,7 +344,7 @@ class Publication extends $pb.GeneratedMessage {
 }
 
 class Join extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Join', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Join', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOM<ClientInfo>(1, 'info', subBuilder: ClientInfo.create)
     ..hasRequiredFields = false
   ;
@@ -377,7 +377,7 @@ class Join extends $pb.GeneratedMessage {
 }
 
 class Leave extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Leave', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Leave', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOM<ClientInfo>(1, 'info', subBuilder: ClientInfo.create)
     ..hasRequiredFields = false
   ;
@@ -410,7 +410,7 @@ class Leave extends $pb.GeneratedMessage {
 }
 
 class Unsub extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Unsub', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Unsub', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOB(1, 'resubscribe')
     ..hasRequiredFields = false
   ;
@@ -440,8 +440,69 @@ class Unsub extends $pb.GeneratedMessage {
   void clearResubscribe() => clearField(1);
 }
 
+class Sub extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Sub', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
+    ..aOB(1, 'recoverable')
+    ..a<$core.int>(2, 'seq', $pb.PbFieldType.OU3)
+    ..a<$core.int>(3, 'gen', $pb.PbFieldType.OU3)
+    ..aOS(4, 'epoch')
+    ..hasRequiredFields = false
+  ;
+
+  Sub._() : super();
+  factory Sub() => create();
+  factory Sub.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Sub.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Sub clone() => Sub()..mergeFromMessage(this);
+  Sub copyWith(void Function(Sub) updates) => super.copyWith((message) => updates(message as Sub));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Sub create() => Sub._();
+  Sub createEmptyInstance() => create();
+  static $pb.PbList<Sub> createRepeated() => $pb.PbList<Sub>();
+  @$core.pragma('dart2js:noInline')
+  static Sub getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Sub>(create);
+  static Sub _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get recoverable => $_getBF(0);
+  @$pb.TagNumber(1)
+  set recoverable($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRecoverable() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRecoverable() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get seq => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set seq($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasSeq() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSeq() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get gen => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set gen($core.int v) { $_setUnsignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasGen() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearGen() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get epoch => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set epoch($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasEpoch() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEpoch() => clearField(4);
+}
+
 class Message extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Message', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Message', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
@@ -472,9 +533,10 @@ class Message extends $pb.GeneratedMessage {
 }
 
 class ConnectRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'token')
     ..a<$core.List<$core.int>>(2, 'data', $pb.PbFieldType.OY)
+    ..m<$core.String, SubscribeRequest>(3, 'subs', entryClassName: 'ConnectRequest.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeRequest.create, packageName: const $pb.PackageName('protocol'))
     ..hasRequiredFields = false
   ;
 
@@ -510,15 +572,19 @@ class ConnectRequest extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(1);
   @$pb.TagNumber(2)
   void clearData() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.Map<$core.String, SubscribeRequest> get subs => $_getMap(2);
 }
 
 class ConnectResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'client')
     ..aOS(2, 'version')
     ..aOB(3, 'expires')
     ..a<$core.int>(4, 'ttl', $pb.PbFieldType.OU3)
     ..a<$core.List<$core.int>>(5, 'data', $pb.PbFieldType.OY)
+    ..m<$core.String, SubscribeResult>(6, 'subs', entryClassName: 'ConnectResult.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, packageName: const $pb.PackageName('protocol'))
     ..hasRequiredFields = false
   ;
 
@@ -581,10 +647,13 @@ class ConnectResult extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(4);
   @$pb.TagNumber(5)
   void clearData() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.Map<$core.String, SubscribeResult> get subs => $_getMap(5);
 }
 
 class RefreshRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RefreshRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RefreshRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'token')
     ..hasRequiredFields = false
   ;
@@ -615,7 +684,7 @@ class RefreshRequest extends $pb.GeneratedMessage {
 }
 
 class RefreshResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RefreshResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RefreshResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'client')
     ..aOS(2, 'version')
     ..aOB(3, 'expires')
@@ -676,7 +745,7 @@ class RefreshResult extends $pb.GeneratedMessage {
 }
 
 class SubscribeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubscribeRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubscribeRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..aOS(2, 'token')
     ..aOB(3, 'recover')
@@ -757,7 +826,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
 }
 
 class SubscribeResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubscribeResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubscribeResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOB(1, 'expires')
     ..a<$core.int>(2, 'ttl', $pb.PbFieldType.OU3)
     ..aOB(3, 'recoverable')
@@ -852,7 +921,7 @@ class SubscribeResult extends $pb.GeneratedMessage {
 }
 
 class SubRefreshRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubRefreshRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubRefreshRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..aOS(2, 'token')
     ..hasRequiredFields = false
@@ -893,7 +962,7 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
 }
 
 class SubRefreshResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubRefreshResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubRefreshResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOB(1, 'expires')
     ..a<$core.int>(2, 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
@@ -934,7 +1003,7 @@ class SubRefreshResult extends $pb.GeneratedMessage {
 }
 
 class UnsubscribeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('UnsubscribeRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('UnsubscribeRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..hasRequiredFields = false
   ;
@@ -965,7 +1034,7 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
 }
 
 class UnsubscribeResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('UnsubscribeResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('UnsubscribeResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
@@ -986,7 +1055,7 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
 }
 
 class PublishRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PublishRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PublishRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..a<$core.List<$core.int>>(2, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
@@ -1027,7 +1096,7 @@ class PublishRequest extends $pb.GeneratedMessage {
 }
 
 class PublishResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PublishResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PublishResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
@@ -1048,7 +1117,7 @@ class PublishResult extends $pb.GeneratedMessage {
 }
 
 class PresenceRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..hasRequiredFields = false
   ;
@@ -1079,8 +1148,8 @@ class PresenceRequest extends $pb.GeneratedMessage {
 }
 
 class PresenceResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
-    ..m<$core.String, ClientInfo>(1, 'presence', entryClassName: 'PresenceResult.PresenceEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: ClientInfo.create, packageName: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
+    ..m<$core.String, ClientInfo>(1, 'presence', entryClassName: 'PresenceResult.PresenceEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: ClientInfo.create, packageName: const $pb.PackageName('protocol'))
     ..hasRequiredFields = false
   ;
 
@@ -1104,7 +1173,7 @@ class PresenceResult extends $pb.GeneratedMessage {
 }
 
 class PresenceStatsRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceStatsRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceStatsRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..hasRequiredFields = false
   ;
@@ -1135,7 +1204,7 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
 }
 
 class PresenceStatsResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceStatsResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceStatsResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, 'numClients', $pb.PbFieldType.OU3)
     ..a<$core.int>(2, 'numUsers', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
@@ -1176,7 +1245,7 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
 }
 
 class HistoryRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('HistoryRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('HistoryRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..hasRequiredFields = false
   ;
@@ -1207,7 +1276,7 @@ class HistoryRequest extends $pb.GeneratedMessage {
 }
 
 class HistoryResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('HistoryResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('HistoryResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..pc<Publication>(1, 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
     ..hasRequiredFields = false
   ;
@@ -1232,7 +1301,7 @@ class HistoryResult extends $pb.GeneratedMessage {
 }
 
 class PingRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PingRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PingRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
@@ -1253,7 +1322,7 @@ class PingRequest extends $pb.GeneratedMessage {
 }
 
 class PingResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PingResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PingResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
@@ -1274,7 +1343,7 @@ class PingResult extends $pb.GeneratedMessage {
 }
 
 class RPCRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
@@ -1305,7 +1374,7 @@ class RPCRequest extends $pb.GeneratedMessage {
 }
 
 class RPCResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCResult', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
@@ -1336,7 +1405,7 @@ class RPCResult extends $pb.GeneratedMessage {
 }
 
 class SendRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SendRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SendRequest', package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
