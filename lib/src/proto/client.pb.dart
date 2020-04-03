@@ -1,11 +1,11 @@
 ///
 //  Generated code. Do not modify.
 //  source: client.proto
-///
-// ignore_for_file: non_constant_identifier_names,library_prefixes,unused_import
+//
+// @dart = 2.3
+// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
-// ignore: UNUSED_SHOWN_NAME
-import 'dart:core' show int, bool, double, String, List, Map, override;
+import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
@@ -14,1501 +14,1355 @@ import 'client.pbenum.dart';
 export 'client.pbenum.dart';
 
 class Error extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('Error', package: const $pb.PackageName('proto'))
-        ..a<int>(1, 'code', $pb.PbFieldType.OU3)
-        ..aOS(2, 'message')
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Error', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.int>(1, 'code', $pb.PbFieldType.OU3)
+    ..aOS(2, 'message')
+    ..hasRequiredFields = false
+  ;
 
-  Error() : super();
-  Error.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Error.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Error clone() => new Error()..mergeFromMessage(this);
-  Error copyWith(void Function(Error) updates) =>
-      super.copyWith((message) => updates(message as Error));
+  Error._() : super();
+  factory Error() => create();
+  factory Error.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Error.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Error clone() => Error()..mergeFromMessage(this);
+  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error));
   $pb.BuilderInfo get info_ => _i;
-  static Error create() => new Error();
+  @$core.pragma('dart2js:noInline')
+  static Error create() => Error._();
   Error createEmptyInstance() => create();
-  static $pb.PbList<Error> createRepeated() => new $pb.PbList<Error>();
-  static Error getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Error> createRepeated() => $pb.PbList<Error>();
+  @$core.pragma('dart2js:noInline')
+  static Error getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Error>(create);
   static Error _defaultInstance;
-  static void $checkItem(Error v) {
-    if (v is! Error) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  int get code => $_get(0, 0);
-  set code(int v) {
-    $_setUnsignedInt32(0, v);
-  }
-
-  bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.int get code => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set code($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
   void clearCode() => clearField(1);
 
-  String get message => $_getS(1, '');
-  set message(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
   void clearMessage() => clearField(2);
 }
 
 class Command extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('Command', package: const $pb.PackageName('proto'))
-        ..a<int>(1, 'id', $pb.PbFieldType.OU3)
-        ..e<MethodType>(2, 'method', $pb.PbFieldType.OE, MethodType.CONNECT,
-            MethodType.valueOf, MethodType.values)
-        ..a<List<int>>(3, 'params', $pb.PbFieldType.OY)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Command', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.int>(1, 'id', $pb.PbFieldType.OU3)
+    ..e<MethodType>(2, 'method', $pb.PbFieldType.OE, defaultOrMaker: MethodType.CONNECT, valueOf: MethodType.valueOf, enumValues: MethodType.values)
+    ..a<$core.List<$core.int>>(3, 'params', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  Command() : super();
-  Command.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Command.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Command clone() => new Command()..mergeFromMessage(this);
-  Command copyWith(void Function(Command) updates) =>
-      super.copyWith((message) => updates(message as Command));
+  Command._() : super();
+  factory Command() => create();
+  factory Command.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Command.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Command clone() => Command()..mergeFromMessage(this);
+  Command copyWith(void Function(Command) updates) => super.copyWith((message) => updates(message as Command));
   $pb.BuilderInfo get info_ => _i;
-  static Command create() => new Command();
+  @$core.pragma('dart2js:noInline')
+  static Command create() => Command._();
   Command createEmptyInstance() => create();
-  static $pb.PbList<Command> createRepeated() => new $pb.PbList<Command>();
-  static Command getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Command> createRepeated() => $pb.PbList<Command>();
+  @$core.pragma('dart2js:noInline')
+  static Command getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Command>(create);
   static Command _defaultInstance;
-  static void $checkItem(Command v) {
-    if (v is! Command) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  int get id => $_get(0, 0);
-  set id(int v) {
-    $_setUnsignedInt32(0, v);
-  }
-
-  bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
   void clearId() => clearField(1);
 
+  @$pb.TagNumber(2)
   MethodType get method => $_getN(1);
-  set method(MethodType v) {
-    setField(2, v);
-  }
-
-  bool hasMethod() => $_has(1);
+  @$pb.TagNumber(2)
+  set method(MethodType v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMethod() => $_has(1);
+  @$pb.TagNumber(2)
   void clearMethod() => clearField(2);
 
-  List<int> get params => $_getN(2);
-  set params(List<int> v) {
-    $_setBytes(2, v);
-  }
-
-  bool hasParams() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get params => $_getN(2);
+  @$pb.TagNumber(3)
+  set params($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasParams() => $_has(2);
+  @$pb.TagNumber(3)
   void clearParams() => clearField(3);
 }
 
 class Reply extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Reply',
-      package: const $pb.PackageName('proto'))
-    ..a<int>(1, 'id', $pb.PbFieldType.OU3)
-    ..a<Error>(2, 'error', $pb.PbFieldType.OM, Error.getDefault, Error.create)
-    ..a<List<int>>(3, 'result', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Reply', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.int>(1, 'id', $pb.PbFieldType.OU3)
+    ..aOM<Error>(2, 'error', subBuilder: Error.create)
+    ..a<$core.List<$core.int>>(3, 'result', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  Reply() : super();
-  Reply.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Reply.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Reply clone() => new Reply()..mergeFromMessage(this);
-  Reply copyWith(void Function(Reply) updates) =>
-      super.copyWith((message) => updates(message as Reply));
+  Reply._() : super();
+  factory Reply() => create();
+  factory Reply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Reply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Reply clone() => Reply()..mergeFromMessage(this);
+  Reply copyWith(void Function(Reply) updates) => super.copyWith((message) => updates(message as Reply));
   $pb.BuilderInfo get info_ => _i;
-  static Reply create() => new Reply();
+  @$core.pragma('dart2js:noInline')
+  static Reply create() => Reply._();
   Reply createEmptyInstance() => create();
-  static $pb.PbList<Reply> createRepeated() => new $pb.PbList<Reply>();
-  static Reply getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Reply> createRepeated() => $pb.PbList<Reply>();
+  @$core.pragma('dart2js:noInline')
+  static Reply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Reply>(create);
   static Reply _defaultInstance;
-  static void $checkItem(Reply v) {
-    if (v is! Reply) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  int get id => $_get(0, 0);
-  set id(int v) {
-    $_setUnsignedInt32(0, v);
-  }
-
-  bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
   void clearId() => clearField(1);
 
+  @$pb.TagNumber(2)
   Error get error => $_getN(1);
-  set error(Error v) {
-    setField(2, v);
-  }
-
-  bool hasError() => $_has(1);
+  @$pb.TagNumber(2)
+  set error(Error v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasError() => $_has(1);
+  @$pb.TagNumber(2)
   void clearError() => clearField(2);
+  @$pb.TagNumber(2)
+  Error ensureError() => $_ensure(1);
 
-  List<int> get result => $_getN(2);
-  set result(List<int> v) {
-    $_setBytes(2, v);
-  }
-
-  bool hasResult() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get result => $_getN(2);
+  @$pb.TagNumber(3)
+  set result($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasResult() => $_has(2);
+  @$pb.TagNumber(3)
   void clearResult() => clearField(3);
 }
 
 class Push extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('Push', package: const $pb.PackageName('proto'))
-        ..e<PushType>(1, 'type', $pb.PbFieldType.OE, PushType.PUBLICATION,
-            PushType.valueOf, PushType.values)
-        ..aOS(2, 'channel')
-        ..a<List<int>>(3, 'data', $pb.PbFieldType.OY)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Push', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..e<PushType>(1, 'type', $pb.PbFieldType.OE, defaultOrMaker: PushType.PUBLICATION, valueOf: PushType.valueOf, enumValues: PushType.values)
+    ..aOS(2, 'channel')
+    ..a<$core.List<$core.int>>(3, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  Push() : super();
-  Push.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Push.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Push clone() => new Push()..mergeFromMessage(this);
-  Push copyWith(void Function(Push) updates) =>
-      super.copyWith((message) => updates(message as Push));
+  Push._() : super();
+  factory Push() => create();
+  factory Push.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Push.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Push clone() => Push()..mergeFromMessage(this);
+  Push copyWith(void Function(Push) updates) => super.copyWith((message) => updates(message as Push));
   $pb.BuilderInfo get info_ => _i;
-  static Push create() => new Push();
+  @$core.pragma('dart2js:noInline')
+  static Push create() => Push._();
   Push createEmptyInstance() => create();
-  static $pb.PbList<Push> createRepeated() => new $pb.PbList<Push>();
-  static Push getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Push> createRepeated() => $pb.PbList<Push>();
+  @$core.pragma('dart2js:noInline')
+  static Push getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Push>(create);
   static Push _defaultInstance;
-  static void $checkItem(Push v) {
-    if (v is! Push) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
+  @$pb.TagNumber(1)
   PushType get type => $_getN(0);
-  set type(PushType v) {
-    setField(1, v);
-  }
-
-  bool hasType() => $_has(0);
+  @$pb.TagNumber(1)
+  set type(PushType v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasType() => $_has(0);
+  @$pb.TagNumber(1)
   void clearType() => clearField(1);
 
-  String get channel => $_getS(1, '');
-  set channel(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasChannel() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get channel => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set channel($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasChannel() => $_has(1);
+  @$pb.TagNumber(2)
   void clearChannel() => clearField(2);
 
-  List<int> get data => $_getN(2);
-  set data(List<int> v) {
-    $_setBytes(2, v);
-  }
-
-  bool hasData() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get data => $_getN(2);
+  @$pb.TagNumber(3)
+  set data($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasData() => $_has(2);
+  @$pb.TagNumber(3)
   void clearData() => clearField(3);
 }
 
 class ClientInfo extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('ClientInfo', package: const $pb.PackageName('proto'))
-        ..aOS(1, 'user')
-        ..aOS(2, 'client')
-        ..a<List<int>>(3, 'connInfo', $pb.PbFieldType.OY)
-        ..a<List<int>>(4, 'chanInfo', $pb.PbFieldType.OY)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ClientInfo', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..aOS(1, 'user')
+    ..aOS(2, 'client')
+    ..a<$core.List<$core.int>>(3, 'connInfo', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(4, 'chanInfo', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  ClientInfo() : super();
-  ClientInfo.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  ClientInfo.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  ClientInfo clone() => new ClientInfo()..mergeFromMessage(this);
-  ClientInfo copyWith(void Function(ClientInfo) updates) =>
-      super.copyWith((message) => updates(message as ClientInfo));
+  ClientInfo._() : super();
+  factory ClientInfo() => create();
+  factory ClientInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ClientInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  ClientInfo clone() => ClientInfo()..mergeFromMessage(this);
+  ClientInfo copyWith(void Function(ClientInfo) updates) => super.copyWith((message) => updates(message as ClientInfo));
   $pb.BuilderInfo get info_ => _i;
-  static ClientInfo create() => new ClientInfo();
+  @$core.pragma('dart2js:noInline')
+  static ClientInfo create() => ClientInfo._();
   ClientInfo createEmptyInstance() => create();
-  static $pb.PbList<ClientInfo> createRepeated() =>
-      new $pb.PbList<ClientInfo>();
-  static ClientInfo getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<ClientInfo> createRepeated() => $pb.PbList<ClientInfo>();
+  @$core.pragma('dart2js:noInline')
+  static ClientInfo getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ClientInfo>(create);
   static ClientInfo _defaultInstance;
-  static void $checkItem(ClientInfo v) {
-    if (v is! ClientInfo) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get user => $_getS(0, '');
-  set user(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasUser() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get user => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set user($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUser() => $_has(0);
+  @$pb.TagNumber(1)
   void clearUser() => clearField(1);
 
-  String get client => $_getS(1, '');
-  set client(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasClient() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get client => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set client($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasClient() => $_has(1);
+  @$pb.TagNumber(2)
   void clearClient() => clearField(2);
 
-  List<int> get connInfo => $_getN(2);
-  set connInfo(List<int> v) {
-    $_setBytes(2, v);
-  }
-
-  bool hasConnInfo() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get connInfo => $_getN(2);
+  @$pb.TagNumber(3)
+  set connInfo($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasConnInfo() => $_has(2);
+  @$pb.TagNumber(3)
   void clearConnInfo() => clearField(3);
 
-  List<int> get chanInfo => $_getN(3);
-  set chanInfo(List<int> v) {
-    $_setBytes(3, v);
-  }
-
-  bool hasChanInfo() => $_has(3);
+  @$pb.TagNumber(4)
+  $core.List<$core.int> get chanInfo => $_getN(3);
+  @$pb.TagNumber(4)
+  set chanInfo($core.List<$core.int> v) { $_setBytes(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasChanInfo() => $_has(3);
+  @$pb.TagNumber(4)
   void clearChanInfo() => clearField(4);
 }
 
 class Publication extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Publication',
-      package: const $pb.PackageName('proto'))
-    ..a<int>(1, 'seq', $pb.PbFieldType.OU3)
-    ..a<int>(2, 'gen', $pb.PbFieldType.OU3)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Publication', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.int>(1, 'seq', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, 'gen', $pb.PbFieldType.OU3)
     ..aOS(3, 'uid')
-    ..a<List<int>>(4, 'data', $pb.PbFieldType.OY)
-    ..a<ClientInfo>(
-        5, 'info', $pb.PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
-    ..hasRequiredFields = false;
+    ..a<$core.List<$core.int>>(4, 'data', $pb.PbFieldType.OY)
+    ..aOM<ClientInfo>(5, 'info', subBuilder: ClientInfo.create)
+    ..hasRequiredFields = false
+  ;
 
-  Publication() : super();
-  Publication.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Publication.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Publication clone() => new Publication()..mergeFromMessage(this);
-  Publication copyWith(void Function(Publication) updates) =>
-      super.copyWith((message) => updates(message as Publication));
+  Publication._() : super();
+  factory Publication() => create();
+  factory Publication.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Publication.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Publication clone() => Publication()..mergeFromMessage(this);
+  Publication copyWith(void Function(Publication) updates) => super.copyWith((message) => updates(message as Publication));
   $pb.BuilderInfo get info_ => _i;
-  static Publication create() => new Publication();
+  @$core.pragma('dart2js:noInline')
+  static Publication create() => Publication._();
   Publication createEmptyInstance() => create();
-  static $pb.PbList<Publication> createRepeated() =>
-      new $pb.PbList<Publication>();
-  static Publication getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Publication> createRepeated() => $pb.PbList<Publication>();
+  @$core.pragma('dart2js:noInline')
+  static Publication getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Publication>(create);
   static Publication _defaultInstance;
-  static void $checkItem(Publication v) {
-    if (v is! Publication) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  int get seq => $_get(0, 0);
-  set seq(int v) {
-    $_setUnsignedInt32(0, v);
-  }
-
-  bool hasSeq() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.int get seq => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set seq($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSeq() => $_has(0);
+  @$pb.TagNumber(1)
   void clearSeq() => clearField(1);
 
-  int get gen => $_get(1, 0);
-  set gen(int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  bool hasGen() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.int get gen => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set gen($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasGen() => $_has(1);
+  @$pb.TagNumber(2)
   void clearGen() => clearField(2);
 
-  String get uid => $_getS(2, '');
-  set uid(String v) {
-    $_setString(2, v);
-  }
-
-  bool hasUid() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.String get uid => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set uid($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasUid() => $_has(2);
+  @$pb.TagNumber(3)
   void clearUid() => clearField(3);
 
-  List<int> get data => $_getN(3);
-  set data(List<int> v) {
-    $_setBytes(3, v);
-  }
-
-  bool hasData() => $_has(3);
+  @$pb.TagNumber(4)
+  $core.List<$core.int> get data => $_getN(3);
+  @$pb.TagNumber(4)
+  set data($core.List<$core.int> v) { $_setBytes(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasData() => $_has(3);
+  @$pb.TagNumber(4)
   void clearData() => clearField(4);
 
+  @$pb.TagNumber(5)
   ClientInfo get info => $_getN(4);
-  set info(ClientInfo v) {
-    setField(5, v);
-  }
-
-  bool hasInfo() => $_has(4);
+  @$pb.TagNumber(5)
+  set info(ClientInfo v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasInfo() => $_has(4);
+  @$pb.TagNumber(5)
   void clearInfo() => clearField(5);
+  @$pb.TagNumber(5)
+  ClientInfo ensureInfo() => $_ensure(4);
 }
 
 class Join extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Join',
-      package: const $pb.PackageName('proto'))
-    ..a<ClientInfo>(
-        1, 'info', $pb.PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Join', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..aOM<ClientInfo>(1, 'info', subBuilder: ClientInfo.create)
+    ..hasRequiredFields = false
+  ;
 
-  Join() : super();
-  Join.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Join.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Join clone() => new Join()..mergeFromMessage(this);
-  Join copyWith(void Function(Join) updates) =>
-      super.copyWith((message) => updates(message as Join));
+  Join._() : super();
+  factory Join() => create();
+  factory Join.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Join.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Join clone() => Join()..mergeFromMessage(this);
+  Join copyWith(void Function(Join) updates) => super.copyWith((message) => updates(message as Join));
   $pb.BuilderInfo get info_ => _i;
-  static Join create() => new Join();
+  @$core.pragma('dart2js:noInline')
+  static Join create() => Join._();
   Join createEmptyInstance() => create();
-  static $pb.PbList<Join> createRepeated() => new $pb.PbList<Join>();
-  static Join getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Join> createRepeated() => $pb.PbList<Join>();
+  @$core.pragma('dart2js:noInline')
+  static Join getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Join>(create);
   static Join _defaultInstance;
-  static void $checkItem(Join v) {
-    if (v is! Join) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
+  @$pb.TagNumber(1)
   ClientInfo get info => $_getN(0);
-  set info(ClientInfo v) {
-    setField(1, v);
-  }
-
-  bool hasInfo() => $_has(0);
+  @$pb.TagNumber(1)
+  set info(ClientInfo v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasInfo() => $_has(0);
+  @$pb.TagNumber(1)
   void clearInfo() => clearField(1);
+  @$pb.TagNumber(1)
+  ClientInfo ensureInfo() => $_ensure(0);
 }
 
 class Leave extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Leave',
-      package: const $pb.PackageName('proto'))
-    ..a<ClientInfo>(
-        1, 'info', $pb.PbFieldType.OM, ClientInfo.getDefault, ClientInfo.create)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Leave', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..aOM<ClientInfo>(1, 'info', subBuilder: ClientInfo.create)
+    ..hasRequiredFields = false
+  ;
 
-  Leave() : super();
-  Leave.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Leave.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Leave clone() => new Leave()..mergeFromMessage(this);
-  Leave copyWith(void Function(Leave) updates) =>
-      super.copyWith((message) => updates(message as Leave));
+  Leave._() : super();
+  factory Leave() => create();
+  factory Leave.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Leave.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Leave clone() => Leave()..mergeFromMessage(this);
+  Leave copyWith(void Function(Leave) updates) => super.copyWith((message) => updates(message as Leave));
   $pb.BuilderInfo get info_ => _i;
-  static Leave create() => new Leave();
+  @$core.pragma('dart2js:noInline')
+  static Leave create() => Leave._();
   Leave createEmptyInstance() => create();
-  static $pb.PbList<Leave> createRepeated() => new $pb.PbList<Leave>();
-  static Leave getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Leave> createRepeated() => $pb.PbList<Leave>();
+  @$core.pragma('dart2js:noInline')
+  static Leave getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Leave>(create);
   static Leave _defaultInstance;
-  static void $checkItem(Leave v) {
-    if (v is! Leave) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
+  @$pb.TagNumber(1)
   ClientInfo get info => $_getN(0);
-  set info(ClientInfo v) {
-    setField(1, v);
-  }
-
-  bool hasInfo() => $_has(0);
+  @$pb.TagNumber(1)
+  set info(ClientInfo v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasInfo() => $_has(0);
+  @$pb.TagNumber(1)
   void clearInfo() => clearField(1);
+  @$pb.TagNumber(1)
+  ClientInfo ensureInfo() => $_ensure(0);
 }
 
 class Unsub extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('Unsub', package: const $pb.PackageName('proto'))
-        ..aOB(1, 'resubscribe')
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Unsub', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..aOB(1, 'resubscribe')
+    ..hasRequiredFields = false
+  ;
 
-  Unsub() : super();
-  Unsub.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Unsub.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Unsub clone() => new Unsub()..mergeFromMessage(this);
-  Unsub copyWith(void Function(Unsub) updates) =>
-      super.copyWith((message) => updates(message as Unsub));
+  Unsub._() : super();
+  factory Unsub() => create();
+  factory Unsub.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Unsub.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Unsub clone() => Unsub()..mergeFromMessage(this);
+  Unsub copyWith(void Function(Unsub) updates) => super.copyWith((message) => updates(message as Unsub));
   $pb.BuilderInfo get info_ => _i;
-  static Unsub create() => new Unsub();
+  @$core.pragma('dart2js:noInline')
+  static Unsub create() => Unsub._();
   Unsub createEmptyInstance() => create();
-  static $pb.PbList<Unsub> createRepeated() => new $pb.PbList<Unsub>();
-  static Unsub getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Unsub> createRepeated() => $pb.PbList<Unsub>();
+  @$core.pragma('dart2js:noInline')
+  static Unsub getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Unsub>(create);
   static Unsub _defaultInstance;
-  static void $checkItem(Unsub v) {
-    if (v is! Unsub) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  bool get resubscribe => $_get(0, false);
-  set resubscribe(bool v) {
-    $_setBool(0, v);
-  }
-
-  bool hasResubscribe() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.bool get resubscribe => $_getBF(0);
+  @$pb.TagNumber(1)
+  set resubscribe($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasResubscribe() => $_has(0);
+  @$pb.TagNumber(1)
   void clearResubscribe() => clearField(1);
 }
 
 class Message extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('Message', package: const $pb.PackageName('proto'))
-        ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Message', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  Message() : super();
-  Message.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  Message.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  Message clone() => new Message()..mergeFromMessage(this);
-  Message copyWith(void Function(Message) updates) =>
-      super.copyWith((message) => updates(message as Message));
+  Message._() : super();
+  factory Message() => create();
+  factory Message.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Message.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  Message clone() => Message()..mergeFromMessage(this);
+  Message copyWith(void Function(Message) updates) => super.copyWith((message) => updates(message as Message));
   $pb.BuilderInfo get info_ => _i;
-  static Message create() => new Message();
+  @$core.pragma('dart2js:noInline')
+  static Message create() => Message._();
   Message createEmptyInstance() => create();
-  static $pb.PbList<Message> createRepeated() => new $pb.PbList<Message>();
-  static Message getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<Message> createRepeated() => $pb.PbList<Message>();
+  @$core.pragma('dart2js:noInline')
+  static Message getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Message>(create);
   static Message _defaultInstance;
-  static void $checkItem(Message v) {
-    if (v is! Message) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  List<int> get data => $_getN(0);
-  set data(List<int> v) {
-    $_setBytes(0, v);
-  }
-
-  bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get data => $_getN(0);
+  @$pb.TagNumber(1)
+  set data($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
   void clearData() => clearField(1);
 }
 
 class ConnectRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('ConnectRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'token')
-    ..a<List<int>>(2, 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
+    ..a<$core.List<$core.int>>(2, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  ConnectRequest() : super();
-  ConnectRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  ConnectRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  ConnectRequest clone() => new ConnectRequest()..mergeFromMessage(this);
-  ConnectRequest copyWith(void Function(ConnectRequest) updates) =>
-      super.copyWith((message) => updates(message as ConnectRequest));
+  ConnectRequest._() : super();
+  factory ConnectRequest() => create();
+  factory ConnectRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  ConnectRequest clone() => ConnectRequest()..mergeFromMessage(this);
+  ConnectRequest copyWith(void Function(ConnectRequest) updates) => super.copyWith((message) => updates(message as ConnectRequest));
   $pb.BuilderInfo get info_ => _i;
-  static ConnectRequest create() => new ConnectRequest();
+  @$core.pragma('dart2js:noInline')
+  static ConnectRequest create() => ConnectRequest._();
   ConnectRequest createEmptyInstance() => create();
-  static $pb.PbList<ConnectRequest> createRepeated() =>
-      new $pb.PbList<ConnectRequest>();
-  static ConnectRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<ConnectRequest> createRepeated() => $pb.PbList<ConnectRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectRequest>(create);
   static ConnectRequest _defaultInstance;
-  static void $checkItem(ConnectRequest v) {
-    if (v is! ConnectRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get token => $_getS(0, '');
-  set token(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasToken() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get token => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set token($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasToken() => $_has(0);
+  @$pb.TagNumber(1)
   void clearToken() => clearField(1);
 
-  List<int> get data => $_getN(1);
-  set data(List<int> v) {
-    $_setBytes(1, v);
-  }
-
-  bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
   void clearData() => clearField(2);
 }
 
 class ConnectResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('ConnectResult',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'client')
     ..aOS(2, 'version')
     ..aOB(3, 'expires')
-    ..a<int>(4, 'ttl', $pb.PbFieldType.OU3)
-    ..a<List<int>>(5, 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
+    ..a<$core.int>(4, 'ttl', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(5, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  ConnectResult() : super();
-  ConnectResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  ConnectResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  ConnectResult clone() => new ConnectResult()..mergeFromMessage(this);
-  ConnectResult copyWith(void Function(ConnectResult) updates) =>
-      super.copyWith((message) => updates(message as ConnectResult));
+  ConnectResult._() : super();
+  factory ConnectResult() => create();
+  factory ConnectResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  ConnectResult clone() => ConnectResult()..mergeFromMessage(this);
+  ConnectResult copyWith(void Function(ConnectResult) updates) => super.copyWith((message) => updates(message as ConnectResult));
   $pb.BuilderInfo get info_ => _i;
-  static ConnectResult create() => new ConnectResult();
+  @$core.pragma('dart2js:noInline')
+  static ConnectResult create() => ConnectResult._();
   ConnectResult createEmptyInstance() => create();
-  static $pb.PbList<ConnectResult> createRepeated() =>
-      new $pb.PbList<ConnectResult>();
-  static ConnectResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<ConnectResult> createRepeated() => $pb.PbList<ConnectResult>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectResult>(create);
   static ConnectResult _defaultInstance;
-  static void $checkItem(ConnectResult v) {
-    if (v is! ConnectResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get client => $_getS(0, '');
-  set client(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasClient() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get client => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set client($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasClient() => $_has(0);
+  @$pb.TagNumber(1)
   void clearClient() => clearField(1);
 
-  String get version => $_getS(1, '');
-  set version(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get version => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set version($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
   void clearVersion() => clearField(2);
 
-  bool get expires => $_get(2, false);
-  set expires(bool v) {
-    $_setBool(2, v);
-  }
-
-  bool hasExpires() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.bool get expires => $_getBF(2);
+  @$pb.TagNumber(3)
+  set expires($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasExpires() => $_has(2);
+  @$pb.TagNumber(3)
   void clearExpires() => clearField(3);
 
-  int get ttl => $_get(3, 0);
-  set ttl(int v) {
-    $_setUnsignedInt32(3, v);
-  }
-
-  bool hasTtl() => $_has(3);
+  @$pb.TagNumber(4)
+  $core.int get ttl => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set ttl($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTtl() => $_has(3);
+  @$pb.TagNumber(4)
   void clearTtl() => clearField(4);
 
-  List<int> get data => $_getN(4);
-  set data(List<int> v) {
-    $_setBytes(4, v);
-  }
-
-  bool hasData() => $_has(4);
+  @$pb.TagNumber(5)
+  $core.List<$core.int> get data => $_getN(4);
+  @$pb.TagNumber(5)
+  set data($core.List<$core.int> v) { $_setBytes(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasData() => $_has(4);
+  @$pb.TagNumber(5)
   void clearData() => clearField(5);
 }
 
 class RefreshRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('RefreshRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RefreshRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'token')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  RefreshRequest() : super();
-  RefreshRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  RefreshRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  RefreshRequest clone() => new RefreshRequest()..mergeFromMessage(this);
-  RefreshRequest copyWith(void Function(RefreshRequest) updates) =>
-      super.copyWith((message) => updates(message as RefreshRequest));
+  RefreshRequest._() : super();
+  factory RefreshRequest() => create();
+  factory RefreshRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RefreshRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RefreshRequest clone() => RefreshRequest()..mergeFromMessage(this);
+  RefreshRequest copyWith(void Function(RefreshRequest) updates) => super.copyWith((message) => updates(message as RefreshRequest));
   $pb.BuilderInfo get info_ => _i;
-  static RefreshRequest create() => new RefreshRequest();
+  @$core.pragma('dart2js:noInline')
+  static RefreshRequest create() => RefreshRequest._();
   RefreshRequest createEmptyInstance() => create();
-  static $pb.PbList<RefreshRequest> createRepeated() =>
-      new $pb.PbList<RefreshRequest>();
-  static RefreshRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<RefreshRequest> createRepeated() => $pb.PbList<RefreshRequest>();
+  @$core.pragma('dart2js:noInline')
+  static RefreshRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RefreshRequest>(create);
   static RefreshRequest _defaultInstance;
-  static void $checkItem(RefreshRequest v) {
-    if (v is! RefreshRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get token => $_getS(0, '');
-  set token(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasToken() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get token => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set token($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasToken() => $_has(0);
+  @$pb.TagNumber(1)
   void clearToken() => clearField(1);
 }
 
 class RefreshResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('RefreshResult',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RefreshResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'client')
     ..aOS(2, 'version')
     ..aOB(3, 'expires')
-    ..a<int>(4, 'ttl', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false;
+    ..a<$core.int>(4, 'ttl', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
 
-  RefreshResult() : super();
-  RefreshResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  RefreshResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  RefreshResult clone() => new RefreshResult()..mergeFromMessage(this);
-  RefreshResult copyWith(void Function(RefreshResult) updates) =>
-      super.copyWith((message) => updates(message as RefreshResult));
+  RefreshResult._() : super();
+  factory RefreshResult() => create();
+  factory RefreshResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RefreshResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RefreshResult clone() => RefreshResult()..mergeFromMessage(this);
+  RefreshResult copyWith(void Function(RefreshResult) updates) => super.copyWith((message) => updates(message as RefreshResult));
   $pb.BuilderInfo get info_ => _i;
-  static RefreshResult create() => new RefreshResult();
+  @$core.pragma('dart2js:noInline')
+  static RefreshResult create() => RefreshResult._();
   RefreshResult createEmptyInstance() => create();
-  static $pb.PbList<RefreshResult> createRepeated() =>
-      new $pb.PbList<RefreshResult>();
-  static RefreshResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<RefreshResult> createRepeated() => $pb.PbList<RefreshResult>();
+  @$core.pragma('dart2js:noInline')
+  static RefreshResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RefreshResult>(create);
   static RefreshResult _defaultInstance;
-  static void $checkItem(RefreshResult v) {
-    if (v is! RefreshResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get client => $_getS(0, '');
-  set client(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasClient() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get client => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set client($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasClient() => $_has(0);
+  @$pb.TagNumber(1)
   void clearClient() => clearField(1);
 
-  String get version => $_getS(1, '');
-  set version(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get version => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set version($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
   void clearVersion() => clearField(2);
 
-  bool get expires => $_get(2, false);
-  set expires(bool v) {
-    $_setBool(2, v);
-  }
-
-  bool hasExpires() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.bool get expires => $_getBF(2);
+  @$pb.TagNumber(3)
+  set expires($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasExpires() => $_has(2);
+  @$pb.TagNumber(3)
   void clearExpires() => clearField(3);
 
-  int get ttl => $_get(3, 0);
-  set ttl(int v) {
-    $_setUnsignedInt32(3, v);
-  }
-
-  bool hasTtl() => $_has(3);
+  @$pb.TagNumber(4)
+  $core.int get ttl => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set ttl($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTtl() => $_has(3);
+  @$pb.TagNumber(4)
   void clearTtl() => clearField(4);
 }
 
 class SubscribeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubscribeRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubscribeRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..aOS(2, 'token')
     ..aOB(3, 'recover')
-    ..a<int>(4, 'seq', $pb.PbFieldType.OU3)
-    ..a<int>(5, 'gen', $pb.PbFieldType.OU3)
+    ..a<$core.int>(4, 'seq', $pb.PbFieldType.OU3)
+    ..a<$core.int>(5, 'gen', $pb.PbFieldType.OU3)
     ..aOS(6, 'epoch')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  SubscribeRequest() : super();
-  SubscribeRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  SubscribeRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  SubscribeRequest clone() => new SubscribeRequest()..mergeFromMessage(this);
-  SubscribeRequest copyWith(void Function(SubscribeRequest) updates) =>
-      super.copyWith((message) => updates(message as SubscribeRequest));
+  SubscribeRequest._() : super();
+  factory SubscribeRequest() => create();
+  factory SubscribeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SubscribeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  SubscribeRequest clone() => SubscribeRequest()..mergeFromMessage(this);
+  SubscribeRequest copyWith(void Function(SubscribeRequest) updates) => super.copyWith((message) => updates(message as SubscribeRequest));
   $pb.BuilderInfo get info_ => _i;
-  static SubscribeRequest create() => new SubscribeRequest();
+  @$core.pragma('dart2js:noInline')
+  static SubscribeRequest create() => SubscribeRequest._();
   SubscribeRequest createEmptyInstance() => create();
-  static $pb.PbList<SubscribeRequest> createRepeated() =>
-      new $pb.PbList<SubscribeRequest>();
-  static SubscribeRequest getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<SubscribeRequest> createRepeated() => $pb.PbList<SubscribeRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SubscribeRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubscribeRequest>(create);
   static SubscribeRequest _defaultInstance;
-  static void $checkItem(SubscribeRequest v) {
-    if (v is! SubscribeRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 
-  String get token => $_getS(1, '');
-  set token(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasToken() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get token => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set token($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasToken() => $_has(1);
+  @$pb.TagNumber(2)
   void clearToken() => clearField(2);
 
-  bool get recover => $_get(2, false);
-  set recover(bool v) {
-    $_setBool(2, v);
-  }
-
-  bool hasRecover() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.bool get recover => $_getBF(2);
+  @$pb.TagNumber(3)
+  set recover($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRecover() => $_has(2);
+  @$pb.TagNumber(3)
   void clearRecover() => clearField(3);
 
-  int get seq => $_get(3, 0);
-  set seq(int v) {
-    $_setUnsignedInt32(3, v);
-  }
-
-  bool hasSeq() => $_has(3);
+  @$pb.TagNumber(4)
+  $core.int get seq => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set seq($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasSeq() => $_has(3);
+  @$pb.TagNumber(4)
   void clearSeq() => clearField(4);
 
-  int get gen => $_get(4, 0);
-  set gen(int v) {
-    $_setUnsignedInt32(4, v);
-  }
-
-  bool hasGen() => $_has(4);
+  @$pb.TagNumber(5)
+  $core.int get gen => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set gen($core.int v) { $_setUnsignedInt32(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasGen() => $_has(4);
+  @$pb.TagNumber(5)
   void clearGen() => clearField(5);
 
-  String get epoch => $_getS(5, '');
-  set epoch(String v) {
-    $_setString(5, v);
-  }
-
-  bool hasEpoch() => $_has(5);
+  @$pb.TagNumber(6)
+  $core.String get epoch => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set epoch($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasEpoch() => $_has(5);
+  @$pb.TagNumber(6)
   void clearEpoch() => clearField(6);
 }
 
 class SubscribeResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubscribeResult',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubscribeResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOB(1, 'expires')
-    ..a<int>(2, 'ttl', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, 'ttl', $pb.PbFieldType.OU3)
     ..aOB(3, 'recoverable')
-    ..a<int>(4, 'seq', $pb.PbFieldType.OU3)
-    ..a<int>(5, 'gen', $pb.PbFieldType.OU3)
+    ..a<$core.int>(4, 'seq', $pb.PbFieldType.OU3)
+    ..a<$core.int>(5, 'gen', $pb.PbFieldType.OU3)
     ..aOS(6, 'epoch')
-    ..pp<Publication>(7, 'publications', $pb.PbFieldType.PM,
-        Publication.$checkItem, Publication.create)
+    ..pc<Publication>(7, 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
     ..aOB(8, 'recovered')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  SubscribeResult() : super();
-  SubscribeResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  SubscribeResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  SubscribeResult clone() => new SubscribeResult()..mergeFromMessage(this);
-  SubscribeResult copyWith(void Function(SubscribeResult) updates) =>
-      super.copyWith((message) => updates(message as SubscribeResult));
+  SubscribeResult._() : super();
+  factory SubscribeResult() => create();
+  factory SubscribeResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SubscribeResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  SubscribeResult clone() => SubscribeResult()..mergeFromMessage(this);
+  SubscribeResult copyWith(void Function(SubscribeResult) updates) => super.copyWith((message) => updates(message as SubscribeResult));
   $pb.BuilderInfo get info_ => _i;
-  static SubscribeResult create() => new SubscribeResult();
+  @$core.pragma('dart2js:noInline')
+  static SubscribeResult create() => SubscribeResult._();
   SubscribeResult createEmptyInstance() => create();
-  static $pb.PbList<SubscribeResult> createRepeated() =>
-      new $pb.PbList<SubscribeResult>();
-  static SubscribeResult getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<SubscribeResult> createRepeated() => $pb.PbList<SubscribeResult>();
+  @$core.pragma('dart2js:noInline')
+  static SubscribeResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubscribeResult>(create);
   static SubscribeResult _defaultInstance;
-  static void $checkItem(SubscribeResult v) {
-    if (v is! SubscribeResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  bool get expires => $_get(0, false);
-  set expires(bool v) {
-    $_setBool(0, v);
-  }
-
-  bool hasExpires() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.bool get expires => $_getBF(0);
+  @$pb.TagNumber(1)
+  set expires($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasExpires() => $_has(0);
+  @$pb.TagNumber(1)
   void clearExpires() => clearField(1);
 
-  int get ttl => $_get(1, 0);
-  set ttl(int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  bool hasTtl() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.int get ttl => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set ttl($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTtl() => $_has(1);
+  @$pb.TagNumber(2)
   void clearTtl() => clearField(2);
 
-  bool get recoverable => $_get(2, false);
-  set recoverable(bool v) {
-    $_setBool(2, v);
-  }
-
-  bool hasRecoverable() => $_has(2);
+  @$pb.TagNumber(3)
+  $core.bool get recoverable => $_getBF(2);
+  @$pb.TagNumber(3)
+  set recoverable($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRecoverable() => $_has(2);
+  @$pb.TagNumber(3)
   void clearRecoverable() => clearField(3);
 
-  int get seq => $_get(3, 0);
-  set seq(int v) {
-    $_setUnsignedInt32(3, v);
-  }
-
-  bool hasSeq() => $_has(3);
+  @$pb.TagNumber(4)
+  $core.int get seq => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set seq($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasSeq() => $_has(3);
+  @$pb.TagNumber(4)
   void clearSeq() => clearField(4);
 
-  int get gen => $_get(4, 0);
-  set gen(int v) {
-    $_setUnsignedInt32(4, v);
-  }
-
-  bool hasGen() => $_has(4);
+  @$pb.TagNumber(5)
+  $core.int get gen => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set gen($core.int v) { $_setUnsignedInt32(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasGen() => $_has(4);
+  @$pb.TagNumber(5)
   void clearGen() => clearField(5);
 
-  String get epoch => $_getS(5, '');
-  set epoch(String v) {
-    $_setString(5, v);
-  }
-
-  bool hasEpoch() => $_has(5);
+  @$pb.TagNumber(6)
+  $core.String get epoch => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set epoch($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasEpoch() => $_has(5);
+  @$pb.TagNumber(6)
   void clearEpoch() => clearField(6);
 
-  List<Publication> get publications => $_getList(6);
+  @$pb.TagNumber(7)
+  $core.List<Publication> get publications => $_getList(6);
 
-  bool get recovered => $_get(7, false);
-  set recovered(bool v) {
-    $_setBool(7, v);
-  }
-
-  bool hasRecovered() => $_has(7);
+  @$pb.TagNumber(8)
+  $core.bool get recovered => $_getBF(7);
+  @$pb.TagNumber(8)
+  set recovered($core.bool v) { $_setBool(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasRecovered() => $_has(7);
+  @$pb.TagNumber(8)
   void clearRecovered() => clearField(8);
 }
 
 class SubRefreshRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubRefreshRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubRefreshRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
     ..aOS(2, 'token')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  SubRefreshRequest() : super();
-  SubRefreshRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  SubRefreshRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  SubRefreshRequest clone() => new SubRefreshRequest()..mergeFromMessage(this);
-  SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) =>
-      super.copyWith((message) => updates(message as SubRefreshRequest));
+  SubRefreshRequest._() : super();
+  factory SubRefreshRequest() => create();
+  factory SubRefreshRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SubRefreshRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  SubRefreshRequest clone() => SubRefreshRequest()..mergeFromMessage(this);
+  SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) => super.copyWith((message) => updates(message as SubRefreshRequest));
   $pb.BuilderInfo get info_ => _i;
-  static SubRefreshRequest create() => new SubRefreshRequest();
+  @$core.pragma('dart2js:noInline')
+  static SubRefreshRequest create() => SubRefreshRequest._();
   SubRefreshRequest createEmptyInstance() => create();
-  static $pb.PbList<SubRefreshRequest> createRepeated() =>
-      new $pb.PbList<SubRefreshRequest>();
-  static SubRefreshRequest getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<SubRefreshRequest> createRepeated() => $pb.PbList<SubRefreshRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SubRefreshRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubRefreshRequest>(create);
   static SubRefreshRequest _defaultInstance;
-  static void $checkItem(SubRefreshRequest v) {
-    if (v is! SubRefreshRequest)
-      $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 
-  String get token => $_getS(1, '');
-  set token(String v) {
-    $_setString(1, v);
-  }
-
-  bool hasToken() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.String get token => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set token($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasToken() => $_has(1);
+  @$pb.TagNumber(2)
   void clearToken() => clearField(2);
 }
 
 class SubRefreshResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SubRefreshResult',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SubRefreshResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOB(1, 'expires')
-    ..a<int>(2, 'ttl', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false;
+    ..a<$core.int>(2, 'ttl', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
 
-  SubRefreshResult() : super();
-  SubRefreshResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  SubRefreshResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  SubRefreshResult clone() => new SubRefreshResult()..mergeFromMessage(this);
-  SubRefreshResult copyWith(void Function(SubRefreshResult) updates) =>
-      super.copyWith((message) => updates(message as SubRefreshResult));
+  SubRefreshResult._() : super();
+  factory SubRefreshResult() => create();
+  factory SubRefreshResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SubRefreshResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  SubRefreshResult clone() => SubRefreshResult()..mergeFromMessage(this);
+  SubRefreshResult copyWith(void Function(SubRefreshResult) updates) => super.copyWith((message) => updates(message as SubRefreshResult));
   $pb.BuilderInfo get info_ => _i;
-  static SubRefreshResult create() => new SubRefreshResult();
+  @$core.pragma('dart2js:noInline')
+  static SubRefreshResult create() => SubRefreshResult._();
   SubRefreshResult createEmptyInstance() => create();
-  static $pb.PbList<SubRefreshResult> createRepeated() =>
-      new $pb.PbList<SubRefreshResult>();
-  static SubRefreshResult getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<SubRefreshResult> createRepeated() => $pb.PbList<SubRefreshResult>();
+  @$core.pragma('dart2js:noInline')
+  static SubRefreshResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubRefreshResult>(create);
   static SubRefreshResult _defaultInstance;
-  static void $checkItem(SubRefreshResult v) {
-    if (v is! SubRefreshResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  bool get expires => $_get(0, false);
-  set expires(bool v) {
-    $_setBool(0, v);
-  }
-
-  bool hasExpires() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.bool get expires => $_getBF(0);
+  @$pb.TagNumber(1)
+  set expires($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasExpires() => $_has(0);
+  @$pb.TagNumber(1)
   void clearExpires() => clearField(1);
 
-  int get ttl => $_get(1, 0);
-  set ttl(int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  bool hasTtl() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.int get ttl => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set ttl($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTtl() => $_has(1);
+  @$pb.TagNumber(2)
   void clearTtl() => clearField(2);
 }
 
 class UnsubscribeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('UnsubscribeRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('UnsubscribeRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  UnsubscribeRequest() : super();
-  UnsubscribeRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  UnsubscribeRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  UnsubscribeRequest clone() =>
-      new UnsubscribeRequest()..mergeFromMessage(this);
-  UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) =>
-      super.copyWith((message) => updates(message as UnsubscribeRequest));
+  UnsubscribeRequest._() : super();
+  factory UnsubscribeRequest() => create();
+  factory UnsubscribeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UnsubscribeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  UnsubscribeRequest clone() => UnsubscribeRequest()..mergeFromMessage(this);
+  UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) => super.copyWith((message) => updates(message as UnsubscribeRequest));
   $pb.BuilderInfo get info_ => _i;
-  static UnsubscribeRequest create() => new UnsubscribeRequest();
+  @$core.pragma('dart2js:noInline')
+  static UnsubscribeRequest create() => UnsubscribeRequest._();
   UnsubscribeRequest createEmptyInstance() => create();
-  static $pb.PbList<UnsubscribeRequest> createRepeated() =>
-      new $pb.PbList<UnsubscribeRequest>();
-  static UnsubscribeRequest getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<UnsubscribeRequest> createRepeated() => $pb.PbList<UnsubscribeRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UnsubscribeRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UnsubscribeRequest>(create);
   static UnsubscribeRequest _defaultInstance;
-  static void $checkItem(UnsubscribeRequest v) {
-    if (v is! UnsubscribeRequest)
-      $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 }
 
 class UnsubscribeResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('UnsubscribeResult',
-      package: const $pb.PackageName('proto'))
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('UnsubscribeResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
 
-  UnsubscribeResult() : super();
-  UnsubscribeResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  UnsubscribeResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  UnsubscribeResult clone() => new UnsubscribeResult()..mergeFromMessage(this);
-  UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) =>
-      super.copyWith((message) => updates(message as UnsubscribeResult));
+  UnsubscribeResult._() : super();
+  factory UnsubscribeResult() => create();
+  factory UnsubscribeResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UnsubscribeResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  UnsubscribeResult clone() => UnsubscribeResult()..mergeFromMessage(this);
+  UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) => super.copyWith((message) => updates(message as UnsubscribeResult));
   $pb.BuilderInfo get info_ => _i;
-  static UnsubscribeResult create() => new UnsubscribeResult();
+  @$core.pragma('dart2js:noInline')
+  static UnsubscribeResult create() => UnsubscribeResult._();
   UnsubscribeResult createEmptyInstance() => create();
-  static $pb.PbList<UnsubscribeResult> createRepeated() =>
-      new $pb.PbList<UnsubscribeResult>();
-  static UnsubscribeResult getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<UnsubscribeResult> createRepeated() => $pb.PbList<UnsubscribeResult>();
+  @$core.pragma('dart2js:noInline')
+  static UnsubscribeResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UnsubscribeResult>(create);
   static UnsubscribeResult _defaultInstance;
-  static void $checkItem(UnsubscribeResult v) {
-    if (v is! UnsubscribeResult)
-      $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 }
 
 class PublishRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PublishRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PublishRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
-    ..a<List<int>>(2, 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
+    ..a<$core.List<$core.int>>(2, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  PublishRequest() : super();
-  PublishRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PublishRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PublishRequest clone() => new PublishRequest()..mergeFromMessage(this);
-  PublishRequest copyWith(void Function(PublishRequest) updates) =>
-      super.copyWith((message) => updates(message as PublishRequest));
+  PublishRequest._() : super();
+  factory PublishRequest() => create();
+  factory PublishRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PublishRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PublishRequest clone() => PublishRequest()..mergeFromMessage(this);
+  PublishRequest copyWith(void Function(PublishRequest) updates) => super.copyWith((message) => updates(message as PublishRequest));
   $pb.BuilderInfo get info_ => _i;
-  static PublishRequest create() => new PublishRequest();
+  @$core.pragma('dart2js:noInline')
+  static PublishRequest create() => PublishRequest._();
   PublishRequest createEmptyInstance() => create();
-  static $pb.PbList<PublishRequest> createRepeated() =>
-      new $pb.PbList<PublishRequest>();
-  static PublishRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PublishRequest> createRepeated() => $pb.PbList<PublishRequest>();
+  @$core.pragma('dart2js:noInline')
+  static PublishRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PublishRequest>(create);
   static PublishRequest _defaultInstance;
-  static void $checkItem(PublishRequest v) {
-    if (v is! PublishRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 
-  List<int> get data => $_getN(1);
-  set data(List<int> v) {
-    $_setBytes(1, v);
-  }
-
-  bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
   void clearData() => clearField(2);
 }
 
 class PublishResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PublishResult',
-      package: const $pb.PackageName('proto'))
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PublishResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
 
-  PublishResult() : super();
-  PublishResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PublishResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PublishResult clone() => new PublishResult()..mergeFromMessage(this);
-  PublishResult copyWith(void Function(PublishResult) updates) =>
-      super.copyWith((message) => updates(message as PublishResult));
+  PublishResult._() : super();
+  factory PublishResult() => create();
+  factory PublishResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PublishResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PublishResult clone() => PublishResult()..mergeFromMessage(this);
+  PublishResult copyWith(void Function(PublishResult) updates) => super.copyWith((message) => updates(message as PublishResult));
   $pb.BuilderInfo get info_ => _i;
-  static PublishResult create() => new PublishResult();
+  @$core.pragma('dart2js:noInline')
+  static PublishResult create() => PublishResult._();
   PublishResult createEmptyInstance() => create();
-  static $pb.PbList<PublishResult> createRepeated() =>
-      new $pb.PbList<PublishResult>();
-  static PublishResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PublishResult> createRepeated() => $pb.PbList<PublishResult>();
+  @$core.pragma('dart2js:noInline')
+  static PublishResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PublishResult>(create);
   static PublishResult _defaultInstance;
-  static void $checkItem(PublishResult v) {
-    if (v is! PublishResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 }
 
 class PresenceRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  PresenceRequest() : super();
-  PresenceRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PresenceRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PresenceRequest clone() => new PresenceRequest()..mergeFromMessage(this);
-  PresenceRequest copyWith(void Function(PresenceRequest) updates) =>
-      super.copyWith((message) => updates(message as PresenceRequest));
+  PresenceRequest._() : super();
+  factory PresenceRequest() => create();
+  factory PresenceRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PresenceRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PresenceRequest clone() => PresenceRequest()..mergeFromMessage(this);
+  PresenceRequest copyWith(void Function(PresenceRequest) updates) => super.copyWith((message) => updates(message as PresenceRequest));
   $pb.BuilderInfo get info_ => _i;
-  static PresenceRequest create() => new PresenceRequest();
+  @$core.pragma('dart2js:noInline')
+  static PresenceRequest create() => PresenceRequest._();
   PresenceRequest createEmptyInstance() => create();
-  static $pb.PbList<PresenceRequest> createRepeated() =>
-      new $pb.PbList<PresenceRequest>();
-  static PresenceRequest getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PresenceRequest> createRepeated() => $pb.PbList<PresenceRequest>();
+  @$core.pragma('dart2js:noInline')
+  static PresenceRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PresenceRequest>(create);
   static PresenceRequest _defaultInstance;
-  static void $checkItem(PresenceRequest v) {
-    if (v is! PresenceRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 }
 
 class PresenceResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceResult',
-      package: const $pb.PackageName('proto'))
-    ..m<String, ClientInfo>(
-        1,
-        'presence',
-        'PresenceResult.PresenceEntry',
-        $pb.PbFieldType.OS,
-        $pb.PbFieldType.OM,
-        ClientInfo.create,
-        null,
-        null,
-        const $pb.PackageName('proto'))
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..m<$core.String, ClientInfo>(1, 'presence', entryClassName: 'PresenceResult.PresenceEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: ClientInfo.create, packageName: const $pb.PackageName('proto'))
+    ..hasRequiredFields = false
+  ;
 
-  PresenceResult() : super();
-  PresenceResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PresenceResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PresenceResult clone() => new PresenceResult()..mergeFromMessage(this);
-  PresenceResult copyWith(void Function(PresenceResult) updates) =>
-      super.copyWith((message) => updates(message as PresenceResult));
+  PresenceResult._() : super();
+  factory PresenceResult() => create();
+  factory PresenceResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PresenceResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PresenceResult clone() => PresenceResult()..mergeFromMessage(this);
+  PresenceResult copyWith(void Function(PresenceResult) updates) => super.copyWith((message) => updates(message as PresenceResult));
   $pb.BuilderInfo get info_ => _i;
-  static PresenceResult create() => new PresenceResult();
+  @$core.pragma('dart2js:noInline')
+  static PresenceResult create() => PresenceResult._();
   PresenceResult createEmptyInstance() => create();
-  static $pb.PbList<PresenceResult> createRepeated() =>
-      new $pb.PbList<PresenceResult>();
-  static PresenceResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PresenceResult> createRepeated() => $pb.PbList<PresenceResult>();
+  @$core.pragma('dart2js:noInline')
+  static PresenceResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PresenceResult>(create);
   static PresenceResult _defaultInstance;
-  static void $checkItem(PresenceResult v) {
-    if (v is! PresenceResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  Map<String, ClientInfo> get presence => $_getMap(0);
+  @$pb.TagNumber(1)
+  $core.Map<$core.String, ClientInfo> get presence => $_getMap(0);
 }
 
 class PresenceStatsRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceStatsRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceStatsRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  PresenceStatsRequest() : super();
-  PresenceStatsRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PresenceStatsRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PresenceStatsRequest clone() =>
-      new PresenceStatsRequest()..mergeFromMessage(this);
-  PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) =>
-      super.copyWith((message) => updates(message as PresenceStatsRequest));
+  PresenceStatsRequest._() : super();
+  factory PresenceStatsRequest() => create();
+  factory PresenceStatsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PresenceStatsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PresenceStatsRequest clone() => PresenceStatsRequest()..mergeFromMessage(this);
+  PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) => super.copyWith((message) => updates(message as PresenceStatsRequest));
   $pb.BuilderInfo get info_ => _i;
-  static PresenceStatsRequest create() => new PresenceStatsRequest();
+  @$core.pragma('dart2js:noInline')
+  static PresenceStatsRequest create() => PresenceStatsRequest._();
   PresenceStatsRequest createEmptyInstance() => create();
-  static $pb.PbList<PresenceStatsRequest> createRepeated() =>
-      new $pb.PbList<PresenceStatsRequest>();
-  static PresenceStatsRequest getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PresenceStatsRequest> createRepeated() => $pb.PbList<PresenceStatsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static PresenceStatsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PresenceStatsRequest>(create);
   static PresenceStatsRequest _defaultInstance;
-  static void $checkItem(PresenceStatsRequest v) {
-    if (v is! PresenceStatsRequest)
-      $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 }
 
 class PresenceStatsResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PresenceStatsResult',
-      package: const $pb.PackageName('proto'))
-    ..a<int>(1, 'numClients', $pb.PbFieldType.OU3)
-    ..a<int>(2, 'numUsers', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PresenceStatsResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.int>(1, 'numClients', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, 'numUsers', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
 
-  PresenceStatsResult() : super();
-  PresenceStatsResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PresenceStatsResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PresenceStatsResult clone() =>
-      new PresenceStatsResult()..mergeFromMessage(this);
-  PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) =>
-      super.copyWith((message) => updates(message as PresenceStatsResult));
+  PresenceStatsResult._() : super();
+  factory PresenceStatsResult() => create();
+  factory PresenceStatsResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PresenceStatsResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PresenceStatsResult clone() => PresenceStatsResult()..mergeFromMessage(this);
+  PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) => super.copyWith((message) => updates(message as PresenceStatsResult));
   $pb.BuilderInfo get info_ => _i;
-  static PresenceStatsResult create() => new PresenceStatsResult();
+  @$core.pragma('dart2js:noInline')
+  static PresenceStatsResult create() => PresenceStatsResult._();
   PresenceStatsResult createEmptyInstance() => create();
-  static $pb.PbList<PresenceStatsResult> createRepeated() =>
-      new $pb.PbList<PresenceStatsResult>();
-  static PresenceStatsResult getDefault() =>
-      _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PresenceStatsResult> createRepeated() => $pb.PbList<PresenceStatsResult>();
+  @$core.pragma('dart2js:noInline')
+  static PresenceStatsResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PresenceStatsResult>(create);
   static PresenceStatsResult _defaultInstance;
-  static void $checkItem(PresenceStatsResult v) {
-    if (v is! PresenceStatsResult)
-      $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  int get numClients => $_get(0, 0);
-  set numClients(int v) {
-    $_setUnsignedInt32(0, v);
-  }
-
-  bool hasNumClients() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.int get numClients => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set numClients($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasNumClients() => $_has(0);
+  @$pb.TagNumber(1)
   void clearNumClients() => clearField(1);
 
-  int get numUsers => $_get(1, 0);
-  set numUsers(int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  bool hasNumUsers() => $_has(1);
+  @$pb.TagNumber(2)
+  $core.int get numUsers => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set numUsers($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasNumUsers() => $_has(1);
+  @$pb.TagNumber(2)
   void clearNumUsers() => clearField(2);
 }
 
 class HistoryRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('HistoryRequest',
-      package: const $pb.PackageName('proto'))
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('HistoryRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
     ..aOS(1, 'channel')
-    ..hasRequiredFields = false;
+    ..hasRequiredFields = false
+  ;
 
-  HistoryRequest() : super();
-  HistoryRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  HistoryRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  HistoryRequest clone() => new HistoryRequest()..mergeFromMessage(this);
-  HistoryRequest copyWith(void Function(HistoryRequest) updates) =>
-      super.copyWith((message) => updates(message as HistoryRequest));
+  HistoryRequest._() : super();
+  factory HistoryRequest() => create();
+  factory HistoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory HistoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  HistoryRequest clone() => HistoryRequest()..mergeFromMessage(this);
+  HistoryRequest copyWith(void Function(HistoryRequest) updates) => super.copyWith((message) => updates(message as HistoryRequest));
   $pb.BuilderInfo get info_ => _i;
-  static HistoryRequest create() => new HistoryRequest();
+  @$core.pragma('dart2js:noInline')
+  static HistoryRequest create() => HistoryRequest._();
   HistoryRequest createEmptyInstance() => create();
-  static $pb.PbList<HistoryRequest> createRepeated() =>
-      new $pb.PbList<HistoryRequest>();
-  static HistoryRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<HistoryRequest> createRepeated() => $pb.PbList<HistoryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static HistoryRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HistoryRequest>(create);
   static HistoryRequest _defaultInstance;
-  static void $checkItem(HistoryRequest v) {
-    if (v is! HistoryRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  String get channel => $_getS(0, '');
-  set channel(String v) {
-    $_setString(0, v);
-  }
-
-  bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.String get channel => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set channel($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChannel() => $_has(0);
+  @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 }
 
 class HistoryResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('HistoryResult',
-      package: const $pb.PackageName('proto'))
-    ..pp<Publication>(1, 'publications', $pb.PbFieldType.PM,
-        Publication.$checkItem, Publication.create)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('HistoryResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..pc<Publication>(1, 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
+    ..hasRequiredFields = false
+  ;
 
-  HistoryResult() : super();
-  HistoryResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  HistoryResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  HistoryResult clone() => new HistoryResult()..mergeFromMessage(this);
-  HistoryResult copyWith(void Function(HistoryResult) updates) =>
-      super.copyWith((message) => updates(message as HistoryResult));
+  HistoryResult._() : super();
+  factory HistoryResult() => create();
+  factory HistoryResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory HistoryResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  HistoryResult clone() => HistoryResult()..mergeFromMessage(this);
+  HistoryResult copyWith(void Function(HistoryResult) updates) => super.copyWith((message) => updates(message as HistoryResult));
   $pb.BuilderInfo get info_ => _i;
-  static HistoryResult create() => new HistoryResult();
+  @$core.pragma('dart2js:noInline')
+  static HistoryResult create() => HistoryResult._();
   HistoryResult createEmptyInstance() => create();
-  static $pb.PbList<HistoryResult> createRepeated() =>
-      new $pb.PbList<HistoryResult>();
-  static HistoryResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<HistoryResult> createRepeated() => $pb.PbList<HistoryResult>();
+  @$core.pragma('dart2js:noInline')
+  static HistoryResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HistoryResult>(create);
   static HistoryResult _defaultInstance;
-  static void $checkItem(HistoryResult v) {
-    if (v is! HistoryResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  List<Publication> get publications => $_getList(0);
+  @$pb.TagNumber(1)
+  $core.List<Publication> get publications => $_getList(0);
 }
 
 class PingRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('PingRequest',
-      package: const $pb.PackageName('proto'))
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PingRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
 
-  PingRequest() : super();
-  PingRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PingRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PingRequest clone() => new PingRequest()..mergeFromMessage(this);
-  PingRequest copyWith(void Function(PingRequest) updates) =>
-      super.copyWith((message) => updates(message as PingRequest));
+  PingRequest._() : super();
+  factory PingRequest() => create();
+  factory PingRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PingRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PingRequest clone() => PingRequest()..mergeFromMessage(this);
+  PingRequest copyWith(void Function(PingRequest) updates) => super.copyWith((message) => updates(message as PingRequest));
   $pb.BuilderInfo get info_ => _i;
-  static PingRequest create() => new PingRequest();
+  @$core.pragma('dart2js:noInline')
+  static PingRequest create() => PingRequest._();
   PingRequest createEmptyInstance() => create();
-  static $pb.PbList<PingRequest> createRepeated() =>
-      new $pb.PbList<PingRequest>();
-  static PingRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PingRequest> createRepeated() => $pb.PbList<PingRequest>();
+  @$core.pragma('dart2js:noInline')
+  static PingRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PingRequest>(create);
   static PingRequest _defaultInstance;
-  static void $checkItem(PingRequest v) {
-    if (v is! PingRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 }
 
 class PingResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('PingResult', package: const $pb.PackageName('proto'))
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('PingResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
 
-  PingResult() : super();
-  PingResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  PingResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  PingResult clone() => new PingResult()..mergeFromMessage(this);
-  PingResult copyWith(void Function(PingResult) updates) =>
-      super.copyWith((message) => updates(message as PingResult));
+  PingResult._() : super();
+  factory PingResult() => create();
+  factory PingResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PingResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  PingResult clone() => PingResult()..mergeFromMessage(this);
+  PingResult copyWith(void Function(PingResult) updates) => super.copyWith((message) => updates(message as PingResult));
   $pb.BuilderInfo get info_ => _i;
-  static PingResult create() => new PingResult();
+  @$core.pragma('dart2js:noInline')
+  static PingResult create() => PingResult._();
   PingResult createEmptyInstance() => create();
-  static $pb.PbList<PingResult> createRepeated() =>
-      new $pb.PbList<PingResult>();
-  static PingResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<PingResult> createRepeated() => $pb.PbList<PingResult>();
+  @$core.pragma('dart2js:noInline')
+  static PingResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PingResult>(create);
   static PingResult _defaultInstance;
-  static void $checkItem(PingResult v) {
-    if (v is! PingResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 }
 
 class RPCRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('RPCRequest', package: const $pb.PackageName('proto'))
-        ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  RPCRequest() : super();
-  RPCRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  RPCRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  RPCRequest clone() => new RPCRequest()..mergeFromMessage(this);
-  RPCRequest copyWith(void Function(RPCRequest) updates) =>
-      super.copyWith((message) => updates(message as RPCRequest));
+  RPCRequest._() : super();
+  factory RPCRequest() => create();
+  factory RPCRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RPCRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RPCRequest clone() => RPCRequest()..mergeFromMessage(this);
+  RPCRequest copyWith(void Function(RPCRequest) updates) => super.copyWith((message) => updates(message as RPCRequest));
   $pb.BuilderInfo get info_ => _i;
-  static RPCRequest create() => new RPCRequest();
+  @$core.pragma('dart2js:noInline')
+  static RPCRequest create() => RPCRequest._();
   RPCRequest createEmptyInstance() => create();
-  static $pb.PbList<RPCRequest> createRepeated() =>
-      new $pb.PbList<RPCRequest>();
-  static RPCRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<RPCRequest> createRepeated() => $pb.PbList<RPCRequest>();
+  @$core.pragma('dart2js:noInline')
+  static RPCRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RPCRequest>(create);
   static RPCRequest _defaultInstance;
-  static void $checkItem(RPCRequest v) {
-    if (v is! RPCRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  List<int> get data => $_getN(0);
-  set data(List<int> v) {
-    $_setBytes(0, v);
-  }
-
-  bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get data => $_getN(0);
+  @$pb.TagNumber(1)
+  set data($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
   void clearData() => clearField(1);
 }
 
 class RPCResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i =
-      new $pb.BuilderInfo('RPCResult', package: const $pb.PackageName('proto'))
-        ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
-        ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCResult', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  RPCResult() : super();
-  RPCResult.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  RPCResult.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  RPCResult clone() => new RPCResult()..mergeFromMessage(this);
-  RPCResult copyWith(void Function(RPCResult) updates) =>
-      super.copyWith((message) => updates(message as RPCResult));
+  RPCResult._() : super();
+  factory RPCResult() => create();
+  factory RPCResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RPCResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RPCResult clone() => RPCResult()..mergeFromMessage(this);
+  RPCResult copyWith(void Function(RPCResult) updates) => super.copyWith((message) => updates(message as RPCResult));
   $pb.BuilderInfo get info_ => _i;
-  static RPCResult create() => new RPCResult();
+  @$core.pragma('dart2js:noInline')
+  static RPCResult create() => RPCResult._();
   RPCResult createEmptyInstance() => create();
-  static $pb.PbList<RPCResult> createRepeated() => new $pb.PbList<RPCResult>();
-  static RPCResult getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<RPCResult> createRepeated() => $pb.PbList<RPCResult>();
+  @$core.pragma('dart2js:noInline')
+  static RPCResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RPCResult>(create);
   static RPCResult _defaultInstance;
-  static void $checkItem(RPCResult v) {
-    if (v is! RPCResult) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  List<int> get data => $_getN(0);
-  set data(List<int> v) {
-    $_setBytes(0, v);
-  }
-
-  bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get data => $_getN(0);
+  @$pb.TagNumber(1)
+  set data($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
   void clearData() => clearField(1);
 }
 
 class SendRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = new $pb.BuilderInfo('SendRequest',
-      package: const $pb.PackageName('proto'))
-    ..a<List<int>>(1, 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('SendRequest', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
 
-  SendRequest() : super();
-  SendRequest.fromBuffer(List<int> i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromBuffer(i, r);
-  SendRequest.fromJson(String i,
-      [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY])
-      : super.fromJson(i, r);
-  SendRequest clone() => new SendRequest()..mergeFromMessage(this);
-  SendRequest copyWith(void Function(SendRequest) updates) =>
-      super.copyWith((message) => updates(message as SendRequest));
+  SendRequest._() : super();
+  factory SendRequest() => create();
+  factory SendRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  SendRequest clone() => SendRequest()..mergeFromMessage(this);
+  SendRequest copyWith(void Function(SendRequest) updates) => super.copyWith((message) => updates(message as SendRequest));
   $pb.BuilderInfo get info_ => _i;
-  static SendRequest create() => new SendRequest();
+  @$core.pragma('dart2js:noInline')
+  static SendRequest create() => SendRequest._();
   SendRequest createEmptyInstance() => create();
-  static $pb.PbList<SendRequest> createRepeated() =>
-      new $pb.PbList<SendRequest>();
-  static SendRequest getDefault() => _defaultInstance ??= create()..freeze();
+  static $pb.PbList<SendRequest> createRepeated() => $pb.PbList<SendRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SendRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendRequest>(create);
   static SendRequest _defaultInstance;
-  static void $checkItem(SendRequest v) {
-    if (v is! SendRequest) $pb.checkItemFailed(v, _i.qualifiedMessageName);
-  }
 
-  List<int> get data => $_getN(0);
-  set data(List<int> v) {
-    $_setBytes(0, v);
-  }
-
-  bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get data => $_getN(0);
+  @$pb.TagNumber(1)
+  set data($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
   void clearData() => clearField(1);
 }
+
