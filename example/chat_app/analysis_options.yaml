@@ -1,0 +1,22 @@
+include: package:extra_pedantic/analysis_options.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors:
+    missing_return: error
+    missing_required_param: error
+    invalid_use_of_protected_member: error
+    dead_code: info
+    sdk_version_async_exported_from_core: ignore
+linter:
+  rules:
+    - unnecessary_statements
+    - unnecessary_lambdas
+    - avoid_classes_with_only_static_members
+    - avoid_renaming_method_parameters
+    - camel_case_types
+    - constant_identifier_names
+    - cascade_invocations
+    - omit_local_variable_types
