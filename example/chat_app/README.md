@@ -18,4 +18,4 @@ By default it will run with the Centrifugo public demo instance. To run locally 
 }
 ```
 
-Then change the server address in `conf.py`
+Then change the server address in `conf.dart`
