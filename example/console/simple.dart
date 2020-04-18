@@ -65,6 +65,12 @@ Function(String) _handleUserInput(
       case '#connect':
         client.connect();
         break;
+      case '#rpc':
+        final request = jsonEncode({'method': 'test'});
+        final data = utf8.encode(request);
+        final result = await client.rpc(data);
+        print('RPC result: ' + utf8.decode(result.data));
+        break;
       case '#disconnect':
         client.disconnect();
         break;

@@ -258,22 +258,25 @@ class ClientImpl implements Client, GeneratedMessageSender {
         final pub = Publication.fromBuffer(push.data);
         final event = PublishEvent.from(pub);
         final subscription = _subscriptions[push.channel];
-
-        subscription.addPublish(event);
+        if (subscription != null) {
+          subscription.addPublish(event);
+        }
         break;
       case PushType.LEAVE:
         final leave = Leave.fromBuffer(push.data);
         final event = LeaveEvent.from(leave.info);
         final subscription = _subscriptions[push.channel];
-
-        subscription.addLeave(event);
+        if (subscription != null) {
+          subscription.addLeave(event);
+        }
         break;
       case PushType.JOIN:
         final join = Join.fromBuffer(push.data);
         final event = JoinEvent.from(join.info);
         final subscription = _subscriptions[push.channel];
-
-        subscription.addJoin(event);
+        if (subscription != null) {
+          subscription.addJoin(event);
+        }
         break;
       case PushType.MESSAGE:
         final message = Message.fromBuffer(push.data);
@@ -284,8 +287,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
       case PushType.UNSUB:
         final event = UnsubscribeEvent();
         final subscription = _subscriptions[push.channel];
-
-        subscription.addUnsubscribe(event);
+        if (subscription != null) {
+          subscription.addUnsubscribe(event);
+        }
         break;
     }
   }
