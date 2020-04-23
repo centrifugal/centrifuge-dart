@@ -1,3 +1,6 @@
+## [0.5.1]
+* Skip handling for events from server-side subscriptions resulted in null pointer dereference 
+
 ## [0.5.0]
 * Update protobuf dependency to `^1.0.1`, thanks [@Holofox](https://github.com/Holofox)
 
