@@ -54,15 +54,18 @@ class MessageEvent {
 }
 
 class PublishEvent {
-  PublishEvent(this.data);
+  PublishEvent(this.seq, this.data);
+
+  final int seq;
 
   final List<int> data;
 
-  static PublishEvent from(proto.Publication pub) => PublishEvent(pub.data);
+  static PublishEvent from(proto.Publication pub) =>
+      PublishEvent(pub.seq, pub.data);
 
   @override
   String toString() {
-    return 'PublishEvent{data: $data}';
+    return 'PublishEvent{seq: $seq, data: $data}';
   }
 }
 
