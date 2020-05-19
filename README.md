@@ -17,7 +17,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 final client = centrifuge.createClient("ws://localhost:8000/connection/websocket?format=protobuf");
 ```
 
-Note that `?format=protobuf` is required because this library only works with Protobuf protocol.
+**Note that** `?format=protobuf` **is required because this library only works with Protobuf protocol.**
 
 Connect to server:
 ```dart
