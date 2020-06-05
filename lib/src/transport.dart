@@ -63,9 +63,7 @@ class Transport implements GeneratedMessageSender {
       {Function onError,
       void onDone(String reason, bool shouldReconnect)}) async {
     _socket = await _socketBuilder();
-    if (_config.pingInterval != Duration.zero) {
-      _socket.pingInterval = _config.pingInterval;
-    }
+    _startPing();
 
     _socket.listen(
       _onData(onPush),
@@ -75,6 +73,8 @@ class Transport implements GeneratedMessageSender {
   }
 
   int _messageId = 1;
+
+  Timer _pingTimer;
 
   final _completers = <int, Completer<GeneratedMessage>>{};
 
@@ -89,7 +89,23 @@ class Transport implements GeneratedMessageSender {
     return filledResult;
   }
 
+  void _startPing() {
+    if (_config.pingInterval != Duration.zero) {
+      _pingTimer = Timer.periodic(_config.pingInterval, (Timer t) async {
+        final command = Command()
+          ..method = MethodType.PING
+          ..id = _messageId++;
+        return _sendCommand(command);
+      });
+    }
+  }
+
+  void _stopPing() {
+    _pingTimer?.cancel();
+  }
+
   Future close() {
+    _stopPing();
     return _socket.close();
   }
 
