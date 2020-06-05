@@ -150,6 +150,8 @@ class Transport implements GeneratedMessageSender {
         return MethodType.SUBSCRIBE;
       case HistoryRequest:
         return MethodType.HISTORY;
+      case PingRequest:
+        return MethodType.PING;
       case RPCRequest:
         return MethodType.RPC;
       default:
