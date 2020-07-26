@@ -81,35 +81,23 @@ class MessageEvent {
 
 class PublishEvent {
   const PublishEvent(
-    this.seq,
-    this.gen,
     this.uid,
     this.clientInfo,
     this.offset,
     this.data,
   );
 
-  @Deprecated('Offset field instead of seq and gen. '
-      'With backwards compatibility in mind via global flags that will be '
-      'removed in Centrifuge v1 release')
-  final int seq;
-  @Deprecated('Offset field instead of seq and gen. '
-      'With backwards compatibility in mind via global flags that will be '
-      'removed in Centrifuge v1 release')
-  final int gen;
   final String uid;
   final proto.ClientInfo clientInfo;
   final Int64 offset;
   final List<int> data;
 
   static PublishEvent from(proto.Publication pub) =>
-      PublishEvent(pub.seq, pub.gen, pub.uid, pub.info, pub.offset, pub.data);
+      PublishEvent(pub.uid, pub.info, pub.offset, pub.data);
 
   @override
   String toString() {
     return 'PublishEvent{'
-        'seq: $seq, '
-        'gen: $gen, '
         'uid: $uid, '
         'clientInfo: ${clientInfo.toProto3Json()}, '
         'offset: $offset, '
@@ -120,35 +108,23 @@ class PublishEvent {
 
 class HistoryEvent {
   const HistoryEvent(
-    this.seq,
-    this.gen,
     this.uid,
     this.clientInfo,
     this.offset,
     this.data,
   );
 
-  @Deprecated('Offset field instead of seq and gen. '
-      'With backwards compatibility in mind via global flags that will be '
-      'removed in Centrifuge v1 release')
-  final int seq;
-  @Deprecated('Offset field instead of seq and gen. '
-      'With backwards compatibility in mind via global flags that will be '
-      'removed in Centrifuge v1 release')
-  final int gen;
   final String uid;
   final proto.ClientInfo clientInfo;
   final Int64 offset;
   final List<int> data;
 
   static HistoryEvent from(proto.Publication pub) =>
-      HistoryEvent(pub.seq, pub.gen, pub.uid, pub.info, pub.offset, pub.data);
+      HistoryEvent(pub.uid, pub.info, pub.offset, pub.data);
 
   @override
   String toString() {
     return 'HistoryEvent{'
-        'seq: $seq, '
-        'gen: $gen, '
         'uid: $uid, '
         'clientInfo: $clientInfo, '
         'offset: $offset, '
@@ -193,8 +169,6 @@ class SubscribeSuccessEvent {
     this.isExpires,
     this.ttl,
     this.isRecoverable,
-    this.seq,
-    this.gen,
     this.epoch,
     this.isRecovered,
     this.offset,
@@ -204,14 +178,6 @@ class SubscribeSuccessEvent {
   final bool isExpires;
   final int ttl;
   final bool isRecoverable;
-  @Deprecated('Offset field instead of seq and gen. '
-      'With backwards compatibility in mind via global flags that will be '
-      'removed in Centrifuge v1 release')
-  final int seq;
-  @Deprecated('Offset field instead of seq and gen. '
-      'With backwards compatibility in mind via global flags that will be '
-      'removed in Centrifuge v1 release')
-  final int gen;
   final String epoch;
   final bool isRecovered;
   final Int64 offset;
@@ -225,8 +191,6 @@ class SubscribeSuccessEvent {
         result.expires,
         result.ttl,
         result.recoverable,
-        result.seq,
-        result.gen,
         result.epoch,
         result.recovered,
         result.offset,
@@ -239,8 +203,6 @@ class SubscribeSuccessEvent {
         'isExpires: $isExpires, '
         'ttl: $ttl, '
         'recoverable: $isRecoverable, '
-        'seq: $seq, '
-        'gen: $gen, '
         'epoch: $epoch, '
         'isRecovered: $isRecovered, '
         'offset: $offset'
