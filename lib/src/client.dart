@@ -25,7 +25,7 @@ abstract class Client {
 
   /// Connect to the server.
   ///
-  void connect();
+  Future<void> connect();
 
   /// Set token for connection request.
   ///
@@ -56,7 +56,7 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  void disconnect();
+  Future<void> disconnect();
 
   /// Detect that the subscription already exists.
   ///
@@ -70,7 +70,7 @@ abstract class Client {
 
   /// Remove the [subscription] and unsubscribe from [subscription.channel].
   ///
-  void removeSubscription(Subscription subscription);
+  Future<void> removeSubscription(Subscription subscription);
 }
 
 class ClientImpl implements Client, GeneratedMessageSender {
@@ -105,7 +105,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  void connect() async {
+  Future<void> connect() async {
     return _connect();
   }
 
@@ -139,7 +139,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  void disconnect() async {
+  Future<void> disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
   }
