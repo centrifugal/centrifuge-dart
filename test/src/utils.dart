@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:centrifuge/centrifuge.dart';
+import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/transport.dart';
 import 'package:mockito/mockito.dart';
@@ -10,6 +12,12 @@ class MockWebSocket implements WebSocket {
   final List<Command> commands = <Command>[];
 
   final _stubs = <CommandMatcher, SendAction>{};
+
+  @override
+  Duration pingInterval;
+
+  @override
+  String closeReason;
 
   @override
   void add(dynamic data) {
@@ -58,6 +66,13 @@ class MockWebSocket implements WebSocket {
   }
 
   @override
+  Future close([int code, String reason]) {
+    closeReason = reason;
+    onDone();
+    return null;
+  }
+
+  @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -79,15 +94,102 @@ typedef CommandMatcher = Function(Command);
 CommandMatcher withMethod(MethodType type) =>
     (Command command) => command.method == type;
 
-class MockTransport extends Mock implements Transport {
-  Function(Push) get triggerOnPush => _openCaptured[0];
+class MockTransport implements Transport {
+  String url;
+  TransportConfig transportConfig;
 
-  Function(dynamic) get triggerOnError => _openCaptured[1];
+  @override
+  Future close() {
+    // TODO: implement close
+    return null;
+  }
 
-  Function get triggerOnDone => _openCaptured[2];
+  void Function(Push push) onPush;
+  void Function(dynamic) onError;
+  void Function(String, bool) onDone;
 
-  List get _openCaptured => verify(open(captureAny,
-          onError: captureAnyNamed('onError'),
-          onDone: captureAnyNamed('onDone')))
-      .captured;
+  Completer<void> _openCompleter;
+
+  void completeOpen() {
+    assert(_openCompleter != null);
+
+    _openCompleter.complete();
+    _openCompleter = null;
+  }
+
+  void completeOpenError(dynamic error) {
+    assert(_openCompleter != null);
+
+    _openCompleter.completeError(error);
+    _openCompleter = null;
+  }
+
+  @override
+  Future open(void Function(Push push) onPush,
+      {Function onError, void Function(String, bool) onDone}) {
+    assert(_openCompleter == null);
+    _openCompleter = Completer<void>.sync();
+
+    this.onPush = onPush;
+    this.onError = onError;
+    this.onDone = onDone;
+
+    return _openCompleter.future;
+  }
+
+  final sendList = <Triplet>[];
+
+  Triplet<Req, Res> sendListLast<Req extends GeneratedMessage,
+          Res extends GeneratedMessage>() =>
+      sendList.last;
+
+  @override
+  Future<Rep>
+      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+          Req request, Rep result) {
+    final completer = Completer<Rep>.sync();
+
+    sendList.add(Triplet<Req, Rep>(request, result, completer));
+
+    return completer.future;
+  }
+}
+
+class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
+  Triplet(this.request, this.result, this.completer);
+
+  Req request;
+  Res result;
+  Completer<Res> completer;
+
+  void completeWith(Res result) => completer.complete(result);
+
+  void completeWith2(Res Function(Res) updates) =>
+      completer.complete(updates(result));
+
+  void completeWithError(dynamic error) => completer.completeError(error);
+
+  void complete() => completer.complete(result);
+
+  @override
+  String toString() => '($request, $result, $completer)';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! Triplet) return false;
+    return other.request == request &&
+        other.completer == completer &&
+        other.completer == completer;
+  }
+
+  @override
+  int get hashCode => request.hashCode ^ completer.hashCode ^ result.hashCode;
+}
+
+class MockClient extends Mock implements ClientImpl {
+  @override
+  ClientConfig config;
+
+  @override
+  bool connected;
 }
