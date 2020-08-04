@@ -25,7 +25,7 @@ abstract class Client {
 
   /// Connect to the server.
   ///
-  void connect();
+  Future<void> connect();
 
   /// Set token for connection request.
   ///
@@ -56,7 +56,7 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  void disconnect();
+  Future<void> disconnect();
 
   /// Detect that the subscription already exists.
   ///
@@ -105,9 +105,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  void connect() async {
-    return _connect();
-  }
+  Future<void> connect() async => _connect();
 
   bool get connected => _state == _ClientState.connected;
 
@@ -139,7 +137,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  void disconnect() async {
+  Future<void> disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
   }
