@@ -1,12 +1,19 @@
 language: dart
+
 dart:
-- stable
-- dev
+  - stable
+  - dev
+
 sudo: false
-dart_task:
-- dartanalyzer: --fatal-warnings lib
-- dartfmt: sdk
-- test: --platform vm
+
+install:
+  - gem install coveralls-lcov
+
+script: ./tool/travis.sh
+
+after_success:
+  - coveralls-lcov var/lcov.info
+
 cache:
   directories:
   - $HOME/.pub-cache

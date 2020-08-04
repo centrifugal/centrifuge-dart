@@ -60,15 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
           PopupMenuButton<Function>(
             onSelected: (f) => f(),
             itemBuilder: (context) => <PopupMenuItem<Function>>[
-                  PopupMenuItem(
-                    value: () => _connect(),
-                    child: Text('Connect'),
-                  ),
-                  PopupMenuItem(
-                    value: () => _subscribe(),
-                    child: Text('Subscribe'),
-                  ),
-                ],
+              PopupMenuItem(
+                value: () => _connect(),
+                child: Text('Connect'),
+              ),
+              PopupMenuItem(
+                value: () => _subscribe(),
+                child: Text('Subscribe'),
+              ),
+            ],
           )
         ],
       ),
@@ -88,8 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _connect() async {
     print('connecting...');
     try {
-      await _centrifuge.connect();
-      print('connected');
+      _centrifuge.connect();
     } catch (exception) {
       print('exception $exception');
       _show(exception);
@@ -98,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _subscribe() async {
     final channel = 'chat:index';
-    _subscription = _centrifuge.subscribe(channel);
+    _subscription = _centrifuge.getSubscription(channel);
 
     _subscription.subscribeErrorStream.listen(_show);
     _subscription.subscribeSuccessStream.listen(_show);
@@ -137,16 +136,18 @@ class _MyHomePageState extends State<MyHomePage> {
       final item = _ChatItem(title: message, subtitle: 'User: user');
       onNewItem(item);
     });
+
+    _subscription.subscribe();
   }
 
   void _show(dynamic error) {
     showDialog<AlertDialog>(
       context: context,
       builder: (_) => AlertDialog(
-            content: Text(
-              error.toString(),
-            ),
-          ),
+        content: Text(
+          error.toString(),
+        ),
+      ),
     );
   }
 }
