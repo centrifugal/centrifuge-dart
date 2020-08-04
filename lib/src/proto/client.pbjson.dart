@@ -1,8 +1,9 @@
 ///
 //  Generated code. Do not modify.
 //  source: client.proto
-///
-// ignore_for_file: non_constant_identifier_names,library_prefixes,unused_import
+//
+// @dart = 2.3
+// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 const MethodType$json = const {
   '1': 'MethodType',
@@ -30,6 +31,7 @@ const PushType$json = const {
     const {'1': 'LEAVE', '2': 2},
     const {'1': 'UNSUB', '2': 3},
     const {'1': 'MESSAGE', '2': 4},
+    const {'1': 'SUB', '2': 5},
   ],
 };
 
@@ -50,7 +52,7 @@ const Command$json = const {
       '3': 2,
       '4': 1,
       '5': 14,
-      '6': '.proto.MethodType',
+      '6': '.protocol.MethodType',
       '10': 'method'
     },
     const {'1': 'params', '3': 3, '4': 1, '5': 12, '10': 'params'},
@@ -66,7 +68,7 @@ const Reply$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.proto.Error',
+      '6': '.protocol.Error',
       '10': 'error'
     },
     const {'1': 'result', '3': 3, '4': 1, '5': 12, '10': 'result'},
@@ -81,7 +83,7 @@ const Push$json = const {
       '3': 1,
       '4': 1,
       '5': 14,
-      '6': '.proto.PushType',
+      '6': '.protocol.PushType',
       '10': 'type'
     },
     const {'1': 'channel', '3': 2, '4': 1, '5': 9, '10': 'channel'},
@@ -111,7 +113,7 @@ const Publication$json = const {
       '3': 5,
       '4': 1,
       '5': 11,
-      '6': '.proto.ClientInfo',
+      '6': '.protocol.ClientInfo',
       '10': 'info'
     },
   ],
@@ -125,7 +127,7 @@ const Join$json = const {
       '3': 1,
       '4': 1,
       '5': 11,
-      '6': '.proto.ClientInfo',
+      '6': '.protocol.ClientInfo',
       '10': 'info'
     },
   ],
@@ -139,7 +141,7 @@ const Leave$json = const {
       '3': 1,
       '4': 1,
       '5': 11,
-      '6': '.proto.ClientInfo',
+      '6': '.protocol.ClientInfo',
       '10': 'info'
     },
   ],
@@ -149,6 +151,16 @@ const Unsub$json = const {
   '1': 'Unsub',
   '2': const [
     const {'1': 'resubscribe', '3': 1, '4': 1, '5': 8, '10': 'resubscribe'},
+  ],
+};
+
+const Sub$json = const {
+  '1': 'Sub',
+  '2': const [
+    const {'1': 'recoverable', '3': 1, '4': 1, '5': 8, '10': 'recoverable'},
+    const {'1': 'seq', '3': 2, '4': 1, '5': 13, '10': 'seq'},
+    const {'1': 'gen', '3': 3, '4': 1, '5': 13, '10': 'gen'},
+    const {'1': 'epoch', '3': 4, '4': 1, '5': 9, '10': 'epoch'},
   ],
 };
 
@@ -164,7 +176,32 @@ const ConnectRequest$json = const {
   '2': const [
     const {'1': 'token', '3': 1, '4': 1, '5': 9, '10': 'token'},
     const {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
+    const {
+      '1': 'subs',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.protocol.ConnectRequest.SubsEntry',
+      '10': 'subs'
+    },
   ],
+  '3': const [ConnectRequest_SubsEntry$json],
+};
+
+const ConnectRequest_SubsEntry$json = const {
+  '1': 'SubsEntry',
+  '2': const [
+    const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    const {
+      '1': 'value',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.protocol.SubscribeRequest',
+      '10': 'value'
+    },
+  ],
+  '7': const {'7': true},
 };
 
 const ConnectResult$json = const {
@@ -175,7 +212,32 @@ const ConnectResult$json = const {
     const {'1': 'expires', '3': 3, '4': 1, '5': 8, '10': 'expires'},
     const {'1': 'ttl', '3': 4, '4': 1, '5': 13, '10': 'ttl'},
     const {'1': 'data', '3': 5, '4': 1, '5': 12, '10': 'data'},
+    const {
+      '1': 'subs',
+      '3': 6,
+      '4': 3,
+      '5': 11,
+      '6': '.protocol.ConnectResult.SubsEntry',
+      '10': 'subs'
+    },
   ],
+  '3': const [ConnectResult_SubsEntry$json],
+};
+
+const ConnectResult_SubsEntry$json = const {
+  '1': 'SubsEntry',
+  '2': const [
+    const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    const {
+      '1': 'value',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.protocol.SubscribeResult',
+      '10': 'value'
+    },
+  ],
+  '7': const {'7': true},
 };
 
 const RefreshRequest$json = const {
@@ -221,7 +283,7 @@ const SubscribeResult$json = const {
       '3': 7,
       '4': 3,
       '5': 11,
-      '6': '.proto.Publication',
+      '6': '.protocol.Publication',
       '10': 'publications'
     },
     const {'1': 'recovered', '3': 8, '4': 1, '5': 8, '10': 'recovered'},
@@ -282,7 +344,7 @@ const PresenceResult$json = const {
       '3': 1,
       '4': 3,
       '5': 11,
-      '6': '.proto.PresenceResult.PresenceEntry',
+      '6': '.protocol.PresenceResult.PresenceEntry',
       '10': 'presence'
     },
   ],
@@ -298,7 +360,7 @@ const PresenceResult_PresenceEntry$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.proto.ClientInfo',
+      '6': '.protocol.ClientInfo',
       '10': 'value'
     },
   ],
@@ -335,7 +397,7 @@ const HistoryResult$json = const {
       '3': 1,
       '4': 3,
       '5': 11,
-      '6': '.proto.Publication',
+      '6': '.protocol.Publication',
       '10': 'publications'
     },
   ],

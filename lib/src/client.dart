@@ -1,73 +1,99 @@
 import 'dart:async';
 
+import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
+import 'package:protobuf/protobuf.dart';
 
+import 'client_config.dart';
 import 'events.dart';
 import 'proto/client.pb.dart';
+import 'subscription.dart';
 import 'transport.dart';
 
-Client createClient(String url, {ClientConfig config = const ClientConfig()}) =>
-    _Client(
+Client createClient(String url, {ClientConfig config}) => ClientImpl(
       url,
-      config,
+      config ?? ClientConfig(),
       protobufTransportBuilder,
     );
 
-class ClientConfig {
-  const ClientConfig({
-    this.timeout = const Duration(seconds: 5),
-    this.debug = false,
-    this.headers = const <String, dynamic>{},
-    this.tlsSkipVerify = false,
-    this.maxReconnectDelay = const Duration(seconds: 20),
-    this.privateChannelPrefix = "\$",
-    this.pingInterval = const Duration(seconds: 25),
-  });
-
-  final Duration timeout;
-  final bool debug;
-  final Map<String, dynamic> headers;
-
-  final bool tlsSkipVerify;
-
-  final Duration maxReconnectDelay;
-  final String privateChannelPrefix;
-  final Duration pingInterval;
-}
-
 abstract class Client {
-  void setToken(String token);
-
-  Future<void> connect();
-
-  Future<void> disconnect();
-
-  Subscription subscribe(String channel, {String token});
-
-  Future publish(String channel, List<int> data);
-
   Stream<ConnectEvent> get connectStream;
 
   Stream<DisconnectEvent> get disconnectStream;
 
   Stream<MessageEvent> get messageStream;
+
+  /// Connect to the server.
+  ///
+  void connect();
+
+  /// Set token for connection request.
+  ///
+  /// Whenever the client connects to a server, it adds token to the
+  /// connection request.
+  ///
+  /// To remove previous token, call with null.
+  void setToken(String token);
+
+  /// Set data for connection request.
+  ///
+  /// Whenever the client connects to a server, it adds connectData to the
+  /// connection request.
+  ///
+  /// To remove previous connectData, call with null.
+  void setConnectData(List<int> connectData);
+
+  /// Publish data to the channel
+  ///
+  Future publish(String channel, List<int> data);
+
+  /// Send RPC command
+  ///
+  Future<RPCResult> rpc(List<int> data);
+
+  @alwaysThrows
+  Future<void> send(List<int> data);
+
+  /// Disconnect from the server.
+  ///
+  void disconnect();
+
+  /// Detect that the subscription already exists.
+  ///
+  bool hasSubscription(String channel);
+
+  /// Get subscription to the channel.
+  ///
+  /// You need to call [Subscription.subscribe] to start receiving events
+  /// in the channel.
+  Subscription getSubscription(String channel);
+
+  /// Remove the [subscription] and unsubscribe from [subscription.channel].
+  ///
+  void removeSubscription(Subscription subscription);
 }
 
-class _Client implements Client, SubscriptionClient {
-  _Client(this.url, this.config, this.transportBuilder);
+class ClientImpl implements Client, GeneratedMessageSender {
+  ClientImpl(this._url, this._config, this._transportBuilder);
 
-  final TransportBuilder transportBuilder;
-  final _subscriptions = <String, _Subscription>{};
+  final TransportBuilder _transportBuilder;
+  final _subscriptions = <String, SubscriptionImpl>{};
 
   Transport _transport;
   String _token;
 
-  final String url;
-  ClientConfig config;
+  final String _url;
+  ClientConfig _config;
+
+  ClientConfig get config => _config;
+  List<int> _connectData;
+  String _clientID;
 
   final _connectController = StreamController<ConnectEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
+
+  _ClientState _state = _ClientState.disconnected;
 
   @override
   Stream<ConnectEvent> get connectStream => _connectController.stream;
@@ -79,60 +105,17 @@ class _Client implements Client, SubscriptionClient {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
+  void connect() async {
+    return _connect();
+  }
+
+  bool get connected => _state == _ClientState.connected;
+
+  @override
   void setToken(String token) => _token = token;
 
   @override
-  Future<void> connect() async {
-    _transport = transportBuilder(url: url, headers: config.headers);
-
-    await _transport.open(
-      _onPush,
-      onError: (dynamic error) =>
-          _processDisconnect(reason: error.toString(), shouldReconnect: false),
-      onDone: () => _processDisconnect(reason: 'done', shouldReconnect: false),
-    );
-
-    final request = ConnectRequest();
-    if (_token != null) {
-      request.token = _token;
-    }
-
-    final result = await _transport.send(
-      request,
-      ConnectResult(),
-    );
-    _connectController.add(ConnectEvent.from(result));
-  }
-
-  @override
-  Subscription subscribe(String channel, {String token}) {
-    final subscription = _Subscription(
-      channel: channel,
-      client: this,
-      token: token,
-    );
-
-    _subscriptions[channel] = subscription;
-
-    subscription.subscribe();
-
-    return subscription;
-  }
-
-  @override
-  Future<void> disconnect() async {
-    await _transport.close();
-  }
-
-  void _processDisconnect({@required String reason, bool shouldReconnect}) {
-    for (_Subscription subscription in _subscriptions.values) {
-      final unsubscribe = UnsubscribeEvent();
-      subscription.onUnsubscribe(unsubscribe);
-    }
-
-    final disconnect = DisconnectEvent(reason, shouldReconnect);
-    _disconnectController.add(disconnect);
-  }
+  void setConnectData(List<int> connectData) => _connectData = connectData;
 
   @override
   Future publish(String channel, List<int> data) async {
@@ -140,32 +123,133 @@ class _Client implements Client, SubscriptionClient {
       ..channel = channel
       ..data = data;
 
-    await _transport.send(request, PublishResult());
+    await _transport.sendMessage(request, PublishResult());
   }
 
   @override
-  Future<UnsubscribeResult> sendUnsubscribe(String channel) {
-    final request = UnsubscribeRequest()..channel = channel;
-    final result = _transport.send(request, UnsubscribeResult());
-    return result;
+  Future<RPCResult> rpc(List<int> data) => _transport.sendMessage(
+        RPCRequest()..data = data,
+        RPCResult(),
+      );
+
+  @override
+  @alwaysThrows
+  Future<void> send(List<int> data) async {
+    throw UnimplementedError;
   }
 
   @override
-  Future<SubscribeResult> sendSubscribe(String channel, {String token}) {
-    final request = SubscribeRequest()..channel = channel;
-    if (token != null) {
-      request.token = token;
+  void disconnect() async {
+    _processDisconnect(reason: 'manual disconnect', reconnect: false);
+    await _transport.close();
+  }
+
+  @override
+  bool hasSubscription(String channel) {
+    return _subscriptions.containsKey(channel);
+  }
+
+  @override
+  Subscription getSubscription(String channel) {
+    if (hasSubscription(channel)) {
+      return _subscriptions[channel];
     }
 
-    final result = _transport.send(request, SubscribeResult());
-    return result;
+    final subscription = SubscriptionImpl(channel, this);
+
+    _subscriptions[channel] = subscription;
+
+    return subscription;
   }
 
   @override
-  Future<HistoryResult> sendHistory(String channel) {
-    final request = HistoryRequest()..channel = channel;
-    final result = _transport.send(request, HistoryResult());
-    return result;
+  Future<void> removeSubscription(Subscription subscription) async {
+    if (subscription != null) {
+      final String channel = subscription.channel;
+      subscription.unsubscribe();
+      _subscriptions.remove(channel);
+    }
+  }
+
+  Future<UnsubscribeEvent> unsubscribe(String channel) async {
+    final request = UnsubscribeRequest()..channel = channel;
+    await _transport.sendMessage(request, UnsubscribeResult());
+    return UnsubscribeEvent();
+  }
+
+  @override
+  Future<Rep>
+      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+              Req request, Rep result) =>
+          _transport.sendMessage(request, result);
+
+  int _retryCount = 0;
+
+  void _processDisconnect({@required String reason, bool reconnect}) async {
+    if (_state == _ClientState.disconnected) {
+      return;
+    }
+    _clientID = '';
+
+    if (_state == _ClientState.connected) {
+      _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
+
+      final disconnect = DisconnectEvent(reason, reconnect);
+      _disconnectController.add(disconnect);
+    }
+
+    if (reconnect) {
+      _state = _ClientState.connecting;
+      _retryCount += 1;
+      await _config.retry(_retryCount);
+      _connect();
+    } else {
+      _state = _ClientState.disconnected;
+    }
+  }
+
+  Future<void> _connect() async {
+    try {
+      _state = _ClientState.connecting;
+
+      _transport = _transportBuilder(
+          url: _url,
+          config: TransportConfig(
+              headers: _config.headers, pingInterval: _config.pingInterval));
+
+      await _transport.open(
+        _onPush,
+        onError: (dynamic error) =>
+            _processDisconnect(reason: error.toString(), reconnect: true),
+        onDone: (reason, reconnect) =>
+            _processDisconnect(reason: reason, reconnect: reconnect),
+      );
+
+      final request = ConnectRequest();
+      if (_token != null) {
+        request.token = _token;
+      }
+
+      if (_connectData != null) {
+        request.data = _connectData;
+      }
+
+      final result = await _transport.sendMessage(
+        request,
+        ConnectResult(),
+      );
+
+      _clientID = result.client;
+      _retryCount = 0;
+      _state = _ClientState.connected;
+      _connectController.add(ConnectEvent.from(result));
+
+      for (SubscriptionImpl subscription in _subscriptions.values) {
+        subscription.resubscribeIfNeeded();
+      }
+    } catch (ex) {
+      _processDisconnect(reason: ex.toString(), reconnect: true);
+    }
   }
 
   void _onPush(Push push) {
@@ -174,22 +258,25 @@ class _Client implements Client, SubscriptionClient {
         final pub = Publication.fromBuffer(push.data);
         final event = PublishEvent.from(pub);
         final subscription = _subscriptions[push.channel];
-
-        subscription.onPublish(event);
+        if (subscription != null) {
+          subscription.addPublish(event);
+        }
         break;
       case PushType.LEAVE:
         final leave = Leave.fromBuffer(push.data);
         final event = LeaveEvent.from(leave.info);
         final subscription = _subscriptions[push.channel];
-
-        subscription.onLeave(event);
+        if (subscription != null) {
+          subscription.addLeave(event);
+        }
         break;
       case PushType.JOIN:
         final join = Join.fromBuffer(push.data);
         final event = JoinEvent.from(join.info);
         final subscription = _subscriptions[push.channel];
-
-        subscription.onJoin(event);
+        if (subscription != null) {
+          subscription.addJoin(event);
+        }
         break;
       case PushType.MESSAGE:
         final message = Message.fromBuffer(push.data);
@@ -200,145 +287,26 @@ class _Client implements Client, SubscriptionClient {
       case PushType.UNSUB:
         final event = UnsubscribeEvent();
         final subscription = _subscriptions[push.channel];
-
-        subscription.onUnsubscribe(event);
+        if (subscription != null) {
+          subscription.addUnsubscribe(event);
+        }
         break;
     }
   }
-}
 
-abstract class Subscription {
-  Subscription(this.channel);
-
-  final String channel;
-
-  Stream<PublishEvent> get publishStream;
-
-  Stream<JoinEvent> get joinStream;
-
-  Stream<LeaveEvent> get leaveStream;
-
-  Stream<SubscribeSuccessEvent> get subscribeSuccessStream;
-
-  Stream<SubscribeErrorEvent> get subscribeErrorStream;
-
-  Stream<UnsubscribeEvent> get unsubscribeStream;
-
-  Future subscribe();
-
-  Future unsubscribe();
-
-  Future publish(List<int> data);
-
-  Future<List<HistoryEvent>> history();
-}
-
-abstract class SubscriptionClient {
-  Future<SubscribeResult> sendSubscribe(String channel, {String token});
-
-  Future<UnsubscribeResult> sendUnsubscribe(String channel);
-
-  Future<HistoryResult> sendHistory(String channel);
-
-  Future publish(String channel, List<int> data);
-}
-
-class _Subscription implements Subscription {
-  _Subscription({
-    @required this.channel,
-    @required this.client,
-    this.token,
-  });
-
-  @override
-  final String channel;
-  final String token;
-  final SubscriptionClient client;
-
-  final _publishController = StreamController<PublishEvent>.broadcast();
-  final _joinController = StreamController<JoinEvent>.broadcast();
-  final _leaveController = StreamController<LeaveEvent>.broadcast();
-  final _subscribeSuccessController =
-      StreamController<SubscribeSuccessEvent>.broadcast();
-  final _subscribeErrorController =
-      StreamController<SubscribeErrorEvent>.broadcast();
-  final _unsubscribeController = StreamController<UnsubscribeEvent>.broadcast();
-
-  @override
-  Stream<PublishEvent> get publishStream => _publishController.stream;
-
-  @override
-  Stream<JoinEvent> get joinStream => _joinController.stream;
-
-  @override
-  Stream<LeaveEvent> get leaveStream => _leaveController.stream;
-
-  @override
-  Stream<SubscribeSuccessEvent> get subscribeSuccessStream =>
-      _subscribeSuccessController.stream;
-
-  @override
-  Stream<SubscribeErrorEvent> get subscribeErrorStream =>
-      _subscribeErrorController.stream;
-
-  @override
-  Stream<UnsubscribeEvent> get unsubscribeStream =>
-      _unsubscribeController.stream;
-
-  @override
-  Future publish(List<int> data) => client.publish(channel, data);
-
-  @override
-  Future subscribe() => _resubscribe(isResubscribed: false);
-
-  @override
-  Future unsubscribe() async {
-    await client.sendUnsubscribe(channel);
-    final event = UnsubscribeEvent();
-    onUnsubscribe(event);
-  }
-
-  @override
-  Future<List<HistoryEvent>> history() async {
-    final result = await client.sendHistory(channel);
-    final events = result.publications.map(HistoryEvent.from).toList();
-    return events;
-  }
-
-  void onPublish(PublishEvent event) => _publishController.add(event);
-
-  void onJoin(JoinEvent event) => _joinController.add(event);
-
-  void onLeave(LeaveEvent event) => _leaveController.add(event);
-
-  void onSubscribeSuccess(SubscribeSuccessEvent event) =>
-      _subscribeSuccessController.add(event);
-
-  void onSubscribeError(SubscribeErrorEvent event) =>
-      _subscribeErrorController.add(event);
-
-  void onUnsubscribe(UnsubscribeEvent event) =>
-      _unsubscribeController.add(event);
-
-  Future _resubscribe({@required bool isResubscribed}) async {
-    try {
-      final result = await client.sendSubscribe(channel, token: token);
-      final event = SubscribeSuccessEvent.from(result, isResubscribed);
-      onSubscribeSuccess(event);
-      recover(result);
-    } catch (exception) {
-      if (exception is Error) {
-        onSubscribeError(SubscribeErrorEvent.from(exception));
-      } else {
-        onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
-      }
+  Future<String> getToken(String channel) async {
+    if (_isPrivateChannel(channel)) {
+      final event = PrivateSubEvent(_clientID, channel);
+      return _onPrivateSub(event);
     }
+    return null;
   }
 
-  void recover(SubscribeResult result) {
-    for (Publication publication in result.publications) {
-      final event = PublishEvent.from(publication);
-      onPublish(event);
-    }
-  }
+  Future<String> _onPrivateSub(PrivateSubEvent event) =>
+      _config.onPrivateSub(event);
+
+  bool _isPrivateChannel(String channel) =>
+      channel.startsWith(_config.privateChannelPrefix);
 }
+
+enum _ClientState { connected, disconnected, connecting }
