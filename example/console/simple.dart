@@ -1,32 +1,36 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  final channel = 'chat:index';
+  // final channel = 'public:test';
+  // Uncomment to subscribe to private channel
+  final channel = r'$user:test';
 
   final onEvent = (dynamic event) {
     print('$channel> $event');
   };
 
   try {
+    final httpClient = http.Client();
     final client = centrifuge.createClient(
       url,
       config: centrifuge.ClientConfig(
-          headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
-          onPrivateSub: (centrifuge.PrivateSubEvent event) {
-            return Future.value('<SUBSCRIPTION JWT>');
-          }),
+        onPrivateSub: (event) =>
+            _auth(httpClient, event.clientID, event.channels),
+      ),
     );
 
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
 
     // Uncomment to use example token based on secret key `secret`.
-    // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
+    client.setToken(
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
     client.connect();
 
     final subscription = client.getSubscription(channel);
@@ -86,4 +90,21 @@ Function(String) _handleUserInput(
     }
     return;
   };
+}
+
+Future<centrifuge.PrivateSubSign> _auth(
+    http.Client httpClient, String clientID, List<String> channels) async {
+  final body = json.encode(<String, dynamic>{
+    'client': clientID,
+    'channels': channels,
+  });
+  final res = await httpClient.post(
+    'http://localhost:5000/auth',
+    headers: <String, String>{
+      'content-type': 'application/json',
+      'accept': 'application/json',
+    },
+    body: body,
+  );
+  return centrifuge.PrivateSubSign.fromRawJson(res.body);
 }

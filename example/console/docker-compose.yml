@@ -1,0 +1,11 @@
+version: "3"
+services:
+  centrifugo:
+    image: centrifugo/centrifugo:v2.3.1
+    container_name: centrifugo
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/centrifugo
+    command: centrifugo --config=config.json

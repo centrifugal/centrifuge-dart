@@ -121,7 +121,7 @@ class Transport implements GeneratedMessageSender {
     ..params = request.writeToBuffer();
 
   Future<List<Reply>> _sendCommands(List<Command> commands) {
-    // list of completers each reffering to one of the passed commands
+    // List of completers each reffering to one of the passed commands
     final ctxCompleters = <Completer<Reply>>[];
 
     for (final cmd in commands) {
