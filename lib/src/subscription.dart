@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 
 import 'client.dart';
@@ -101,7 +103,12 @@ class SubscriptionImpl implements Subscription {
     }
 
     final request = UnsubscribeRequest()..channel = channel;
-    await _client.sendMessage(request, UnsubscribeResult());
+    await _client.sendMessages([
+      TransportMessage(
+        req: request,
+        res: UnsubscribeResult(),
+      ),
+    ]);
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
@@ -117,8 +124,13 @@ class SubscriptionImpl implements Subscription {
   @override
   Future<List<HistoryEvent>> history() async {
     final request = HistoryRequest()..channel = channel;
-    final result = await _client.sendMessage(request, HistoryResult());
-    final events = result.publications.map(HistoryEvent.from).toList();
+    final result = await _client.sendMessages([
+      TransportMessage(
+        req: request,
+        res: HistoryResult(),
+      ),
+    ]);
+    final events = result[0].publications.map(HistoryEvent.from).toList();
     return events;
   }
 
@@ -144,10 +156,15 @@ class SubscriptionImpl implements Subscription {
         ..channel = channel
         ..token = token ?? '';
 
-      final result = await _client.sendMessage(request, SubscribeResult());
-      final event = SubscribeSuccessEvent.from(result, isResubscribed);
+      final result = await _client.sendMessages([
+        TransportMessage(
+          req: request,
+          res: SubscribeResult(),
+        ),
+      ]);
+      final event = SubscribeSuccessEvent.from(result[0], isResubscribed);
       _onSubscribeSuccess(event);
-      _recover(result);
+      _recover(result[0]);
     } catch (exception) {
       if (exception is errors.Error) {
         _onSubscribeError(
@@ -167,3 +184,35 @@ class SubscriptionImpl implements Subscription {
 }
 
 enum _SubscriptionState { subscribed, unsubscribed }
+
+class PrivateSubSign {
+  PrivateSubSign._({
+    this.channels,
+  });
+
+  factory PrivateSubSign.fromRawJson(String str) =>
+      PrivateSubSign._fromJson(json.decode(str));
+
+  factory PrivateSubSign._fromJson(Map<String, dynamic> json) =>
+      PrivateSubSign._(
+        channels: List<_Channel>.from(
+            json['channels'].map((dynamic x) => _Channel.fromJson(x))),
+      );
+
+  final List<_Channel> channels;
+}
+
+class _Channel {
+  _Channel._({
+    this.channel,
+    this.token,
+  });
+
+  String channel;
+  String token;
+
+  factory _Channel.fromJson(Map<String, dynamic> json) => _Channel._(
+        channel: json['channel'],
+        token: json['token'],
+      );
+}

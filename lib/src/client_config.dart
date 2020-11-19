@@ -32,12 +32,12 @@ class ClientConfig {
 
 typedef WaitRetry = Future Function(int);
 
-typedef PrivateSubCallback = Future<String> Function(PrivateSubEvent);
+typedef PrivateSubCallback = Future<PrivateSubSign> Function(PrivateSubEvent);
 
 WaitRetry _defaultRetry(int maxReconnectDelay) => (int count) {
       final seconds = min(0.5 * pow(2, count), maxReconnectDelay).toInt();
       return Future<void>.delayed(Duration(seconds: seconds));
     };
 
-Future<String> _defaultPrivateSubCallback(PrivateSubEvent event) =>
-    Future.value("");
+Future<PrivateSubSign> _defaultPrivateSubCallback(PrivateSubEvent event) =>
+    Future.value(PrivateSubSign.fromRawJson('{"channels":[]}'));

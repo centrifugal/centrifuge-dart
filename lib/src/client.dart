@@ -123,14 +123,24 @@ class ClientImpl implements Client, GeneratedMessageSender {
       ..channel = channel
       ..data = data;
 
-    await _transport.sendMessage(request, PublishResult());
+    await _transport.sendMessages([
+      TransportMessage(
+        req: request,
+        res: PublishResult(),
+      ),
+    ]);
   }
 
   @override
-  Future<RPCResult> rpc(List<int> data) => _transport.sendMessage(
-        RPCRequest()..data = data,
-        RPCResult(),
-      );
+  Future<RPCResult> rpc(List<int> data) async {
+    final result = await _transport.sendMessages([
+      TransportMessage(
+        req: RPCRequest()..data = data,
+        res: RPCResult(),
+      ),
+    ]);
+    return result[0];
+  }
 
   @override
   @alwaysThrows
@@ -173,15 +183,20 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   Future<UnsubscribeEvent> unsubscribe(String channel) async {
     final request = UnsubscribeRequest()..channel = channel;
-    await _transport.sendMessage(request, UnsubscribeResult());
+    await _transport.sendMessages([
+      TransportMessage(
+        req: request,
+        res: UnsubscribeResult(),
+      )
+    ]);
     return UnsubscribeEvent();
   }
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-              Req request, Rep result) =>
-          _transport.sendMessage(request, result);
+  Future<List<Res>>
+      sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+              List<TransportMessage<Req, Res>> messages) =>
+          _transport.sendMessages(messages);
 
   int _retryCount = 0;
 
@@ -234,15 +249,17 @@ class ClientImpl implements Client, GeneratedMessageSender {
         request.data = _connectData;
       }
 
-      final result = await _transport.sendMessage(
-        request,
-        ConnectResult(),
-      );
+      final result = await _transport.sendMessages([
+        TransportMessage(
+          req: request,
+          res: ConnectResult(),
+        )
+      ]);
 
-      _clientID = result.client;
+      _clientID = result[0].client;
       _retryCount = 0;
       _state = _ClientState.connected;
-      _connectController.add(ConnectEvent.from(result));
+      _connectController.add(ConnectEvent.from(result[0]));
 
       for (SubscriptionImpl subscription in _subscriptions.values) {
         subscription.resubscribeIfNeeded();
@@ -296,13 +313,14 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   Future<String> getToken(String channel) async {
     if (_isPrivateChannel(channel)) {
-      final event = PrivateSubEvent(_clientID, channel);
-      return _onPrivateSub(event);
+      final event = PrivateSubEvent(_clientID, [channel]);
+      final sign = await _onPrivateSub(event);
+      return sign.channels.firstWhere((c) => c.channel == channel).token;
     }
     return null;
   }
 
-  Future<String> _onPrivateSub(PrivateSubEvent event) =>
+  Future<PrivateSubSign> _onPrivateSub(PrivateSubEvent event) =>
       _config.onPrivateSub(event);
 
   bool _isPrivateChannel(String channel) =>

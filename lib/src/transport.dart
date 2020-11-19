@@ -16,17 +16,27 @@ typedef Transport TransportBuilder({
 
 typedef Future<WebSocket> WebSocketBuilder();
 
+class TransportMessage<Req extends GeneratedMessage,
+    Res extends GeneratedMessage> {
+  TransportMessage({this.req, this.res});
+  final Req req;
+  final Res res;
+}
+
 class TransportConfig {
-  TransportConfig(
-      {this.pingInterval = const Duration(seconds: 25),
-      this.headers = const <String, dynamic>{}});
+  TransportConfig({
+    this.pingInterval = const Duration(seconds: 25),
+    this.headers = const <String, dynamic>{},
+  });
 
   final Duration pingInterval;
   final Map<String, dynamic> headers;
 }
 
-Transport protobufTransportBuilder(
-    {@required String url, @required TransportConfig config}) {
+Transport protobufTransportBuilder({
+  @required String url,
+  @required TransportConfig config,
+}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
@@ -44,14 +54,18 @@ Transport protobufTransportBuilder(
 }
 
 abstract class GeneratedMessageSender {
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result);
+  Future<List<Res>>
+      sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+          List<TransportMessage<Req, Res>> messages);
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder,
-      this._replyDecoder);
+  Transport(
+    this._socketBuilder,
+    this._config,
+    this._commandEncoder,
+    this._replyDecoder,
+  );
 
   final WebSocketBuilder _socketBuilder;
   WebSocket _socket;
@@ -59,9 +73,11 @@ class Transport implements GeneratedMessageSender {
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
 
-  Future open(void onPush(Push push),
-      {Function onError,
-      void onDone(String reason, bool shouldReconnect)}) async {
+  Future open(
+    void onPush(Push push), {
+    Function onError,
+    void onDone(String reason, bool shouldReconnect),
+  }) async {
     _socket = await _socketBuilder();
     if (_config.pingInterval != Duration.zero) {
       _socket.pingInterval = _config.pingInterval;
@@ -79,14 +95,20 @@ class Transport implements GeneratedMessageSender {
   final _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result) async {
-    final command = _createCommand(request);
-    final reply = await _sendCommand(command);
+  Future<List<Res>>
+      sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+          List<TransportMessage<Req, Res>> messages) async {
+    final commands = messages.map((msg) => _createCommand(msg.req)).toList();
+    final replies = await _sendCommands(commands);
 
-    final filledResult = _processResult(result, reply);
-    return filledResult;
+    final filledResults = <Res>[];
+    for (var i = 0; i < replies.length; i++) {
+      filledResults.add(
+        _processResult(messages[i].res, replies[i]),
+      );
+    }
+
+    return filledResults;
   }
 
   Future close() {
@@ -98,20 +120,24 @@ class Transport implements GeneratedMessageSender {
     ..method = _getType(request)
     ..params = request.writeToBuffer();
 
-  Future<Reply> _sendCommand(Command command) {
-    final completer = Completer<Reply>.sync();
+  Future<List<Reply>> _sendCommands(List<Command> commands) {
+    // list of completers each reffering to one of the passed commands
+    final ctxCompleters = <Completer<Reply>>[];
 
-    _completers[command.id] = completer;
+    for (final cmd in commands) {
+      final completer = Completer<Reply>.sync();
+      _completers[cmd.id] = completer;
+      ctxCompleters.add(completer);
+    }
 
-    final data = _commandEncoder.convert(command);
+    final data = _commandEncoder.convert(commands);
 
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
 
     _socket.add(data);
-
-    return completer.future;
+    return Future.wait(ctxCompleters.map((c) => c.future));
   }
 
   T _processResult<T extends GeneratedMessage>(T result, Reply reply) {

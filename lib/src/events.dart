@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'proto/client.pb.dart' as proto;
 
 class PrivateSubEvent {
-  PrivateSubEvent(this.clientID, this.channel);
+  PrivateSubEvent(this.clientID, this.channels);
 
   final String clientID;
-  final String channel;
+  final List<String> channels;
 
   @override
   String toString() {
-    return 'PrivateSubEvent{clientID: $clientID, channel: $channel}';
+    return 'PrivateSubEvent{clientID: $clientID, channels: $channels}';
   }
 }
 

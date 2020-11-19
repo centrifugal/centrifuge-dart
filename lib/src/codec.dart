@@ -3,20 +3,23 @@ import 'dart:convert';
 import 'package:centrifuge/src/proto/client.pb.dart';
 import 'package:protobuf/protobuf.dart';
 
-abstract class CommandEncoder extends Converter<Command, List<int>> {}
+abstract class CommandEncoder extends Converter<List<Command>, List<int>> {}
 
 abstract class ReplyDecoder extends Converter<List<int>, List<Reply>> {}
 
 class ProtobufCommandEncoder extends CommandEncoder {
   @override
-  List<int> convert(Command input) {
-    final commandData = input.writeToBuffer();
-    final length = commandData.lengthInBytes;
-
+  List<int> convert(List<Command> commands) {
     final writer = CodedBufferWriter();
-    writer.writeInt32NoTag(length);
+    var commandsData = <int>[];
 
-    return writer.toBuffer() + commandData;
+    for (final c in commands) {
+      final cmdData = c.writeToBuffer();
+      commandsData += cmdData;
+      writer.writeInt32NoTag(cmdData.lengthInBytes);
+    }
+
+    return writer.toBuffer() + commandsData;
   }
 }
 
@@ -38,8 +41,12 @@ class ProtobufReplyDecoder extends ReplyDecoder {
 
 class JsonCommandEncoder extends CommandEncoder {
   @override
-  List<int> convert(Command input) {
-    return utf8.encode(input.writeToJson());
+  List<int> convert(List<Command> commands) {
+    const jsonCommands = <String>[];
+    for (final c in commands) {
+      jsonCommands.add(c.writeToJson());
+    }
+    return utf8.encode(jsonCommands.join('\n'));
   }
 }
 
