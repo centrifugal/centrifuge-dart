@@ -7,18 +7,21 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
-  // final channel = 'public:test';
-  // Uncomment to subscribe to private channel
-  // final channel = r'$user:test';
-  final channels = [
-    r'$usert:test1',
-    r'$user:test2',
-    r'$user:test3',
-  ];
+  final channel = 'public:test';
 
-  final onEvent = (dynamic event) {
-    // print('$channel> $event');
-    print('$event');
+  // Uncomment to subscribe to private channels
+  // final channel = r'$user:test';
+
+  // Uncomment to use batching
+  // final channels = [
+  //   r'$usert:test1',
+  //   r'$user:test2',
+  //   r'$user:test3',
+  //   r'public:test1',
+  // ];
+
+  final onEvent = (String channel, dynamic event) {
+    print('$channel> $event');
   };
 
   try {
@@ -31,37 +34,41 @@ void main() async {
       ),
     );
 
-    client.connectStream.listen(onEvent);
-    client.disconnectStream.listen(onEvent);
+    client.connectStream.listen((e) => onEvent('', e));
+    client.disconnectStream.listen((e) => onEvent('', e));
 
     // Uncomment to use example token based on secret key `secret`.
-    client.setToken(
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
+    // client.setToken(
+    //     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
     await client.connect();
 
-    client.startSubscribeBatching();
-    for (final channel in channels) {
-      final subscription = client.getSubscription(channel);
+    // Uncomment to use batching
+    // client.startBatching();
+    // client.startSubscribeBatching();
+    // for (final channel in channels) {
+    final subscription = client.getSubscription(channel);
 
-      subscription.publishStream
-          .map((e) => utf8.decode(e.data))
-          .listen(onEvent);
-      subscription.joinStream.listen(onEvent);
-      subscription.leaveStream.listen(onEvent);
+    subscription.publishStream
+        .map((e) => utf8.decode(e.data))
+        .listen((e) => onEvent(channel, e));
+    subscription.joinStream.listen((e) => onEvent(channel, e));
+    subscription.leaveStream.listen((e) => onEvent(channel, e));
 
-      subscription.subscribeSuccessStream.listen(onEvent);
-      subscription.subscribeErrorStream.listen(onEvent);
-      subscription.unsubscribeStream.listen(onEvent);
+    subscription.subscribeSuccessStream.listen((e) => onEvent(channel, e));
+    subscription.subscribeErrorStream.listen((e) => onEvent(channel, e));
+    subscription.unsubscribeStream.listen((e) => onEvent(channel, e));
 
-      subscription.subscribe();
-    }
-    client.stopSubscribeBatching();
+    subscription.subscribe();
+    // Uncomment to use batching
+    // }
+    // client.stopSubscribeBatching();
+    // client.stopBatching();
 
-    // final handler = _handleUserInput(client, subscription);
+    final handler = _handleUserInput(client, subscription);
 
     await for (List<int> codeUnit in stdin) {
       final message = utf8.decode(codeUnit).trim();
-      // handler(message);
+      handler(message);
     }
   } catch (ex) {
     print(ex);

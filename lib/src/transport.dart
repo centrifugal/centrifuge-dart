@@ -16,16 +16,26 @@ typedef Transport TransportBuilder({
 
 typedef Future<WebSocket> WebSocketBuilder();
 
+typedef void TransportMessageResultCallback<T extends GeneratedMessage>(
+    T result);
+typedef void TransportMessageErrorCallback(centrifuge.Error error);
+
 class TransportMessage<Req extends GeneratedMessage,
     Res extends GeneratedMessage> {
   TransportMessage({
-    this.req,
-    this.res,
+    @required this.res,
+    @required this.req,
+    @required this.onResult,
     this.onError,
   });
   final Req req;
   final Res res;
-  final void Function(int code, String message) onError;
+
+  final TransportMessageResultCallback<Res> onResult;
+
+  /// Transport will call this method (if present)
+  /// instead of throwing exception
+  final TransportMessageErrorCallback onError;
 }
 
 class TransportConfig {
@@ -59,7 +69,7 @@ Transport protobufTransportBuilder({
 }
 
 abstract class GeneratedMessageSender {
-  Future<List<Res>>
+  Future<void>
       sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
           List<TransportMessage<Req, Res>> messages);
 }
@@ -100,20 +110,21 @@ class Transport implements GeneratedMessageSender {
   final _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<List<Res>>
+  Future<void>
       sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
           List<TransportMessage<Req, Res>> messages) async {
     final commands = messages.map((msg) => _createCommand(msg.req)).toList();
     final replies = await _sendCommands(commands);
 
-    final filledResults = <Res>[];
     for (var i = 0; i < replies.length; i++) {
-      filledResults.add(
-        _processResult(messages[i].res, replies[i], messages[i].onError),
+      final m = messages[i];
+      _processResult(
+        m.res,
+        replies[i],
+        onResult: m.onResult,
+        onError: m.onError,
       );
     }
-
-    return filledResults;
   }
 
   Future close() {
@@ -145,18 +156,24 @@ class Transport implements GeneratedMessageSender {
     return Future.wait(ctxCompleters.map((c) => c.future));
   }
 
-  T _processResult<T extends GeneratedMessage>(T result, Reply reply,
-      [void Function(int code, String message) onError]) {
+  void _processResult<T extends GeneratedMessage>(
+    T result,
+    Reply reply, {
+    TransportMessageResultCallback onResult,
+    TransportMessageErrorCallback onError,
+  }) {
     if (reply.hasError()) {
+      final err =
+          centrifuge.Error.custom(reply.error.code, reply.error.message);
       if (onError != null) {
-        onError(reply.error.code, reply.error.message);
-        return null;
+        onError(err);
+        return;
       } else {
-        throw centrifuge.Error.custom(reply.error.code, reply.error.message);
+        throw err;
       }
     }
     result.mergeFromBuffer(reply.result);
-    return result;
+    onResult(result);
   }
 
   MethodType _getType(GeneratedMessage request) {

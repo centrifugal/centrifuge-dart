@@ -5,7 +5,6 @@ import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 
 import 'client.dart';
-import 'error.dart' as errors;
 import 'events.dart';
 import 'proto/client.pb.dart';
 
@@ -103,12 +102,15 @@ class SubscriptionImpl implements Subscription {
     }
 
     final request = UnsubscribeRequest()..channel = channel;
-    await _client.sendMessages([
+    final completer = Completer<UnsubscribeResult>();
+    await _client.addMessage(
       TransportMessage(
         req: request,
         res: UnsubscribeResult(),
+        onResult: completer.complete,
       ),
-    ]);
+    );
+    await completer.future;
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
@@ -124,13 +126,16 @@ class SubscriptionImpl implements Subscription {
   @override
   Future<List<HistoryEvent>> history() async {
     final request = HistoryRequest()..channel = channel;
-    final result = await _client.sendMessages([
+    final completer = Completer<HistoryResult>();
+    await _client.addMessage(
       TransportMessage(
         req: request,
         res: HistoryResult(),
+        onResult: completer.complete,
       ),
-    ]);
-    final events = result[0].publications.map(HistoryEvent.from).toList();
+    );
+    final result = await completer.future;
+    final events = result.publications.map(HistoryEvent.from).toList();
     return events;
   }
 
@@ -149,7 +154,7 @@ class SubscriptionImpl implements Subscription {
   void addUnsubscribe(UnsubscribeEvent event) =>
       _unsubscribeController.add(event);
 
-  Future _resubscribe({@required bool isResubscribed}) async {
+  Future<void> _resubscribe({@required bool isResubscribed}) async {
     if (_isPrivateChannel(channel)) {
       if (_client.isSubscribeBatching) {
         _client.privateChannels.add(channel);
@@ -159,28 +164,24 @@ class SubscriptionImpl implements Subscription {
         _client.stopSubscribeBatching();
       }
     } else {
-      try {
-        final request = SubscribeRequest()
-          ..channel = channel
-          ..token = '';
+      final request = SubscribeRequest()
+        ..channel = channel
+        ..token = '';
 
-        final result = await _client.sendMessages([
-          TransportMessage(
-            req: request,
-            res: SubscribeResult(),
-          ),
-        ]);
-        final event = SubscribeSuccessEvent.from(result[0], isResubscribed);
-        onSubscribeSuccess(event);
-        recover(result[0]);
-      } catch (exception) {
-        if (exception is errors.Error) {
-          onSubscribeError(
-              SubscribeErrorEvent(exception.message, exception.code));
-        } else {
-          onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
-        }
-      }
+      await _client.addMessage(
+        TransportMessage(
+          req: request,
+          res: SubscribeResult(),
+          onResult: (dynamic result) {
+            final event = SubscribeSuccessEvent.from(result, isResubscribed);
+            onSubscribeSuccess(event);
+            recover(result);
+          },
+          onError: (err) {
+            onSubscribeError(SubscribeErrorEvent(err.message, err.code));
+          },
+        ),
+      );
     }
   }
 
