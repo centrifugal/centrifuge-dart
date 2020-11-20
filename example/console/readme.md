@@ -1,23 +1,23 @@
-Before running example make sure you created `chat` namespace in Centrifugo configuration and allowed publishing into channel - i.e. using config like this:
+# centrifuge-dart console app
 
-```json
-{
-  ...
-  "namespaces": [
-    {
-      "name": "chat",
-      "anonymous": false,
-      "publish": true,
-      "join_leave": true,
-      "presence": true,
-      "presence_stats": true
-    }
-  ]
-}
-```
+You can run environment in two ways:
 
-Also run Centrifugo in insecure client mode so it does not expect JWT token from client:
+1. Docker (recommended)
+   ```bash
+   docker-compose up [-d]
+   ```
 
+2. Manually
+   ```bash
+   # first terminal session
+   npm i
+   npm start 
+
+   # second terminal session
+   ./centrifugo --config config.json --client_insecure
+   ```
+
+To run console app itself:
 ```bash
-./centrifugo --config config.json --client_insecure
+dart ./simple.dart
 ```
