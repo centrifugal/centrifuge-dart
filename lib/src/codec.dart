@@ -11,15 +11,15 @@ class ProtobufCommandEncoder extends CommandEncoder {
   @override
   List<int> convert(List<Command> commands) {
     final writer = CodedBufferWriter();
-    var commandsData = <int>[];
 
-    for (final c in commands) {
-      final cmdData = c.writeToBuffer();
-      commandsData += cmdData;
-      writer.writeInt32NoTag(cmdData.lengthInBytes);
+    for (final cmd in commands) {
+      final cmdData = cmd.writeToBuffer();
+      writer
+        ..writeInt32NoTag(cmdData.lengthInBytes)
+        ..writeRawBytes(cmdData);
     }
 
-    return writer.toBuffer() + commandsData;
+    return writer.toBuffer();
   }
 }
 

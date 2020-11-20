@@ -18,9 +18,14 @@ typedef Future<WebSocket> WebSocketBuilder();
 
 class TransportMessage<Req extends GeneratedMessage,
     Res extends GeneratedMessage> {
-  TransportMessage({this.req, this.res});
+  TransportMessage({
+    this.req,
+    this.res,
+    this.onError,
+  });
   final Req req;
   final Res res;
+  final void Function(int code, String message) onError;
 }
 
 class TransportConfig {
@@ -104,7 +109,7 @@ class Transport implements GeneratedMessageSender {
     final filledResults = <Res>[];
     for (var i = 0; i < replies.length; i++) {
       filledResults.add(
-        _processResult(messages[i].res, replies[i]),
+        _processResult(messages[i].res, replies[i], messages[i].onError),
       );
     }
 
@@ -140,9 +145,15 @@ class Transport implements GeneratedMessageSender {
     return Future.wait(ctxCompleters.map((c) => c.future));
   }
 
-  T _processResult<T extends GeneratedMessage>(T result, Reply reply) {
+  T _processResult<T extends GeneratedMessage>(T result, Reply reply,
+      [void Function(int code, String message) onError]) {
     if (reply.hasError()) {
-      throw centrifuge.Error.custom(reply.error.code, reply.error.message);
+      if (onError != null) {
+        onError(reply.error.code, reply.error.message);
+        return null;
+      } else {
+        throw centrifuge.Error.custom(reply.error.code, reply.error.message);
+      }
     }
     result.mergeFromBuffer(reply.result);
     return result;

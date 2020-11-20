@@ -9,10 +9,16 @@ void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
   // final channel = 'public:test';
   // Uncomment to subscribe to private channel
-  final channel = r'$user:test';
+  // final channel = r'$user:test';
+  final channels = [
+    r'$usert:test1',
+    r'$user:test2',
+    r'$user:test3',
+  ];
 
   final onEvent = (dynamic event) {
-    print('$channel> $event');
+    // print('$channel> $event');
+    print('$event');
   };
 
   try {
@@ -31,25 +37,31 @@ void main() async {
     // Uncomment to use example token based on secret key `secret`.
     client.setToken(
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
-    client.connect();
+    await client.connect();
 
-    final subscription = client.getSubscription(channel);
+    client.startSubscribeBatching();
+    for (final channel in channels) {
+      final subscription = client.getSubscription(channel);
 
-    subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
-    subscription.joinStream.listen(onEvent);
-    subscription.leaveStream.listen(onEvent);
+      subscription.publishStream
+          .map((e) => utf8.decode(e.data))
+          .listen(onEvent);
+      subscription.joinStream.listen(onEvent);
+      subscription.leaveStream.listen(onEvent);
 
-    subscription.subscribeSuccessStream.listen(onEvent);
-    subscription.subscribeErrorStream.listen(onEvent);
-    subscription.unsubscribeStream.listen(onEvent);
+      subscription.subscribeSuccessStream.listen(onEvent);
+      subscription.subscribeErrorStream.listen(onEvent);
+      subscription.unsubscribeStream.listen(onEvent);
 
-    subscription.subscribe();
+      subscription.subscribe();
+    }
+    client.stopSubscribeBatching();
 
-    final handler = _handleUserInput(client, subscription);
+    // final handler = _handleUserInput(client, subscription);
 
     await for (List<int> codeUnit in stdin) {
       final message = utf8.decode(codeUnit).trim();
-      handler(message);
+      // handler(message);
     }
   } catch (ex) {
     print(ex);
@@ -76,7 +88,7 @@ Function(String) _handleUserInput(
         print('RPC result: ' + utf8.decode(result.data));
         break;
       case '#disconnect':
-        client.disconnect();
+        await client.disconnect();
         break;
       default:
         final output = jsonEncode({'input': message});

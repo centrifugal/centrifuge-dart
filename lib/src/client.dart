@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'client_config.dart';
+import 'error.dart' as errors;
 import 'events.dart';
 import 'proto/client.pb.dart';
 import 'subscription.dart';
@@ -25,7 +26,7 @@ abstract class Client {
 
   /// Connect to the server.
   ///
-  void connect();
+  Future<void> connect();
 
   /// Set token for connection request.
   ///
@@ -56,7 +57,15 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  void disconnect();
+  Future<void> disconnect();
+
+  /// Start collecting private channels to create bulk authentication
+  /// Call config.onPrivateSub when stopSubscribeBatching will be called
+  void startSubscribeBatching();
+
+  /// Call config.onPrivateSub with collected private channels
+  /// to ask if this client can subscribe on each channel
+  Future<void> stopSubscribeBatching();
 
   /// Detect that the subscription already exists.
   ///
@@ -82,6 +91,12 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Transport _transport;
   String _token;
 
+  final _privateChannels = <String>{};
+  Set<String> get privateChannels => _privateChannels;
+
+  bool _isSubscribeBatching = false;
+  bool get isSubscribeBatching => _isSubscribeBatching;
+
   final String _url;
   ClientConfig _config;
 
@@ -105,9 +120,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  void connect() async {
-    return _connect();
-  }
+  Future<void> connect() async => _connect();
 
   bool get connected => _state == _ClientState.connected;
 
@@ -149,7 +162,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  void disconnect() async {
+  Future<void> disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
   }
@@ -311,20 +324,59 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
   }
 
-  Future<String> getToken(String channel) async {
-    if (_isPrivateChannel(channel)) {
-      final event = PrivateSubEvent(_clientID, [channel]);
-      final sign = await _onPrivateSub(event);
-      return sign.channels.firstWhere((c) => c.channel == channel).token;
+  @override
+  void startSubscribeBatching() {
+    _isSubscribeBatching = true;
+  }
+
+  @override
+  Future<void> stopSubscribeBatching() async {
+    _isSubscribeBatching = false;
+    final authChannels = _privateChannels.toList();
+    _privateChannels.clear();
+
+    final event = PrivateSubEvent(_clientID, authChannels);
+    final sign = await _onPrivateSub(event);
+
+    final messages = <TransportMessage>[];
+    for (final ch in sign.channels) {
+      final req = SubscribeRequest()
+        ..channel = ch.channel
+        ..token = ch.token;
+
+      final SubscriptionImpl sub = getSubscription(ch.channel);
+
+      final msg = TransportMessage(
+        req: req,
+        res: SubscribeResult(),
+        onError: (code, message) {
+          sub.onSubscribeError(SubscribeErrorEvent(message, code));
+        },
+      );
+
+      messages.add(msg);
     }
-    return null;
+
+    try {
+      final replies = await _transport.sendMessages(messages);
+      for (var i = 0; i < authChannels.length; i++) {
+        final result = replies[i];
+        if (result == null) {
+          continue;
+        }
+        final event = SubscribeSuccessEvent.from(result, false);
+        final channel = authChannels[i];
+        final SubscriptionImpl sub = getSubscription(channel);
+        sub.onSubscribeSuccess(event);
+        sub.recover(result);
+      }
+    } catch (exception) {
+      print(exception);
+    }
   }
 
   Future<PrivateSubSign> _onPrivateSub(PrivateSubEvent event) =>
       _config.onPrivateSub(event);
-
-  bool _isPrivateChannel(String channel) =>
-      channel.startsWith(_config.privateChannelPrefix);
 }
 
 enum _ClientState { connected, disconnected, connecting }

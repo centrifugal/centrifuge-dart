@@ -76,12 +76,12 @@ class SubscriptionImpl implements Subscription {
   Future publish(List<int> data) => _client.publish(channel, data);
 
   @override
-  void subscribe() {
+  Future<void> subscribe() async {
     _state = _SubscriptionState.subscribed;
     if (!_client.connected) {
       return;
     }
-    _resubscribe(isResubscribed: false);
+    await _resubscribe(isResubscribed: false);
   }
 
   void resubscribeIfNeeded() {
@@ -92,7 +92,7 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  void unsubscribe() async {
+  Future<void> unsubscribe() async {
     if (_state != _SubscriptionState.subscribed) {
       return;
     }
@@ -140,47 +140,59 @@ class SubscriptionImpl implements Subscription {
 
   void addLeave(LeaveEvent event) => _leaveController.add(event);
 
-  void _onSubscribeSuccess(SubscribeSuccessEvent event) =>
+  void onSubscribeSuccess(SubscribeSuccessEvent event) =>
       _subscribeSuccessController.add(event);
 
-  void _onSubscribeError(SubscribeErrorEvent event) =>
+  void onSubscribeError(SubscribeErrorEvent event) =>
       _subscribeErrorController.add(event);
 
   void addUnsubscribe(UnsubscribeEvent event) =>
       _unsubscribeController.add(event);
 
   Future _resubscribe({@required bool isResubscribed}) async {
-    try {
-      final token = await _client.getToken(channel);
-      final request = SubscribeRequest()
-        ..channel = channel
-        ..token = token ?? '';
-
-      final result = await _client.sendMessages([
-        TransportMessage(
-          req: request,
-          res: SubscribeResult(),
-        ),
-      ]);
-      final event = SubscribeSuccessEvent.from(result[0], isResubscribed);
-      _onSubscribeSuccess(event);
-      _recover(result[0]);
-    } catch (exception) {
-      if (exception is errors.Error) {
-        _onSubscribeError(
-            SubscribeErrorEvent(exception.message, exception.code));
+    if (_isPrivateChannel(channel)) {
+      if (_client.isSubscribeBatching) {
+        _client.privateChannels.add(channel);
       } else {
-        _onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
+        _client.startSubscribeBatching();
+        _resubscribe(isResubscribed: isResubscribed);
+        _client.stopSubscribeBatching();
+      }
+    } else {
+      try {
+        final request = SubscribeRequest()
+          ..channel = channel
+          ..token = '';
+
+        final result = await _client.sendMessages([
+          TransportMessage(
+            req: request,
+            res: SubscribeResult(),
+          ),
+        ]);
+        final event = SubscribeSuccessEvent.from(result[0], isResubscribed);
+        onSubscribeSuccess(event);
+        recover(result[0]);
+      } catch (exception) {
+        if (exception is errors.Error) {
+          onSubscribeError(
+              SubscribeErrorEvent(exception.message, exception.code));
+        } else {
+          onSubscribeError(SubscribeErrorEvent(exception.toString(), -1));
+        }
       }
     }
   }
 
-  void _recover(SubscribeResult result) {
+  void recover(SubscribeResult result) {
     for (Publication publication in result.publications) {
       final event = PublishEvent.from(publication);
       addPublish(event);
     }
   }
+
+  bool _isPrivateChannel(String channel) =>
+      channel.startsWith(_client.config.privateChannelPrefix);
 }
 
 enum _SubscriptionState { subscribed, unsubscribed }
