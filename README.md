@@ -17,7 +17,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 final client = centrifuge.createClient("ws://localhost:8000/connection/websocket?format=protobuf");
 ```
 
-**Note that** `?format=protobuf` **is required because this library only works with Protobuf protocol.**
+**Note that** `?format=protobuf` **is required because this library only works with Protobuf protocol.** While this client uses binary Protobuf protocol internally nothing stops you from sending JSON-encoded data over it.
 
 Connect to server:
 ```dart
@@ -60,7 +60,7 @@ await subscription.publish(data);
 
 - [ ] connect to server using JSON protocol format
 - [x] connect to server using Protobuf protocol format
-- [x] connect with JWT
+- [x] connect with token (JWT)
 - [x] connect with custom header
 - [x] automatic reconnect in case of errors, network problems etc
 - [x] exponential backoff for reconnect
@@ -75,18 +75,24 @@ await subscription.publish(data);
 - [ ] presence method of Subscription
 - [ ] presence stats method of Subscription
 - [x] history method of Subscription
+- [x] top-level publish method
+- [ ] top-level presence method
+- [ ] top-level presence stats method
+- [ ] top-level history method
+- [ ] top-level unsubscribe method
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [x] send RPC commands
-- [x] publish to channel without being subscribed
-- [x] subscribe to private channels with JWT
+- [x] subscribe to private channels with token (JWT)
 - [ ] connection JWT refresh
-- [ ] private channel subscription JWT refresh
+- [ ] private channel subscription token (JWT) refresh
 - [ ] handle connection expired error
 - [ ] handle subscription expired error
 - [x] ping/pong to find broken connection
+- [ ] message recovery mechanism for client-side subscriptions
 - [ ] server-side subscriptions
-- [ ] message recovery mechanism
+- [ ] message recovery mechanism for server-side subscriptions
+- [ ] history stream pagination
 
 ## Instructions to update protobuf
 
