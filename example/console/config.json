@@ -1,0 +1,27 @@
+{
+  "secret": "secret",
+  "api_key": "strong_secret_for_api_auth",
+  "admin": true,
+  "admin_password": "password",
+  "admin_secret": "strong_secret_key_to_sign_authorization_token",
+  "internal_port": "10001",
+  "max_channel_length": 500,
+  "connection_lifetime": 60,
+  "log_level": "debug",
+  "namespaces": [
+    {
+      "name": "public",
+      "publish": true,
+      "anonymous": true,
+      "presence": true,
+      "join_leave": false
+    },
+    {
+      "name": "user",
+      "anonymous": false,
+      "publish": true,
+      "presence": false,
+      "join_leave": false
+    }
+  ]
+}

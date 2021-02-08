@@ -16,17 +16,42 @@ typedef Transport TransportBuilder({
 
 typedef Future<WebSocket> WebSocketBuilder();
 
+typedef void TransportMessageResultCallback<T extends GeneratedMessage>(
+    T result);
+typedef void TransportMessageErrorCallback(centrifuge.Error error);
+
+class TransportMessage<Req extends GeneratedMessage,
+    Res extends GeneratedMessage> {
+  TransportMessage({
+    @required this.res,
+    @required this.req,
+    @required this.onResult,
+    this.onError,
+  });
+  final Req req;
+  final Res res;
+
+  final TransportMessageResultCallback<Res> onResult;
+
+  /// Transport will call this method (if present)
+  /// instead of throwing exception
+  final TransportMessageErrorCallback onError;
+}
+
 class TransportConfig {
-  TransportConfig(
-      {this.pingInterval = const Duration(seconds: 25),
-      this.headers = const <String, dynamic>{}});
+  TransportConfig({
+    this.pingInterval = const Duration(seconds: 25),
+    this.headers = const <String, dynamic>{},
+  });
 
   final Duration pingInterval;
   final Map<String, dynamic> headers;
 }
 
-Transport protobufTransportBuilder(
-    {@required String url, @required TransportConfig config}) {
+Transport protobufTransportBuilder({
+  @required String url,
+  @required TransportConfig config,
+}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
@@ -44,14 +69,18 @@ Transport protobufTransportBuilder(
 }
 
 abstract class GeneratedMessageSender {
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result);
+  Future<void>
+      sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+          List<TransportMessage<Req, Res>> messages);
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder,
-      this._replyDecoder);
+  Transport(
+    this._socketBuilder,
+    this._config,
+    this._commandEncoder,
+    this._replyDecoder,
+  );
 
   final WebSocketBuilder _socketBuilder;
   WebSocket _socket;
@@ -59,9 +88,11 @@ class Transport implements GeneratedMessageSender {
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
 
-  Future open(void onPush(Push push),
-      {Function onError,
-      void onDone(String reason, bool shouldReconnect)}) async {
+  Future open(
+    void onPush(Push push), {
+    Function onError,
+    void onDone(String reason, bool shouldReconnect),
+  }) async {
     _socket = await _socketBuilder();
     if (_config.pingInterval != Duration.zero) {
       _socket.pingInterval = _config.pingInterval;
@@ -79,14 +110,21 @@ class Transport implements GeneratedMessageSender {
   final _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result) async {
-    final command = _createCommand(request);
-    final reply = await _sendCommand(command);
+  Future<void>
+      sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+          List<TransportMessage<Req, Res>> messages) async {
+    final commands = messages.map((msg) => _createCommand(msg.req)).toList();
+    final replies = await _sendCommands(commands);
 
-    final filledResult = _processResult(result, reply);
-    return filledResult;
+    for (var i = 0; i < replies.length; i++) {
+      final m = messages[i];
+      _processResult(
+        m.res,
+        replies[i],
+        onResult: m.onResult,
+        onError: m.onError,
+      );
+    }
   }
 
   Future close() {
@@ -98,28 +136,44 @@ class Transport implements GeneratedMessageSender {
     ..method = _getType(request)
     ..params = request.writeToBuffer();
 
-  Future<Reply> _sendCommand(Command command) {
-    final completer = Completer<Reply>.sync();
+  Future<List<Reply>> _sendCommands(List<Command> commands) {
+    // List of completers each reffering to one of the passed commands
+    final ctxCompleters = <Completer<Reply>>[];
 
-    _completers[command.id] = completer;
+    for (final cmd in commands) {
+      final completer = Completer<Reply>.sync();
+      _completers[cmd.id] = completer;
+      ctxCompleters.add(completer);
+    }
 
-    final data = _commandEncoder.convert(command);
+    final data = _commandEncoder.convert(commands);
 
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
 
     _socket.add(data);
-
-    return completer.future;
+    return Future.wait(ctxCompleters.map((c) => c.future));
   }
 
-  T _processResult<T extends GeneratedMessage>(T result, Reply reply) {
+  void _processResult<T extends GeneratedMessage>(
+    T result,
+    Reply reply, {
+    TransportMessageResultCallback onResult,
+    TransportMessageErrorCallback onError,
+  }) {
     if (reply.hasError()) {
-      throw centrifuge.Error.custom(reply.error.code, reply.error.message);
+      final err =
+          centrifuge.Error.custom(reply.error.code, reply.error.message);
+      if (onError != null) {
+        onError(err);
+        return;
+      } else {
+        throw err;
+      }
     }
     result.mergeFromBuffer(reply.result);
-    return result;
+    onResult(result);
   }
 
   MethodType _getType(GeneratedMessage request) {

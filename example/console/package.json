@@ -1,0 +1,17 @@
+{
+  "name": "console",
+  "version": "1.0.0",
+  "description": "Before running example make sure you created `chat` namespace in Centrifugo configuration and allowed publishing into channel - i.e. using config like this:",
+  "main": "sign-server.js",
+  "scripts": {
+    "start": "node sign-server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1"
+  }
+}

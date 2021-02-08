@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'client_config.dart';
+import 'error.dart' as errors;
 import 'events.dart';
 import 'proto/client.pb.dart';
 import 'subscription.dart';
@@ -25,7 +26,7 @@ abstract class Client {
 
   /// Connect to the server.
   ///
-  void connect();
+  Future<void> connect();
 
   /// Set token for connection request.
   ///
@@ -56,7 +57,22 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  void disconnect();
+  Future<void> disconnect();
+
+  /// Start collecting messages without sending them to Centrifuge until stopBatching
+  /// method called
+  void startBatching();
+
+  /// Stop collecting messages and send them
+  void stopBatching();
+
+  /// Start collecting private channels to create bulk authentication
+  /// Call config.onPrivateSub when stopSubscribeBatching will be called
+  void startSubscribeBatching();
+
+  /// Call config.onPrivateSub with collected private channels
+  /// to ask if this client can subscribe on each channel
+  Future<void> stopSubscribeBatching();
 
   /// Detect that the subscription already exists.
   ///
@@ -82,6 +98,16 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Transport _transport;
   String _token;
 
+  final _messages = <TransportMessage>[];
+  bool _isBatching = false;
+  bool get isBatching => _isBatching;
+
+  final _privateChannels = <String>{};
+  Set<String> get privateChannels => _privateChannels;
+
+  bool _isSubscribeBatching = false;
+  bool get isSubscribeBatching => _isSubscribeBatching;
+
   final String _url;
   ClientConfig _config;
 
@@ -105,9 +131,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  void connect() async {
-    return _connect();
-  }
+  Future<void> connect() async => _connect();
 
   bool get connected => _state == _ClientState.connected;
 
@@ -118,19 +142,34 @@ class ClientImpl implements Client, GeneratedMessageSender {
   void setConnectData(List<int> connectData) => _connectData = connectData;
 
   @override
-  Future publish(String channel, List<int> data) async {
+  Future<PublishResult> publish(String channel, List<int> data) async {
     final request = PublishRequest()
       ..channel = channel
       ..data = data;
 
-    await _transport.sendMessage(request, PublishResult());
+    final completer = Completer<PublishResult>();
+    await addMessage(
+      TransportMessage(
+        req: request,
+        res: PublishResult(),
+        onResult: completer.complete,
+      ),
+    );
+    return completer.future;
   }
 
   @override
-  Future<RPCResult> rpc(List<int> data) => _transport.sendMessage(
-        RPCRequest()..data = data,
-        RPCResult(),
-      );
+  Future<RPCResult> rpc(List<int> data) async {
+    final completer = Completer<RPCResult>();
+    await addMessage(
+      TransportMessage(
+        req: RPCRequest()..data = data,
+        res: RPCResult(),
+        onResult: completer.complete,
+      ),
+    );
+    return completer.future;
+  }
 
   @override
   @alwaysThrows
@@ -139,7 +178,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  void disconnect() async {
+  Future<void> disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
   }
@@ -173,15 +212,21 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   Future<UnsubscribeEvent> unsubscribe(String channel) async {
     final request = UnsubscribeRequest()..channel = channel;
-    await _transport.sendMessage(request, UnsubscribeResult());
+    final completer = Completer<UnsubscribeResult>();
+    await addMessage(TransportMessage(
+      req: request,
+      res: UnsubscribeResult(),
+      onResult: completer.complete,
+    ));
+    await completer.future;
     return UnsubscribeEvent();
   }
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-              Req request, Rep result) =>
-          _transport.sendMessage(request, result);
+  Future<void>
+      sendMessages<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+              List<TransportMessage<Req, Res>> messages) =>
+          _transport.sendMessages(messages);
 
   int _retryCount = 0;
 
@@ -234,10 +279,15 @@ class ClientImpl implements Client, GeneratedMessageSender {
         request.data = _connectData;
       }
 
-      final result = await _transport.sendMessage(
-        request,
-        ConnectResult(),
+      final completer = Completer<ConnectResult>();
+      await addMessage(
+        TransportMessage(
+          req: request,
+          res: ConnectResult(),
+          onResult: completer.complete,
+        ),
       );
+      final result = await completer.future;
 
       _clientID = result.client;
       _retryCount = 0;
@@ -294,19 +344,81 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
   }
 
-  Future<String> getToken(String channel) async {
-    if (_isPrivateChannel(channel)) {
-      final event = PrivateSubEvent(_clientID, channel);
-      return _onPrivateSub(event);
-    }
-    return null;
+  @override
+  void startBatching() {
+    _isBatching = true;
   }
 
-  Future<String> _onPrivateSub(PrivateSubEvent event) =>
-      _config.onPrivateSub(event);
+  @override
+  Future<void> stopBatching() async {
+    _isBatching = false;
+    await _flush();
+  }
 
-  bool _isPrivateChannel(String channel) =>
-      channel.startsWith(_config.privateChannelPrefix);
+  Future<void> _flush() async {
+    if (_messages.isEmpty) {
+      return;
+    }
+    final messages = _messages.sublist(0);
+    _messages.clear();
+    await sendMessages(messages);
+  }
+
+  Future<void>
+      addMessage<Req extends GeneratedMessage, Res extends GeneratedMessage>(
+          TransportMessage<Req, Res> message) async {
+    if (_isBatching) {
+      _messages.add(message);
+    } else {
+      await sendMessages([message]);
+    }
+  }
+
+  @override
+  void startSubscribeBatching() {
+    _isSubscribeBatching = true;
+  }
+
+  @override
+  Future<void> stopSubscribeBatching() async {
+    _isSubscribeBatching = false;
+    final authChannels = _privateChannels.toList();
+    _privateChannels.clear();
+
+    final event = PrivateSubEvent(_clientID, authChannels);
+    final sign = await _onPrivateSub(event);
+
+    startBatching();
+
+    for (final ch in sign.channels) {
+      final req = SubscribeRequest()
+        ..channel = ch.channel
+        ..token = ch.token;
+
+      final SubscriptionImpl sub = getSubscription(ch.channel);
+
+      final message = TransportMessage(
+        req: req,
+        res: SubscribeResult(),
+        onResult: (dynamic result) {
+          final event = SubscribeSuccessEvent.from(result, false);
+          final SubscriptionImpl sub = getSubscription(ch.channel);
+          sub.onSubscribeSuccess(event);
+          sub.recover(result);
+        },
+        onError: (err) {
+          sub.onSubscribeError(SubscribeErrorEvent(err.message, err.code));
+        },
+      );
+
+      await addMessage(message);
+    }
+
+    stopBatching();
+  }
+
+  Future<PrivateSubSign> _onPrivateSub(PrivateSubEvent event) =>
+      _config.onPrivateSub(event);
 }
 
 enum _ClientState { connected, disconnected, connecting }
