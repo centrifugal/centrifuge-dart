@@ -141,7 +141,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   @override
   void disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
-    await _transport.close();
+    await _transport?.close();
   }
 
   @override

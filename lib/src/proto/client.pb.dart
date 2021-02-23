@@ -7,6 +7,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'client.pbenum.dart';
@@ -359,6 +360,8 @@ class Publication extends $pb.GeneratedMessage {
     ..aOS(3, 'uid')
     ..a<$core.List<$core.int>>(4, 'data', $pb.PbFieldType.OY)
     ..aOM<ClientInfo>(5, 'info', subBuilder: ClientInfo.create)
+    ..a<$fixnum.Int64>(6, 'offset', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false;
 
   Publication._() : super();
@@ -443,6 +446,18 @@ class Publication extends $pb.GeneratedMessage {
   void clearInfo() => clearField(5);
   @$pb.TagNumber(5)
   ClientInfo ensureInfo() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $fixnum.Int64 get offset => $_getI64(5);
+  @$pb.TagNumber(6)
+  set offset($fixnum.Int64 v) {
+    $_setInt64(5, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasOffset() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearOffset() => clearField(6);
 }
 
 class Join extends $pb.GeneratedMessage {
@@ -576,6 +591,8 @@ class Sub extends $pb.GeneratedMessage {
     ..a<$core.int>(2, 'seq', $pb.PbFieldType.OU3)
     ..a<$core.int>(3, 'gen', $pb.PbFieldType.OU3)
     ..aOS(4, 'epoch')
+    ..a<$fixnum.Int64>(5, 'offset', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false;
 
   Sub._() : super();
@@ -646,6 +663,18 @@ class Sub extends $pb.GeneratedMessage {
   $core.bool hasEpoch() => $_has(3);
   @$pb.TagNumber(4)
   void clearEpoch() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get offset => $_getI64(4);
+  @$pb.TagNumber(5)
+  set offset($fixnum.Int64 v) {
+    $_setInt64(4, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasOffset() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOffset() => clearField(5);
 }
 
 class Message extends $pb.GeneratedMessage {
@@ -983,6 +1012,8 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     ..a<$core.int>(4, 'seq', $pb.PbFieldType.OU3)
     ..a<$core.int>(5, 'gen', $pb.PbFieldType.OU3)
     ..aOS(6, 'epoch')
+    ..a<$fixnum.Int64>(7, 'offset', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false;
 
   SubscribeRequest._() : super();
@@ -1078,6 +1109,18 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   $core.bool hasEpoch() => $_has(5);
   @$pb.TagNumber(6)
   void clearEpoch() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $fixnum.Int64 get offset => $_getI64(6);
+  @$pb.TagNumber(7)
+  set offset($fixnum.Int64 v) {
+    $_setInt64(6, v);
+  }
+
+  @$pb.TagNumber(7)
+  $core.bool hasOffset() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearOffset() => clearField(7);
 }
 
 class SubscribeResult extends $pb.GeneratedMessage {
@@ -1092,6 +1135,8 @@ class SubscribeResult extends $pb.GeneratedMessage {
     ..pc<Publication>(7, 'publications', $pb.PbFieldType.PM,
         subBuilder: Publication.create)
     ..aOB(8, 'recovered')
+    ..a<$fixnum.Int64>(9, 'offset', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false;
 
   SubscribeResult._() : super();
@@ -1202,6 +1247,18 @@ class SubscribeResult extends $pb.GeneratedMessage {
   $core.bool hasRecovered() => $_has(7);
   @$pb.TagNumber(8)
   void clearRecovered() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get offset => $_getI64(8);
+  @$pb.TagNumber(9)
+  set offset($fixnum.Int64 v) {
+    $_setInt64(8, v);
+  }
+
+  @$pb.TagNumber(9)
+  $core.bool hasOffset() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearOffset() => clearField(9);
 }
 
 class SubRefreshRequest extends $pb.GeneratedMessage {
@@ -1769,6 +1826,7 @@ class RPCRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('RPCRequest',
       package: const $pb.PackageName('protocol'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, 'data', $pb.PbFieldType.OY)
+    ..aOS(2, 'method')
     ..hasRequiredFields = false;
 
   RPCRequest._() : super();
@@ -1803,6 +1861,18 @@ class RPCRequest extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(0);
   @$pb.TagNumber(1)
   void clearData() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get method => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set method($core.String v) {
+    $_setString(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasMethod() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMethod() => clearField(2);
 }
 
 class RPCResult extends $pb.GeneratedMessage {

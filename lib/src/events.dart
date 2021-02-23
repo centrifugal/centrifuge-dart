@@ -1,9 +1,10 @@
 import 'dart:convert';
 
+import 'package:fixnum/fixnum.dart';
 import 'proto/client.pb.dart' as proto;
 
 class PrivateSubEvent {
-  PrivateSubEvent(this.clientID, this.channel);
+  const PrivateSubEvent(this.clientID, this.channel);
 
   final String clientID;
   final String channel;
@@ -15,23 +16,48 @@ class PrivateSubEvent {
 }
 
 class ConnectEvent {
-  ConnectEvent(this.client, this.version, this.data);
+  const ConnectEvent(
+    this.client,
+    this.version,
+    this.expires,
+    this.ttl,
+    this.data,
+    this.subs,
+  );
 
   final String client;
   final String version;
+  final bool expires;
+  final int ttl;
   final List<int> data;
+  final Map<String, proto.SubscribeResult> subs;
 
-  static ConnectEvent from(proto.ConnectResult result) =>
-      ConnectEvent(result.client, result.version, result.data);
+  static ConnectEvent from(proto.ConnectResult result) {
+    return ConnectEvent(
+      result.client,
+      result.version,
+      result.expires,
+      result.ttl,
+      result.data,
+      result.subs,
+    );
+  }
 
   @override
   String toString() {
-    return 'ConnectEvent{client: $client, version: $version, data: ${utf8.decode(data, allowMalformed: true)}}';
+    return 'ConnectEvent{'
+        'client: $client, '
+        'version: $version, '
+        'expires: $expires, '
+        'ttl: $ttl, '
+        'data: ${utf8.decode(data, allowMalformed: true)}, '
+        'subs: $subs'
+        '}';
   }
 }
 
 class DisconnectEvent {
-  DisconnectEvent(this.reason, this.shouldReconnect);
+  const DisconnectEvent(this.reason, this.shouldReconnect);
 
   final String reason;
   final bool shouldReconnect;
@@ -43,7 +69,7 @@ class DisconnectEvent {
 }
 
 class MessageEvent {
-  MessageEvent(this.data);
+  const MessageEvent(this.data);
 
   final List<int> data;
 
@@ -54,33 +80,61 @@ class MessageEvent {
 }
 
 class PublishEvent {
-  PublishEvent(this.data);
+  const PublishEvent(
+    this.uid,
+    this.clientInfo,
+    this.offset,
+    this.data,
+  );
 
+  final String uid;
+  final proto.ClientInfo clientInfo;
+  final Int64 offset;
   final List<int> data;
 
-  static PublishEvent from(proto.Publication pub) => PublishEvent(pub.data);
+  static PublishEvent from(proto.Publication pub) =>
+      PublishEvent(pub.uid, pub.info, pub.offset, pub.data);
 
   @override
   String toString() {
-    return 'PublishEvent{data: $data}';
+    return 'PublishEvent{'
+        'uid: $uid, '
+        'clientInfo: ${clientInfo.toProto3Json()}, '
+        'offset: $offset, '
+        'data: $data'
+        '}';
   }
 }
 
 class HistoryEvent {
-  HistoryEvent(this.data);
+  const HistoryEvent(
+    this.uid,
+    this.clientInfo,
+    this.offset,
+    this.data,
+  );
 
+  final String uid;
+  final proto.ClientInfo clientInfo;
+  final Int64 offset;
   final List<int> data;
 
-  static HistoryEvent from(proto.Publication pub) => HistoryEvent(pub.data);
+  static HistoryEvent from(proto.Publication pub) =>
+      HistoryEvent(pub.uid, pub.info, pub.offset, pub.data);
 
   @override
   String toString() {
-    return 'HistoryEvent{data: $data}';
+    return 'HistoryEvent{'
+        'uid: $uid, '
+        'clientInfo: $clientInfo, '
+        'offset: $offset, '
+        'data: $data'
+        '}';
   }
 }
 
 class JoinEvent {
-  JoinEvent(this.user, this.client);
+  const JoinEvent(this.user, this.client);
 
   final String user;
   final String client;
@@ -95,7 +149,7 @@ class JoinEvent {
 }
 
 class LeaveEvent {
-  LeaveEvent(this.user, this.client);
+  const LeaveEvent(this.user, this.client);
 
   final String user;
   final String client;
@@ -110,18 +164,49 @@ class LeaveEvent {
 }
 
 class SubscribeSuccessEvent {
-  SubscribeSuccessEvent(this.isResubscribed, this.isRecovered);
+  const SubscribeSuccessEvent(
+    this.isResubscribed,
+    this.isExpires,
+    this.ttl,
+    this.isRecoverable,
+    this.epoch,
+    this.isRecovered,
+    this.offset,
+  );
 
   final bool isResubscribed;
+  final bool isExpires;
+  final int ttl;
+  final bool isRecoverable;
+  final String epoch;
   final bool isRecovered;
+  final Int64 offset;
 
   static SubscribeSuccessEvent from(
-          proto.SubscribeResult result, bool resubscribed) =>
-      SubscribeSuccessEvent(resubscribed, result.recovered);
+    proto.SubscribeResult result,
+    bool resubscribed,
+  ) =>
+      SubscribeSuccessEvent(
+        resubscribed,
+        result.expires,
+        result.ttl,
+        result.recoverable,
+        result.epoch,
+        result.recovered,
+        result.offset,
+      );
 
   @override
   String toString() {
-    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered}';
+    return 'SubscribeSuccessEvent{'
+        'isResubscribed: $isResubscribed, '
+        'isExpires: $isExpires, '
+        'ttl: $ttl, '
+        'recoverable: $isRecoverable, '
+        'epoch: $epoch, '
+        'isRecovered: $isRecovered, '
+        'offset: $offset'
+        '}';
   }
 }
 

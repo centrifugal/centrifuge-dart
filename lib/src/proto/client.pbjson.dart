@@ -116,6 +116,7 @@ const Publication$json = const {
       '6': '.protocol.ClientInfo',
       '10': 'info'
     },
+    const {'1': 'offset', '3': 6, '4': 1, '5': 4, '10': 'offset'},
   ],
 };
 
@@ -161,6 +162,7 @@ const Sub$json = const {
     const {'1': 'seq', '3': 2, '4': 1, '5': 13, '10': 'seq'},
     const {'1': 'gen', '3': 3, '4': 1, '5': 13, '10': 'gen'},
     const {'1': 'epoch', '3': 4, '4': 1, '5': 9, '10': 'epoch'},
+    const {'1': 'offset', '3': 5, '4': 1, '5': 4, '10': 'offset'},
   ],
 };
 
@@ -266,6 +268,7 @@ const SubscribeRequest$json = const {
     const {'1': 'seq', '3': 4, '4': 1, '5': 13, '10': 'seq'},
     const {'1': 'gen', '3': 5, '4': 1, '5': 13, '10': 'gen'},
     const {'1': 'epoch', '3': 6, '4': 1, '5': 9, '10': 'epoch'},
+    const {'1': 'offset', '3': 7, '4': 1, '5': 4, '10': 'offset'},
   ],
 };
 
@@ -287,6 +290,7 @@ const SubscribeResult$json = const {
       '10': 'publications'
     },
     const {'1': 'recovered', '3': 8, '4': 1, '5': 8, '10': 'recovered'},
+    const {'1': 'offset', '3': 9, '4': 1, '5': 4, '10': 'offset'},
   ],
 };
 
@@ -415,6 +419,7 @@ const RPCRequest$json = const {
   '1': 'RPCRequest',
   '2': const [
     const {'1': 'data', '3': 1, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'method', '3': 2, '4': 1, '5': 9, '10': 'method'},
   ],
 };
 
