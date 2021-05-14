@@ -1,0 +1,26 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    # Prevent duplicate builds on internal PRs.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Install coveralls
+        run: gem install coveralls-lcov 
+
+      - name: Hello world
+        run: bash tools/ci.sh
+
+      - name: Upload coverage
+        run: coveralls-lcov var/lcov.info 

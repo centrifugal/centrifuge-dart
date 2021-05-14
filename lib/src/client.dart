@@ -254,7 +254,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   void _onPush(Push push) {
     switch (push.type) {
-      case PushType.PUBLICATION:
+      case Push_PushType.PUBLICATION:
         final pub = Publication.fromBuffer(push.data);
         final event = PublishEvent.from(pub);
         final subscription = _subscriptions[push.channel];
@@ -262,7 +262,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
           subscription.addPublish(event);
         }
         break;
-      case PushType.LEAVE:
+      case Push_PushType.LEAVE:
         final leave = Leave.fromBuffer(push.data);
         final event = LeaveEvent.from(leave.info);
         final subscription = _subscriptions[push.channel];
@@ -270,7 +270,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
           subscription.addLeave(event);
         }
         break;
-      case PushType.JOIN:
+      case Push_PushType.JOIN:
         final join = Join.fromBuffer(push.data);
         final event = JoinEvent.from(join.info);
         final subscription = _subscriptions[push.channel];
@@ -278,13 +278,13 @@ class ClientImpl implements Client, GeneratedMessageSender {
           subscription.addJoin(event);
         }
         break;
-      case PushType.MESSAGE:
+      case Push_PushType.MESSAGE:
         final message = Message.fromBuffer(push.data);
         final event = MessageEvent(message.data);
 
         _messageController.add(event);
         break;
-      case PushType.UNSUB:
+      case Push_PushType.UNSUBSCRIBE:
         final event = UnsubscribeEvent();
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {

@@ -91,7 +91,7 @@ class SendAction {
 
 typedef CommandMatcher = Function(Command);
 
-CommandMatcher withMethod(MethodType type) =>
+CommandMatcher withMethod(Command_MethodType type) =>
     (Command command) => command.method == type;
 
 class MockTransport implements Transport {

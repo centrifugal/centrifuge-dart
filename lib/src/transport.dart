@@ -122,20 +122,20 @@ class Transport implements GeneratedMessageSender {
     return result;
   }
 
-  MethodType _getType(GeneratedMessage request) {
+  Command_MethodType _getType(GeneratedMessage request) {
     switch (request.runtimeType) {
       case ConnectRequest:
-        return MethodType.CONNECT;
+        return Command_MethodType.CONNECT;
       case PublishRequest:
-        return MethodType.PUBLISH;
+        return Command_MethodType.PUBLISH;
       case UnsubscribeRequest:
-        return MethodType.UNSUBSCRIBE;
+        return Command_MethodType.UNSUBSCRIBE;
       case SubscribeRequest:
-        return MethodType.SUBSCRIBE;
+        return Command_MethodType.SUBSCRIBE;
       case HistoryRequest:
-        return MethodType.HISTORY;
+        return Command_MethodType.HISTORY;
       case RPCRequest:
-        return MethodType.RPC;
+        return Command_MethodType.RPC;
       default:
         throw ArgumentError('unknown request type');
     }

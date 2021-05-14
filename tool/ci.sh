@@ -8,8 +8,8 @@
 set -e
 
 # Run pub get to fetch packages.
-pub global activate coverage
-pub get
+dart pub global activate coverage
+dart pub get
 
 # Verify that the libraries are error and warning-free.
 echo "Running dartanalyzer..."
@@ -25,7 +25,7 @@ fi
 
 # Run the tests.
 echo "Running tests..."
-pub run test --reporter expanded
+dart pub run test --reporter expanded
 
 # Gather coverage and upload to Coveralls.
 if [ "$COVERALLS_TOKEN" ] && [ "$TRAVIS_DART_VERSION" = "dev" ]; then
@@ -39,14 +39,14 @@ if [ "$COVERALLS_TOKEN" ] && [ "$TRAVIS_DART_VERSION" = "dev" ]; then
     test/test_all.dart &
 
   # Run the coverage collector to generate the JSON coverage report.
-  pub global run coverage:collect_coverage \
+  dart pub global run coverage:collect_coverage \
     --port=$OBS_PORT \
     --out=var/coverage.json \
     --wait-paused \
     --resume-isolates
 
   echo "Generating LCOV report..."
-  pub global run coverage:format_coverage \
+  dart pub global run coverage:format_coverage \
     --lcov \
     --in=var/coverage.json \
     --out=var/lcov.info \

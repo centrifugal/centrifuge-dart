@@ -51,7 +51,7 @@ void main() {
         ));
 
     test('Transport.send() returns result', () async {
-      webSocket.onCommand(withMethod(MethodType.CONNECT)).result(ConnectResult()
+      webSocket.onCommand(withMethod(Command_MethodType.CONNECT)).result(ConnectResult()
         ..client = 'c1'
         ..version = 'v2');
 
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('Transport.send() throws error', () async {
-      webSocket.onCommand(withMethod(MethodType.CONNECT)).error(proto.Error()
+      webSocket.onCommand(withMethod(Command_MethodType.CONNECT)).error(proto.Error()
         ..message = 'some exception'
         ..code = 999);
 
@@ -72,7 +72,7 @@ void main() {
     });
 
     test('Transport.send() throws error', () async {
-      webSocket.onCommand(withMethod(MethodType.CONNECT)).error(proto.Error()
+      webSocket.onCommand(withMethod(Command_MethodType.CONNECT)).error(proto.Error()
         ..message = 'some exception'
         ..code = 999);
 
