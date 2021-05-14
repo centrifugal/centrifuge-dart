@@ -52,4 +52,6 @@ if [ "$COVERALLS_TOKEN" ]; then
     --out=var/lcov.info \
     --packages=.packages \
     --report-on=lib
+
+  coveralls-lcov var/lcov.info 
 fi
