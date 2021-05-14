@@ -28,7 +28,7 @@ echo "Running tests..."
 dart pub run test --reporter expanded
 
 # Gather coverage and upload to Coveralls.
-if [ "$COVERALLS_TOKEN" ]; then
+if [[ "${COVERALLS_TOKEN}" ]]; then
   OBS_PORT=9292
   echo "Collecting coverage on port $OBS_PORT..."
 
@@ -54,4 +54,6 @@ if [ "$COVERALLS_TOKEN" ]; then
     --report-on=lib
 
   coveralls-lcov var/lcov.info 
+else
+  echo "Skipping coverage collection"
 fi
