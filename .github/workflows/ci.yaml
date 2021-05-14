@@ -19,8 +19,8 @@ jobs:
       - name: Install coveralls
         run: sudo gem install coveralls-lcov 
 
-      - name: Hello world
-        run: bash tools/ci.sh
+      - name: Run tests
+        run: bash tool/ci.sh
 
       - name: Upload coverage
         run: coveralls-lcov var/lcov.info 
