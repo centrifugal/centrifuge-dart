@@ -97,9 +97,9 @@ await subscription.publish(data);
 ## Instructions to update protobuf
 
 1) Install `protoc` compiler
-2) Install `protoc_plugin` https://pub.dev/packages/protoc_plugin
+2) Install `protoc_plugin` https://pub.dev/packages/protoc_plugin (`dart pub global activate protoc_plugin`)
 3) cd `lib/src/proto` and run `protoc --dart_out=. -I . client.proto`
-4) cd to root and run `dartfmt -w lib/ test/`
+4) cd to root and run `dartfmt -w lib/ test/` (install dartfmt with `dart pub global activate dart_style`)
 
 ## Instructions to release
 

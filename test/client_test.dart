@@ -176,7 +176,7 @@ void main() {
     test('client doesn\'t reconnect if reconnect = false', () async {
       bool retryCalled = false;
 
-      retry = (_) {
+      retry = (_) async {
         retryCalled = true;
       };
 

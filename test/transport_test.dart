@@ -51,9 +51,11 @@ void main() {
         ));
 
     test('Transport.send() returns result', () async {
-      webSocket.onCommand(withMethod(MethodType.CONNECT)).result(ConnectResult()
-        ..client = 'c1'
-        ..version = 'v2');
+      webSocket
+          .onCommand(withMethod(Command_MethodType.CONNECT))
+          .result(ConnectResult()
+            ..client = 'c1'
+            ..version = 'v2');
 
       final result =
           await transport.sendMessage(ConnectRequest(), ConnectResult());
@@ -63,18 +65,22 @@ void main() {
     });
 
     test('Transport.send() throws error', () async {
-      webSocket.onCommand(withMethod(MethodType.CONNECT)).error(proto.Error()
-        ..message = 'some exception'
-        ..code = 999);
+      webSocket
+          .onCommand(withMethod(Command_MethodType.CONNECT))
+          .error(proto.Error()
+            ..message = 'some exception'
+            ..code = 999);
 
       expect(transport.sendMessage(ConnectRequest(), ConnectResult()),
           throwsA(anything));
     });
 
     test('Transport.send() throws error', () async {
-      webSocket.onCommand(withMethod(MethodType.CONNECT)).error(proto.Error()
-        ..message = 'some exception'
-        ..code = 999);
+      webSocket
+          .onCommand(withMethod(Command_MethodType.CONNECT))
+          .error(proto.Error()
+            ..message = 'some exception'
+            ..code = 999);
 
       expect(transport.sendMessage(ConnectRequest(), ConnectResult()),
           throwsA(anything));
