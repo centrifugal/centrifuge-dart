@@ -1,6 +1,9 @@
 name: centrifuge_app
 description: A new Flutter project.
 
+environment:
+ sdk: '>=2.0.0  <3.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
