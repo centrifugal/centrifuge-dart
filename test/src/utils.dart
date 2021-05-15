@@ -194,7 +194,7 @@ class MockClient extends Mock implements ClientImpl {
   ClientConfig? config;
 
   @override
-  bool? connected;
+  bool connected = false;
 
   @override
   Future<Rep>

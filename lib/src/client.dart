@@ -109,7 +109,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
     return _connect();
   }
 
-  bool? get connected => _state == _ClientState.connected;
+  bool get connected => _state == _ClientState.connected;
 
   @override
   void setToken(String token) => _token = token;
