@@ -10,8 +10,8 @@ import 'error.dart' as centrifuge;
 import 'proto/client.pb.dart' hide Error;
 
 typedef Transport TransportBuilder({
-  @required String url,
-  @required TransportConfig config,
+  required String url,
+  required TransportConfig config,
 });
 
 typedef Future<WebSocket> WebSocketBuilder();
@@ -26,7 +26,7 @@ class TransportConfig {
 }
 
 Transport protobufTransportBuilder(
-    {@required String url, @required TransportConfig config}) {
+    {required String url, required TransportConfig config}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
@@ -54,23 +54,23 @@ class Transport implements GeneratedMessageSender {
       this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
-  WebSocket _socket;
+  WebSocket? _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
 
   Future open(void onPush(Push push),
-      {Function onError,
-      void onDone(String reason, bool shouldReconnect)}) async {
+      {Function? onError,
+      void onDone(String? reason, bool shouldReconnect)?}) async {
     _socket = await _socketBuilder();
     if (_config.pingInterval != Duration.zero) {
-      _socket.pingInterval = _config.pingInterval;
+      _socket!.pingInterval = _config.pingInterval;
     }
 
-    _socket.listen(
-      _onData(onPush),
+    _socket!.listen(
+      _onData(onPush) as void Function(dynamic)?,
       onError: onError,
-      onDone: _onDone(onDone),
+      onDone: _onDone(onDone) as void Function()?,
     );
   }
 
@@ -89,8 +89,8 @@ class Transport implements GeneratedMessageSender {
     return filledResult;
   }
 
-  Future close() {
-    return _socket.close();
+  Future? close() {
+    return _socket!.close();
   }
 
   Command _createCommand(GeneratedMessage request) => Command()
@@ -103,13 +103,13 @@ class Transport implements GeneratedMessageSender {
 
     _completers[command.id] = completer;
 
-    final data = _commandEncoder.convert(command);
+    final List<int> data = _commandEncoder.convert(command);
 
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
 
-    _socket.add(data);
+    _socket!.add(data);
 
     return completer.future;
   }
@@ -141,27 +141,27 @@ class Transport implements GeneratedMessageSender {
     }
   }
 
-  Function _onDone(void Function(String, bool) onDone) {
+  Function _onDone(void Function(String?, bool)? onDone) {
     return () {
-      String reason;
+      String? reason;
       bool reconnect = true;
-      if (_socket.closeReason != null) {
+      if (_socket!.closeReason != null) {
         try {
-          final Map<String, dynamic> info = jsonDecode(_socket.closeReason);
+          final Map<String, dynamic> info = jsonDecode(_socket!.closeReason!);
           reason = info['reason'];
           reconnect = info['reconnect'] ?? true;
         } catch (_) {}
       }
-      onDone(reason, reconnect);
+      onDone!(reason, reconnect);
     };
   }
 
   Function _onData(void onPush(Push push)) {
     return (dynamic input) {
-      final replies = _replyDecoder.convert(input);
+      final List<Reply> replies = _replyDecoder.convert(input);
       replies.forEach((reply) {
         if (reply.id > 0) {
-          _completers.remove(reply.id).complete(reply);
+          _completers.remove(reply.id)!.complete(reply);
         } else {
           final push = Push.fromBuffer(reply.result);
 

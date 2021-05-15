@@ -11,10 +11,10 @@ import 'src/utils.dart';
 void main() {
   final url = 'test url';
 
-  Client client;
-  MockTransport transport;
-  ClientConfig clientConfig;
-  WaitRetry retry;
+  late Client client;
+  late MockTransport transport;
+  late ClientConfig clientConfig;
+  WaitRetry? retry;
 
   final subscription = (String name) => client.getSubscription(name);
 
@@ -33,9 +33,9 @@ void main() {
 
   group('Subscription', () {
     test('getSubscription returns valid subscriptions', () {
-      final s1 = subscription('some_channel');
+      final s1 = subscription('some_channel')!;
       final s2 = subscription('some_channel');
-      final s3 = subscription('some_another_channel');
+      final s3 = subscription('some_another_channel')!;
 
       expect(s1, same(s2));
       expect(s1.channel, 'some_channel');
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('removeSubscription works correctly', () {
-      final s1 = subscription('some_channel');
+      final s1 = subscription('some_channel')!;
       expect(true, client.hasSubscription(s1.channel));
       client.removeSubscription(s1);
       expect(false, client.hasSubscription(s1.channel));
@@ -59,7 +59,7 @@ void main() {
       transport.completeOpen();
 
       expect(transport.url, equals(url));
-      expect(transport.transportConfig.headers, same(clientConfig.headers));
+      expect(transport.transportConfig!.headers, same(clientConfig.headers));
     });
     test('connect sends request with data and token', () async {
       client.setToken('test token');
@@ -131,17 +131,17 @@ void main() {
     });
 
     test('socket closing triggers the corresponding events', () async {
-      subscription('test one').subscribe();
+      subscription('test one')!.subscribe();
 
       final unsubscribeOneFuture =
-          subscription('test one').unsubscribeStream.first;
+          subscription('test one')!.unsubscribeStream.first;
 
       final unsubscribeTwoFuture =
-          subscription('test two').unsubscribeStream.first;
+          subscription('test two')!.unsubscribeStream.first;
 
       final disconnectFuture = client.disconnectStream.first;
 
-      transport.onDone('test reason', true);
+      transport.onDone!('test reason', true);
 
       final disconnect = await disconnectFuture;
 
@@ -153,16 +153,16 @@ void main() {
     });
 
     test('socket error triggers the corresponding events', () async {
-      subscription('test one').subscribe();
+      subscription('test one')!.subscribe();
 
       final unsubscribeOneFuture =
-          subscription('test one').unsubscribeStream.first;
+          subscription('test one')!.unsubscribeStream.first;
       final unsubscribeTwoFuture =
-          subscription('test two').unsubscribeStream.first;
+          subscription('test two')!.unsubscribeStream.first;
 
       final disconnectFuture = client.disconnectStream.first;
 
-      transport.onError('test error');
+      transport.onError!('test error');
 
       final disconnect = await disconnectFuture;
 
@@ -181,14 +181,14 @@ void main() {
       };
 
       for (var i = 1; i < 20; i++) {
-        transport.onDone('test reason', false);
+        transport.onDone!('test reason', false);
         expect(retryCalled, isFalse);
       }
     });
 
     test('client reconnects on error', () async {
-      Completer<void> retryCompleter;
-      int count;
+      late Completer<void> retryCompleter;
+      int? count;
 
       retry = (c) {
         count = c;
@@ -199,7 +199,7 @@ void main() {
         final connectFuture = client.connectStream.first;
 
         retryCompleter = Completer<void>.sync();
-        transport.onError('test error');
+        transport.onError!('test error');
 
         expect(count, 1);
         retryCompleter.complete();
@@ -215,21 +215,21 @@ void main() {
       retry = (_) => fail('retry shouldn\'t be called');
 
       client.disconnect();
-      transport.onDone(null, true);
+      transport.onDone!(null, true);
 
       expect(transport.sendList, hasLength(expectedMessages));
     });
 
     test('client reconnect increases retry count', () async {
       Completer<void> retryCompleter = Completer<void>.sync();
-      int count;
+      int? count;
 
       retry = (c) {
         count = c;
         return retryCompleter.future;
       };
 
-      transport.onError('test error');
+      transport.onError!('test error');
 
       for (var i = 1; i < 20; i++) {
         expect(count, i);
@@ -250,19 +250,19 @@ void main() {
       var countClientConnect = 0;
       var countClientDisconnect = 0;
 
-      subscription('test one').subscribe();
+      subscription('test one')!.subscribe();
 
-      subscription('test one')
+      subscription('test one')!
           .unsubscribeStream
           .listen((_) => countOneChannelUnsubscribe += 1);
-      subscription('test two')
+      subscription('test two')!
           .unsubscribeStream
           .listen((_) => countTwoChannelUnsubscribe += 1);
 
-      subscription('test one')
+      subscription('test one')!
           .subscribeSuccessStream
           .listen((_) => countOneChannelSubscribe += 1);
-      subscription('test two')
+      subscription('test two')!
           .subscribeSuccessStream
           .listen((_) => countTwoChannelSubscribe += 1);
 
@@ -272,7 +272,7 @@ void main() {
       Completer<void> retryCompleter = Completer<void>.sync();
       retry = (c) => retryCompleter.future;
 
-      transport.onError('test error');
+      transport.onError!('test error');
 
       for (var i = 1; i < 20; i++) {
         retryCompleter.complete();
@@ -302,26 +302,26 @@ void main() {
       var countClientConnect = 0;
       var countClientDisconnect = 0;
 
-      subscription('test one').subscribe();
+      subscription('test one')!.subscribe();
 
-      subscription('test one')
+      subscription('test one')!
           .subscribeSuccessStream
           .listen((_) => countOneChannelSubscribe += 1);
-      subscription('test one')
+      subscription('test one')!
           .unsubscribeStream
           .listen((_) => countOneChannelUnsubscribe += 1);
 
-      subscription('test two')
+      subscription('test two')!
           .subscribeSuccessStream
           .listen((_) => countTwoChannelSubscribe += 1);
-      subscription('test two')
+      subscription('test two')!
           .unsubscribeStream
           .listen((_) => countTwoChannelUnsubscribe += 1);
 
       client.connectStream.listen((_) => countClientConnect += 1);
       client.disconnectStream.listen((_) => countClientDisconnect += 1);
 
-      Completer<void> retryCompleter;
+      late Completer<void> retryCompleter;
 
       retry = (c) => retryCompleter.future;
 
@@ -331,7 +331,7 @@ void main() {
         retryCompleter = Completer<void>.sync();
 
         final disconnect = client.disconnectStream.first;
-        transport.onError('test error');
+        transport.onError!('test error');
         await disconnect;
 
         retryCompleter.complete();

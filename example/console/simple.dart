@@ -29,7 +29,7 @@ void main() async {
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
     client.connect();
 
-    final subscription = client.getSubscription(channel);
+    final subscription = client.getSubscription(channel)!;
 
     subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
     subscription.joinStream.listen(onEvent);

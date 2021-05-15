@@ -11,14 +11,14 @@ import 'package:test/test.dart';
 import 'src/utils.dart';
 
 void main() {
-  Transport transport;
-  MockWebSocket webSocket;
+  late Transport transport;
+  late MockWebSocket webSocket;
 
   Function(Push) onPush = (_) => fail('unexpected invocation');
   final Function(dynamic) onError =
       (dynamic error) => fail('unexpected invocation');
-  Function(String, bool) onDone =
-      (String reason, bool reconnect) => fail('unexpected invocation');
+  Function(String?, bool) onDone =
+      (String? reason, bool reconnect) => fail('unexpected invocation');
 
   setUp(() {
     webSocket = MockWebSocket();
@@ -92,17 +92,17 @@ void main() {
           .writeToBuffer();
       final writer = CodedBufferWriter();
       writer.writeInt32NoTag(replyData.length);
-      Push push;
+      late Push push;
       onPush = (Push p) => push = p;
 
-      webSocket.onData(writer.toBuffer() + replyData);
+      webSocket.onData!(writer.toBuffer() + replyData);
 
       expect(utf8.decode(push.data), equals('hello'));
     });
 
     test('Transport processes socket close reason', () async {
-      String reason;
-      bool reconnect;
+      String? reason;
+      bool? reconnect;
 
       onDone = (r, rc) {
         reason = r;
@@ -116,8 +116,8 @@ void main() {
     });
 
     test('Transport handles socket close with not-json reason', () async {
-      String reason;
-      bool reconnect;
+      String? reason;
+      bool? reconnect;
 
       onDone = (r, rc) {
         reason = r;
@@ -132,8 +132,8 @@ void main() {
 
     test('Transport handles socket close with invalid format of reason',
         () async {
-      String reason;
-      bool reconnect;
+      String? reason;
+      bool? reconnect;
 
       onDone = (r, rc) {
         reason = r;
@@ -147,8 +147,8 @@ void main() {
     });
 
     test('Transport handles socket close with empty reason', () async {
-      String reason;
-      bool reconnect;
+      String? reason;
+      bool? reconnect;
 
       onDone = (r, rc) {
         reason = r;

@@ -76,7 +76,7 @@ class SubscriptionImpl implements Subscription {
   @override
   void subscribe() {
     _state = _SubscriptionState.subscribed;
-    if (!_client.connected) {
+    if (!_client.connected!) {
       return;
     }
     _resubscribe(isResubscribed: false);
@@ -96,7 +96,7 @@ class SubscriptionImpl implements Subscription {
     }
     _state = _SubscriptionState.unsubscribed;
 
-    if (!_client.connected) {
+    if (!_client.connected!) {
       return;
     }
 
@@ -137,7 +137,7 @@ class SubscriptionImpl implements Subscription {
   void addUnsubscribe(UnsubscribeEvent event) =>
       _unsubscribeController.add(event);
 
-  Future _resubscribe({@required bool isResubscribed}) async {
+  Future _resubscribe({required bool isResubscribed}) async {
     try {
       final token = await _client.getToken(channel);
       final request = SubscribeRequest()

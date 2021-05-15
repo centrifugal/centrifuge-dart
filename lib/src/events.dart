@@ -5,7 +5,7 @@ import 'proto/client.pb.dart' as proto;
 class PrivateSubEvent {
   PrivateSubEvent(this.clientID, this.channel);
 
-  final String clientID;
+  final String? clientID;
   final String channel;
 
   @override
@@ -33,8 +33,8 @@ class ConnectEvent {
 class DisconnectEvent {
   DisconnectEvent(this.reason, this.shouldReconnect);
 
-  final String reason;
-  final bool shouldReconnect;
+  final String? reason;
+  final bool? shouldReconnect;
 
   @override
   String toString() {
@@ -128,7 +128,7 @@ class SubscribeSuccessEvent {
 class SubscribeErrorEvent {
   SubscribeErrorEvent(this.message, this.code);
 
-  final String message;
+  final String? message;
   final int code;
 
   @override

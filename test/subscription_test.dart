@@ -9,8 +9,8 @@ import 'package:test/test.dart';
 import 'src/utils.dart';
 
 void main() {
-  MockClient client;
-  SubscriptionImpl subscription;
+  late MockClient client;
+  late SubscriptionImpl subscription;
   final channel = 'test channel';
 
   setUp(() {
