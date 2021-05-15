@@ -143,6 +143,7 @@ class MockTransport implements Transport {
 
   Triplet<Req, Res> sendListLast<Req extends GeneratedMessage,
           Res extends GeneratedMessage>() =>
+      // ignore: avoid_as
       sendList.last as Triplet<Req, Res>;
 
   @override

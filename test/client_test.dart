@@ -33,9 +33,9 @@ void main() {
 
   group('Subscription', () {
     test('getSubscription returns valid subscriptions', () {
-      final s1 = subscription('some_channel')!;
+      final s1 = subscription('some_channel');
       final s2 = subscription('some_channel');
-      final s3 = subscription('some_another_channel')!;
+      final s3 = subscription('some_another_channel');
 
       expect(s1, same(s2));
       expect(s1.channel, 'some_channel');
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('removeSubscription works correctly', () {
-      final s1 = subscription('some_channel')!;
+      final s1 = subscription('some_channel');
       expect(true, client.hasSubscription(s1.channel));
       client.removeSubscription(s1);
       expect(false, client.hasSubscription(s1.channel));
@@ -131,13 +131,13 @@ void main() {
     });
 
     test('socket closing triggers the corresponding events', () async {
-      subscription('test one')!.subscribe();
+      subscription('test one').subscribe();
 
       final unsubscribeOneFuture =
-          subscription('test one')!.unsubscribeStream.first;
+          subscription('test one').unsubscribeStream.first;
 
       final unsubscribeTwoFuture =
-          subscription('test two')!.unsubscribeStream.first;
+          subscription('test two').unsubscribeStream.first;
 
       final disconnectFuture = client.disconnectStream.first;
 
@@ -153,12 +153,12 @@ void main() {
     });
 
     test('socket error triggers the corresponding events', () async {
-      subscription('test one')!.subscribe();
+      subscription('test one').subscribe();
 
       final unsubscribeOneFuture =
-          subscription('test one')!.unsubscribeStream.first;
+          subscription('test one').unsubscribeStream.first;
       final unsubscribeTwoFuture =
-          subscription('test two')!.unsubscribeStream.first;
+          subscription('test two').unsubscribeStream.first;
 
       final disconnectFuture = client.disconnectStream.first;
 
@@ -173,7 +173,7 @@ void main() {
       expect(unsubscribeTwoFuture, doesNotComplete);
     });
 
-    test('client doesn\'t reconnect if reconnect = false', () async {
+    test('client does not reconnect if reconnect = false', () async {
       bool retryCalled = false;
 
       retry = (_) async {
@@ -250,19 +250,19 @@ void main() {
       var countClientConnect = 0;
       var countClientDisconnect = 0;
 
-      subscription('test one')!.subscribe();
+      subscription('test one').subscribe();
 
-      subscription('test one')!
+      subscription('test one')
           .unsubscribeStream
           .listen((_) => countOneChannelUnsubscribe += 1);
-      subscription('test two')!
+      subscription('test two')
           .unsubscribeStream
           .listen((_) => countTwoChannelUnsubscribe += 1);
 
-      subscription('test one')!
+      subscription('test one')
           .subscribeSuccessStream
           .listen((_) => countOneChannelSubscribe += 1);
-      subscription('test two')!
+      subscription('test two')
           .subscribeSuccessStream
           .listen((_) => countTwoChannelSubscribe += 1);
 
@@ -302,19 +302,19 @@ void main() {
       var countClientConnect = 0;
       var countClientDisconnect = 0;
 
-      subscription('test one')!.subscribe();
+      subscription('test one').subscribe();
 
-      subscription('test one')!
+      subscription('test one')
           .subscribeSuccessStream
           .listen((_) => countOneChannelSubscribe += 1);
-      subscription('test one')!
+      subscription('test one')
           .unsubscribeStream
           .listen((_) => countOneChannelUnsubscribe += 1);
 
-      subscription('test two')!
+      subscription('test two')
           .subscribeSuccessStream
           .listen((_) => countTwoChannelSubscribe += 1);
-      subscription('test two')!
+      subscription('test two')
           .unsubscribeStream
           .listen((_) => countTwoChannelUnsubscribe += 1);
 

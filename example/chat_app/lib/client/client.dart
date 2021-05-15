@@ -3,20 +3,21 @@ import 'dart:convert';
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:dash_chat/dash_chat.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../conf.dart' as conf;
 import '../state.dart' as state;
 
 class ChatClient {
-  Client _client;
+  late Client _client;
 
-  StreamSubscription<ConnectEvent> _connSub;
-  StreamSubscription<DisconnectEvent> _disconnSub;
-  StreamSubscription<MessageEvent> _msgSub;
+  StreamSubscription<ConnectEvent>? _connSub;
+  StreamSubscription<DisconnectEvent>? _disconnSub;
 
-  Subscription subscription;
+  late StreamSubscription<MessageEvent> _msgSub;
+
+  late Subscription? subscription;
   final _chatMsgController = StreamController<ChatMessage>();
 
   Stream<ChatMessage> get messages => _chatMsgController.stream;
@@ -56,7 +57,7 @@ class ChatClient {
 
   void subscribe(String channel) {
     print("Subscribing to channel $channel");
-    subscription = _client.getSubscription(channel);
+    final subscription = _client.getSubscription(channel);
     subscription.publishStream
         .map<String>((e) => utf8.decode(e.data))
         .listen((data) {
@@ -78,11 +79,13 @@ class ChatClient {
     subscription.subscribeErrorStream.listen(print);
     subscription.unsubscribeStream.listen(print);
     subscription.subscribe();
+
+    this.subscription = subscription;
   }
 
   void dispose() {
-    _connSub.cancel();
-    _disconnSub.cancel();
+    _connSub?.cancel();
+    _disconnSub?.cancel();
     _msgSub.cancel();
     _chatMsgController.close();
   }
@@ -92,7 +95,7 @@ class ChatClient {
     print("Sending msg : $output");
     final data = utf8.encode(output);
     try {
-      await subscription.publish(data);
+      await subscription?.publish(data);
     } catch (e) {
       rethrow;
     }

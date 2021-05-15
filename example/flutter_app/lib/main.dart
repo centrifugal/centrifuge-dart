@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -30,9 +30,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  centrifuge.Client _centrifuge;
-  centrifuge.Subscription _subscription;
-  ScrollController _controller;
+  late centrifuge.Client _centrifuge;
+  late centrifuge.Subscription _subscription;
+  late ScrollController _controller;
 
   final _items = <_ChatItem>[];
 
@@ -151,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class _ChatItem {
-  _ChatItem({this.title, this.subtitle});
+  _ChatItem({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;

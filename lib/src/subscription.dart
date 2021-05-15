@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import 'client.dart';
 import 'error.dart' as errors;
 import 'events.dart';
