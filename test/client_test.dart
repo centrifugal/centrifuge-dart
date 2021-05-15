@@ -25,7 +25,7 @@ void main() {
     client = ClientImpl(
       url,
       clientConfig,
-      ({url, config}) => transport
+      ({required url, required config}) => transport
         ..url = url
         ..transportConfig = config,
     );

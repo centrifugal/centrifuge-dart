@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
+import 'package:centrifuge/src/proto/client.pb.dart' as proto;
 import 'package:centrifuge/src/transport.dart';
 import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
@@ -28,9 +29,10 @@ class MockWebSocket implements WebSocket {
     for (CommandMatcher func in _stubs.keys) {
       if (func(command)) {
         final reply = Reply()..id = command.id;
-        if (_stubs[func]!._error != null) {
-          reply.error = _stubs[func]!._error as Error;
-        } else if (_stubs[func]!.result != null) {
+        if (_stubs[func]?._error != null) {
+          // ignore: avoid_as
+          reply.error = _stubs[func]!._error as proto.Error;
+        } else if (_stubs[func]?.result != null) {
           reply.result = _stubs[func]!._result.writeToBuffer();
         }
 
@@ -62,14 +64,14 @@ class MockWebSocket implements WebSocket {
     this.onData = onData;
     this.onError = onError;
     this.onDone = onDone;
-    return null;
+    return MockStreamSubscription<void>();
   }
 
   @override
   Future close([int? code, String? reason]) {
     closeReason = reason;
     onDone!();
-    return null;
+    return Future<void>.value();
   }
 
   @override
@@ -192,4 +194,21 @@ class MockClient extends Mock implements ClientImpl {
 
   @override
   bool? connected;
+
+  @override
+  Future<Rep>
+      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+          Req request, Rep result) {
+    return super.noSuchMethod(
+        Invocation.method(#sendMessage, [request, result]),
+        returnValue: Future.value(result));
+  }
+
+  @override
+  Future<String> getToken(String channel) {
+    return super.noSuchMethod(Invocation.method(#getToken, [channel]),
+        returnValue: Future.value(''));
+  }
 }
+
+class MockStreamSubscription<T> extends Mock implements StreamSubscription<T> {}
