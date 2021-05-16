@@ -74,7 +74,7 @@ class SubscriptionImpl implements Subscription {
   @override
   void subscribe() {
     _state = _SubscriptionState.subscribed;
-    if (!_client.connected!) {
+    if (!_client.connected) {
       return;
     }
     _resubscribe(isResubscribed: false);
@@ -94,7 +94,7 @@ class SubscriptionImpl implements Subscription {
     }
     _state = _SubscriptionState.unsubscribed;
 
-    if (!_client.connected!) {
+    if (!_client.connected) {
       return;
     }
 
