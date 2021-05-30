@@ -183,7 +183,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   int _retryCount = 0;
 
-  void _processDisconnect({required String reason, required bool reconnect}) async {
+  void _processDisconnect(
+      {required String reason, required bool reconnect}) async {
     if (_state == _ClientState.disconnected) {
       return;
     }
