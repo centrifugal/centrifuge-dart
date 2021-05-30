@@ -60,7 +60,7 @@ class Transport implements GeneratedMessageSender {
 
   Future open(void onPush(Push push),
       {Function? onError,
-      void onDone(String? reason, bool shouldReconnect)?}) async {
+      void onDone(String reason, bool shouldReconnect)?}) async {
     _socket = await _socketBuilder();
     if (_config.pingInterval != Duration.zero) {
       _socket!.pingInterval = _config.pingInterval;
@@ -140,9 +140,9 @@ class Transport implements GeneratedMessageSender {
     }
   }
 
-  Function _onDone(void Function(String?, bool)? onDone) {
+  Function _onDone(void Function(String, bool)? onDone) {
     return () {
-      String? reason;
+      String reason = "";
       bool reconnect = true;
       if (_socket!.closeReason != null) {
         try {

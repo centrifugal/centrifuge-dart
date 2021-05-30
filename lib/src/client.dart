@@ -183,7 +183,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   int _retryCount = 0;
 
-  void _processDisconnect({required String? reason, bool? reconnect}) async {
+  void _processDisconnect({required String reason, required bool reconnect}) async {
     if (_state == _ClientState.disconnected) {
       return;
     }
@@ -196,7 +196,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _disconnectController.add(disconnect);
     }
 
-    if (reconnect!) {
+    if (reconnect) {
       _state = _ClientState.connecting;
       _retryCount += 1;
       await _config.retry(_retryCount);
@@ -293,8 +293,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   Future<String?> getToken(String channel) async {
-    if (_isPrivateChannel(channel)) {
-      final event = PrivateSubEvent(_clientID, channel);
+    if (_clientID != null && _isPrivateChannel(channel)) {
+      final event = PrivateSubEvent(_clientID!, channel);
       return _onPrivateSub(event);
     }
     return null;

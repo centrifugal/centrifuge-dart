@@ -215,7 +215,7 @@ void main() {
       retry = (_) => fail('retry shouldn\'t be called');
 
       client.disconnect();
-      transport.onDone!(null, true);
+      transport.onDone!("", true);
 
       expect(transport.sendList, hasLength(expectedMessages));
     });

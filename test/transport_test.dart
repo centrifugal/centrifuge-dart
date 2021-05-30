@@ -126,7 +126,7 @@ void main() {
 
       webSocket.close(3001, '{"reason":');
 
-      expect(reason, isNull);
+      expect(reason, isEmpty);
       expect(reconnect, isTrue);
     });
 
@@ -142,7 +142,7 @@ void main() {
 
       webSocket.close(3001, '{}');
 
-      expect(reason, isNull);
+      expect(reason, isEmpty);
       expect(reconnect, isTrue);
     });
 
@@ -157,7 +157,7 @@ void main() {
 
       webSocket.close(3001, null);
 
-      expect(reason, isNull);
+      expect(reason, isEmpty);
       expect(reconnect, isTrue);
     });
   });
