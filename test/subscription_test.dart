@@ -9,9 +9,10 @@ import 'package:test/test.dart';
 import 'src/utils.dart';
 
 void main() {
-  MockClient client;
-  SubscriptionImpl subscription;
+  late MockClient client;
+  late SubscriptionImpl subscription;
   final channel = 'test channel';
+  final token = 'test channel token';
 
   setUp(() {
     client = MockClient();
@@ -22,11 +23,13 @@ void main() {
   test('subscribe sends request and triggers success event', () async {
     final subscribeSuccess = subscription.subscribeSuccessStream.first;
 
+    when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
+
     when(
       client.sendMessage(
         SubscribeRequest()
           ..channel = channel
-          ..token = '',
+          ..token = token,
         SubscribeResult(),
       ),
     ).thenAnswer((_) async => SubscribeResult()..recovered = true);
@@ -41,14 +44,15 @@ void main() {
 
   test('subscription resubscribes if was subscribed', () async {
     final subscribeSuccess = () => subscription.subscribeSuccessStream.first;
+    final request = SubscribeRequest()
+      ..channel = channel
+      ..token = token;
+    final result = SubscribeResult();
+
+    when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        SubscribeRequest()
-          ..channel = channel
-          ..token = '',
-        SubscribeResult(),
-      ),
+      client.sendMessage(request, result),
     ).thenAnswer((_) async => SubscribeResult()..recovered = true);
 
     subscription.subscribe();
@@ -59,7 +63,9 @@ void main() {
 
     await subscribeSuccess();
 
-    verify(client.sendMessage(any, any)).called(2);
+    verify(client.sendMessage<SubscribeRequest, SubscribeResult>(
+            request, result))
+        .called(2);
   });
 
   test('subscription doesn\'t resubscribe if wasn\'t subscribed', () async {
@@ -72,11 +78,13 @@ void main() {
     final subscribeSuccess = subscription.subscribeSuccessStream.first;
     final unsubscribe = subscription.unsubscribeStream.first;
 
+    when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
+
     when(
       client.sendMessage(
         SubscribeRequest()
           ..channel = channel
-          ..token = '',
+          ..token = token,
         SubscribeResult(),
       ),
     ).thenAnswer((_) async => SubscribeResult()..recovered = true);
@@ -123,11 +131,13 @@ void main() {
   test('success subscribe triggers publish events', () async {
     final publish = subscription.publishStream.take(2).toList();
 
+    when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
+
     when(
       client.sendMessage(
         SubscribeRequest()
           ..channel = channel
-          ..token = '',
+          ..token = token,
         SubscribeResult(),
       ),
     ).thenAnswer(
@@ -151,6 +161,7 @@ void main() {
 
   test('failed subscribe triggers error events', () async {
     final errorFuture = subscription.subscribeErrorStream.first;
+    when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     subscription.subscribe();
 
@@ -158,7 +169,7 @@ void main() {
       client.sendMessage(
         SubscribeRequest()
           ..channel = channel
-          ..token = '',
+          ..token = token,
         SubscribeResult(),
       ),
     ).thenAnswer((_) => Future.error('test error'));

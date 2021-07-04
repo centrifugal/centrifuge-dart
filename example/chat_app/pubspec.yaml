@@ -8,23 +8,22 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 0.1.0
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
-  pedantic: ^1.8.0
-  extra_pedantic: ^1.1.1+3
-  responsive_builder: ^0.1.5
-  dash_chat: ^1.0.18
-  corsac_jwt: ^0.2.1
-  fluttertoast: ^4.0.0
   centrifuge:
     path: ../../
+  dash_chat: ^1.1.15-nullsafety
+  extra_pedantic: ^1.1.1+3
+  flutter:
+    sdk: flutter
+  fluttertoast: ^8.0.6
+  pedantic: ^1.8.0
+  responsive_builder: ^0.1.5
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.3
+dependency_overrides:
+  dash_chat:
+    git: git@github.com:fayeed/dash_chat.git
 
 dev_dependencies:
   flutter_test:

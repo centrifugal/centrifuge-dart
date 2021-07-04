@@ -3,7 +3,7 @@ class Error {
   final String message;
 
   /// Custom error code.
-  Error.custom(this.code, [this.message]);
+  Error.custom(this.code, this.message);
 
   @override
   String toString() {

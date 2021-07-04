@@ -10,7 +10,7 @@ import 'proto/client.pb.dart';
 import 'subscription.dart';
 import 'transport.dart';
 
-Client createClient(String url, {ClientConfig config}) => ClientImpl(
+Client createClient(String url, {ClientConfig? config}) => ClientImpl(
       url,
       config ?? ClientConfig(),
       protobufTransportBuilder,
@@ -79,15 +79,15 @@ class ClientImpl implements Client, GeneratedMessageSender {
   final TransportBuilder _transportBuilder;
   final _subscriptions = <String, SubscriptionImpl>{};
 
-  Transport _transport;
-  String _token;
+  late Transport _transport;
+  String? _token;
 
   final String _url;
   ClientConfig _config;
 
-  ClientConfig get config => _config;
-  List<int> _connectData;
-  String _clientID;
+  ClientConfig? get config => _config;
+  List<int>? _connectData;
+  String? _clientID;
 
   final _connectController = StreamController<ConnectEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
@@ -152,7 +152,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   @override
   Subscription getSubscription(String channel) {
     if (hasSubscription(channel)) {
-      return _subscriptions[channel];
+      return _subscriptions[channel]!;
     }
 
     final subscription = SubscriptionImpl(channel, this);
@@ -164,11 +164,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Future<void> removeSubscription(Subscription subscription) async {
-    if (subscription != null) {
-      final String channel = subscription.channel;
-      subscription.unsubscribe();
-      _subscriptions.remove(channel);
-    }
+    final String channel = subscription.channel;
+    subscription.unsubscribe();
+    _subscriptions.remove(channel);
   }
 
   Future<UnsubscribeEvent> unsubscribe(String channel) async {
@@ -185,7 +183,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   int _retryCount = 0;
 
-  void _processDisconnect({@required String reason, bool reconnect}) async {
+  void _processDisconnect(
+      {required String reason, required bool reconnect}) async {
     if (_state == _ClientState.disconnected) {
       return;
     }
@@ -227,11 +226,11 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
       final request = ConnectRequest();
       if (_token != null) {
-        request.token = _token;
+        request.token = _token!;
       }
 
       if (_connectData != null) {
-        request.data = _connectData;
+        request.data = _connectData!;
       }
 
       final result = await _transport.sendMessage(
@@ -294,9 +293,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
   }
 
-  Future<String> getToken(String channel) async {
-    if (_isPrivateChannel(channel)) {
-      final event = PrivateSubEvent(_clientID, channel);
+  Future<String?> getToken(String channel) async {
+    if (_clientID != null && _isPrivateChannel(channel)) {
+      final event = PrivateSubEvent(_clientID!, channel);
       return _onPrivateSub(event);
     }
     return null;

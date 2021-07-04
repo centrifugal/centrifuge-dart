@@ -25,7 +25,7 @@ fi
 
 # Run the tests.
 echo "Running tests..."
-dart pub run test --reporter expanded
+dart run test --reporter expanded
 
 # Gather coverage and upload to Coveralls.
 if [[ "${COVERALLS_TOKEN}" ]]; then

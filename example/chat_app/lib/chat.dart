@@ -8,7 +8,7 @@ import 'state.dart' as state;
 
 class _ChatPageState extends State<ChatPage> {
   final _msgs = <ChatMessage>[];
-  StreamSubscription<ChatMessage> _sub;
+  late StreamSubscription<ChatMessage> _sub;
 
   @override
   void initState() {

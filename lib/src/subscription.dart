@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import 'client.dart';
 import 'error.dart' as errors;
 import 'events.dart';
@@ -137,7 +135,7 @@ class SubscriptionImpl implements Subscription {
   void addUnsubscribe(UnsubscribeEvent event) =>
       _unsubscribeController.add(event);
 
-  Future _resubscribe({@required bool isResubscribed}) async {
+  Future _resubscribe({required bool isResubscribed}) async {
     try {
       final token = await _client.getToken(channel);
       final request = SubscribeRequest()

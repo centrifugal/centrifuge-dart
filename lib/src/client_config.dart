@@ -14,7 +14,7 @@ class ClientConfig {
       this.privateChannelPrefix = "\$",
       this.pingInterval = const Duration(seconds: 25),
       this.onPrivateSub = _defaultPrivateSubCallback,
-      WaitRetry retry})
+      WaitRetry? retry})
       : retry = retry ?? _defaultRetry(maxReconnectDelay.inSeconds);
 
   final Duration timeout;
@@ -27,10 +27,10 @@ class ClientConfig {
   final String privateChannelPrefix;
   final Duration pingInterval;
   final PrivateSubCallback onPrivateSub;
-  final Future Function(int) retry;
+  final Future? Function(int) retry;
 }
 
-typedef WaitRetry = Future Function(int);
+typedef WaitRetry = Future? Function(int);
 
 typedef PrivateSubCallback = Future<String> Function(PrivateSubEvent);
 

@@ -11,10 +11,10 @@ import 'src/utils.dart';
 void main() {
   final url = 'test url';
 
-  Client client;
-  MockTransport transport;
-  ClientConfig clientConfig;
-  WaitRetry retry;
+  late Client client;
+  late MockTransport transport;
+  late ClientConfig clientConfig;
+  WaitRetry? retry;
 
   final subscription = (String name) => client.getSubscription(name);
 
@@ -25,7 +25,7 @@ void main() {
     client = ClientImpl(
       url,
       clientConfig,
-      ({url, config}) => transport
+      ({required url, required config}) => transport
         ..url = url
         ..transportConfig = config,
     );
@@ -59,7 +59,7 @@ void main() {
       transport.completeOpen();
 
       expect(transport.url, equals(url));
-      expect(transport.transportConfig.headers, same(clientConfig.headers));
+      expect(transport.transportConfig!.headers, same(clientConfig.headers));
     });
     test('connect sends request with data and token', () async {
       client.setToken('test token');
@@ -141,7 +141,7 @@ void main() {
 
       final disconnectFuture = client.disconnectStream.first;
 
-      transport.onDone('test reason', true);
+      transport.onDone!('test reason', true);
 
       final disconnect = await disconnectFuture;
 
@@ -162,7 +162,7 @@ void main() {
 
       final disconnectFuture = client.disconnectStream.first;
 
-      transport.onError('test error');
+      transport.onError!('test error');
 
       final disconnect = await disconnectFuture;
 
@@ -173,7 +173,7 @@ void main() {
       expect(unsubscribeTwoFuture, doesNotComplete);
     });
 
-    test('client doesn\'t reconnect if reconnect = false', () async {
+    test('client does not reconnect if reconnect = false', () async {
       bool retryCalled = false;
 
       retry = (_) async {
@@ -181,14 +181,14 @@ void main() {
       };
 
       for (var i = 1; i < 20; i++) {
-        transport.onDone('test reason', false);
+        transport.onDone!('test reason', false);
         expect(retryCalled, isFalse);
       }
     });
 
     test('client reconnects on error', () async {
-      Completer<void> retryCompleter;
-      int count;
+      late Completer<void> retryCompleter;
+      int? count;
 
       retry = (c) {
         count = c;
@@ -199,7 +199,7 @@ void main() {
         final connectFuture = client.connectStream.first;
 
         retryCompleter = Completer<void>.sync();
-        transport.onError('test error');
+        transport.onError!('test error');
 
         expect(count, 1);
         retryCompleter.complete();
@@ -215,21 +215,21 @@ void main() {
       retry = (_) => fail('retry shouldn\'t be called');
 
       client.disconnect();
-      transport.onDone(null, true);
+      transport.onDone!("", true);
 
       expect(transport.sendList, hasLength(expectedMessages));
     });
 
     test('client reconnect increases retry count', () async {
       Completer<void> retryCompleter = Completer<void>.sync();
-      int count;
+      int? count;
 
       retry = (c) {
         count = c;
         return retryCompleter.future;
       };
 
-      transport.onError('test error');
+      transport.onError!('test error');
 
       for (var i = 1; i < 20; i++) {
         expect(count, i);
@@ -272,7 +272,7 @@ void main() {
       Completer<void> retryCompleter = Completer<void>.sync();
       retry = (c) => retryCompleter.future;
 
-      transport.onError('test error');
+      transport.onError!('test error');
 
       for (var i = 1; i < 20; i++) {
         retryCompleter.complete();
@@ -321,7 +321,7 @@ void main() {
       client.connectStream.listen((_) => countClientConnect += 1);
       client.disconnectStream.listen((_) => countClientDisconnect += 1);
 
-      Completer<void> retryCompleter;
+      late Completer<void> retryCompleter;
 
       retry = (c) => retryCompleter.future;
 
@@ -331,7 +331,7 @@ void main() {
         retryCompleter = Completer<void>.sync();
 
         final disconnect = client.disconnectStream.first;
-        transport.onError('test error');
+        transport.onError!('test error');
         await disconnect;
 
         retryCompleter.complete();
