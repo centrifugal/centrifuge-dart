@@ -66,6 +66,20 @@ class PublishEvent {
   }
 }
 
+class ServerPublishEvent {
+  ServerPublishEvent(this.channel, this.data);
+
+  final String channel;
+  final List<int> data;
+
+  static ServerPublishEvent from(String channel, proto.Publication pub) => ServerPublishEvent(channel, pub.data);
+
+  @override
+  String toString() {
+    return 'ServerPublishEvent{channel: $channel, data: $data}';
+  }
+}
+
 class HistoryEvent {
   HistoryEvent(this.data);
 
@@ -94,6 +108,22 @@ class JoinEvent {
   }
 }
 
+class ServerJoinEvent {
+  ServerJoinEvent(this.channel, this.user, this.client);
+
+  final String channel;
+  final String user;
+  final String client;
+
+  static ServerJoinEvent from(String channel, proto.ClientInfo clientInfo) =>
+      ServerJoinEvent(channel, clientInfo.user, clientInfo.client);
+
+  @override
+  String toString() {
+    return 'ServerJoinEvent{channel: $channel, user: $user, client: $client}';
+  }
+}
+
 class LeaveEvent {
   LeaveEvent(this.user, this.client);
 
@@ -106,6 +136,22 @@ class LeaveEvent {
   @override
   String toString() {
     return 'LeaveEvent{user: $user, client: $client}';
+  }
+}
+
+class ServerLeaveEvent {
+  ServerLeaveEvent(this.channel, this.user, this.client);
+
+  final String channel;
+  final String user;
+  final String client;
+
+  static ServerLeaveEvent from(String channel, proto.ClientInfo clientInfo) =>
+      ServerLeaveEvent(channel, clientInfo.user, clientInfo.client);
+
+  @override
+  String toString() {
+    return 'ServerLeaveEvent{channel: $channel, user: $user, client: $client}';
   }
 }
 
@@ -125,6 +171,23 @@ class SubscribeSuccessEvent {
   }
 }
 
+class ServerSubscribeEvent {
+  ServerSubscribeEvent(this.channel, this.isResubscribed, this.isRecovered);
+
+  final String channel;
+  final bool isResubscribed;
+  final bool isRecovered;
+
+  static ServerSubscribeEvent from(
+          String channel, proto.SubscribeResult result, bool resubscribed) =>
+      ServerSubscribeEvent(channel, resubscribed, result.recovered);
+
+  @override
+  String toString() {
+    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered}';
+  }
+}
+
 class SubscribeErrorEvent {
   SubscribeErrorEvent(this.message, this.code);
 
@@ -141,5 +204,16 @@ class UnsubscribeEvent {
   @override
   String toString() {
     return 'UnsubscribeEvent{}';
+  }
+}
+
+class ServerUnsubscribeEvent {
+  ServerUnsubscribeEvent(this.channel);
+
+  final String channel;
+
+  @override
+  String toString() {
+    return 'ServerUnsubscribeEvent{channel: $channel}';
   }
 }
