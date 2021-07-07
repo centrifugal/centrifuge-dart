@@ -72,7 +72,8 @@ class ServerPublishEvent {
   final String channel;
   final List<int> data;
 
-  static ServerPublishEvent from(String channel, proto.Publication pub) => ServerPublishEvent(channel, pub.data);
+  static ServerPublishEvent from(String channel, proto.Publication pub) =>
+      ServerPublishEvent(channel, pub.data);
 
   @override
   String toString() {
@@ -178,9 +179,13 @@ class ServerSubscribeEvent {
   final bool isResubscribed;
   final bool isRecovered;
 
-  static ServerSubscribeEvent from(
+  static ServerSubscribeEvent fromSubscribeResult(
           String channel, proto.SubscribeResult result, bool resubscribed) =>
       ServerSubscribeEvent(channel, resubscribed, result.recovered);
+
+  static ServerSubscribeEvent fromSubscribePush(
+          String channel, proto.Subscribe result, bool resubscribed) =>
+      ServerSubscribeEvent(channel, resubscribed, false);
 
   @override
   String toString() {
@@ -211,6 +216,9 @@ class ServerUnsubscribeEvent {
   ServerUnsubscribeEvent(this.channel);
 
   final String channel;
+
+  static ServerUnsubscribeEvent from(String channel) =>
+      ServerUnsubscribeEvent(channel);
 
   @override
   String toString() {

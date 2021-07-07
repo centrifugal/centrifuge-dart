@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:centrifuge/src/server_subscription.dart';
 import 'package:centrifuge/src/transport.dart';
+import 'package:centrifuge/src/server_subscription.dart';
 import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
@@ -104,9 +104,12 @@ class ClientImpl implements Client, GeneratedMessageSender {
   final _connectController = StreamController<ConnectEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
-  final _serverSubscribeController = StreamController<ServerSubscribeEvent>.broadcast();
-  final _serverUnsubscribeController = StreamController<ServerUnsubscribeEvent>.broadcast();
-  final _serverPublishController = StreamController<ServerPublishEvent>.broadcast();
+  final _serverSubscribeController =
+      StreamController<ServerSubscribeEvent>.broadcast();
+  final _serverUnsubscribeController =
+      StreamController<ServerUnsubscribeEvent>.broadcast();
+  final _serverPublishController =
+      StreamController<ServerPublishEvent>.broadcast();
   final _serverJoinController = StreamController<ServerJoinEvent>.broadcast();
   final _serverLeaveController = StreamController<ServerLeaveEvent>.broadcast();
 
@@ -122,19 +125,23 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  Stream<ServerSubscribeEvent> get serverSubscribeStream => _serverSubscribeController.stream;
+  Stream<ServerSubscribeEvent> get serverSubscribeStream =>
+      _serverSubscribeController.stream;
 
   @override
-  Stream<ServerUnsubscribeEvent> get serverUnsubscribeStream => _serverUnsubscribeController.stream;
+  Stream<ServerUnsubscribeEvent> get serverUnsubscribeStream =>
+      _serverUnsubscribeController.stream;
 
   @override
-  Stream<ServerPublishEvent> get serverPublishStream => _serverPublishController.stream;
+  Stream<ServerPublishEvent> get serverPublishStream =>
+      _serverPublishController.stream;
 
   @override
   Stream<ServerJoinEvent> get serverJoinStream => _serverJoinController.stream;
 
   @override
-  Stream<ServerLeaveEvent> get serverLeaveStream => _serverLeaveController.stream;
+  Stream<ServerLeaveEvent> get serverLeaveStream =>
+      _serverLeaveController.stream;
 
   @override
   void connect() async {
@@ -265,6 +272,19 @@ class ClientImpl implements Client, GeneratedMessageSender {
         request.data = _connectData!;
       }
 
+      request.name = _config.name;
+      request.version = _config.version;
+
+      if (_serverSubs.isNotEmpty) {
+        _serverSubs.forEach((key, value) {
+          final subRequest = SubscribeRequest();
+          subRequest.offset = value.offset;
+          subRequest.epoch = value.epoch;
+          subRequest.recover = value.recoverable;
+          request.subs.putIfAbsent(key, () => subRequest);
+        });
+      }
+
       final result = await _transport.sendMessage(
         request,
         ConnectResult(),
@@ -274,6 +294,24 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _retryCount = 0;
       _state = _ClientState.connected;
       _connectController.add(ConnectEvent.from(result));
+
+      result.subs.forEach((key, value) {
+        final isResubscribed = _serverSubs[key] != null;
+        _serverSubs[key] = ServerSubscription(
+            key, value.recoverable, value.offset, value.epoch);
+        final event = ServerSubscribeEvent.fromSubscribeResult(
+            key, value, isResubscribed);
+        _serverSubscribeController.add(event);
+        value.publications.forEach((element) {
+          final event = ServerPublishEvent.from(key, element);
+          _serverPublishController.add(event);
+        });
+      });
+      _serverSubs.forEach((key, value) {
+        if (!result.subs.containsKey(key)) {
+          _serverSubs.remove(key);
+        }
+      });
 
       for (SubscriptionImpl subscription in _subscriptions.values) {
         subscription.resubscribeIfNeeded();
@@ -287,39 +325,71 @@ class ClientImpl implements Client, GeneratedMessageSender {
     switch (push.type) {
       case Push_PushType.PUBLICATION:
         final pub = Publication.fromBuffer(push.data);
-        final event = PublishEvent.from(pub);
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
+          final event = PublishEvent.from(pub);
           subscription.addPublish(event);
+          break;
+        }
+        final serverSubscription = _serverSubs[push.channel];
+        if (serverSubscription != null) {
+          final event = ServerPublishEvent.from(push.channel, pub);
+          _serverPublishController.add(event);
         }
         break;
       case Push_PushType.LEAVE:
         final leave = Leave.fromBuffer(push.data);
-        final event = LeaveEvent.from(leave.info);
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
+          final event = LeaveEvent.from(leave.info);
           subscription.addLeave(event);
+          break;
+        }
+        final serverSubscription = _serverSubs[push.channel];
+        if (serverSubscription != null) {
+          final event = ServerLeaveEvent.from(push.channel, leave.info);
+          _serverLeaveController.add(event);
         }
         break;
       case Push_PushType.JOIN:
         final join = Join.fromBuffer(push.data);
-        final event = JoinEvent.from(join.info);
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
+          final event = JoinEvent.from(join.info);
           subscription.addJoin(event);
+          break;
+        }
+        final serverSubscription = _serverSubs[push.channel];
+        if (serverSubscription != null) {
+          final event = ServerJoinEvent.from(push.channel, join.info);
+          _serverJoinController.add(event);
         }
         break;
       case Push_PushType.MESSAGE:
         final message = Message.fromBuffer(push.data);
         final event = MessageEvent(message.data);
-
         _messageController.add(event);
         break;
+      case Push_PushType.SUBSCRIBE:
+        final subscribe = Subscribe.fromBuffer(push.data);
+        final event = ServerSubscribeEvent.fromSubscribePush(
+            push.channel, subscribe, false);
+        _serverSubs[push.channel] = ServerSubscription.from(push.channel,
+            subscribe.recoverable, subscribe.offset, subscribe.epoch);
+        _serverSubscribeController.add(event);
+        break;
       case Push_PushType.UNSUBSCRIBE:
-        final event = UnsubscribeEvent();
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
+          final event = UnsubscribeEvent();
           subscription.addUnsubscribe(event);
+          break;
+        }
+        final serverSubscription = _serverSubs[push.channel];
+        if (serverSubscription != null) {
+          final event = ServerUnsubscribeEvent.from(push.channel);
+          _serverSubs.remove(push.channel);
+          _serverUnsubscribeController.add(event);
         }
         break;
     }
