@@ -1,3 +1,12 @@
+## [0.6.0]
+
+Null safety migration
+
+* library dependencies updated to null safe versions
+* library code updated to support null safety in places where required
+
+See issue [#47](https://github.com/centrifugal/centrifuge-dart/issues/47) and pull request [#48](https://github.com/centrifugal/centrifuge-dart/pull/48) for details.
+
 ## [0.5.1]
 * Skip handling for events from server-side subscriptions resulted in null pointer dereference 
 
