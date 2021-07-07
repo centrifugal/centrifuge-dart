@@ -90,8 +90,8 @@ await subscription.publish(data);
 - [ ] handle subscription expired error
 - [x] ping/pong to find broken connection
 - [ ] message recovery mechanism for client-side subscriptions
-- [ ] server-side subscriptions
-- [ ] message recovery mechanism for server-side subscriptions
+- [x] server-side subscriptions
+- [x] message recovery mechanism for server-side subscriptions
 - [ ] history stream pagination
 
 ## Instructions to update protobuf
