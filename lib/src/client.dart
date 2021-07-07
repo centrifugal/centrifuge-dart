@@ -24,15 +24,15 @@ abstract class Client {
 
   Stream<MessageEvent> get messageStream;
 
-  Stream<ServerSubscribeEvent> get serverSubscribeStream;
+  Stream<ServerSubscribeEvent> get subscribeStream;
 
-  Stream<ServerUnsubscribeEvent> get serverUnsubscribeStream;
+  Stream<ServerUnsubscribeEvent> get unsubscribeStream;
 
-  Stream<ServerPublishEvent> get serverPublishStream;
+  Stream<ServerPublishEvent> get publishStream;
 
-  Stream<ServerJoinEvent> get serverJoinStream;
+  Stream<ServerJoinEvent> get joinStream;
 
-  Stream<ServerLeaveEvent> get serverLeaveStream;
+  Stream<ServerLeaveEvent> get leaveStream;
 
   /// Connect to the server.
   ///
@@ -104,14 +104,14 @@ class ClientImpl implements Client, GeneratedMessageSender {
   final _connectController = StreamController<ConnectEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
-  final _serverSubscribeController =
+  final _subscribeController =
       StreamController<ServerSubscribeEvent>.broadcast();
-  final _serverUnsubscribeController =
+  final _unsubscribeController =
       StreamController<ServerUnsubscribeEvent>.broadcast();
-  final _serverPublishController =
+  final _publishController =
       StreamController<ServerPublishEvent>.broadcast();
-  final _serverJoinController = StreamController<ServerJoinEvent>.broadcast();
-  final _serverLeaveController = StreamController<ServerLeaveEvent>.broadcast();
+  final _joinController = StreamController<ServerJoinEvent>.broadcast();
+  final _leaveController = StreamController<ServerLeaveEvent>.broadcast();
 
   _ClientState _state = _ClientState.disconnected;
 
@@ -125,23 +125,23 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<MessageEvent> get messageStream => _messageController.stream;
 
   @override
-  Stream<ServerSubscribeEvent> get serverSubscribeStream =>
-      _serverSubscribeController.stream;
+  Stream<ServerSubscribeEvent> get subscribeStream =>
+      _subscribeController.stream;
 
   @override
-  Stream<ServerUnsubscribeEvent> get serverUnsubscribeStream =>
-      _serverUnsubscribeController.stream;
+  Stream<ServerUnsubscribeEvent> get unsubscribeStream =>
+      _unsubscribeController.stream;
 
   @override
-  Stream<ServerPublishEvent> get serverPublishStream =>
-      _serverPublishController.stream;
+  Stream<ServerPublishEvent> get publishStream =>
+      _publishController.stream;
 
   @override
-  Stream<ServerJoinEvent> get serverJoinStream => _serverJoinController.stream;
+  Stream<ServerJoinEvent> get joinStream => _joinController.stream;
 
   @override
-  Stream<ServerLeaveEvent> get serverLeaveStream =>
-      _serverLeaveController.stream;
+  Stream<ServerLeaveEvent> get leaveStream =>
+      _leaveController.stream;
 
   @override
   void connect() async {
@@ -233,7 +233,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
       _serverSubs.forEach((key, value) {
         final event = ServerUnsubscribeEvent.from(key);
-        _serverUnsubscribeController.add(event);
+        _unsubscribeController.add(event);
       });
       final disconnect = DisconnectEvent(reason, reconnect);
       _disconnectController.add(disconnect);
@@ -304,10 +304,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
             key, value.recoverable, value.offset, value.epoch);
         final event = ServerSubscribeEvent.fromSubscribeResult(
             key, value, isResubscribed);
-        _serverSubscribeController.add(event);
+        _subscribeController.add(event);
         value.publications.forEach((element) {
           final event = ServerPublishEvent.from(key, element);
-          _serverPublishController.add(event);
+          _publishController.add(event);
         });
       });
       _serverSubs.forEach((key, value) {
@@ -337,7 +337,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
         final serverSubscription = _serverSubs[push.channel];
         if (serverSubscription != null) {
           final event = ServerPublishEvent.from(push.channel, pub);
-          _serverPublishController.add(event);
+          _publishController.add(event);
+          _serverSubs[push.channel]!.offset = pub.offset;
         }
         break;
       case Push_PushType.LEAVE:
@@ -351,7 +352,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
         final serverSubscription = _serverSubs[push.channel];
         if (serverSubscription != null) {
           final event = ServerLeaveEvent.from(push.channel, leave.info);
-          _serverLeaveController.add(event);
+          _leaveController.add(event);
         }
         break;
       case Push_PushType.JOIN:
@@ -365,7 +366,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
         final serverSubscription = _serverSubs[push.channel];
         if (serverSubscription != null) {
           final event = ServerJoinEvent.from(push.channel, join.info);
-          _serverJoinController.add(event);
+          _joinController.add(event);
         }
         break;
       case Push_PushType.MESSAGE:
@@ -379,7 +380,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
             push.channel, subscribe, false);
         _serverSubs[push.channel] = ServerSubscription.from(push.channel,
             subscribe.recoverable, subscribe.offset, subscribe.epoch);
-        _serverSubscribeController.add(event);
+        _subscribeController.add(event);
         break;
       case Push_PushType.UNSUBSCRIBE:
         final subscription = _subscriptions[push.channel];
@@ -392,7 +393,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
         if (serverSubscription != null) {
           final event = ServerUnsubscribeEvent.from(push.channel);
           _serverSubs.remove(push.channel);
-          _serverUnsubscribeController.add(event);
+          _unsubscribeController.add(event);
         }
         break;
     }

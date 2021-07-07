@@ -4,9 +4,9 @@ class ServerSubscription {
   ServerSubscription(this.channel, this.recoverable, this.offset, this.epoch);
 
   final String channel;
-  final bool recoverable;
-  final $fixnum.Int64 offset;
-  final String epoch;
+  bool recoverable;
+  $fixnum.Int64 offset;
+  String epoch;
 
   static ServerSubscription from(String channel, bool recoverable,
           $fixnum.Int64 offset, String epoch) =>

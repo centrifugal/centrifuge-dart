@@ -18,11 +18,11 @@ void main() async {
 
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
-    client.serverSubscribeStream.listen(onEvent);
-    client.serverUnsubscribeStream.listen(onEvent);
-    client.serverPublishStream.listen(onEvent);
-    client.serverJoinStream.listen(onEvent);
-    client.serverLeaveStream.listen(onEvent);
+    client.subscribeStream.listen(onEvent);
+    client.unsubscribeStream.listen(onEvent);
+    client.publishStream.listen(onEvent);
+    client.joinStream.listen(onEvent);
+    client.leaveStream.listen(onEvent);
 
     // Uncomment to use example token based on secret key `secret`.
     client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
