@@ -108,8 +108,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
       StreamController<ServerSubscribeEvent>.broadcast();
   final _unsubscribeController =
       StreamController<ServerUnsubscribeEvent>.broadcast();
-  final _publishController =
-      StreamController<ServerPublishEvent>.broadcast();
+  final _publishController = StreamController<ServerPublishEvent>.broadcast();
   final _joinController = StreamController<ServerJoinEvent>.broadcast();
   final _leaveController = StreamController<ServerLeaveEvent>.broadcast();
 
@@ -133,15 +132,13 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _unsubscribeController.stream;
 
   @override
-  Stream<ServerPublishEvent> get publishStream =>
-      _publishController.stream;
+  Stream<ServerPublishEvent> get publishStream => _publishController.stream;
 
   @override
   Stream<ServerJoinEvent> get joinStream => _joinController.stream;
 
   @override
-  Stream<ServerLeaveEvent> get leaveStream =>
-      _leaveController.stream;
+  Stream<ServerLeaveEvent> get leaveStream => _leaveController.stream;
 
   @override
   void connect() async {
