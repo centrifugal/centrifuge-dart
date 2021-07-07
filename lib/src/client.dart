@@ -231,7 +231,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
     if (_state == _ClientState.connected) {
       _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
-
+      _serverSubs.forEach((key, value) {
+        final event = ServerUnsubscribeEvent.from(key);
+        _serverUnsubscribeController.add(event);
+      });
       final disconnect = DisconnectEvent(reason, reconnect);
       _disconnectController.add(disconnect);
     }
