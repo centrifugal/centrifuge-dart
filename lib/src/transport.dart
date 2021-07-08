@@ -32,6 +32,7 @@ Transport protobufTransportBuilder(
   final transport = Transport(
     () => WebSocket.connect(
       url,
+      protocols: ["centrifuge-protobuf"],
       headers: config.headers,
     ),
     config,
