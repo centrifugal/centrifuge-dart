@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:centrifuge/src/proto/client.pb.dart';
+import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:centrifuge/src/subscription.dart';
+import 'package:centrifuge/src/events.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 
 import 'src/utils.dart';
 
@@ -27,12 +29,12 @@ void main() {
 
     when(
       client.sendMessage(
-        SubscribeRequest()
+        protocol.SubscribeRequest()
           ..channel = channel
           ..token = token,
-        SubscribeResult(),
+        protocol.SubscribeResult(),
       ),
-    ).thenAnswer((_) async => SubscribeResult()..recovered = true);
+    ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
     subscription.subscribe();
 
@@ -44,16 +46,16 @@ void main() {
 
   test('subscription resubscribes if was subscribed', () async {
     final subscribeSuccess = () => subscription.subscribeSuccessStream.first;
-    final request = SubscribeRequest()
+    final request = protocol.SubscribeRequest()
       ..channel = channel
       ..token = token;
-    final result = SubscribeResult();
+    final result = protocol.SubscribeResult();
 
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
       client.sendMessage(request, result),
-    ).thenAnswer((_) async => SubscribeResult()..recovered = true);
+    ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
     subscription.subscribe();
 
@@ -63,8 +65,9 @@ void main() {
 
     await subscribeSuccess();
 
-    verify(client.sendMessage<SubscribeRequest, SubscribeResult>(
-            request, result))
+    verify(client
+            .sendMessage<protocol.SubscribeRequest, protocol.SubscribeResult>(
+                request, result))
         .called(2);
   });
 
@@ -82,19 +85,19 @@ void main() {
 
     when(
       client.sendMessage(
-        SubscribeRequest()
+        protocol.SubscribeRequest()
           ..channel = channel
           ..token = token,
-        SubscribeResult(),
+        protocol.SubscribeResult(),
       ),
-    ).thenAnswer((_) async => SubscribeResult()..recovered = true);
+    ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
     when(
       client.sendMessage(
-        UnsubscribeRequest()..channel = channel,
-        UnsubscribeResult(),
+        protocol.UnsubscribeRequest()..channel = channel,
+        protocol.UnsubscribeResult(),
       ),
-    ).thenAnswer((_) async => UnsubscribeResult());
+    ).thenAnswer((_) async => protocol.UnsubscribeResult());
 
     subscription.subscribe();
 
@@ -135,18 +138,18 @@ void main() {
 
     when(
       client.sendMessage(
-        SubscribeRequest()
+        protocol.SubscribeRequest()
           ..channel = channel
           ..token = token,
-        SubscribeResult(),
+        protocol.SubscribeResult(),
       ),
     ).thenAnswer(
-      (_) async => SubscribeResult()
+      (_) async => protocol.SubscribeResult()
         ..recovered = true
         ..publications.addAll(
           [
-            Publication()..data = utf8.encode('test message 1'),
-            Publication()..data = utf8.encode('test message 2'),
+            protocol.Publication()..data = utf8.encode('test message 1'),
+            protocol.Publication()..data = utf8.encode('test message 2'),
           ],
         ),
     );
@@ -167,10 +170,10 @@ void main() {
 
     when(
       client.sendMessage(
-        SubscribeRequest()
+        protocol.SubscribeRequest()
           ..channel = channel
           ..token = token,
-        SubscribeResult(),
+        protocol.SubscribeResult(),
       ),
     ).thenAnswer((_) => Future.error('test error'));
 
@@ -180,24 +183,23 @@ void main() {
 
   test('history sends correct data', () async {
     when(
-      client.sendMessage(
-        HistoryRequest()..channel = channel,
-        HistoryResult(),
+      client.history(
+        channel,
       ),
-    ).thenAnswer((_) async => HistoryResult()
+    ).thenAnswer((_) async => HistoryResult([], $fixnum.Int64(0), "")
       ..publications.addAll(
         [
-          Publication()..data = utf8.encode('test history 1'),
-          Publication()..data = utf8.encode('test history 2')
+          Publication(utf8.encode('test history 1'), $fixnum.Int64(0), null),
+          Publication(utf8.encode('test history 2'), $fixnum.Int64(0), null),
         ],
       ));
 
     final historyFuture = subscription.history();
 
-    final events = await historyFuture;
+    final result = await historyFuture;
 
-    expect(events, hasLength(equals(2)));
-    expect(utf8.decode(events[0].data), equals('test history 1'));
-    expect(utf8.decode(events[1].data), equals('test history 2'));
+    expect(result.publications, hasLength(equals(2)));
+    expect(utf8.decode(result.publications[0].data), equals('test history 1'));
+    expect(utf8.decode(result.publications[1].data), equals('test history 2'));
   });
 }

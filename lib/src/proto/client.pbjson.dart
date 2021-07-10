@@ -31,7 +31,7 @@ const Command$json = const {
       '3': 2,
       '4': 1,
       '5': 14,
-      '6': '.protocol.Command.MethodType',
+      '6': '.centrifugal.centrifuge.protocol.Command.MethodType',
       '10': 'method'
     },
     const {'1': 'params', '3': 3, '4': 1, '5': 12, '10': 'params'},
@@ -60,7 +60,7 @@ const Command_MethodType$json = const {
 
 /// Descriptor for `Command`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List commandDescriptor = $convert.base64Decode(
-    'CgdDb21tYW5kEg4KAmlkGAEgASgNUgJpZBI0CgZtZXRob2QYAiABKA4yHC5wcm90b2NvbC5Db21tYW5kLk1ldGhvZFR5cGVSBm1ldGhvZBIWCgZwYXJhbXMYAyABKAxSBnBhcmFtcyKwAQoKTWV0aG9kVHlwZRILCgdDT05ORUNUEAASDQoJU1VCU0NSSUJFEAESDwoLVU5TVUJTQ1JJQkUQAhILCgdQVUJMSVNIEAMSDAoIUFJFU0VOQ0UQBBISCg5QUkVTRU5DRV9TVEFUUxAFEgsKB0hJU1RPUlkQBhIICgRQSU5HEAcSCAoEU0VORBAIEgcKA1JQQxAJEgsKB1JFRlJFU0gQChIPCgtTVUJfUkVGUkVTSBAL');
+    'CgdDb21tYW5kEg4KAmlkGAEgASgNUgJpZBJLCgZtZXRob2QYAiABKA4yMy5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNvbW1hbmQuTWV0aG9kVHlwZVIGbWV0aG9kEhYKBnBhcmFtcxgDIAEoDFIGcGFyYW1zIrABCgpNZXRob2RUeXBlEgsKB0NPTk5FQ1QQABINCglTVUJTQ1JJQkUQARIPCgtVTlNVQlNDUklCRRACEgsKB1BVQkxJU0gQAxIMCghQUkVTRU5DRRAEEhIKDlBSRVNFTkNFX1NUQVRTEAUSCwoHSElTVE9SWRAGEggKBFBJTkcQBxIICgRTRU5EEAgSBwoDUlBDEAkSCwoHUkVGUkVTSBAKEg8KC1NVQl9SRUZSRVNIEAs=');
 @$core.Deprecated('Use replyDescriptor instead')
 const Reply$json = const {
   '1': 'Reply',
@@ -71,7 +71,7 @@ const Reply$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.protocol.Error',
+      '6': '.centrifugal.centrifuge.protocol.Error',
       '10': 'error'
     },
     const {'1': 'result', '3': 3, '4': 1, '5': 12, '10': 'result'},
@@ -80,7 +80,7 @@ const Reply$json = const {
 
 /// Descriptor for `Reply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List replyDescriptor = $convert.base64Decode(
-    'CgVSZXBseRIOCgJpZBgBIAEoDVICaWQSJQoFZXJyb3IYAiABKAsyDy5wcm90b2NvbC5FcnJvclIFZXJyb3ISFgoGcmVzdWx0GAMgASgMUgZyZXN1bHQ=');
+    'CgVSZXBseRIOCgJpZBgBIAEoDVICaWQSPAoFZXJyb3IYAiABKAsyJi5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkVycm9yUgVlcnJvchIWCgZyZXN1bHQYAyABKAxSBnJlc3VsdA==');
 @$core.Deprecated('Use pushDescriptor instead')
 const Push$json = const {
   '1': 'Push',
@@ -90,7 +90,7 @@ const Push$json = const {
       '3': 1,
       '4': 1,
       '5': 14,
-      '6': '.protocol.Push.PushType',
+      '6': '.centrifugal.centrifuge.protocol.Push.PushType',
       '10': 'type'
     },
     const {'1': 'channel', '3': 2, '4': 1, '5': 9, '10': 'channel'},
@@ -116,7 +116,7 @@ const Push_PushType$json = const {
 
 /// Descriptor for `Push`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List pushDescriptor = $convert.base64Decode(
-    'CgRQdXNoEisKBHR5cGUYASABKA4yFy5wcm90b2NvbC5QdXNoLlB1c2hUeXBlUgR0eXBlEhgKB2NoYW5uZWwYAiABKAlSB2NoYW5uZWwSEgoEZGF0YRgDIAEoDFIEZGF0YSJ6CghQdXNoVHlwZRIPCgtQVUJMSUNBVElPThAAEggKBEpPSU4QARIJCgVMRUFWRRACEg8KC1VOU1VCU0NSSUJFEAMSCwoHTUVTU0FHRRAEEg0KCVNVQlNDUklCRRAFEgsKB0NPTk5FQ1QQBhIOCgpESVNDT05ORUNUEAc=');
+    'CgRQdXNoEkIKBHR5cGUYASABKA4yLi5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLlB1c2guUHVzaFR5cGVSBHR5cGUSGAoHY2hhbm5lbBgCIAEoCVIHY2hhbm5lbBISCgRkYXRhGAMgASgMUgRkYXRhInoKCFB1c2hUeXBlEg8KC1BVQkxJQ0FUSU9OEAASCAoESk9JThABEgkKBUxFQVZFEAISDwoLVU5TVUJTQ1JJQkUQAxILCgdNRVNTQUdFEAQSDQoJU1VCU0NSSUJFEAUSCwoHQ09OTkVDVBAGEg4KCkRJU0NPTk5FQ1QQBw==');
 @$core.Deprecated('Use clientInfoDescriptor instead')
 const ClientInfo$json = const {
   '1': 'ClientInfo',
@@ -135,16 +135,13 @@ final $typed_data.Uint8List clientInfoDescriptor = $convert.base64Decode(
 const Publication$json = const {
   '1': 'Publication',
   '2': const [
-    const {'1': 'seq', '3': 1, '4': 1, '5': 13, '10': 'seq'},
-    const {'1': 'gen', '3': 2, '4': 1, '5': 13, '10': 'gen'},
-    const {'1': 'uid', '3': 3, '4': 1, '5': 9, '10': 'uid'},
     const {'1': 'data', '3': 4, '4': 1, '5': 12, '10': 'data'},
     const {
       '1': 'info',
       '3': 5,
       '4': 1,
       '5': 11,
-      '6': '.protocol.ClientInfo',
+      '6': '.centrifugal.centrifuge.protocol.ClientInfo',
       '10': 'info'
     },
     const {'1': 'offset', '3': 6, '4': 1, '5': 4, '10': 'offset'},
@@ -153,7 +150,7 @@ const Publication$json = const {
 
 /// Descriptor for `Publication`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List publicationDescriptor = $convert.base64Decode(
-    'CgtQdWJsaWNhdGlvbhIQCgNzZXEYASABKA1SA3NlcRIQCgNnZW4YAiABKA1SA2dlbhIQCgN1aWQYAyABKAlSA3VpZBISCgRkYXRhGAQgASgMUgRkYXRhEigKBGluZm8YBSABKAsyFC5wcm90b2NvbC5DbGllbnRJbmZvUgRpbmZvEhYKBm9mZnNldBgGIAEoBFIGb2Zmc2V0');
+    'CgtQdWJsaWNhdGlvbhISCgRkYXRhGAQgASgMUgRkYXRhEj8KBGluZm8YBSABKAsyKy5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNsaWVudEluZm9SBGluZm8SFgoGb2Zmc2V0GAYgASgEUgZvZmZzZXQ=');
 @$core.Deprecated('Use joinDescriptor instead')
 const Join$json = const {
   '1': 'Join',
@@ -163,7 +160,7 @@ const Join$json = const {
       '3': 1,
       '4': 1,
       '5': 11,
-      '6': '.protocol.ClientInfo',
+      '6': '.centrifugal.centrifuge.protocol.ClientInfo',
       '10': 'info'
     },
   ],
@@ -171,7 +168,7 @@ const Join$json = const {
 
 /// Descriptor for `Join`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List joinDescriptor = $convert.base64Decode(
-    'CgRKb2luEigKBGluZm8YASABKAsyFC5wcm90b2NvbC5DbGllbnRJbmZvUgRpbmZv');
+    'CgRKb2luEj8KBGluZm8YASABKAsyKy5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNsaWVudEluZm9SBGluZm8=');
 @$core.Deprecated('Use leaveDescriptor instead')
 const Leave$json = const {
   '1': 'Leave',
@@ -181,7 +178,7 @@ const Leave$json = const {
       '3': 1,
       '4': 1,
       '5': 11,
-      '6': '.protocol.ClientInfo',
+      '6': '.centrifugal.centrifuge.protocol.ClientInfo',
       '10': 'info'
     },
   ],
@@ -189,7 +186,7 @@ const Leave$json = const {
 
 /// Descriptor for `Leave`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List leaveDescriptor = $convert.base64Decode(
-    'CgVMZWF2ZRIoCgRpbmZvGAEgASgLMhQucHJvdG9jb2wuQ2xpZW50SW5mb1IEaW5mbw==');
+    'CgVMZWF2ZRI/CgRpbmZvGAEgASgLMisuY2VudHJpZnVnYWwuY2VudHJpZnVnZS5wcm90b2NvbC5DbGllbnRJbmZvUgRpbmZv');
 @$core.Deprecated('Use unsubscribeDescriptor instead')
 const Unsubscribe$json = const {
   '1': 'Unsubscribe',
@@ -206,8 +203,6 @@ const Subscribe$json = const {
   '1': 'Subscribe',
   '2': const [
     const {'1': 'recoverable', '3': 1, '4': 1, '5': 8, '10': 'recoverable'},
-    const {'1': 'seq', '3': 2, '4': 1, '5': 13, '10': 'seq'},
-    const {'1': 'gen', '3': 3, '4': 1, '5': 13, '10': 'gen'},
     const {'1': 'epoch', '3': 4, '4': 1, '5': 9, '10': 'epoch'},
     const {'1': 'offset', '3': 5, '4': 1, '5': 4, '10': 'offset'},
     const {'1': 'positioned', '3': 6, '4': 1, '5': 8, '10': 'positioned'},
@@ -217,7 +212,7 @@ const Subscribe$json = const {
 
 /// Descriptor for `Subscribe`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List subscribeDescriptor = $convert.base64Decode(
-    'CglTdWJzY3JpYmUSIAoLcmVjb3ZlcmFibGUYASABKAhSC3JlY292ZXJhYmxlEhAKA3NlcRgCIAEoDVIDc2VxEhAKA2dlbhgDIAEoDVIDZ2VuEhQKBWVwb2NoGAQgASgJUgVlcG9jaBIWCgZvZmZzZXQYBSABKARSBm9mZnNldBIeCgpwb3NpdGlvbmVkGAYgASgIUgpwb3NpdGlvbmVkEhIKBGRhdGEYByABKAxSBGRhdGE=');
+    'CglTdWJzY3JpYmUSIAoLcmVjb3ZlcmFibGUYASABKAhSC3JlY292ZXJhYmxlEhQKBWVwb2NoGAQgASgJUgVlcG9jaBIWCgZvZmZzZXQYBSABKARSBm9mZnNldBIeCgpwb3NpdGlvbmVkGAYgASgIUgpwb3NpdGlvbmVkEhIKBGRhdGEYByABKAxSBGRhdGE=');
 @$core.Deprecated('Use messageDescriptor instead')
 const Message$json = const {
   '1': 'Message',
@@ -241,7 +236,7 @@ const Connect$json = const {
       '3': 4,
       '4': 3,
       '5': 11,
-      '6': '.protocol.Connect.SubsEntry',
+      '6': '.centrifugal.centrifuge.protocol.Connect.SubsEntry',
       '10': 'subs'
     },
   ],
@@ -258,7 +253,7 @@ const Connect_SubsEntry$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.protocol.SubscribeResult',
+      '6': '.centrifugal.centrifuge.protocol.SubscribeResult',
       '10': 'value'
     },
   ],
@@ -267,7 +262,7 @@ const Connect_SubsEntry$json = const {
 
 /// Descriptor for `Connect`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List connectDescriptor = $convert.base64Decode(
-    'CgdDb25uZWN0EhYKBmNsaWVudBgBIAEoCVIGY2xpZW50EhgKB3ZlcnNpb24YAiABKAlSB3ZlcnNpb24SEgoEZGF0YRgDIAEoDFIEZGF0YRIvCgRzdWJzGAQgAygLMhsucHJvdG9jb2wuQ29ubmVjdC5TdWJzRW50cnlSBHN1YnMaUgoJU3Vic0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5Ei8KBXZhbHVlGAIgASgLMhkucHJvdG9jb2wuU3Vic2NyaWJlUmVzdWx0UgV2YWx1ZToCOAE=');
+    'CgdDb25uZWN0EhYKBmNsaWVudBgBIAEoCVIGY2xpZW50EhgKB3ZlcnNpb24YAiABKAlSB3ZlcnNpb24SEgoEZGF0YRgDIAEoDFIEZGF0YRJGCgRzdWJzGAQgAygLMjIuY2VudHJpZnVnYWwuY2VudHJpZnVnZS5wcm90b2NvbC5Db25uZWN0LlN1YnNFbnRyeVIEc3VicxppCglTdWJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSRgoFdmFsdWUYAiABKAsyMC5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLlN1YnNjcmliZVJlc3VsdFIFdmFsdWU6AjgB');
 @$core.Deprecated('Use disconnectDescriptor instead')
 const Disconnect$json = const {
   '1': 'Disconnect',
@@ -292,7 +287,7 @@ const ConnectRequest$json = const {
       '3': 3,
       '4': 3,
       '5': 11,
-      '6': '.protocol.ConnectRequest.SubsEntry',
+      '6': '.centrifugal.centrifuge.protocol.ConnectRequest.SubsEntry',
       '10': 'subs'
     },
     const {'1': 'name', '3': 4, '4': 1, '5': 9, '10': 'name'},
@@ -311,7 +306,7 @@ const ConnectRequest_SubsEntry$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.protocol.SubscribeRequest',
+      '6': '.centrifugal.centrifuge.protocol.SubscribeRequest',
       '10': 'value'
     },
   ],
@@ -320,7 +315,7 @@ const ConnectRequest_SubsEntry$json = const {
 
 /// Descriptor for `ConnectRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List connectRequestDescriptor = $convert.base64Decode(
-    'Cg5Db25uZWN0UmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SEgoEZGF0YRgCIAEoDFIEZGF0YRI2CgRzdWJzGAMgAygLMiIucHJvdG9jb2wuQ29ubmVjdFJlcXVlc3QuU3Vic0VudHJ5UgRzdWJzEhIKBG5hbWUYBCABKAlSBG5hbWUSGAoHdmVyc2lvbhgFIAEoCVIHdmVyc2lvbhpTCglTdWJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSMAoFdmFsdWUYAiABKAsyGi5wcm90b2NvbC5TdWJzY3JpYmVSZXF1ZXN0UgV2YWx1ZToCOAE=');
+    'Cg5Db25uZWN0UmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SEgoEZGF0YRgCIAEoDFIEZGF0YRJNCgRzdWJzGAMgAygLMjkuY2VudHJpZnVnYWwuY2VudHJpZnVnZS5wcm90b2NvbC5Db25uZWN0UmVxdWVzdC5TdWJzRW50cnlSBHN1YnMSEgoEbmFtZRgEIAEoCVIEbmFtZRIYCgd2ZXJzaW9uGAUgASgJUgd2ZXJzaW9uGmoKCVN1YnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRJHCgV2YWx1ZRgCIAEoCzIxLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuU3Vic2NyaWJlUmVxdWVzdFIFdmFsdWU6AjgB');
 @$core.Deprecated('Use connectResultDescriptor instead')
 const ConnectResult$json = const {
   '1': 'ConnectResult',
@@ -335,7 +330,7 @@ const ConnectResult$json = const {
       '3': 6,
       '4': 3,
       '5': 11,
-      '6': '.protocol.ConnectResult.SubsEntry',
+      '6': '.centrifugal.centrifuge.protocol.ConnectResult.SubsEntry',
       '10': 'subs'
     },
   ],
@@ -352,7 +347,7 @@ const ConnectResult_SubsEntry$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.protocol.SubscribeResult',
+      '6': '.centrifugal.centrifuge.protocol.SubscribeResult',
       '10': 'value'
     },
   ],
@@ -361,7 +356,7 @@ const ConnectResult_SubsEntry$json = const {
 
 /// Descriptor for `ConnectResult`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List connectResultDescriptor = $convert.base64Decode(
-    'Cg1Db25uZWN0UmVzdWx0EhYKBmNsaWVudBgBIAEoCVIGY2xpZW50EhgKB3ZlcnNpb24YAiABKAlSB3ZlcnNpb24SGAoHZXhwaXJlcxgDIAEoCFIHZXhwaXJlcxIQCgN0dGwYBCABKA1SA3R0bBISCgRkYXRhGAUgASgMUgRkYXRhEjUKBHN1YnMYBiADKAsyIS5wcm90b2NvbC5Db25uZWN0UmVzdWx0LlN1YnNFbnRyeVIEc3VicxpSCglTdWJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSLwoFdmFsdWUYAiABKAsyGS5wcm90b2NvbC5TdWJzY3JpYmVSZXN1bHRSBXZhbHVlOgI4AQ==');
+    'Cg1Db25uZWN0UmVzdWx0EhYKBmNsaWVudBgBIAEoCVIGY2xpZW50EhgKB3ZlcnNpb24YAiABKAlSB3ZlcnNpb24SGAoHZXhwaXJlcxgDIAEoCFIHZXhwaXJlcxIQCgN0dGwYBCABKA1SA3R0bBISCgRkYXRhGAUgASgMUgRkYXRhEkwKBHN1YnMYBiADKAsyOC5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNvbm5lY3RSZXN1bHQuU3Vic0VudHJ5UgRzdWJzGmkKCVN1YnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRJGCgV2YWx1ZRgCIAEoCzIwLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuU3Vic2NyaWJlUmVzdWx0UgV2YWx1ZToCOAE=');
 @$core.Deprecated('Use refreshRequestDescriptor instead')
 const RefreshRequest$json = const {
   '1': 'RefreshRequest',
@@ -394,8 +389,6 @@ const SubscribeRequest$json = const {
     const {'1': 'channel', '3': 1, '4': 1, '5': 9, '10': 'channel'},
     const {'1': 'token', '3': 2, '4': 1, '5': 9, '10': 'token'},
     const {'1': 'recover', '3': 3, '4': 1, '5': 8, '10': 'recover'},
-    const {'1': 'seq', '3': 4, '4': 1, '5': 13, '10': 'seq'},
-    const {'1': 'gen', '3': 5, '4': 1, '5': 13, '10': 'gen'},
     const {'1': 'epoch', '3': 6, '4': 1, '5': 9, '10': 'epoch'},
     const {'1': 'offset', '3': 7, '4': 1, '5': 4, '10': 'offset'},
   ],
@@ -403,7 +396,7 @@ const SubscribeRequest$json = const {
 
 /// Descriptor for `SubscribeRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List subscribeRequestDescriptor = $convert.base64Decode(
-    'ChBTdWJzY3JpYmVSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFAoFdG9rZW4YAiABKAlSBXRva2VuEhgKB3JlY292ZXIYAyABKAhSB3JlY292ZXISEAoDc2VxGAQgASgNUgNzZXESEAoDZ2VuGAUgASgNUgNnZW4SFAoFZXBvY2gYBiABKAlSBWVwb2NoEhYKBm9mZnNldBgHIAEoBFIGb2Zmc2V0');
+    'ChBTdWJzY3JpYmVSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFAoFdG9rZW4YAiABKAlSBXRva2VuEhgKB3JlY292ZXIYAyABKAhSB3JlY292ZXISFAoFZXBvY2gYBiABKAlSBWVwb2NoEhYKBm9mZnNldBgHIAEoBFIGb2Zmc2V0');
 @$core.Deprecated('Use subscribeResultDescriptor instead')
 const SubscribeResult$json = const {
   '1': 'SubscribeResult',
@@ -411,15 +404,13 @@ const SubscribeResult$json = const {
     const {'1': 'expires', '3': 1, '4': 1, '5': 8, '10': 'expires'},
     const {'1': 'ttl', '3': 2, '4': 1, '5': 13, '10': 'ttl'},
     const {'1': 'recoverable', '3': 3, '4': 1, '5': 8, '10': 'recoverable'},
-    const {'1': 'seq', '3': 4, '4': 1, '5': 13, '10': 'seq'},
-    const {'1': 'gen', '3': 5, '4': 1, '5': 13, '10': 'gen'},
     const {'1': 'epoch', '3': 6, '4': 1, '5': 9, '10': 'epoch'},
     const {
       '1': 'publications',
       '3': 7,
       '4': 3,
       '5': 11,
-      '6': '.protocol.Publication',
+      '6': '.centrifugal.centrifuge.protocol.Publication',
       '10': 'publications'
     },
     const {'1': 'recovered', '3': 8, '4': 1, '5': 8, '10': 'recovered'},
@@ -431,7 +422,7 @@ const SubscribeResult$json = const {
 
 /// Descriptor for `SubscribeResult`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List subscribeResultDescriptor = $convert.base64Decode(
-    'Cg9TdWJzY3JpYmVSZXN1bHQSGAoHZXhwaXJlcxgBIAEoCFIHZXhwaXJlcxIQCgN0dGwYAiABKA1SA3R0bBIgCgtyZWNvdmVyYWJsZRgDIAEoCFILcmVjb3ZlcmFibGUSEAoDc2VxGAQgASgNUgNzZXESEAoDZ2VuGAUgASgNUgNnZW4SFAoFZXBvY2gYBiABKAlSBWVwb2NoEjkKDHB1YmxpY2F0aW9ucxgHIAMoCzIVLnByb3RvY29sLlB1YmxpY2F0aW9uUgxwdWJsaWNhdGlvbnMSHAoJcmVjb3ZlcmVkGAggASgIUglyZWNvdmVyZWQSFgoGb2Zmc2V0GAkgASgEUgZvZmZzZXQSHgoKcG9zaXRpb25lZBgKIAEoCFIKcG9zaXRpb25lZBISCgRkYXRhGAsgASgMUgRkYXRh');
+    'Cg9TdWJzY3JpYmVSZXN1bHQSGAoHZXhwaXJlcxgBIAEoCFIHZXhwaXJlcxIQCgN0dGwYAiABKA1SA3R0bBIgCgtyZWNvdmVyYWJsZRgDIAEoCFILcmVjb3ZlcmFibGUSFAoFZXBvY2gYBiABKAlSBWVwb2NoElAKDHB1YmxpY2F0aW9ucxgHIAMoCzIsLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHVibGljYXRpb25SDHB1YmxpY2F0aW9ucxIcCglyZWNvdmVyZWQYCCABKAhSCXJlY292ZXJlZBIWCgZvZmZzZXQYCSABKARSBm9mZnNldBIeCgpwb3NpdGlvbmVkGAogASgIUgpwb3NpdGlvbmVkEhIKBGRhdGEYCyABKAxSBGRhdGE=');
 @$core.Deprecated('Use subRefreshRequestDescriptor instead')
 const SubRefreshRequest$json = const {
   '1': 'SubRefreshRequest',
@@ -516,7 +507,7 @@ const PresenceResult$json = const {
       '3': 1,
       '4': 3,
       '5': 11,
-      '6': '.protocol.PresenceResult.PresenceEntry',
+      '6': '.centrifugal.centrifuge.protocol.PresenceResult.PresenceEntry',
       '10': 'presence'
     },
   ],
@@ -533,7 +524,7 @@ const PresenceResult_PresenceEntry$json = const {
       '3': 2,
       '4': 1,
       '5': 11,
-      '6': '.protocol.ClientInfo',
+      '6': '.centrifugal.centrifuge.protocol.ClientInfo',
       '10': 'value'
     },
   ],
@@ -542,7 +533,7 @@ const PresenceResult_PresenceEntry$json = const {
 
 /// Descriptor for `PresenceResult`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List presenceResultDescriptor = $convert.base64Decode(
-    'Cg5QcmVzZW5jZVJlc3VsdBJCCghwcmVzZW5jZRgBIAMoCzImLnByb3RvY29sLlByZXNlbmNlUmVzdWx0LlByZXNlbmNlRW50cnlSCHByZXNlbmNlGlEKDVByZXNlbmNlRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSKgoFdmFsdWUYAiABKAsyFC5wcm90b2NvbC5DbGllbnRJbmZvUgV2YWx1ZToCOAE=');
+    'Cg5QcmVzZW5jZVJlc3VsdBJZCghwcmVzZW5jZRgBIAMoCzI9LmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHJlc2VuY2VSZXN1bHQuUHJlc2VuY2VFbnRyeVIIcHJlc2VuY2UaaAoNUHJlc2VuY2VFbnRyeRIQCgNrZXkYASABKAlSA2tleRJBCgV2YWx1ZRgCIAEoCzIrLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuQ2xpZW50SW5mb1IFdmFsdWU6AjgB');
 @$core.Deprecated('Use presenceStatsRequestDescriptor instead')
 const PresenceStatsRequest$json = const {
   '1': 'PresenceStatsRequest',
@@ -567,22 +558,38 @@ const PresenceStatsResult$json = const {
 /// Descriptor for `PresenceStatsResult`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List presenceStatsResultDescriptor = $convert.base64Decode(
     'ChNQcmVzZW5jZVN0YXRzUmVzdWx0Eh8KC251bV9jbGllbnRzGAEgASgNUgpudW1DbGllbnRzEhsKCW51bV91c2VycxgCIAEoDVIIbnVtVXNlcnM=');
+@$core.Deprecated('Use streamPositionDescriptor instead')
+const StreamPosition$json = const {
+  '1': 'StreamPosition',
+  '2': const [
+    const {'1': 'offset', '3': 1, '4': 1, '5': 4, '10': 'offset'},
+    const {'1': 'epoch', '3': 2, '4': 1, '5': 9, '10': 'epoch'},
+  ],
+};
+
+/// Descriptor for `StreamPosition`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List streamPositionDescriptor = $convert.base64Decode(
+    'Cg5TdHJlYW1Qb3NpdGlvbhIWCgZvZmZzZXQYASABKARSBm9mZnNldBIUCgVlcG9jaBgCIAEoCVIFZXBvY2g=');
 @$core.Deprecated('Use historyRequestDescriptor instead')
 const HistoryRequest$json = const {
   '1': 'HistoryRequest',
   '2': const [
     const {'1': 'channel', '3': 1, '4': 1, '5': 9, '10': 'channel'},
-    const {'1': 'use_since', '3': 2, '4': 1, '5': 8, '10': 'useSince'},
-    const {'1': 'offset', '3': 3, '4': 1, '5': 4, '10': 'offset'},
-    const {'1': 'epoch', '3': 4, '4': 1, '5': 9, '10': 'epoch'},
-    const {'1': 'use_limit', '3': 5, '4': 1, '5': 8, '10': 'useLimit'},
-    const {'1': 'limit', '3': 6, '4': 1, '5': 5, '10': 'limit'},
+    const {'1': 'limit', '3': 7, '4': 1, '5': 5, '10': 'limit'},
+    const {
+      '1': 'since',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.centrifugal.centrifuge.protocol.StreamPosition',
+      '10': 'since'
+    },
   ],
 };
 
 /// Descriptor for `HistoryRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List historyRequestDescriptor = $convert.base64Decode(
-    'Cg5IaXN0b3J5UmVxdWVzdBIYCgdjaGFubmVsGAEgASgJUgdjaGFubmVsEhsKCXVzZV9zaW5jZRgCIAEoCFIIdXNlU2luY2USFgoGb2Zmc2V0GAMgASgEUgZvZmZzZXQSFAoFZXBvY2gYBCABKAlSBWVwb2NoEhsKCXVzZV9saW1pdBgFIAEoCFIIdXNlTGltaXQSFAoFbGltaXQYBiABKAVSBWxpbWl0');
+    'Cg5IaXN0b3J5UmVxdWVzdBIYCgdjaGFubmVsGAEgASgJUgdjaGFubmVsEhQKBWxpbWl0GAcgASgFUgVsaW1pdBJFCgVzaW5jZRgIIAEoCzIvLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuU3RyZWFtUG9zaXRpb25SBXNpbmNl');
 @$core.Deprecated('Use historyResultDescriptor instead')
 const HistoryResult$json = const {
   '1': 'HistoryResult',
@@ -592,7 +599,7 @@ const HistoryResult$json = const {
       '3': 1,
       '4': 3,
       '5': 11,
-      '6': '.protocol.Publication',
+      '6': '.centrifugal.centrifuge.protocol.Publication',
       '10': 'publications'
     },
     const {'1': 'epoch', '3': 2, '4': 1, '5': 9, '10': 'epoch'},
@@ -602,7 +609,7 @@ const HistoryResult$json = const {
 
 /// Descriptor for `HistoryResult`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List historyResultDescriptor = $convert.base64Decode(
-    'Cg1IaXN0b3J5UmVzdWx0EjkKDHB1YmxpY2F0aW9ucxgBIAMoCzIVLnByb3RvY29sLlB1YmxpY2F0aW9uUgxwdWJsaWNhdGlvbnMSFAoFZXBvY2gYAiABKAlSBWVwb2NoEhYKBm9mZnNldBgDIAEoBFIGb2Zmc2V0');
+    'Cg1IaXN0b3J5UmVzdWx0ElAKDHB1YmxpY2F0aW9ucxgBIAMoCzIsLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHVibGljYXRpb25SDHB1YmxpY2F0aW9ucxIUCgVlcG9jaBgCIAEoCVIFZXBvY2gSFgoGb2Zmc2V0GAMgASgEUgZvZmZzZXQ=');
 @$core.Deprecated('Use pingRequestDescriptor instead')
 const PingRequest$json = const {
   '1': 'PingRequest',

@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-package protocol;
+package centrifugal.centrifuge.protocol;
+
+option go_package = "./;protocol";
 
 message Error {
     uint32 code = 1;
@@ -57,9 +59,7 @@ message ClientInfo {
 }
 
 message Publication {
-    uint32 seq = 1;
-    uint32 gen = 2;
-    string uid = 3;
+    // 1-3 skipped here for backwards compatibility.
     bytes data = 4;
     ClientInfo info = 5;
     uint64 offset = 6;
@@ -79,8 +79,7 @@ message Unsubscribe {
 
 message Subscribe {
     bool recoverable = 1;
-    uint32 seq = 2;
-    uint32 gen = 3;
+    // 2-3 skipped here for backwards compatibility.
     string epoch = 4;
     uint64 offset = 5;
     bool positioned = 6;
@@ -136,8 +135,7 @@ message SubscribeRequest {
     string channel = 1;
     string token = 2;
     bool recover = 3;
-    uint32 seq = 4;
-    uint32 gen = 5;
+    // 4-5 skipped here for backwards compatibility.
     string epoch = 6;
     uint64 offset = 7;
 }
@@ -146,8 +144,7 @@ message SubscribeResult {
     bool expires = 1;
     uint32 ttl = 2;
     bool recoverable = 3;
-    uint32 seq = 4;
-    uint32 gen = 5;
+    // 4-5 skipped here for backwards compatibility.
     string epoch = 6;   
     repeated Publication publications = 7;
     bool recovered = 8;
@@ -196,13 +193,16 @@ message PresenceStatsResult {
     uint32 num_users = 2;
 }
 
+message StreamPosition {
+    uint64 offset = 1;
+    string epoch = 2;
+}
+
 message HistoryRequest {
     string channel = 1;
-    bool use_since = 2;
-    uint64 offset = 3;
-    string epoch = 4;
-    bool use_limit = 5;
-    int32 limit = 6;
+    // 2-6 skipped here for backwards compatibility.
+    int32 limit = 7;
+    StreamPosition since = 8;
 }
 
 message HistoryResult {
@@ -211,11 +211,9 @@ message HistoryResult {
     uint64 offset = 3;
 }
 
-message PingRequest {
-}
+message PingRequest {}
 
-message PingResult {
-}
+message PingResult {}
 
 message RPCRequest{
     bytes data = 1;
