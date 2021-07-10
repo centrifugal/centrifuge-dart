@@ -7,7 +7,7 @@ import 'package:protobuf/protobuf.dart';
 
 import 'client_config.dart';
 import 'events.dart';
-import 'proto/client.pb.dart';
+import 'proto/client.pb.dart' as protocol;
 import 'subscription.dart';
 import 'transport.dart';
 
@@ -56,11 +56,15 @@ abstract class Client {
 
   /// Publish data to the channel
   ///
-  Future publish(String channel, List<int> data);
+  Future<PublishResult> publish(String channel, List<int> data);
 
   /// Send RPC command
   ///
-  Future<RPCResult> rpc(List<int> data);
+  Future<RPCResult> rpc(String method, List<int> data);
+
+  /// Send History command
+  ///
+  Future<HistoryResult> history(String channel, {int limit = 0, StreamPosition? since});
 
   @alwaysThrows
   Future<void> send(List<int> data);
@@ -154,19 +158,37 @@ class ClientImpl implements Client, GeneratedMessageSender {
   void setConnectData(List<int> connectData) => _connectData = connectData;
 
   @override
-  Future publish(String channel, List<int> data) async {
-    final request = PublishRequest()
+  Future<PublishResult> publish(String channel, List<int> data) async {
+    final request = protocol.PublishRequest()
       ..channel = channel
       ..data = data;
 
-    await _transport.sendMessage(request, PublishResult());
+    final result = await _transport.sendMessage(request, protocol.PublishResult());
+    return PublishResult.from(result);
   }
 
   @override
-  Future<RPCResult> rpc(List<int> data) => _transport.sendMessage(
-        RPCRequest()..data = data,
-        RPCResult(),
-      );
+  Future<RPCResult> rpc(String method, List<int> data) async {
+    final request = protocol.RPCRequest();
+    request.method = method;
+    request.data = data;
+    final result = await _transport.sendMessage(request, protocol.RPCResult());
+    return RPCResult.from(result);
+  }
+
+  @override
+  Future<HistoryResult> history(String channel, {int limit = 0, StreamPosition? since}) async {
+    final request = protocol.HistoryRequest()..channel = channel;
+    request.limit = limit;
+    if (since != null) {
+      final sp = protocol.StreamPosition();
+      sp.offset = since.offset;
+      sp.epoch = since.epoch;
+      request.since = sp;
+    }
+    final result = await _transport.sendMessage(request, protocol.HistoryResult());
+    return HistoryResult.from(result);
+  }
 
   @override
   @alwaysThrows
@@ -206,8 +228,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   Future<UnsubscribeEvent> unsubscribe(String channel) async {
-    final request = UnsubscribeRequest()..channel = channel;
-    await _transport.sendMessage(request, UnsubscribeResult());
+    final request = protocol.UnsubscribeRequest()..channel = channel;
+    await _transport.sendMessage(request, protocol.UnsubscribeResult());
     return UnsubscribeEvent();
   }
 
@@ -263,7 +285,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
             _processDisconnect(reason: reason, reconnect: reconnect),
       );
 
-      final request = ConnectRequest();
+      final request = protocol.ConnectRequest();
       if (_token != null) {
         request.token = _token!;
       }
@@ -277,7 +299,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
       if (_serverSubs.isNotEmpty) {
         _serverSubs.forEach((key, value) {
-          final subRequest = SubscribeRequest();
+          final subRequest = protocol.SubscribeRequest();
           subRequest.offset = value.offset;
           subRequest.epoch = value.epoch;
           subRequest.recover = value.recoverable;
@@ -287,7 +309,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
       final result = await _transport.sendMessage(
         request,
-        ConnectResult(),
+        protocol.ConnectResult(),
       );
 
       _clientID = result.client;
@@ -321,10 +343,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
   }
 
-  void _onPush(Push push) {
+  void _onPush(protocol.Push push) {
     switch (push.type) {
-      case Push_PushType.PUBLICATION:
-        final pub = Publication.fromBuffer(push.data);
+      case protocol.Push_PushType.PUBLICATION:
+        final pub = protocol.Publication.fromBuffer(push.data);
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
           final event = PublishEvent.from(pub);
@@ -338,8 +360,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
           _serverSubs[push.channel]!.offset = pub.offset;
         }
         break;
-      case Push_PushType.LEAVE:
-        final leave = Leave.fromBuffer(push.data);
+      case protocol.Push_PushType.LEAVE:
+        final leave = protocol.Leave.fromBuffer(push.data);
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
           final event = LeaveEvent.from(leave.info);
@@ -352,8 +374,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
           _leaveController.add(event);
         }
         break;
-      case Push_PushType.JOIN:
-        final join = Join.fromBuffer(push.data);
+      case protocol.Push_PushType.JOIN:
+        final join = protocol.Join.fromBuffer(push.data);
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
           final event = JoinEvent.from(join.info);
@@ -366,20 +388,20 @@ class ClientImpl implements Client, GeneratedMessageSender {
           _joinController.add(event);
         }
         break;
-      case Push_PushType.MESSAGE:
-        final message = Message.fromBuffer(push.data);
+      case protocol.Push_PushType.MESSAGE:
+        final message = protocol.Message.fromBuffer(push.data);
         final event = MessageEvent(message.data);
         _messageController.add(event);
         break;
-      case Push_PushType.SUBSCRIBE:
-        final subscribe = Subscribe.fromBuffer(push.data);
+      case protocol.Push_PushType.SUBSCRIBE:
+        final subscribe = protocol.Subscribe.fromBuffer(push.data);
         final event = ServerSubscribeEvent.fromSubscribePush(
             push.channel, subscribe, false);
         _serverSubs[push.channel] = ServerSubscription.from(push.channel,
             subscribe.recoverable, subscribe.offset, subscribe.epoch);
         _subscribeController.add(event);
         break;
-      case Push_PushType.UNSUBSCRIBE:
+      case protocol.Push_PushType.UNSUBSCRIBE:
         final subscription = _subscriptions[push.channel];
         if (subscription != null) {
           final event = UnsubscribeEvent();

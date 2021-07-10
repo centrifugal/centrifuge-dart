@@ -3,7 +3,7 @@ import 'dart:async';
 import 'client.dart';
 import 'error.dart' as errors;
 import 'events.dart';
-import 'proto/client.pb.dart';
+import 'proto/client.pb.dart' as protocol;
 
 abstract class Subscription {
   String get channel;
@@ -24,9 +24,9 @@ abstract class Subscription {
 
   void unsubscribe();
 
-  Future publish(List<int> data);
-
-  Future<List<HistoryEvent>> history();
+  Future<PublishResult> publish(List<int> data);
+  
+  Future<HistoryResult> history({int limit = 0, StreamPosition? since});
 }
 
 class SubscriptionImpl implements Subscription {
@@ -69,7 +69,7 @@ class SubscriptionImpl implements Subscription {
       _unsubscribeController.stream;
 
   @override
-  Future publish(List<int> data) => _client.publish(channel, data);
+  Future<PublishResult> publish(List<int> data) => _client.publish(channel, data);
 
   @override
   void subscribe() {
@@ -98,8 +98,8 @@ class SubscriptionImpl implements Subscription {
       return;
     }
 
-    final request = UnsubscribeRequest()..channel = channel;
-    await _client.sendMessage(request, UnsubscribeResult());
+    final request = protocol.UnsubscribeRequest()..channel = channel;
+    await _client.sendMessage(request, protocol.UnsubscribeResult());
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
@@ -113,12 +113,8 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  Future<List<HistoryEvent>> history() async {
-    final request = HistoryRequest()..channel = channel;
-    final result = await _client.sendMessage(request, HistoryResult());
-    final events = result.publications.map(HistoryEvent.from).toList();
-    return events;
-  }
+  Future<HistoryResult> history({int limit = 0, StreamPosition? since}) => 
+    _client.history(channel, limit: limit, since: since);
 
   void addPublish(PublishEvent event) => _publishController.add(event);
 
@@ -138,11 +134,11 @@ class SubscriptionImpl implements Subscription {
   Future _resubscribe({required bool isResubscribed}) async {
     try {
       final token = await _client.getToken(channel);
-      final request = SubscribeRequest()
+      final request = protocol.SubscribeRequest()
         ..channel = channel
         ..token = token ?? '';
 
-      final result = await _client.sendMessage(request, SubscribeResult());
+      final result = await _client.sendMessage(request, protocol.SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
       _recover(result);
@@ -156,8 +152,8 @@ class SubscriptionImpl implements Subscription {
     }
   }
 
-  void _recover(SubscribeResult result) {
-    for (Publication publication in result.publications) {
+  void _recover(protocol.SubscribeResult result) {
+    for (protocol.Publication publication in result.publications) {
       final event = PublishEvent.from(publication);
       addPublish(event);
     }

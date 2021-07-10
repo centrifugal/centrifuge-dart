@@ -22,7 +22,7 @@ class Error extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.int>(
         1,
@@ -108,7 +108,7 @@ class Command extends $pb.GeneratedMessage {
           package: const $pb.PackageName(
               const $core.bool.fromEnvironment('protobuf.omit_message_names')
                   ? ''
-                  : 'protocol'),
+                  : 'centrifugal.centrifuge.protocol'),
           createEmptyInstance: create)
         ..a<$core.int>(
             1,
@@ -220,7 +220,7 @@ class Reply extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.int>(
         1,
@@ -328,20 +328,20 @@ class Push extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..e<Push_PushType>(
-        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE,
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'type',
+        $pb.PbFieldType.OE,
         defaultOrMaker: Push_PushType.PUBLICATION,
         valueOf: Push_PushType.valueOf,
         enumValues: Push_PushType.values)
-    ..aOS(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'channel')
-    ..a<$core.List<$core.int>>(
-        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOS(2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   Push._() : super();
@@ -433,7 +433,7 @@ class ClientInfo extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -560,46 +560,29 @@ class Publication extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..a<$core.int>(
-        1,
+    ..a<$core.List<$core.int>>(
+        4,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
-            : 'seq',
-        $pb.PbFieldType.OU3)
-    ..a<$core.int>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'gen',
-        $pb.PbFieldType.OU3)
-    ..aOS(3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..aOM<ClientInfo>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', subBuilder: ClientInfo.create)
-    ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+            : 'data',
+        $pb.PbFieldType.OY)
+    ..aOM<ClientInfo>(
+        5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info',
+        subBuilder: ClientInfo.create)
+    ..a<$fixnum.Int64>(
+        6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false;
 
   Publication._() : super();
   factory Publication({
-    $core.int? seq,
-    $core.int? gen,
-    $core.String? uid,
     $core.List<$core.int>? data,
     ClientInfo? info,
     $fixnum.Int64? offset,
   }) {
     final _result = create();
-    if (seq != null) {
-      _result.seq = seq;
-    }
-    if (gen != null) {
-      _result.gen = gen;
-    }
-    if (uid != null) {
-      _result.uid = uid;
-    }
     if (data != null) {
       _result.data = data;
     }
@@ -637,77 +620,41 @@ class Publication extends $pb.GeneratedMessage {
       $pb.GeneratedMessage.$_defaultFor<Publication>(create);
   static Publication? _defaultInstance;
 
-  @$pb.TagNumber(1)
-  $core.int get seq => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set seq($core.int v) {
-    $_setUnsignedInt32(0, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasSeq() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSeq() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.int get gen => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set gen($core.int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasGen() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearGen() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get uid => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set uid($core.String v) {
-    $_setString(2, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasUid() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearUid() => clearField(3);
-
   @$pb.TagNumber(4)
-  $core.List<$core.int> get data => $_getN(3);
+  $core.List<$core.int> get data => $_getN(0);
   @$pb.TagNumber(4)
   set data($core.List<$core.int> v) {
-    $_setBytes(3, v);
+    $_setBytes(0, v);
   }
 
   @$pb.TagNumber(4)
-  $core.bool hasData() => $_has(3);
+  $core.bool hasData() => $_has(0);
   @$pb.TagNumber(4)
   void clearData() => clearField(4);
 
   @$pb.TagNumber(5)
-  ClientInfo get info => $_getN(4);
+  ClientInfo get info => $_getN(1);
   @$pb.TagNumber(5)
   set info(ClientInfo v) {
     setField(5, v);
   }
 
   @$pb.TagNumber(5)
-  $core.bool hasInfo() => $_has(4);
+  $core.bool hasInfo() => $_has(1);
   @$pb.TagNumber(5)
   void clearInfo() => clearField(5);
   @$pb.TagNumber(5)
-  ClientInfo ensureInfo() => $_ensure(4);
+  ClientInfo ensureInfo() => $_ensure(1);
 
   @$pb.TagNumber(6)
-  $fixnum.Int64 get offset => $_getI64(5);
+  $fixnum.Int64 get offset => $_getI64(2);
   @$pb.TagNumber(6)
   set offset($fixnum.Int64 v) {
-    $_setInt64(5, v);
+    $_setInt64(2, v);
   }
 
   @$pb.TagNumber(6)
-  $core.bool hasOffset() => $_has(5);
+  $core.bool hasOffset() => $_has(2);
   @$pb.TagNumber(6)
   void clearOffset() => clearField(6);
 }
@@ -720,7 +667,7 @@ class Join extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOM<ClientInfo>(
         1,
@@ -789,7 +736,7 @@ class Leave extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOM<ClientInfo>(
         1,
@@ -858,7 +805,7 @@ class Unsubscribe extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(
         1,
@@ -924,27 +871,25 @@ class Subscribe extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(
         1,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
             : 'recoverable')
-    ..a<$core.int>(
-        2,
+    ..aOS(
+        4,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
-            : 'seq',
-        $pb.PbFieldType.OU3)
-    ..a<$core.int>(
-        3,
+            : 'epoch')
+    ..a<$fixnum.Int64>(
+        5,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
-            : 'gen',
-        $pb.PbFieldType.OU3)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+            : 'offset',
+        $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
     ..a<$core.List<$core.int>>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
@@ -952,8 +897,6 @@ class Subscribe extends $pb.GeneratedMessage {
   Subscribe._() : super();
   factory Subscribe({
     $core.bool? recoverable,
-    $core.int? seq,
-    $core.int? gen,
     $core.String? epoch,
     $fixnum.Int64? offset,
     $core.bool? positioned,
@@ -962,12 +905,6 @@ class Subscribe extends $pb.GeneratedMessage {
     final _result = create();
     if (recoverable != null) {
       _result.recoverable = recoverable;
-    }
-    if (seq != null) {
-      _result.seq = seq;
-    }
-    if (gen != null) {
-      _result.gen = gen;
     }
     if (epoch != null) {
       _result.epoch = epoch;
@@ -1021,75 +958,51 @@ class Subscribe extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearRecoverable() => clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.int get seq => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set seq($core.int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasSeq() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSeq() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.int get gen => $_getIZ(2);
-  @$pb.TagNumber(3)
-  set gen($core.int v) {
-    $_setUnsignedInt32(2, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasGen() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearGen() => clearField(3);
-
   @$pb.TagNumber(4)
-  $core.String get epoch => $_getSZ(3);
+  $core.String get epoch => $_getSZ(1);
   @$pb.TagNumber(4)
   set epoch($core.String v) {
-    $_setString(3, v);
+    $_setString(1, v);
   }
 
   @$pb.TagNumber(4)
-  $core.bool hasEpoch() => $_has(3);
+  $core.bool hasEpoch() => $_has(1);
   @$pb.TagNumber(4)
   void clearEpoch() => clearField(4);
 
   @$pb.TagNumber(5)
-  $fixnum.Int64 get offset => $_getI64(4);
+  $fixnum.Int64 get offset => $_getI64(2);
   @$pb.TagNumber(5)
   set offset($fixnum.Int64 v) {
-    $_setInt64(4, v);
+    $_setInt64(2, v);
   }
 
   @$pb.TagNumber(5)
-  $core.bool hasOffset() => $_has(4);
+  $core.bool hasOffset() => $_has(2);
   @$pb.TagNumber(5)
   void clearOffset() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.bool get positioned => $_getBF(5);
+  $core.bool get positioned => $_getBF(3);
   @$pb.TagNumber(6)
   set positioned($core.bool v) {
-    $_setBool(5, v);
+    $_setBool(3, v);
   }
 
   @$pb.TagNumber(6)
-  $core.bool hasPositioned() => $_has(5);
+  $core.bool hasPositioned() => $_has(3);
   @$pb.TagNumber(6)
   void clearPositioned() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.List<$core.int> get data => $_getN(6);
+  $core.List<$core.int> get data => $_getN(4);
   @$pb.TagNumber(7)
   set data($core.List<$core.int> v) {
-    $_setBytes(6, v);
+    $_setBytes(4, v);
   }
 
   @$pb.TagNumber(7)
-  $core.bool hasData() => $_has(6);
+  $core.bool hasData() => $_has(4);
   @$pb.TagNumber(7)
   void clearData() => clearField(7);
 }
@@ -1102,7 +1015,7 @@ class Message extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.List<$core.int>>(
         1,
@@ -1168,7 +1081,7 @@ class Connect extends $pb.GeneratedMessage {
           : 'Connect',
       package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
-          : 'protocol'),
+          : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -1192,7 +1105,7 @@ class Connect extends $pb.GeneratedMessage {
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OM,
         valueCreator: SubscribeResult.create,
-        packageName: const $pb.PackageName('protocol'))
+        packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..hasRequiredFields = false;
 
   Connect._() : super();
@@ -1291,7 +1204,7 @@ class Disconnect extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.int>(
         1,
@@ -1397,7 +1310,7 @@ class ConnectRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -1416,7 +1329,7 @@ class ConnectRequest extends $pb.GeneratedMessage {
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OM,
         valueCreator: SubscribeRequest.create,
-        packageName: const $pb.PackageName('protocol'))
+        packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
     ..hasRequiredFields = false;
@@ -1533,7 +1446,7 @@ class ConnectResult extends $pb.GeneratedMessage {
           : 'ConnectResult',
       package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
-          : 'protocol'),
+          : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -1555,7 +1468,7 @@ class ConnectResult extends $pb.GeneratedMessage {
         const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl',
         $pb.PbFieldType.OU3)
     ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..m<$core.String, SubscribeResult>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subs', entryClassName: 'ConnectResult.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, packageName: const $pb.PackageName('protocol'))
+    ..m<$core.String, SubscribeResult>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subs', entryClassName: 'ConnectResult.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..hasRequiredFields = false;
 
   ConnectResult._() : super();
@@ -1687,7 +1600,7 @@ class RefreshRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -1753,7 +1666,7 @@ class RefreshResult extends $pb.GeneratedMessage {
           : 'RefreshResult',
       package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
-          : 'protocol'),
+          : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -1882,7 +1795,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -1899,12 +1812,8 @@ class SubscribeRequest extends $pb.GeneratedMessage {
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
             : 'recover')
-    ..a<$core.int>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'seq',
-        $pb.PbFieldType.OU3)
-    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'gen', $pb.PbFieldType.OU3)
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
+    ..aOS(
+        6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
     ..a<$fixnum.Int64>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false;
 
@@ -1913,8 +1822,6 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     $core.String? channel,
     $core.String? token,
     $core.bool? recover,
-    $core.int? seq,
-    $core.int? gen,
     $core.String? epoch,
     $fixnum.Int64? offset,
   }) {
@@ -1927,12 +1834,6 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     }
     if (recover != null) {
       _result.recover = recover;
-    }
-    if (seq != null) {
-      _result.seq = seq;
-    }
-    if (gen != null) {
-      _result.gen = gen;
     }
     if (epoch != null) {
       _result.epoch = epoch;
@@ -2005,51 +1906,27 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearRecover() => clearField(3);
 
-  @$pb.TagNumber(4)
-  $core.int get seq => $_getIZ(3);
-  @$pb.TagNumber(4)
-  set seq($core.int v) {
-    $_setUnsignedInt32(3, v);
-  }
-
-  @$pb.TagNumber(4)
-  $core.bool hasSeq() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearSeq() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.int get gen => $_getIZ(4);
-  @$pb.TagNumber(5)
-  set gen($core.int v) {
-    $_setUnsignedInt32(4, v);
-  }
-
-  @$pb.TagNumber(5)
-  $core.bool hasGen() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearGen() => clearField(5);
-
   @$pb.TagNumber(6)
-  $core.String get epoch => $_getSZ(5);
+  $core.String get epoch => $_getSZ(3);
   @$pb.TagNumber(6)
   set epoch($core.String v) {
-    $_setString(5, v);
+    $_setString(3, v);
   }
 
   @$pb.TagNumber(6)
-  $core.bool hasEpoch() => $_has(5);
+  $core.bool hasEpoch() => $_has(3);
   @$pb.TagNumber(6)
   void clearEpoch() => clearField(6);
 
   @$pb.TagNumber(7)
-  $fixnum.Int64 get offset => $_getI64(6);
+  $fixnum.Int64 get offset => $_getI64(4);
   @$pb.TagNumber(7)
   set offset($fixnum.Int64 v) {
-    $_setInt64(6, v);
+    $_setInt64(4, v);
   }
 
   @$pb.TagNumber(7)
-  $core.bool hasOffset() => $_has(6);
+  $core.bool hasOffset() => $_has(4);
   @$pb.TagNumber(7)
   void clearOffset() => clearField(7);
 }
@@ -2062,7 +1939,7 @@ class SubscribeResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(
         1,
@@ -2080,8 +1957,6 @@ class SubscribeResult extends $pb.GeneratedMessage {
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
             : 'recoverable')
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'seq', $pb.PbFieldType.OU3)
-    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'gen', $pb.PbFieldType.OU3)
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
     ..pc<Publication>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
     ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recovered')
@@ -2095,8 +1970,6 @@ class SubscribeResult extends $pb.GeneratedMessage {
     $core.bool? expires,
     $core.int? ttl,
     $core.bool? recoverable,
-    $core.int? seq,
-    $core.int? gen,
     $core.String? epoch,
     $core.Iterable<Publication>? publications,
     $core.bool? recovered,
@@ -2113,12 +1986,6 @@ class SubscribeResult extends $pb.GeneratedMessage {
     }
     if (recoverable != null) {
       _result.recoverable = recoverable;
-    }
-    if (seq != null) {
-      _result.seq = seq;
-    }
-    if (gen != null) {
-      _result.gen = gen;
     }
     if (epoch != null) {
       _result.epoch = epoch;
@@ -2203,90 +2070,66 @@ class SubscribeResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearRecoverable() => clearField(3);
 
-  @$pb.TagNumber(4)
-  $core.int get seq => $_getIZ(3);
-  @$pb.TagNumber(4)
-  set seq($core.int v) {
-    $_setUnsignedInt32(3, v);
-  }
-
-  @$pb.TagNumber(4)
-  $core.bool hasSeq() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearSeq() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.int get gen => $_getIZ(4);
-  @$pb.TagNumber(5)
-  set gen($core.int v) {
-    $_setUnsignedInt32(4, v);
-  }
-
-  @$pb.TagNumber(5)
-  $core.bool hasGen() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearGen() => clearField(5);
-
   @$pb.TagNumber(6)
-  $core.String get epoch => $_getSZ(5);
+  $core.String get epoch => $_getSZ(3);
   @$pb.TagNumber(6)
   set epoch($core.String v) {
-    $_setString(5, v);
+    $_setString(3, v);
   }
 
   @$pb.TagNumber(6)
-  $core.bool hasEpoch() => $_has(5);
+  $core.bool hasEpoch() => $_has(3);
   @$pb.TagNumber(6)
   void clearEpoch() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.List<Publication> get publications => $_getList(6);
+  $core.List<Publication> get publications => $_getList(4);
 
   @$pb.TagNumber(8)
-  $core.bool get recovered => $_getBF(7);
+  $core.bool get recovered => $_getBF(5);
   @$pb.TagNumber(8)
   set recovered($core.bool v) {
-    $_setBool(7, v);
+    $_setBool(5, v);
   }
 
   @$pb.TagNumber(8)
-  $core.bool hasRecovered() => $_has(7);
+  $core.bool hasRecovered() => $_has(5);
   @$pb.TagNumber(8)
   void clearRecovered() => clearField(8);
 
   @$pb.TagNumber(9)
-  $fixnum.Int64 get offset => $_getI64(8);
+  $fixnum.Int64 get offset => $_getI64(6);
   @$pb.TagNumber(9)
   set offset($fixnum.Int64 v) {
-    $_setInt64(8, v);
+    $_setInt64(6, v);
   }
 
   @$pb.TagNumber(9)
-  $core.bool hasOffset() => $_has(8);
+  $core.bool hasOffset() => $_has(6);
   @$pb.TagNumber(9)
   void clearOffset() => clearField(9);
 
   @$pb.TagNumber(10)
-  $core.bool get positioned => $_getBF(9);
+  $core.bool get positioned => $_getBF(7);
   @$pb.TagNumber(10)
   set positioned($core.bool v) {
-    $_setBool(9, v);
+    $_setBool(7, v);
   }
 
   @$pb.TagNumber(10)
-  $core.bool hasPositioned() => $_has(9);
+  $core.bool hasPositioned() => $_has(7);
   @$pb.TagNumber(10)
   void clearPositioned() => clearField(10);
 
   @$pb.TagNumber(11)
-  $core.List<$core.int> get data => $_getN(10);
+  $core.List<$core.int> get data => $_getN(8);
   @$pb.TagNumber(11)
   set data($core.List<$core.int> v) {
-    $_setBytes(10, v);
+    $_setBytes(8, v);
   }
 
   @$pb.TagNumber(11)
-  $core.bool hasData() => $_has(10);
+  $core.bool hasData() => $_has(8);
   @$pb.TagNumber(11)
   void clearData() => clearField(11);
 }
@@ -2299,7 +2142,7 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -2387,7 +2230,7 @@ class SubRefreshResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(
         1,
@@ -2476,7 +2319,7 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -2543,7 +2386,7 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -2585,7 +2428,7 @@ class PublishRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -2674,7 +2517,7 @@ class PublishResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -2716,7 +2559,7 @@ class PresenceRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -2783,7 +2626,7 @@ class PresenceResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..m<$core.String, ClientInfo>(
         1,
@@ -2794,7 +2637,7 @@ class PresenceResult extends $pb.GeneratedMessage {
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OM,
         valueCreator: ClientInfo.create,
-        packageName: const $pb.PackageName('protocol'))
+        packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..hasRequiredFields = false;
 
   PresenceResult._() : super();
@@ -2846,7 +2689,7 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -2914,7 +2757,7 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.int>(
         1,
@@ -2996,6 +2839,93 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
   void clearNumUsers() => clearField(2);
 }
 
+class StreamPosition extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'StreamPosition',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'centrifugal.centrifuge.protocol'),
+      createEmptyInstance: create)
+    ..a<$fixnum.Int64>(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'offset',
+        $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
+    ..hasRequiredFields = false;
+
+  StreamPosition._() : super();
+  factory StreamPosition({
+    $fixnum.Int64? offset,
+    $core.String? epoch,
+  }) {
+    final _result = create();
+    if (offset != null) {
+      _result.offset = offset;
+    }
+    if (epoch != null) {
+      _result.epoch = epoch;
+    }
+    return _result;
+  }
+  factory StreamPosition.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory StreamPosition.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  StreamPosition clone() => StreamPosition()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  StreamPosition copyWith(void Function(StreamPosition) updates) =>
+      super.copyWith((message) => updates(message as StreamPosition))
+          as StreamPosition; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StreamPosition create() => StreamPosition._();
+  StreamPosition createEmptyInstance() => create();
+  static $pb.PbList<StreamPosition> createRepeated() =>
+      $pb.PbList<StreamPosition>();
+  @$core.pragma('dart2js:noInline')
+  static StreamPosition getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StreamPosition>(create);
+  static StreamPosition? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get offset => $_getI64(0);
+  @$pb.TagNumber(1)
+  set offset($fixnum.Int64 v) {
+    $_setInt64(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasOffset() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOffset() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get epoch => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set epoch($core.String v) {
+    $_setString(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasEpoch() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearEpoch() => clearField(2);
+}
+
 class HistoryRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names')
@@ -3004,57 +2934,39 @@ class HistoryRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(
         1,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
             : 'channel')
-    ..aOB(
-        2,
+    ..a<$core.int>(
+        7,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
-            : 'useSince')
-    ..a<$fixnum.Int64>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'offset',
-        $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'useLimit')
-    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'limit', $pb.PbFieldType.O3)
+            : 'limit',
+        $pb.PbFieldType.O3)
+    ..aOM<StreamPosition>(8,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'since',
+        subBuilder: StreamPosition.create)
     ..hasRequiredFields = false;
 
   HistoryRequest._() : super();
   factory HistoryRequest({
     $core.String? channel,
-    $core.bool? useSince,
-    $fixnum.Int64? offset,
-    $core.String? epoch,
-    $core.bool? useLimit,
     $core.int? limit,
+    StreamPosition? since,
   }) {
     final _result = create();
     if (channel != null) {
       _result.channel = channel;
     }
-    if (useSince != null) {
-      _result.useSince = useSince;
-    }
-    if (offset != null) {
-      _result.offset = offset;
-    }
-    if (epoch != null) {
-      _result.epoch = epoch;
-    }
-    if (useLimit != null) {
-      _result.useLimit = useLimit;
-    }
     if (limit != null) {
       _result.limit = limit;
+    }
+    if (since != null) {
+      _result.since = since;
     }
     return _result;
   }
@@ -3097,65 +3009,31 @@ class HistoryRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearChannel() => clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.bool get useSince => $_getBF(1);
-  @$pb.TagNumber(2)
-  set useSince($core.bool v) {
-    $_setBool(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasUseSince() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearUseSince() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $fixnum.Int64 get offset => $_getI64(2);
-  @$pb.TagNumber(3)
-  set offset($fixnum.Int64 v) {
-    $_setInt64(2, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasOffset() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearOffset() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get epoch => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set epoch($core.String v) {
-    $_setString(3, v);
-  }
-
-  @$pb.TagNumber(4)
-  $core.bool hasEpoch() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearEpoch() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.bool get useLimit => $_getBF(4);
-  @$pb.TagNumber(5)
-  set useLimit($core.bool v) {
-    $_setBool(4, v);
-  }
-
-  @$pb.TagNumber(5)
-  $core.bool hasUseLimit() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearUseLimit() => clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.int get limit => $_getIZ(5);
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  $core.int get limit => $_getIZ(1);
+  @$pb.TagNumber(7)
   set limit($core.int v) {
-    $_setSignedInt32(5, v);
+    $_setSignedInt32(1, v);
   }
 
-  @$pb.TagNumber(6)
-  $core.bool hasLimit() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearLimit() => clearField(6);
+  @$pb.TagNumber(7)
+  $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(7)
+  void clearLimit() => clearField(7);
+
+  @$pb.TagNumber(8)
+  StreamPosition get since => $_getN(2);
+  @$pb.TagNumber(8)
+  set since(StreamPosition v) {
+    setField(8, v);
+  }
+
+  @$pb.TagNumber(8)
+  $core.bool hasSince() => $_has(2);
+  @$pb.TagNumber(8)
+  void clearSince() => clearField(8);
+  @$pb.TagNumber(8)
+  StreamPosition ensureSince() => $_ensure(2);
 }
 
 class HistoryResult extends $pb.GeneratedMessage {
@@ -3166,7 +3044,7 @@ class HistoryResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..pc<Publication>(
         1,
@@ -3261,7 +3139,7 @@ class PingRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -3302,7 +3180,7 @@ class PingResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -3343,7 +3221,7 @@ class RPCRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.List<$core.int>>(
         1,
@@ -3431,7 +3309,7 @@ class RPCResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.List<$core.int>>(
         1,
@@ -3498,7 +3376,7 @@ class SendRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
-              : 'protocol'),
+              : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..a<$core.List<$core.int>>(
         1,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'proto/client.pb.dart' as proto;
 
 class PrivateSubEvent {
@@ -54,11 +55,14 @@ class MessageEvent {
 }
 
 class PublishEvent {
-  PublishEvent(this.data);
+  PublishEvent(this.data, this.offset, this.info);
 
   final List<int> data;
+  final $fixnum.Int64 offset;
+  final ClientInfo? info;
 
-  static PublishEvent from(proto.Publication pub) => PublishEvent(pub.data);
+  static PublishEvent from(proto.Publication pub) => 
+    PublishEvent(pub.data, pub.offset,  pub.hasInfo() ? ClientInfo.from(pub.info) : null);
 
   @override
   String toString() {
@@ -67,13 +71,15 @@ class PublishEvent {
 }
 
 class ServerPublishEvent {
-  ServerPublishEvent(this.channel, this.data);
+  ServerPublishEvent(this.channel, this.data, this.offset, this.info);
 
   final String channel;
   final List<int> data;
+  final $fixnum.Int64 offset;
+  final ClientInfo? info;
 
   static ServerPublishEvent from(String channel, proto.Publication pub) =>
-      ServerPublishEvent(channel, pub.data);
+      ServerPublishEvent(channel, pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
 
   @override
   String toString() {
@@ -81,16 +87,47 @@ class ServerPublishEvent {
   }
 }
 
-class HistoryEvent {
-  HistoryEvent(this.data);
+class ClientInfo {
+  ClientInfo(this.client, this.user, this.connInfo, this.chanInfo);
+
+  static ClientInfo from(proto.ClientInfo info) =>
+    ClientInfo(info.client, info.user, info.connInfo, info.chanInfo);
+
+  final String client;
+  final String user;
+  final List<int>? connInfo;
+  final List<int>? chanInfo;
+}
+
+class Publication {
+  Publication(this.data, this.offset, this.info);
+
+  static Publication from(proto.Publication pub) => 
+    Publication(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
 
   final List<int> data;
+  final $fixnum.Int64 offset;
+  final ClientInfo? info;
+}
 
-  static HistoryEvent from(proto.Publication pub) => HistoryEvent(pub.data);
+class HistoryResult {
+  HistoryResult(this.publications, this.offset, this.epoch);
+
+  final List<Publication> publications;
+  final $fixnum.Int64 offset;
+  final String epoch;
+
+  static HistoryResult from(proto.HistoryResult res) {
+    final pubs = <Publication>[];
+    res.publications.forEach((element) {
+      pubs.add(Publication.from(element));
+    });
+    return HistoryResult(pubs, res.offset, res.epoch);
+  }
 
   @override
   String toString() {
-    return 'HistoryEvent{data: $data}';
+    return 'HistoryResult{num pubs: ${publications.length}, offset: $offset, epoch: $epoch}';
   }
 }
 
@@ -193,6 +230,16 @@ class ServerSubscribeEvent {
   }
 }
 
+class StreamPosition {
+  StreamPosition(this.offset, this.epoch);
+
+  static StreamPosition from(proto.StreamPosition sp) =>
+    StreamPosition(sp.offset, sp.epoch);
+
+  final $fixnum.Int64 offset;
+  final String epoch;
+}
+
 class SubscribeErrorEvent {
   SubscribeErrorEvent(this.message, this.code);
 
@@ -223,5 +270,29 @@ class ServerUnsubscribeEvent {
   @override
   String toString() {
     return 'ServerUnsubscribeEvent{channel: $channel}';
+  }
+}
+
+class RPCResult {
+  RPCResult(this.data);
+
+  final List<int> data;
+
+  static RPCResult from(proto.RPCResult result) =>
+      RPCResult(result.data);
+
+  @override
+  String toString() {
+    return 'RPCResult{data: ${utf8.decode(data, allowMalformed: true)}}';
+  }
+}
+
+class PublishResult {
+  static PublishResult from(proto.PublishResult result) =>
+      PublishResult();
+
+  @override
+  String toString() {
+    return 'PublishResult{}';
   }
 }
