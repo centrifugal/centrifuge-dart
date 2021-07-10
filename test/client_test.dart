@@ -69,8 +69,9 @@ void main() {
 
       transport.completeOpen();
 
-      final request =
-          transport.sendListLast<protocol.ConnectRequest, protocol.ConnectResult>().request;
+      final request = transport
+          .sendListLast<protocol.ConnectRequest, protocol.ConnectResult>()
+          .request;
 
       expect(request.token, equals('test token'));
       expect(utf8.decode(request.data), equals('test connect data'));
@@ -83,7 +84,8 @@ void main() {
       client.connect();
       transport.completeOpen();
 
-      final send = transport.sendListLast<protocol.ConnectRequest, protocol.ConnectResult>();
+      final send = transport
+          .sendListLast<protocol.ConnectRequest, protocol.ConnectResult>();
       send.result
         ..client = 'mock client'
         ..version = '0.0.0'
@@ -109,8 +111,9 @@ void main() {
     test('publish sends correct data', () async {
       client.publish('test channel', utf8.encode('test message'));
 
-      final publish =
-          transport.sendListLast<protocol.PublishRequest, protocol.PublishResult>().request;
+      final publish = transport
+          .sendListLast<protocol.PublishRequest, protocol.PublishResult>()
+          .request;
       expect(publish.channel, equals('test channel'));
       expect(utf8.decode(publish.data), equals('test message'));
     });
@@ -118,7 +121,9 @@ void main() {
     test('rpc sends correct data', () async {
       client.rpc("test", utf8.encode('test rpc message'));
 
-      final rpc = transport.sendListLast<protocol.RPCRequest, protocol.RPCResult>().request;
+      final rpc = transport
+          .sendListLast<protocol.RPCRequest, protocol.RPCResult>()
+          .request;
       expect(utf8.decode(rpc.data), equals('test rpc message'));
     });
   });
@@ -127,7 +132,9 @@ void main() {
     setUp(() {
       client.connect();
       transport.completeOpen();
-      transport.sendListLast<protocol.ConnectRequest, protocol.ConnectResult>().complete();
+      transport
+          .sendListLast<protocol.ConnectRequest, protocol.ConnectResult>()
+          .complete();
     });
 
     test('socket closing triggers the corresponding events', () async {
@@ -204,7 +211,9 @@ void main() {
         expect(count, 1);
         retryCompleter.complete();
         transport.completeOpen();
-        transport.sendListLast<protocol.ConnectRequest, protocol.ConnectResult>().complete();
+        transport
+            .sendListLast<protocol.ConnectRequest, protocol.ConnectResult>()
+            .complete();
         expect(connectFuture, completion(isNotNull));
       }
     });
@@ -336,11 +345,14 @@ void main() {
 
         retryCompleter.complete();
         transport.completeOpen();
-        transport.sendListLast<protocol.ConnectRequest, protocol.ConnectResult>().complete();
+        transport
+            .sendListLast<protocol.ConnectRequest, protocol.ConnectResult>()
+            .complete();
         expect(connectFuture, completion(isNotNull));
 
         transport.sendList
-            .where((t) => t is Triplet<protocol.SubscribeRequest, protocol.SubscribeResult>)
+            .where((t) => t
+                is Triplet<protocol.SubscribeRequest, protocol.SubscribeResult>)
             .where((t) => !t.completer.isCompleted)
             .forEach((t) => t.complete());
       }

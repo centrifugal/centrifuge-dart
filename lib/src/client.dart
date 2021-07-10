@@ -64,7 +64,8 @@ abstract class Client {
 
   /// Send History command
   ///
-  Future<HistoryResult> history(String channel, {int limit = 0, StreamPosition? since});
+  Future<HistoryResult> history(String channel,
+      {int limit = 0, StreamPosition? since});
 
   @alwaysThrows
   Future<void> send(List<int> data);
@@ -163,7 +164,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
       ..channel = channel
       ..data = data;
 
-    final result = await _transport.sendMessage(request, protocol.PublishResult());
+    final result =
+        await _transport.sendMessage(request, protocol.PublishResult());
     return PublishResult.from(result);
   }
 
@@ -177,7 +179,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  Future<HistoryResult> history(String channel, {int limit = 0, StreamPosition? since}) async {
+  Future<HistoryResult> history(String channel,
+      {int limit = 0, StreamPosition? since}) async {
     final request = protocol.HistoryRequest()..channel = channel;
     request.limit = limit;
     if (since != null) {
@@ -186,7 +189,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
       sp.epoch = since.epoch;
       request.since = sp;
     }
-    final result = await _transport.sendMessage(request, protocol.HistoryResult());
+    final result =
+        await _transport.sendMessage(request, protocol.HistoryResult());
     return HistoryResult.from(result);
   }
 

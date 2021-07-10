@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/events.dart';
-import 'package:centrifuge/src/proto/client.pb.dart' hide Error, HistoryResult, StreamPosition;
+import 'package:centrifuge/src/proto/client.pb.dart'
+    hide Error, HistoryResult, StreamPosition;
 import 'package:centrifuge/src/proto/client.pb.dart' as proto;
 import 'package:centrifuge/src/transport.dart';
 import 'package:mockito/mockito.dart';
@@ -208,9 +209,10 @@ class MockClient extends Mock implements ClientImpl {
   }
 
   @override
-  Future<HistoryResult> history(String channel, {int limit = 0, StreamPosition? since}) {
+  Future<HistoryResult> history(String channel,
+      {int limit = 0, StreamPosition? since}) {
     return super.noSuchMethod(Invocation.method(#history, [channel]),
-      returnValue: Future.value(HistoryResult([], $fixnum.Int64(0), "")));
+        returnValue: Future.value(HistoryResult([], $fixnum.Int64(0), "")));
   }
 
   @override

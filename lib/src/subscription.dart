@@ -25,7 +25,7 @@ abstract class Subscription {
   void unsubscribe();
 
   Future<PublishResult> publish(List<int> data);
-  
+
   Future<HistoryResult> history({int limit = 0, StreamPosition? since});
 }
 
@@ -69,7 +69,8 @@ class SubscriptionImpl implements Subscription {
       _unsubscribeController.stream;
 
   @override
-  Future<PublishResult> publish(List<int> data) => _client.publish(channel, data);
+  Future<PublishResult> publish(List<int> data) =>
+      _client.publish(channel, data);
 
   @override
   void subscribe() {
@@ -113,8 +114,8 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  Future<HistoryResult> history({int limit = 0, StreamPosition? since}) => 
-    _client.history(channel, limit: limit, since: since);
+  Future<HistoryResult> history({int limit = 0, StreamPosition? since}) =>
+      _client.history(channel, limit: limit, since: since);
 
   void addPublish(PublishEvent event) => _publishController.add(event);
 
@@ -138,7 +139,8 @@ class SubscriptionImpl implements Subscription {
         ..channel = channel
         ..token = token ?? '';
 
-      final result = await _client.sendMessage(request, protocol.SubscribeResult());
+      final result =
+          await _client.sendMessage(request, protocol.SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _onSubscribeSuccess(event);
       _recover(result);

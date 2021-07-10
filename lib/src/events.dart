@@ -61,8 +61,8 @@ class PublishEvent {
   final $fixnum.Int64 offset;
   final ClientInfo? info;
 
-  static PublishEvent from(proto.Publication pub) => 
-    PublishEvent(pub.data, pub.offset,  pub.hasInfo() ? ClientInfo.from(pub.info) : null);
+  static PublishEvent from(proto.Publication pub) => PublishEvent(
+      pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
 
   @override
   String toString() {
@@ -79,7 +79,8 @@ class ServerPublishEvent {
   final ClientInfo? info;
 
   static ServerPublishEvent from(String channel, proto.Publication pub) =>
-      ServerPublishEvent(channel, pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
+      ServerPublishEvent(channel, pub.data, pub.offset,
+          pub.hasInfo() ? ClientInfo.from(pub.info) : null);
 
   @override
   String toString() {
@@ -91,7 +92,7 @@ class ClientInfo {
   ClientInfo(this.client, this.user, this.connInfo, this.chanInfo);
 
   static ClientInfo from(proto.ClientInfo info) =>
-    ClientInfo(info.client, info.user, info.connInfo, info.chanInfo);
+      ClientInfo(info.client, info.user, info.connInfo, info.chanInfo);
 
   final String client;
   final String user;
@@ -102,8 +103,8 @@ class ClientInfo {
 class Publication {
   Publication(this.data, this.offset, this.info);
 
-  static Publication from(proto.Publication pub) => 
-    Publication(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
+  static Publication from(proto.Publication pub) => Publication(
+      pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
 
   final List<int> data;
   final $fixnum.Int64 offset;
@@ -234,7 +235,7 @@ class StreamPosition {
   StreamPosition(this.offset, this.epoch);
 
   static StreamPosition from(proto.StreamPosition sp) =>
-    StreamPosition(sp.offset, sp.epoch);
+      StreamPosition(sp.offset, sp.epoch);
 
   final $fixnum.Int64 offset;
   final String epoch;
@@ -278,8 +279,7 @@ class RPCResult {
 
   final List<int> data;
 
-  static RPCResult from(proto.RPCResult result) =>
-      RPCResult(result.data);
+  static RPCResult from(proto.RPCResult result) => RPCResult(result.data);
 
   @override
   String toString() {
@@ -288,8 +288,7 @@ class RPCResult {
 }
 
 class PublishResult {
-  static PublishResult from(proto.PublishResult result) =>
-      PublishResult();
+  static PublishResult from(proto.PublishResult result) => PublishResult();
 
   @override
   String toString() {

@@ -65,8 +65,9 @@ void main() {
 
     await subscribeSuccess();
 
-    verify(client.sendMessage<protocol.SubscribeRequest, protocol.SubscribeResult>(
-            request, result))
+    verify(client
+            .sendMessage<protocol.SubscribeRequest, protocol.SubscribeResult>(
+                request, result))
         .called(2);
   });
 
