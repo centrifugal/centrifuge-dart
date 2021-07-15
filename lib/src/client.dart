@@ -305,6 +305,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
         value.publications.forEach((element) {
           final event = ServerPublishEvent.from(key, element);
           _publishController.add(event);
+          if (_serverSubs[key]!.recoverable && element.offset > 0) {
+            _serverSubs[key]!.offset = element.offset;
+          }
         });
       });
       _serverSubs.forEach((key, value) {
@@ -335,7 +338,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
         if (serverSubscription != null) {
           final event = ServerPublishEvent.from(push.channel, pub);
           _publishController.add(event);
-          _serverSubs[push.channel]!.offset = pub.offset;
+          if (_serverSubs[push.channel]!.recoverable && pub.offset > 0) {
+            _serverSubs[push.channel]!.offset = pub.offset;
+          }
         }
         break;
       case Push_PushType.LEAVE:
