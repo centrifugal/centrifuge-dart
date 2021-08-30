@@ -134,6 +134,11 @@ class Push_PushType extends $pb.ProtobufEnum {
       const $core.bool.fromEnvironment('protobuf.omit_enum_names')
           ? ''
           : 'DISCONNECT');
+  static const Push_PushType REFRESH = Push_PushType._(
+      8,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'REFRESH');
 
   static const $core.List<Push_PushType> values = <Push_PushType>[
     PUBLICATION,
@@ -144,6 +149,7 @@ class Push_PushType extends $pb.ProtobufEnum {
     SUBSCRIBE,
     CONNECT,
     DISCONNECT,
+    REFRESH,
   ];
 
   static final $core.Map<$core.int, Push_PushType> _byValue =

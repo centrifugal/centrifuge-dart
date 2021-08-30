@@ -180,9 +180,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Future<HistoryResult> history(String channel,
-      {int limit = 0, StreamPosition? since}) async {
+      {int limit = 0, StreamPosition? since, bool reverse = false}) async {
     final request = protocol.HistoryRequest()..channel = channel;
     request.limit = limit;
+    request.reverse = reverse;
     if (since != null) {
       final sp = protocol.StreamPosition();
       sp.offset = since.offset;

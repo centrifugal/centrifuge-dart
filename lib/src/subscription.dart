@@ -114,8 +114,9 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  Future<HistoryResult> history({int limit = 0, StreamPosition? since}) =>
-      _client.history(channel, limit: limit, since: since);
+  Future<HistoryResult> history(
+          {int limit = 0, StreamPosition? since, bool reverse = false}) =>
+      _client.history(channel, limit: limit, since: since, reverse: reverse);
 
   void addPublish(PublishEvent event) => _publishController.add(event);
 

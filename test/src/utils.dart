@@ -210,7 +210,7 @@ class MockClient extends Mock implements ClientImpl {
 
   @override
   Future<HistoryResult> history(String channel,
-      {int limit = 0, StreamPosition? since}) {
+      {int limit = 0, StreamPosition? since, bool reverse = false}) {
     return super.noSuchMethod(Invocation.method(#history, [channel]),
         returnValue: Future.value(HistoryResult([], $fixnum.Int64(0), "")));
   }

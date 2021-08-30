@@ -807,23 +807,10 @@ class Unsubscribe extends $pb.GeneratedMessage {
               ? ''
               : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aOB(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'resubscribe')
     ..hasRequiredFields = false;
 
   Unsubscribe._() : super();
-  factory Unsubscribe({
-    $core.bool? resubscribe,
-  }) {
-    final _result = create();
-    if (resubscribe != null) {
-      _result.resubscribe = resubscribe;
-    }
-    return _result;
-  }
+  factory Unsubscribe() => create();
   factory Unsubscribe.fromBuffer($core.List<$core.int> i,
           [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(i, r);
@@ -849,18 +836,6 @@ class Unsubscribe extends $pb.GeneratedMessage {
   static Unsubscribe getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<Unsubscribe>(create);
   static Unsubscribe? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.bool get resubscribe => $_getBF(0);
-  @$pb.TagNumber(1)
-  set resubscribe($core.bool v) {
-    $_setBool(0, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasResubscribe() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearResubscribe() => clearField(1);
 }
 
 class Subscribe extends $pb.GeneratedMessage {
@@ -1106,6 +1081,8 @@ class Connect extends $pb.GeneratedMessage {
         valueFieldType: $pb.PbFieldType.OM,
         valueCreator: SubscribeResult.create,
         packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
+    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   Connect._() : super();
@@ -1114,6 +1091,8 @@ class Connect extends $pb.GeneratedMessage {
     $core.String? version,
     $core.List<$core.int>? data,
     $core.Map<$core.String, SubscribeResult>? subs,
+    $core.bool? expires,
+    $core.int? ttl,
   }) {
     final _result = create();
     if (client != null) {
@@ -1127,6 +1106,12 @@ class Connect extends $pb.GeneratedMessage {
     }
     if (subs != null) {
       _result.subs.addAll(subs);
+    }
+    if (expires != null) {
+      _result.expires = expires;
+    }
+    if (ttl != null) {
+      _result.ttl = ttl;
     }
     return _result;
   }
@@ -1194,6 +1179,30 @@ class Connect extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(4)
   $core.Map<$core.String, SubscribeResult> get subs => $_getMap(3);
+
+  @$pb.TagNumber(5)
+  $core.bool get expires => $_getBF(4);
+  @$pb.TagNumber(5)
+  set expires($core.bool v) {
+    $_setBool(4, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasExpires() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearExpires() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get ttl => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set ttl($core.int v) {
+    $_setUnsignedInt32(5, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasTtl() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearTtl() => clearField(6);
 }
 
 class Disconnect extends $pb.GeneratedMessage {
@@ -1300,6 +1309,94 @@ class Disconnect extends $pb.GeneratedMessage {
   $core.bool hasReconnect() => $_has(2);
   @$pb.TagNumber(3)
   void clearReconnect() => clearField(3);
+}
+
+class Refresh extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'Refresh',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'centrifugal.centrifuge.protocol'),
+      createEmptyInstance: create)
+    ..aOB(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'expires')
+    ..a<$core.int>(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'ttl',
+        $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  Refresh._() : super();
+  factory Refresh({
+    $core.bool? expires,
+    $core.int? ttl,
+  }) {
+    final _result = create();
+    if (expires != null) {
+      _result.expires = expires;
+    }
+    if (ttl != null) {
+      _result.ttl = ttl;
+    }
+    return _result;
+  }
+  factory Refresh.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory Refresh.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  Refresh clone() => Refresh()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  Refresh copyWith(void Function(Refresh) updates) =>
+      super.copyWith((message) => updates(message as Refresh))
+          as Refresh; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Refresh create() => Refresh._();
+  Refresh createEmptyInstance() => create();
+  static $pb.PbList<Refresh> createRepeated() => $pb.PbList<Refresh>();
+  @$core.pragma('dart2js:noInline')
+  static Refresh getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Refresh>(create);
+  static Refresh? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get expires => $_getBF(0);
+  @$pb.TagNumber(1)
+  set expires($core.bool v) {
+    $_setBool(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasExpires() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearExpires() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get ttl => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set ttl($core.int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasTtl() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTtl() => clearField(2);
 }
 
 class ConnectRequest extends $pb.GeneratedMessage {
@@ -2950,6 +3047,7 @@ class HistoryRequest extends $pb.GeneratedMessage {
     ..aOM<StreamPosition>(8,
         const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'since',
         subBuilder: StreamPosition.create)
+    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reverse')
     ..hasRequiredFields = false;
 
   HistoryRequest._() : super();
@@ -2957,6 +3055,7 @@ class HistoryRequest extends $pb.GeneratedMessage {
     $core.String? channel,
     $core.int? limit,
     StreamPosition? since,
+    $core.bool? reverse,
   }) {
     final _result = create();
     if (channel != null) {
@@ -2967,6 +3066,9 @@ class HistoryRequest extends $pb.GeneratedMessage {
     }
     if (since != null) {
       _result.since = since;
+    }
+    if (reverse != null) {
+      _result.reverse = reverse;
     }
     return _result;
   }
@@ -3034,6 +3136,18 @@ class HistoryRequest extends $pb.GeneratedMessage {
   void clearSince() => clearField(8);
   @$pb.TagNumber(8)
   StreamPosition ensureSince() => $_ensure(2);
+
+  @$pb.TagNumber(9)
+  $core.bool get reverse => $_getBF(3);
+  @$pb.TagNumber(9)
+  set reverse($core.bool v) {
+    $_setBool(3, v);
+  }
+
+  @$pb.TagNumber(9)
+  $core.bool hasReverse() => $_has(3);
+  @$pb.TagNumber(9)
+  void clearReverse() => clearField(9);
 }
 
 class HistoryResult extends $pb.GeneratedMessage {
