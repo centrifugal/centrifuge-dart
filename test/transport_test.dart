@@ -5,6 +5,7 @@ import 'package:centrifuge/src/codec.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/proto/client.pb.dart' as proto show Error;
 import 'package:centrifuge/src/transport.dart';
+import 'package:centrifuge/src/universal_web_socket/web_socket_interface.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:test/test.dart';
 
@@ -24,7 +25,7 @@ void main() {
     webSocket = MockWebSocket();
 
     transport = Transport(
-      () => Future.value(webSocket),
+      () => Future<IWebSocket>.value(webSocket),
       TransportConfig(),
       ProtobufCommandEncoder(),
       ProtobufReplyDecoder(),

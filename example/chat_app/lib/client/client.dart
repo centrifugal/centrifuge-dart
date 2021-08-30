@@ -36,7 +36,7 @@ class ChatClient {
   }
 
   void connect(VoidCallback onConnect) {
-    print("Connecting to Centrifugo server at ${conf.serverAddr}");
+    print("Connecting to Centrifugo server at ws://centrifugo-tms.infra.dev.s.o3.ru/connection/websocket?format=protobuf");
     _connSub = _client.connectStream.listen((event) {
       print("Connected to server");
       Fluttertoast.showToast(
@@ -96,7 +96,7 @@ class ChatClient {
     final data = utf8.encode(output);
     try {
       await subscription?.publish(data);
-    } catch (e) {
+    } on Object catch (_) {
       rethrow;
     }
   }

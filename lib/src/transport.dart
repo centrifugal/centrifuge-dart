@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
+import 'package:centrifuge/src/universal_web_socket/web_socket_interface.dart';
+import 'package:centrifuge/src/universal_web_socket/web_socket_universal.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
@@ -13,24 +14,21 @@ typedef Transport TransportBuilder({
   required TransportConfig config,
 });
 
-typedef Future<WebSocket> WebSocketBuilder();
+typedef Future<IWebSocket> WebSocketBuilder();
 
 class TransportConfig {
-  TransportConfig(
-      {this.pingInterval = const Duration(seconds: 25),
-      this.headers = const <String, dynamic>{}});
+  TransportConfig({this.pingInterval = const Duration(seconds: 25), this.headers = const <String, dynamic>{}});
 
   final Duration pingInterval;
   final Map<String, dynamic> headers;
 }
 
-Transport protobufTransportBuilder(
-    {required String url, required TransportConfig config}) {
+Transport protobufTransportBuilder({required String url, required TransportConfig config}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
   final transport = Transport(
-    () => WebSocket.connect(
+    () => UniversalWebSocket.connect(
       url,
       headers: config.headers,
     ),
@@ -43,24 +41,19 @@ Transport protobufTransportBuilder(
 }
 
 abstract class GeneratedMessageSender {
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result);
+  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(Req request, Rep result);
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder,
-      this._replyDecoder);
+  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
-  WebSocket? _socket;
+  IWebSocket? _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
 
-  Future open(void onPush(Push push),
-      {Function? onError,
-      void onDone(String reason, bool shouldReconnect)?}) async {
+  Future open(void onPush(Push push), {Function? onError, void onDone(String reason, bool shouldReconnect)?}) async {
     _socket = await _socketBuilder();
     if (_config.pingInterval != Duration.zero) {
       _socket!.pingInterval = _config.pingInterval;
@@ -78,9 +71,7 @@ class Transport implements GeneratedMessageSender {
   final _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result) async {
+  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(Req request, Rep result) async {
     final command = _createCommand(request);
     final reply = await _sendCommand(command);
 

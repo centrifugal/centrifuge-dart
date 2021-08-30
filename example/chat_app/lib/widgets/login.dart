@@ -14,7 +14,7 @@ class _LoginFormState extends State<LoginForm> {
       Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
         const Icon(Icons.person),
         const Padding(padding: EdgeInsets.only(right: 10.0)),
-        Container(
+        SizedBox(
             width: 250.0,
             child: TextField(
               controller: _controller,

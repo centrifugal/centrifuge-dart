@@ -13,18 +13,14 @@ environment:
 dependencies:
   centrifuge:
     path: ../../
-  dash_chat: ^1.1.15-nullsafety
+  dash_chat: ^1.1.16
   extra_pedantic: ^1.1.1+3
   flutter:
     sdk: flutter
   fluttertoast: ^8.0.6
   pedantic: ^1.8.0
   responsive_builder: ^0.1.5
-
-dependency_overrides:
-  dash_chat:
-    git: git@github.com:fayeed/dash_chat.git
-
+  universal_io: ^2.0.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

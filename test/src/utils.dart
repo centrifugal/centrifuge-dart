@@ -1,15 +1,16 @@
 import 'dart:async';
-import 'dart:io';
+
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
 import 'package:centrifuge/src/proto/client.pb.dart' as proto;
 import 'package:centrifuge/src/transport.dart';
+import 'package:centrifuge/src/universal_web_socket/web_socket_interface.dart';
 import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
 
-class MockWebSocket implements WebSocket {
+class MockWebSocket implements IWebSocket {
   final List<Command> commands = <Command>[];
 
   final _stubs = <CommandMatcher, SendAction>{};
