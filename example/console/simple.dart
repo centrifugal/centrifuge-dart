@@ -66,10 +66,15 @@ Function(String) _handleUserInput(
         client.connect();
         break;
       case '#rpc':
-        final request = jsonEncode({'method': 'test'});
+        final request = jsonEncode({'param': 'test'});
         final data = utf8.encode(request);
-        final result = await client.rpc(data);
+        final result = await client.rpc('test', data);
         print('RPC result: ' + utf8.decode(result.data));
+        break;
+      case '#history':
+        final result = await subscription.history(limit: 10);
+        print('History num publications: ' + result.publications.length.toString());
+        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
         break;
       case '#disconnect':
         client.disconnect();

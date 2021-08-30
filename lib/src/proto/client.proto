@@ -1,231 +1,238 @@
 syntax = "proto3";
 
-package protocol;
+package centrifugal.centrifuge.protocol;
+
+option go_package = "./;protocol";
 
 message Error {
-    uint32 code = 1;
-    string message = 2;
+  uint32 code = 1;
+  string message = 2;
 }
 
 message Command {
-    uint32 id = 1;
-    enum MethodType {
-        CONNECT = 0;
-        SUBSCRIBE = 1;
-        UNSUBSCRIBE = 2;
-        PUBLISH = 3;
-        PRESENCE = 4;
-        PRESENCE_STATS = 5;
-        HISTORY = 6;
-        PING = 7;
-        SEND = 8;
-        RPC = 9;
-        REFRESH = 10;
-        SUB_REFRESH = 11;
-    }
-    MethodType method = 2;
-    bytes params = 3;
+  uint32 id = 1;
+  enum MethodType {
+    CONNECT = 0;
+    SUBSCRIBE = 1;
+    UNSUBSCRIBE = 2;
+    PUBLISH = 3;
+    PRESENCE = 4;
+    PRESENCE_STATS = 5;
+    HISTORY = 6;
+    PING = 7;
+    SEND = 8;
+    RPC = 9;
+    REFRESH = 10;
+    SUB_REFRESH = 11;
+  }
+  MethodType method = 2;
+  bytes params = 3;
 }
 
 message Reply {
-    uint32 id = 1;
-    Error error = 2;
-    bytes result = 3;
+  uint32 id = 1;
+  Error error = 2;
+  bytes result = 3;
 }
 
 message Push {
-    enum PushType {
-        PUBLICATION = 0;
-        JOIN = 1;
-        LEAVE = 2;
-        UNSUBSCRIBE = 3;
-        MESSAGE = 4;
-        SUBSCRIBE = 5;
-        CONNECT = 6;
-        DISCONNECT = 7;
-    }
-    PushType type = 1;
-    string channel = 2;
-    bytes data = 3;
+  enum PushType {
+    PUBLICATION = 0;
+    JOIN = 1;
+    LEAVE = 2;
+    UNSUBSCRIBE = 3;
+    MESSAGE = 4;
+    SUBSCRIBE = 5;
+    CONNECT = 6;
+    DISCONNECT = 7;
+    REFRESH = 8;
+  }
+  PushType type = 1;
+  string channel = 2;
+  bytes data = 3;
 }
 
 message ClientInfo {
-    string user = 1;
-    string client = 2;
-    bytes conn_info = 3;
-    bytes chan_info = 4;
+  string user = 1;
+  string client = 2;
+  bytes conn_info = 3;
+  bytes chan_info = 4;
 }
 
 message Publication {
-    uint32 seq = 1;
-    uint32 gen = 2;
-    string uid = 3;
-    bytes data = 4;
-    ClientInfo info = 5;
-    uint64 offset = 6;
+  // 1-3 skipped here for backwards compatibility.
+  bytes data = 4;
+  ClientInfo info = 5;
+  uint64 offset = 6;
 }
 
 message Join {
-    ClientInfo info = 1;
+  ClientInfo info = 1;
 }
 
 message Leave {
-    ClientInfo info = 1;
+  ClientInfo info = 1;
 }
 
 message Unsubscribe {
-    bool resubscribe =1;
+  // Field 1 removed (bool resubscribe).
 }
 
 message Subscribe {
-    bool recoverable = 1;
-    uint32 seq = 2;
-    uint32 gen = 3;
-    string epoch = 4;
-    uint64 offset = 5;
-    bool positioned = 6;
-    bytes data = 7;
+  bool recoverable = 1;
+  // 2-3 skipped here for backwards compatibility.
+  string epoch = 4;
+  uint64 offset = 5;
+  bool positioned = 6;
+  bytes data = 7;
 }
 
 message Message {
-    bytes data = 1;
+  bytes data = 1;
 }
 
 message Connect {
-    string client = 1;
-    string version = 2;
-    bytes data = 3;
-    map<string, SubscribeResult> subs = 4;
+  string client = 1;
+  string version = 2;
+  bytes data = 3;
+  map<string, SubscribeResult> subs = 4;
+  bool expires = 5;
+  uint32 ttl = 6;
 }
 
 message Disconnect {
-    uint32 code = 1;
-    string reason = 2;
-    bool reconnect = 3;
+  uint32 code = 1;
+  string reason = 2;
+  bool reconnect = 3;
+}
+
+message Refresh {
+  bool expires = 1;
+  uint32 ttl = 2;
 }
 
 message ConnectRequest {
-    string token = 1;
-    bytes data = 2;
-    map<string, SubscribeRequest> subs = 3;
-    string name = 4;
-    string version = 5;
+  string token = 1;
+  bytes data = 2;
+  map<string, SubscribeRequest> subs = 3;
+  string name = 4;
+  string version = 5;
 }
 
 message ConnectResult {
-    string client = 1;
-    string version = 2;
-    bool expires = 3;
-    uint32 ttl = 4;
-    bytes data = 5;
-    map<string, SubscribeResult> subs = 6;
+  string client = 1;
+  string version = 2;
+  bool expires = 3;
+  uint32 ttl = 4;
+  bytes data = 5;
+  map<string, SubscribeResult> subs = 6;
 }
 
 message RefreshRequest {
-    string token = 1;
+  string token = 1;
 }
 
 message RefreshResult {
-    string client = 1;
-    string version = 2;
-    bool expires = 3;
-    uint32 ttl = 4;
+  string client = 1;
+  string version = 2;
+  bool expires = 3;
+  uint32 ttl = 4;
 }
 
 message SubscribeRequest {
-    string channel = 1;
-    string token = 2;
-    bool recover = 3;
-    uint32 seq = 4;
-    uint32 gen = 5;
-    string epoch = 6;
-    uint64 offset = 7;
+  string channel = 1;
+  string token = 2;
+  bool recover = 3;
+  // 4-5 skipped here for backwards compatibility.
+  string epoch = 6;
+  uint64 offset = 7;
 }
 
 message SubscribeResult {
-    bool expires = 1;
-    uint32 ttl = 2;
-    bool recoverable = 3;
-    uint32 seq = 4;
-    uint32 gen = 5;
-    string epoch = 6;   
-    repeated Publication publications = 7;
-    bool recovered = 8;
-    uint64 offset = 9;
-    bool positioned = 10;
-    bytes data = 11;
+  bool expires = 1;
+  uint32 ttl = 2;
+  bool recoverable = 3;
+  // 4-5 skipped here for backwards compatibility.
+  string epoch = 6;
+  repeated Publication publications = 7;
+  bool recovered = 8;
+  uint64 offset = 9;
+  bool positioned = 10;
+  bytes data = 11;
 }
 
 message SubRefreshRequest {
-    string channel = 1;
-    string token = 2;
+  string channel = 1;
+  string token = 2;
 }
 
 message SubRefreshResult {
-    bool expires = 1;
-    uint32 ttl = 2;
+  bool expires = 1;
+  uint32 ttl = 2;
 }
 
 message UnsubscribeRequest {
-    string channel = 1;
+  string channel = 1;
 }
 
 message UnsubscribeResult {}
 
 message PublishRequest {
-    string channel = 1;
-    bytes data = 2;
+  string channel = 1;
+  bytes data = 2;
 }
 
 message PublishResult {}
 
 message PresenceRequest {
-    string channel = 1;
+  string channel = 1;
 }
 
 message PresenceResult {
-    map<string, ClientInfo> presence = 1;
+  map<string, ClientInfo> presence = 1;
 }
 
 message PresenceStatsRequest {
-    string channel = 1;
+  string channel = 1;
 }
 
 message PresenceStatsResult {
-    uint32 num_clients = 1;
-    uint32 num_users = 2;
+  uint32 num_clients = 1;
+  uint32 num_users = 2;
+}
+
+message StreamPosition {
+  uint64 offset = 1;
+  string epoch = 2;
 }
 
 message HistoryRequest {
-    string channel = 1;
-    bool use_since = 2;
-    uint64 offset = 3;
-    string epoch = 4;
-    bool use_limit = 5;
-    int32 limit = 6;
+  string channel = 1;
+  // 2-6 skipped here for backwards compatibility.
+  int32 limit = 7;
+  StreamPosition since = 8;
+  bool reverse = 9;
 }
 
 message HistoryResult {
-    repeated Publication publications = 1;
-    string epoch = 2;
-    uint64 offset = 3;
+  repeated Publication publications = 1;
+  string epoch = 2;
+  uint64 offset = 3;
 }
 
-message PingRequest {
-}
+message PingRequest {}
 
-message PingResult {
-}
+message PingResult {}
 
 message RPCRequest{
-    bytes data = 1;
-    string method = 2;
+  bytes data = 1;
+  string method = 2;
 }
 
 message RPCResult {
-    bytes data = 1 ;
+  bytes data = 1 ;
 }
 
 message SendRequest{
-    bytes data = 1;
+  bytes data = 1;
 }
