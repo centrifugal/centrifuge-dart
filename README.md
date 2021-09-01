@@ -92,7 +92,7 @@ await subscription.publish(data);
 - [ ] message recovery mechanism for client-side subscriptions
 - [x] server-side subscriptions
 - [x] message recovery mechanism for server-side subscriptions
-- [ ] history stream pagination
+- [x] history stream pagination
 
 ## Instructions to update protobuf
 

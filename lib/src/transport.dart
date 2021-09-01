@@ -30,6 +30,7 @@ Transport protobufTransportBuilder({required String url, required TransportConfi
   final transport = Transport(
     () => UniversalWebSocket.connect(
       url,
+      protocols: ["centrifuge-protobuf"],
       headers: config.headers,
     ),
     config,

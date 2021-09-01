@@ -3,12 +3,15 @@ import 'dart:async';
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/client.dart';
-import 'package:centrifuge/src/proto/client.pb.dart' hide Error;
+import 'package:centrifuge/src/events.dart';
+import 'package:centrifuge/src/proto/client.pb.dart'
+    hide Error, HistoryResult, StreamPosition;
 import 'package:centrifuge/src/proto/client.pb.dart' as proto;
 import 'package:centrifuge/src/transport.dart';
 import 'package:centrifuge/src/universal_web_socket/web_socket_interface.dart';
 import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 
 class MockWebSocket implements IWebSocket {
   final List<Command> commands = <Command>[];
@@ -204,6 +207,13 @@ class MockClient extends Mock implements ClientImpl {
     return super.noSuchMethod(
         Invocation.method(#sendMessage, [request, result]),
         returnValue: Future.value(result));
+  }
+
+  @override
+  Future<HistoryResult> history(String channel,
+      {int limit = 0, StreamPosition? since, bool reverse = false}) {
+    return super.noSuchMethod(Invocation.method(#history, [channel]),
+        returnValue: Future.value(HistoryResult([], $fixnum.Int64(0), "")));
   }
 
   @override

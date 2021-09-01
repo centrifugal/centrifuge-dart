@@ -1,3 +1,15 @@
+## [0.7.0]
+
+Update to work with Centrifuge >= v0.18.0 and Centrifugo v3.
+
+**Breaking change** in server behavior. Client History API behavior changed in Centrifuge >= v0.18.0 and Centrifugo >= v3.0.0. When using history call it won't return all publications in a stream by default. See Centrifuge [v0.18.0 release notes](https://github.com/centrifugal/centrifuge/releases/tag/v0.18.0) or [Centrifugo v3 migration guide](https://centrifugal.dev/docs/getting-started/migration_v3) for more information and workaround on server-side.
+
+* Protocol definitions updated to the latest version 
+* History method now accepts optional `limit`, `since` and `reverse` arguments and returns `HistoryResult`
+* RPC call now requires method name as first argument (you can pass empty string to mimic previous behavior)
+* Publish now returns `PublishResult`
+* When working with Centrifugo v3 or Centrifuge >= v0.18.0 it's now possible to avoid using `?format=protobuf` in connection URL. Client will negotiate Protobuf protocol with a server using WebSocket subprotocol mechanism (in request headers).
+
 ## [0.6.0]
 
 Null safety migration
