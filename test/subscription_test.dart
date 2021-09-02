@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:centrifuge/src/events.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:centrifuge/src/subscription.dart';
-import 'package:centrifuge/src/events.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-import 'package:fixnum/fixnum.dart' as $fixnum;
 
 import 'src/utils.dart';
 

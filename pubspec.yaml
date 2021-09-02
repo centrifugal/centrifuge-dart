@@ -2,7 +2,7 @@ name: centrifuge
 version: 0.7.0
 
 description: >
-  Dart client to communicate with Centrifuge and Centrifugo from Flutter and VM over import 'package:universal_io/io.dart'; WebSocket
+ Dart client to communicate with Centrifuge and Centrifugo from Flutter and VM over dart:io and dart:html WebSocket
 
 homepage: http://github.com/centrifugal/centrifuge-dart
 
