@@ -1,38 +1,19 @@
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:typed_data';
 
 import 'package:centrifuge/src/universal_web_socket/web_socket_interface.dart';
 import 'package:centrifuge/src/universal_web_socket/web_socket_universal.dart';
 import 'package:meta/meta.dart';
 
 @internal
-Future<IWebSocket> connect(String url, {Map<String, Object?>? headers}) async {
-  // print('URL: $url, HEADERS: $headers');
-  // try {
-  //   await html.HttpRequest.request(
-  //     url,
-  //     requestHeaders: headers?.map(
-  //           (key, value) =>
-  //           MapEntry(
-  //             key,
-  //             value.toString(),
-  //           ),
-  //     ),
-  //   );
-  // }
-  // on Object catch(e){
-  //   print('1 - $e');
-  // }
-  try {
-    final client = html.WebSocket(
-      url,
-    );
-    return WebSocketHtml._(client);
-  }
-  on Object catch(e){
-    print('2 - $e');
-    rethrow;
-  }
+Future<IWebSocket> connect(String url, {List<String>? protocols, Map<String, Object?>? headers}) async {
+  final client = html.WebSocket(
+    url,
+  );
+  await client.onOpen.first;
+  client.binaryType = 'arraybuffer';
+  return WebSocketHtml._(client);
 }
 
 @internal
@@ -45,8 +26,6 @@ class WebSocketHtml extends UniversalWebSocket {
   WebSocketHtml._(html.WebSocket client)
       : _client = client,
         super.internal() {
-    /// прослушиваем все CloseEvent и усстанавливаем их в локальную переменную
-    /// для того, чтобы у нас всегда была возможность синхронно иметь доступ к _closeEvent
     _closeEventListener = _client.on['CloseEvent'].where((event) => event is html.CloseEvent).listen((event) {
       if (event is html.CloseEvent) {
         _closeEvent = event;
@@ -61,15 +40,28 @@ class WebSocketHtml extends UniversalWebSocket {
     void Function()? onDone,
     bool? cancelOnError,
   }) =>
-      _client.onMessage.map<Object?>((event) => event.data).listen(
-            onData,
-            onError: onError,
-            onDone: onDone,
-            cancelOnError: cancelOnError,
-          );
+      _client.onMessage.map<Object?>((event) {
+        final dynamic data = event.data;
+        if (data is ByteBuffer) {
+          return data.asInt8List();
+        } else {
+          throw Exception('data is not ByteBuffer');
+        }
+      }).listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
 
   @override
-  void add(Object? data) => _client.send(data);
+  Future<void> add(Object? data) async {
+    Uint8List? uint8list;
+    if (data is List<int>) {
+      uint8list = Uint8List.fromList(data);
+      _client.sendTypedData(uint8list);
+    }
+  }
 
   @override
   Future<void> close() async {

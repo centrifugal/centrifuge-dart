@@ -8,7 +8,11 @@ import 'package:meta/meta.dart';
 @internal
 abstract class UniversalWebSocket extends Stream<Object?> implements IWebSocket {
   @internal
-  static Future<IWebSocket> connect(String url, {Map<String, Object?>? headers}) => platform.connect(url, headers: headers);
+  static Future<IWebSocket> connect(String url, {List<String>? protocols, Map<String, Object?>? headers}) => platform.connect(
+        url,
+        protocols: protocols,
+        headers: headers,
+      );
 
   @internal
   @protected
