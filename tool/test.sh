@@ -16,13 +16,6 @@ echo "Running dartanalyzer..."
 dartanalyzer $DARTANALYZER_FLAGS \
   lib/
 
-# Verify that dartfmt has been run.
-echo "Checking dart format..."
-if [[ $(dart format --set-exit-if-changed lib/ test/) ]]; then
-	echo "Failed dartfmt check, run: dart format lib/ test/"
-	exit 1
-fi
-
 # Run the tests.
 echo "Running tests..."
 dart run test --reporter expanded
