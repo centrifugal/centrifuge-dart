@@ -207,7 +207,7 @@ class SubscribeSuccessEvent {
 
   @override
   String toString() {
-    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered}';
+    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}}';
   }
 }
 
