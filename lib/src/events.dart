@@ -195,18 +195,19 @@ class ServerLeaveEvent {
 }
 
 class SubscribeSuccessEvent {
-  SubscribeSuccessEvent(this.isResubscribed, this.isRecovered);
+  SubscribeSuccessEvent(this.isResubscribed, this.isRecovered, this.data);
 
   final bool isResubscribed;
   final bool isRecovered;
+  final List<int> data;
 
   static SubscribeSuccessEvent from(
           proto.SubscribeResult result, bool resubscribed) =>
-      SubscribeSuccessEvent(resubscribed, result.recovered);
+      SubscribeSuccessEvent(resubscribed, result.recovered, result.data);
 
   @override
   String toString() {
-    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered}';
+    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}}';
   }
 }
 

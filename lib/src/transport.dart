@@ -8,12 +8,12 @@ import 'codec.dart';
 import 'error.dart' as centrifuge;
 import 'proto/client.pb.dart' hide Error;
 
-typedef Transport TransportBuilder({
+typedef TransportBuilder = Transport Function({
   required String url,
   required TransportConfig config,
 });
 
-typedef Future<WebSocket> WebSocketBuilder();
+typedef WebSocketBuilder = Future<WebSocket> Function();
 
 class TransportConfig {
   TransportConfig(
