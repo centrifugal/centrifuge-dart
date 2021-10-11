@@ -1,3 +1,7 @@
+## [0.7.1]
+
+* Add support for `data` in `SubscribeSuccessEvent`. This is a custom data which can be sent by a server towards client connection in subscribe result. Note that due to the bug in Centrifugo server this feature only works in Centrifugo >= v3.0.3.
+
 ## [0.7.0]
 
 Update to work with Centrifuge >= v0.18.0 and Centrifugo v3.
