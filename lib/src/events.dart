@@ -31,6 +31,17 @@ class ConnectEvent {
   }
 }
 
+class ErrorEvent {
+  ErrorEvent(this.error);
+
+  final dynamic error;
+
+  @override
+  String toString() {
+    return 'ErrorEvent{error: $error}';
+  }
+}
+
 class DisconnectEvent {
   DisconnectEvent(this.reason, this.shouldReconnect);
 

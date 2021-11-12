@@ -61,7 +61,7 @@ void main() {
 
     await subscribeSuccess();
 
-    subscription.resubscribeIfNeeded();
+    subscription.resubscribeOnConnect();
 
     await subscribeSuccess();
 
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('subscription doesn\'t resubscribe if wasn\'t subscribed', () async {
-    subscription.resubscribeIfNeeded();
+    subscription.resubscribeOnConnect();
 
     verifyNoMoreInteractions(client);
   });
@@ -118,7 +118,7 @@ void main() {
     final unsubscribe = subscription.unsubscribeStream.first;
     subscription.subscribe();
 
-    subscription.sendUnsubscribeEventIfNeeded();
+    subscription.unsubscribeOnDisconnect();
 
     expect(unsubscribe, completion(isNotNull));
   });
@@ -126,7 +126,7 @@ void main() {
   test('subscription doesn\'t send event if wasn\'t subscribed', () async {
     final unsubscribe = subscription.unsubscribeStream.first;
 
-    subscription.sendUnsubscribeEventIfNeeded();
+    subscription.unsubscribeOnDisconnect();
 
     expect(unsubscribe, doesNotComplete);
   });

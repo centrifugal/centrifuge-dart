@@ -90,7 +90,7 @@ class Transport implements GeneratedMessageSender {
   }
 
   Future? close() {
-    return _socket!.close();
+    return _socket?.close();
   }
 
   Command _createCommand(GeneratedMessage request) => Command()
@@ -143,7 +143,7 @@ class Transport implements GeneratedMessageSender {
 
   Function _onDone(void Function(String, bool)? onDone) {
     return () {
-      String reason = "";
+      String reason = "connection closed";
       bool reconnect = true;
       if (_socket!.closeReason != null) {
         try {

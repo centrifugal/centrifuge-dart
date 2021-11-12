@@ -8,8 +8,12 @@ void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
   final channel = 'chat:index';
 
+  final onSubscriptionEvent = (dynamic event) {
+    print('subscription $channel> $event');
+  };
+
   final onEvent = (dynamic event) {
-    print('$channel> $event');
+    print('client> $event');
   };
 
   try {
@@ -24,6 +28,7 @@ void main() async {
 
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
+    client.errorStream.listen(onEvent);
 
     // Uncomment to use example token based on secret key `secret`.
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
@@ -32,12 +37,12 @@ void main() async {
     final subscription = client.getSubscription(channel);
 
     subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
-    subscription.joinStream.listen(onEvent);
-    subscription.leaveStream.listen(onEvent);
+    subscription.joinStream.listen(onSubscriptionEvent);
+    subscription.leaveStream.listen(onSubscriptionEvent);
 
-    subscription.subscribeSuccessStream.listen(onEvent);
-    subscription.subscribeErrorStream.listen(onEvent);
-    subscription.unsubscribeStream.listen(onEvent);
+    subscription.subscribeSuccessStream.listen(onSubscriptionEvent);
+    subscription.subscribeErrorStream.listen(onSubscriptionEvent);
+    subscription.unsubscribeStream.listen(onSubscriptionEvent);
 
     subscription.subscribe();
 
@@ -73,8 +78,12 @@ Function(String) _handleUserInput(
         break;
       case '#history':
         final result = await subscription.history(limit: 10);
-        print('History num publications: ' + result.publications.length.toString());
-        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
+        print('History num publications: ' +
+            result.publications.length.toString());
+        print('Stream top position: ' +
+            result.offset.toString() +
+            ', epoch: ' +
+            result.epoch);
         break;
       case '#disconnect':
         client.disconnect();

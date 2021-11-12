@@ -20,6 +20,8 @@ Client createClient(String url, {ClientConfig? config}) => ClientImpl(
 abstract class Client {
   Stream<ConnectEvent> get connectStream;
 
+  Stream<ErrorEvent> get errorStream;
+
   Stream<DisconnectEvent> get disconnectStream;
 
   Stream<MessageEvent> get messageStream;
@@ -105,8 +107,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
   ClientConfig? get config => _config;
   List<int>? _connectData;
   String? _clientID;
+  bool _new = true;
 
   final _connectController = StreamController<ConnectEvent>.broadcast();
+  final _errorController = StreamController<ErrorEvent>.broadcast();
   final _disconnectController = StreamController<DisconnectEvent>.broadcast();
   final _messageController = StreamController<MessageEvent>.broadcast();
   final _subscribeController =
@@ -121,6 +125,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
   @override
   Stream<ConnectEvent> get connectStream => _connectController.stream;
+
+  @override
+  Stream<ErrorEvent> get errorStream => _errorController.stream;
 
   @override
   Stream<DisconnectEvent> get disconnectStream => _disconnectController.stream;
@@ -205,6 +212,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   void disconnect() async {
     _processDisconnect(reason: 'manual disconnect', reconnect: false);
     await _transport.close();
+    _new = true;
   }
 
   @override
@@ -253,20 +261,25 @@ class ClientImpl implements Client, GeneratedMessageSender {
     }
     _clientID = '';
 
-    if (_state == _ClientState.connected) {
-      _subscriptions.values.forEach((s) => s.sendUnsubscribeEventIfNeeded());
+    if (_state == _ClientState.connected ||
+        (_state == _ClientState.connecting && _new)) {
+      _subscriptions.values.forEach((s) => s.unsubscribeOnDisconnect());
       _serverSubs.forEach((key, value) {
         final event = ServerUnsubscribeEvent.from(key);
         _unsubscribeController.add(event);
       });
       final disconnect = DisconnectEvent(reason, reconnect);
       _disconnectController.add(disconnect);
+      _new = false;
     }
 
     if (reconnect) {
       _state = _ClientState.connecting;
       _retryCount += 1;
       await _config.retry(_retryCount);
+      if (_state == _ClientState.disconnected) {
+        return;
+      }
       _connect();
     } else {
       _state = _ClientState.disconnected;
@@ -282,13 +295,13 @@ class ClientImpl implements Client, GeneratedMessageSender {
           config: TransportConfig(
               headers: _config.headers, pingInterval: _config.pingInterval));
 
-      await _transport.open(
-        _onPush,
-        onError: (dynamic error) =>
-            _processDisconnect(reason: error.toString(), reconnect: true),
-        onDone: (reason, reconnect) =>
-            _processDisconnect(reason: reason, reconnect: reconnect),
-      );
+      await _transport.open(_onPush, onError: (dynamic error) {
+        final event = ErrorEvent(error);
+        _errorController.add(event);
+        _processDisconnect(reason: "connection closed", reconnect: true);
+      }, onDone: (reason, reconnect) {
+        _processDisconnect(reason: reason, reconnect: reconnect);
+      });
 
       final request = protocol.ConnectRequest();
       if (_token != null) {
@@ -320,6 +333,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _clientID = result.client;
       _retryCount = 0;
       _state = _ClientState.connected;
+      _new = false;
       _connectController.add(ConnectEvent.from(result));
 
       result.subs.forEach((key, value) {
@@ -344,10 +358,12 @@ class ClientImpl implements Client, GeneratedMessageSender {
       });
 
       for (SubscriptionImpl subscription in _subscriptions.values) {
-        subscription.resubscribeIfNeeded();
+        subscription.resubscribeOnConnect();
       }
     } catch (ex) {
-      _processDisconnect(reason: ex.toString(), reconnect: true);
+      final event = ErrorEvent(ex);
+      _errorController.add(event);
+      _processDisconnect(reason: "connect error", reconnect: true);
     }
   }
 

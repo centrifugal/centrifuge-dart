@@ -74,15 +74,18 @@ class SubscriptionImpl implements Subscription {
 
   @override
   void subscribe() {
-    _state = _SubscriptionState.subscribed;
+    if (_state != _SubscriptionState.unsubscribed) {
+      return;
+    }
+    _state = _SubscriptionState.subscribing;
     if (!_client.connected) {
       return;
     }
     _resubscribe(isResubscribed: false);
   }
 
-  void resubscribeIfNeeded() {
-    if (_state != _SubscriptionState.subscribed) {
+  void resubscribeOnConnect() {
+    if (_state != _SubscriptionState.subscribing) {
       return null;
     }
     _resubscribe(isResubscribed: true);
@@ -90,25 +93,25 @@ class SubscriptionImpl implements Subscription {
 
   @override
   void unsubscribe() async {
-    if (_state != _SubscriptionState.subscribed) {
+    final prevState = _state;
+    _state = _SubscriptionState.unsubscribed;
+    if (prevState != _SubscriptionState.subscribed) {
       return;
     }
-    _state = _SubscriptionState.unsubscribed;
-
     if (!_client.connected) {
       return;
     }
-
     final request = protocol.UnsubscribeRequest()..channel = channel;
     await _client.sendMessage(request, protocol.UnsubscribeResult());
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
 
-  void sendUnsubscribeEventIfNeeded() {
+  void unsubscribeOnDisconnect() {
     if (_state != _SubscriptionState.subscribed) {
       return;
     }
+    _state = _SubscriptionState.subscribing;
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
@@ -143,9 +146,11 @@ class SubscriptionImpl implements Subscription {
       final result =
           await _client.sendMessage(request, protocol.SubscribeResult());
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
+      _state = _SubscriptionState.subscribed;
       _onSubscribeSuccess(event);
       _recover(result);
     } catch (exception) {
+      _state = _SubscriptionState.error;
       if (exception is errors.Error) {
         _onSubscribeError(
             SubscribeErrorEvent(exception.message, exception.code));
@@ -163,4 +168,4 @@ class SubscriptionImpl implements Subscription {
   }
 }
 
-enum _SubscriptionState { subscribed, unsubscribed }
+enum _SubscriptionState { unsubscribed, subscribing, subscribed, error }
