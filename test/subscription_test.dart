@@ -45,7 +45,15 @@ void main() {
   });
 
   test('subscription resubscribes if was subscribed', () async {
-    final subscribeSuccess = () => subscription.subscribeSuccessStream.first;
+    var numOnSubscribeSuccessCalls = 0;
+    var completer = new Completer<void>();
+    final onSubscriptionEvent = (dynamic event) {
+      numOnSubscribeSuccessCalls++;
+      completer.complete();
+      completer = new Completer<void>();
+    };
+    subscription.subscribeSuccessStream.listen(onSubscriptionEvent);
+
     final request = protocol.SubscribeRequest()
       ..channel = channel
       ..token = token;
@@ -57,18 +65,20 @@ void main() {
       client.sendMessage(request, result),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
-    subscription.subscribe();
+    final unsubRequest = protocol.UnsubscribeRequest()..channel = channel;
+    final unsubResult = protocol.UnsubscribeResult();
 
-    await subscribeSuccess();
+    when(
+      client.sendMessage(unsubRequest, unsubResult),
+    ).thenAnswer((_) async => protocol.UnsubscribeResult());
 
-    subscription.resubscribeOnConnect();
+    await subscription.subscribe();
+    await completer.future;
+    await subscription.unsubscribe();
+    await subscription.subscribe();
+    await completer.future;
 
-    await subscribeSuccess();
-
-    verify(client
-            .sendMessage<protocol.SubscribeRequest, protocol.SubscribeResult>(
-                request, result))
-        .called(2);
+    expect(numOnSubscribeSuccessCalls, 2);
   });
 
   test('subscription doesn\'t resubscribe if wasn\'t subscribed', () async {
@@ -114,13 +124,13 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('subscription sends event if was subscribed', () async {
+  test('subscription doesn\'t send event if was subscribing', () async {
     final unsubscribe = subscription.unsubscribeStream.first;
     subscription.subscribe();
 
     subscription.unsubscribeOnDisconnect();
 
-    expect(unsubscribe, completion(isNotNull));
+    expect(unsubscribe, doesNotComplete);
   });
 
   test('subscription doesn\'t send event if wasn\'t subscribed', () async {

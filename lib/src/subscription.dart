@@ -20,9 +20,9 @@ abstract class Subscription {
 
   Stream<UnsubscribeEvent> get unsubscribeStream;
 
-  void subscribe();
+  Future<void> subscribe();
 
-  void unsubscribe();
+  Future<void> unsubscribe();
 
   Future<PublishResult> publish(List<int> data);
 
@@ -73,15 +73,15 @@ class SubscriptionImpl implements Subscription {
       _client.publish(channel, data);
 
   @override
-  void subscribe() {
+  Future<void> subscribe() async {
     if (_state != _SubscriptionState.unsubscribed) {
-      return;
+      return Future.value();
     }
     _state = _SubscriptionState.subscribing;
     if (!_client.connected) {
-      return;
+      return Future.value();
     }
-    _resubscribe(isResubscribed: false);
+    await _resubscribe(isResubscribed: false);
   }
 
   void resubscribeOnConnect() {
@@ -92,7 +92,7 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  void unsubscribe() async {
+  Future<void> unsubscribe() async {
     final prevState = _state;
     _state = _SubscriptionState.unsubscribed;
     if (prevState != _SubscriptionState.subscribed) {
@@ -127,8 +127,9 @@ class SubscriptionImpl implements Subscription {
 
   void addLeave(LeaveEvent event) => _leaveController.add(event);
 
-  void _onSubscribeSuccess(SubscribeSuccessEvent event) =>
-      _subscribeSuccessController.add(event);
+  void _onSubscribeSuccess(SubscribeSuccessEvent event) {
+    _subscribeSuccessController.add(event);
+  }
 
   void _onSubscribeError(SubscribeErrorEvent event) =>
       _subscribeErrorController.add(event);

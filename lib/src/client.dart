@@ -38,7 +38,7 @@ abstract class Client {
 
   /// Connect to the server.
   ///
-  void connect();
+  Future<void> connect();
 
   /// Set token for connection request.
   ///
@@ -74,7 +74,7 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  void disconnect();
+  Future<void> disconnect();
 
   /// Detect that the subscription already exists.
   ///
@@ -153,8 +153,8 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<ServerLeaveEvent> get leaveStream => _leaveController.stream;
 
   @override
-  void connect() async {
-    return _connect();
+  Future<void> connect() async {
+    _connect();
   }
 
   bool get connected => _state == _ClientState.connected;
@@ -209,10 +209,10 @@ class ClientImpl implements Client, GeneratedMessageSender {
   }
 
   @override
-  void disconnect() async {
-    _processDisconnect(reason: 'manual disconnect', reconnect: false);
-    await _transport.close();
+  Future<void> disconnect() async {
+    _processDisconnect(reason: 'client disconnect', reconnect: false);
     _new = true;
+    await _transport.close();
   }
 
   @override
@@ -275,15 +275,19 @@ class ClientImpl implements Client, GeneratedMessageSender {
 
     if (reconnect) {
       _state = _ClientState.connecting;
-      _retryCount += 1;
-      await _config.retry(_retryCount);
-      if (_state == _ClientState.disconnected) {
-        return;
-      }
-      _connect();
+      scheduleReconnect();
     } else {
       _state = _ClientState.disconnected;
     }
+  }
+
+  void scheduleReconnect() async {
+    _retryCount += 1;
+    await _config.retry(_retryCount);
+    if (_state == _ClientState.disconnected) {
+      return;
+    }
+    _connect();
   }
 
   Future<void> _connect() async {
@@ -298,8 +302,15 @@ class ClientImpl implements Client, GeneratedMessageSender {
       await _transport.open(_onPush, onError: (dynamic error) {
         final event = ErrorEvent(error);
         _errorController.add(event);
+        if (_state != _ClientState.connected) {
+          return;
+        }
         _processDisconnect(reason: "connection closed", reconnect: true);
       }, onDone: (reason, reconnect) {
+        if (_state != _ClientState.connected &&
+            !(_state == _ClientState.connecting && _new)) {
+          return;
+        }
         _processDisconnect(reason: reason, reconnect: reconnect);
       });
 
@@ -364,6 +375,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
       final event = ErrorEvent(ex);
       _errorController.add(event);
       _processDisconnect(reason: "connect error", reconnect: true);
+      await _transport.close();
     }
   }
 
