@@ -153,9 +153,7 @@ class ClientImpl implements Client, GeneratedMessageSender {
   Stream<ServerLeaveEvent> get leaveStream => _leaveController.stream;
 
   @override
-  Future<void> connect() async {
-    _connect();
-  }
+  Future<void> connect() async => await _connect();
 
   bool get connected => _state == _ClientState.connected;
 

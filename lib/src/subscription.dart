@@ -75,11 +75,11 @@ class SubscriptionImpl implements Subscription {
   @override
   Future<void> subscribe() async {
     if (_state != _SubscriptionState.unsubscribed) {
-      return Future.value();
+      return;
     }
     _state = _SubscriptionState.subscribing;
     if (!_client.connected) {
-      return Future.value();
+      return;
     }
     await _resubscribe(isResubscribed: false);
   }
