@@ -14,6 +14,7 @@ class ChatClient {
 
   StreamSubscription<ConnectEvent>? _connSub;
   StreamSubscription<DisconnectEvent>? _disconnSub;
+  StreamSubscription<ErrorEvent>? _errorSub;
 
   late StreamSubscription<MessageEvent> _msgSub;
 
@@ -35,7 +36,7 @@ class ChatClient {
     });
   }
 
-  void connect(VoidCallback onConnect) {
+  Future<void> connect(VoidCallback onConnect) async {
     print("Connecting to Centrifugo server at ${conf.serverAddr}");
     _connSub = _client.connectStream.listen((event) {
       print("Connected to server");
@@ -52,10 +53,13 @@ class ChatClient {
           backgroundColor: Colors.red,
           textColor: Colors.white);
     });
-    _client.connect();
+    _errorSub = _client.errorStream.listen((event) {
+      print(event.error);
+    });
+    await _client.connect();
   }
 
-  void subscribe(String channel) {
+  Future<void> subscribe(String channel) async {
     print("Subscribing to channel $channel");
     final subscription = _client.getSubscription(channel);
     subscription.publishStream
@@ -78,16 +82,15 @@ class ChatClient {
     subscription.subscribeSuccessStream.listen(print);
     subscription.subscribeErrorStream.listen(print);
     subscription.unsubscribeStream.listen(print);
-    subscription.subscribe();
-
     this.subscription = subscription;
+    await subscription.subscribe();
   }
 
-  void dispose() {
-    _connSub?.cancel();
-    _disconnSub?.cancel();
-    _msgSub.cancel();
-    _chatMsgController.close();
+  Future<void> dispose() async {
+    await _connSub?.cancel();
+    await _disconnSub?.cancel();
+    await _msgSub.cancel();
+    await _chatMsgController.close();
   }
 
   Future<void> sendMsg(ChatMessage msg) async {

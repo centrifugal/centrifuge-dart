@@ -26,13 +26,16 @@ class _ChatPageState extends State<ChatPage> {
         onSend: (msg) async {
           await conf.cli.sendMsg(msg);
         },
+        onLoadEarlier: () {
+          print("loading...");
+        },
       ),
     );
   }
 
   @override
-  void dispose() {
-    _sub.cancel();
+  Future<void> dispose() async {
+    await _sub.cancel();
     super.dispose();
   }
 }

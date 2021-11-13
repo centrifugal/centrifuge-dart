@@ -7,7 +7,10 @@ final Map<String, Widget Function(BuildContext)> routes = {
   '/chat': (BuildContext context) => const ChatPage(),
 };
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override

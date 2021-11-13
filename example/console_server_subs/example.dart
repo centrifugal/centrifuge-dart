@@ -26,7 +26,7 @@ void main() async {
 
     // Uncomment to use example token based on secret key `secret`.
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
-    client.connect();
+    await client.connect();
 
     final handler = _handleUserInput(client);
 
@@ -39,15 +39,14 @@ void main() async {
   }
 }
 
-Function(String) _handleUserInput(
-    centrifuge.Client client) {
+Function(String) _handleUserInput(centrifuge.Client client) {
   return (String message) async {
     switch (message) {
       case '#connect':
-        client.connect();
+        await client.connect();
         break;
       case '#disconnect':
-        client.disconnect();
+        await client.disconnect();
         break;
       default:
         break;
