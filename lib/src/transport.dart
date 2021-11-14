@@ -146,6 +146,10 @@ class Transport implements GeneratedMessageSender {
         return Command_MethodType.SUBSCRIBE;
       case HistoryRequest:
         return Command_MethodType.HISTORY;
+      case PresenceRequest:
+        return Command_MethodType.PRESENCE;
+      case PresenceStatsRequest:
+        return Command_MethodType.PRESENCE_STATS;
       case RPCRequest:
         return Command_MethodType.RPC;
       default:

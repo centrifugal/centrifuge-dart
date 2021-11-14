@@ -26,6 +26,10 @@ abstract class Subscription {
 
   Future<PublishResult> publish(List<int> data);
 
+  Future<PresenceResult> presence();
+
+  Future<PresenceStatsResult> presenceStats();
+
   Future<HistoryResult> history({int limit = 0, StreamPosition? since});
 }
 
@@ -120,6 +124,12 @@ class SubscriptionImpl implements Subscription {
   Future<HistoryResult> history(
           {int limit = 0, StreamPosition? since, bool reverse = false}) =>
       _client.history(channel, limit: limit, since: since, reverse: reverse);
+
+  @override
+  Future<PresenceResult> presence() => _client.presence(channel);
+
+  @override
+  Future<PresenceStatsResult> presenceStats() => _client.presenceStats(channel);
 
   void addPublish(PublishEvent event) => _publishController.add(event);
 

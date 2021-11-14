@@ -69,16 +69,16 @@ await subscription.publish(data);
 - [x] subscribe on channel and handle asynchronous Publications
 - [x] handle Join and Leave messages
 - [x] handle Unsubscribe notifications
-- [ ] reconnect on subscribe timeout
+- [x] reconnect on subscribe timeout
 - [x] publish method of Subscription
 - [x] unsubscribe method of Subscription
-- [ ] presence method of Subscription
-- [ ] presence stats method of Subscription
+- [x] presence method of Subscription
+- [x] presence stats method of Subscription
 - [x] history method of Subscription
 - [x] top-level publish method
-- [ ] top-level presence method
-- [ ] top-level presence stats method
-- [ ] top-level history method
+- [x] top-level presence method
+- [x] top-level presence stats method
+- [x] top-level history method
 - [ ] top-level unsubscribe method
 - [ ] send asynchronous messages to server
 - [x] handle asynchronous messages from server

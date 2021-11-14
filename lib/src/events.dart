@@ -143,6 +143,43 @@ class HistoryResult {
   }
 }
 
+class PresenceResult {
+  PresenceResult(this.presence);
+
+  final Map<String, ClientInfo> presence;
+
+  static PresenceResult from(proto.PresenceResult res) {
+    final presence = <String, ClientInfo>{};
+    res.presence.forEach((clientId, ci) {
+      presence[clientId] = ClientInfo.from(ci);
+    });
+    return PresenceResult(
+      presence,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'PresenceResult{num clients: ${presence.length}}';
+  }
+}
+
+class PresenceStatsResult {
+  PresenceStatsResult(this.numClients, this.numUsers);
+
+  final int numClients;
+  final int numUsers;
+
+  static PresenceStatsResult from(proto.PresenceStatsResult res) {
+    return PresenceStatsResult(res.numClients, res.numUsers);
+  }
+
+  @override
+  String toString() {
+    return 'PresenceStatsResult{num clients: $numClients, num users: $numUsers}';
+  }
+}
+
 class JoinEvent {
   JoinEvent(this.user, this.client);
 

@@ -76,6 +76,14 @@ Function(String) _handleUserInput(
         final result = await client.rpc('test', data);
         print('RPC result: ' + utf8.decode(result.data));
         break;
+      case '#presence':
+        final result = await subscription.presence();
+        print(result);
+        break;
+      case '#presenceStats':
+        final result = await subscription.presenceStats();
+        print(result);
+        break;
       case '#history':
         final result = await subscription.history(limit: 10);
         print('History num publications: ' +

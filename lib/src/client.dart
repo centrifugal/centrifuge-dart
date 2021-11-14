@@ -67,7 +67,15 @@ abstract class Client {
   /// Send History command
   ///
   Future<HistoryResult> history(String channel,
-      {int limit = 0, StreamPosition? since});
+      {int limit = 0, StreamPosition? since, bool reverse = false});
+
+  /// Send Presence command
+  ///
+  Future<PresenceResult> presence(String channel);
+
+  /// Send PresenceStats command
+  ///
+  Future<PresenceStatsResult> presenceStats(String channel);
 
   @alwaysThrows
   Future<void> send(List<int> data);
@@ -198,6 +206,22 @@ class ClientImpl implements Client, GeneratedMessageSender {
     final result =
         await _transport.sendMessage(request, protocol.HistoryResult());
     return HistoryResult.from(result);
+  }
+
+  @override
+  Future<PresenceResult> presence(String channel) async {
+    final request = protocol.PresenceRequest()..channel = channel;
+    final result =
+        await _transport.sendMessage(request, protocol.PresenceResult());
+    return PresenceResult.from(result);
+  }
+
+  @override
+  Future<PresenceStatsResult> presenceStats(String channel) async {
+    final request = protocol.PresenceStatsRequest()..channel = channel;
+    final result =
+        await _transport.sendMessage(request, protocol.PresenceStatsResult());
+    return PresenceStatsResult.from(result);
   }
 
   @override
