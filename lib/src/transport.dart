@@ -18,10 +18,12 @@ typedef WebSocketBuilder = Future<WebSocket> Function();
 class TransportConfig {
   TransportConfig(
       {this.pingInterval = const Duration(seconds: 25),
-      this.headers = const <String, dynamic>{}});
+      this.headers = const <String, dynamic>{},
+      this.timeout = const Duration(seconds: 10)});
 
   final Duration pingInterval;
   final Map<String, dynamic> headers;
+  final Duration timeout;
 }
 
 Transport protobufTransportBuilder(
@@ -76,17 +78,27 @@ class Transport implements GeneratedMessageSender {
 
   int _messageId = 1;
 
-  final _completers = <int, Completer<GeneratedMessage>>{};
+  var _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
   Future<Rep>
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
           Req request, Rep result) async {
     final command = _createCommand(request);
-    final reply = await _sendCommand(command);
-
-    final filledResult = _processResult(result, reply);
-    return filledResult;
+    try {
+      var fut = _sendCommand(command);
+      if (_config.timeout.inMicroseconds > 0) {
+        fut = fut.timeout(_config.timeout);
+      }
+      final reply = await fut;
+      final filledResult = _processResult(result, reply);
+      return filledResult;
+    } on TimeoutException {
+      if (command.id > 0) {
+        _completers.remove(command.id);
+      }
+      rethrow;
+    }
   }
 
   Future? close() {
@@ -145,6 +157,10 @@ class Transport implements GeneratedMessageSender {
     return () {
       String reason = "connection closed";
       bool reconnect = true;
+      _completers.forEach((key, value) {
+        _completers[key]?.completeError(centrifuge.ClientDisconnectedError);
+      });
+      _completers = <int, Completer<GeneratedMessage>>{};
       if (_socket!.closeReason != null) {
         try {
           final Map<String, dynamic> info = jsonDecode(_socket!.closeReason!);
@@ -161,7 +177,7 @@ class Transport implements GeneratedMessageSender {
       final List<Reply> replies = _replyDecoder.convert(input);
       replies.forEach((reply) {
         if (reply.id > 0) {
-          _completers.remove(reply.id)!.complete(reply);
+          _completers.remove(reply.id)?.complete(reply);
         } else {
           final push = Push.fromBuffer(reply.result);
 

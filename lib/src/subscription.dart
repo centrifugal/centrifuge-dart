@@ -150,9 +150,18 @@ class SubscriptionImpl implements Subscription {
       _state = _SubscriptionState.subscribed;
       _onSubscribeSuccess(event);
       _recover(result);
+    } on TimeoutException {
+      _client.processDisconnect(reason: 'subscribe timeout', reconnect: true);
+      _client.closeTransport();
+      return;
     } catch (exception) {
       _state = _SubscriptionState.error;
       if (exception is errors.Error) {
+        if (exception.code == 100) {
+          _client.processDisconnect(reason: 'subscribe error', reconnect: true);
+          _client.closeTransport();
+          return;
+        }
         _onSubscribeError(
             SubscribeErrorEvent(exception.message, exception.code));
       } else {

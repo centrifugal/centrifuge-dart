@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:centrifuge/src/transport.dart';
 import 'package:centrifuge/src/server_subscription.dart';
+import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 import 'package:protobuf/protobuf.dart';
 
@@ -251,6 +251,15 @@ class ClientImpl implements Client, GeneratedMessageSender {
           _transport.sendMessage(request, result);
 
   int _retryCount = 0;
+
+  @internal
+  void processDisconnect(
+      {required String reason, required bool reconnect}) async {
+    return _processDisconnect(reason: reason, reconnect: reconnect);
+  }
+
+  @internal
+  void closeTransport() async => await _transport.close();
 
   void _processDisconnect(
       {required String reason, required bool reconnect}) async {
