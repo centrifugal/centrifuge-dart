@@ -328,7 +328,9 @@ class ClientImpl implements Client, GeneratedMessageSender {
       _transport = _transportBuilder(
           url: _url,
           config: TransportConfig(
-              headers: _config.headers, pingInterval: _config.pingInterval));
+              headers: _config.headers,
+              pingInterval: _config.pingInterval,
+              timeout: _config.timeout));
 
       await _transport.open(_onPush, onError: (dynamic error) {
         final event = ErrorEvent(error);

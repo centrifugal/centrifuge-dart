@@ -17,19 +17,21 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 final client = centrifuge.createClient("ws://localhost:8000/connection/websocket?format=protobuf");
 ```
 
-**Note that** `?format=protobuf` **is required because this library only works with Protobuf protocol.** While this client uses binary Protobuf protocol internally nothing stops you from sending JSON-encoded data over it.
+**Note that using** `?format=protobuf` **is required for Centrifugo < v3 and can be skipped for later versions**.
+
+Centrifuge-dart uses binary Protobuf protocol internally but nothing stops you from sending JSON-encoded data over it.
 
 Connect to server:
 ```dart
-client.connect();
+await client.connect();
 ```
 
-Note that `.connect()` method is asynchronous. This means that client will be properly connected and authenticated on server at some point in future. To handle connect and disconnect events you can listen to `connectStream` and `disconnectStream`:
+To handle connect and disconnect events you can listen to `connectStream` and `disconnectStream`:
 
 ```dart
 client.connectStream.listen(onEvent);
 client.disconnectStream.listen(onEvent);
-client.connect();
+await client.connect();
 ```
 
 Connect and disconnect events can happen many times throughout client lifetime.
@@ -46,13 +48,13 @@ subscription.subscribeSuccessStream.listen(onEvent);
 subscription.subscribeErrorStream.listen(onEvent);
 subscription.unsubscribeStream.listen(onEvent);
 
-subscription.subscribe();
+await subscription.subscribe();
 ```
 
 Publish:
+
 ```dart
-final output = jsonEncode({'input': message});
-final data = utf8.encode(output);
+final data = utf8.encode(jsonEncode({'input': message}));
 await subscription.publish(data);
 ```
 
@@ -93,6 +95,7 @@ await subscription.publish(data);
 - [x] server-side subscriptions
 - [x] message recovery mechanism for server-side subscriptions
 - [x] history stream pagination
+- [ ] subscribe from the known StreamPosition
 
 ## Instructions to update protobuf
 
