@@ -268,12 +268,13 @@ class SubscribeSuccessEvent {
 }
 
 class ServerSubscribeEvent {
-  ServerSubscribeEvent(
-      this.channel, this.isResubscribed, this.isRecovered, this.streamPosition);
+  ServerSubscribeEvent(this.channel, this.isResubscribed, this.isRecovered,
+      this.data, this.streamPosition);
 
   final String channel;
   final bool isResubscribed;
   final bool isRecovered;
+  final List<int> data;
   final StreamPosition? streamPosition;
 
   static ServerSubscribeEvent fromSubscribeResult(
@@ -283,7 +284,7 @@ class ServerSubscribeEvent {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
     return ServerSubscribeEvent(
-        channel, resubscribed, result.recovered, streamPosition);
+        channel, resubscribed, result.recovered, result.data, streamPosition);
   }
 
   static ServerSubscribeEvent fromSubscribePush(
@@ -292,12 +293,13 @@ class ServerSubscribeEvent {
     if (result.positioned) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return ServerSubscribeEvent(channel, resubscribed, false, streamPosition);
+    return ServerSubscribeEvent(
+        channel, resubscribed, false, result.data, streamPosition);
   }
 
   @override
   String toString() {
-    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered, streamPosition: $streamPosition}';
+    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
