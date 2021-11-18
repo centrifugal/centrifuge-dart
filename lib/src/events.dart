@@ -268,23 +268,36 @@ class SubscribeSuccessEvent {
 }
 
 class ServerSubscribeEvent {
-  ServerSubscribeEvent(this.channel, this.isResubscribed, this.isRecovered);
+  ServerSubscribeEvent(
+      this.channel, this.isResubscribed, this.isRecovered, this.streamPosition);
 
   final String channel;
   final bool isResubscribed;
   final bool isRecovered;
+  final StreamPosition? streamPosition;
 
   static ServerSubscribeEvent fromSubscribeResult(
-          String channel, proto.SubscribeResult result, bool resubscribed) =>
-      ServerSubscribeEvent(channel, resubscribed, result.recovered);
+      String channel, proto.SubscribeResult result, bool resubscribed) {
+    StreamPosition? streamPosition;
+    if (result.positioned) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return ServerSubscribeEvent(
+        channel, resubscribed, result.recovered, streamPosition);
+  }
 
   static ServerSubscribeEvent fromSubscribePush(
-          String channel, proto.Subscribe result, bool resubscribed) =>
-      ServerSubscribeEvent(channel, resubscribed, false);
+      String channel, proto.Subscribe result, bool resubscribed) {
+    StreamPosition? streamPosition;
+    if (result.positioned) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return ServerSubscribeEvent(channel, resubscribed, false, streamPosition);
+  }
 
   @override
   String toString() {
-    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered}';
+    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered, streamPosition: $streamPosition}';
   }
 }
 
