@@ -243,19 +243,27 @@ class ServerLeaveEvent {
 }
 
 class SubscribeSuccessEvent {
-  SubscribeSuccessEvent(this.isResubscribed, this.isRecovered, this.data);
+  SubscribeSuccessEvent(
+      this.isResubscribed, this.isRecovered, this.data, this.streamPosition);
 
   final bool isResubscribed;
   final bool isRecovered;
   final List<int> data;
+  final StreamPosition? streamPosition;
 
   static SubscribeSuccessEvent from(
-          proto.SubscribeResult result, bool resubscribed) =>
-      SubscribeSuccessEvent(resubscribed, result.recovered, result.data);
+      proto.SubscribeResult result, bool resubscribed) {
+    StreamPosition? streamPosition;
+    if (result.positioned) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return SubscribeSuccessEvent(
+        resubscribed, result.recovered, result.data, streamPosition);
+  }
 
   @override
   String toString() {
-    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}}';
+    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
@@ -288,6 +296,11 @@ class StreamPosition {
 
   final $fixnum.Int64 offset;
   final String epoch;
+
+  @override
+  String toString() {
+    return 'StreamPosition{offset: $offset, epoch: $epoch}';
+  }
 }
 
 class SubscribeErrorEvent {
