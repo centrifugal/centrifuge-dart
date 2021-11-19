@@ -1,3 +1,23 @@
+## [0.8.0]
+
+Version 0.8.0 is the next iteration of `centrifuge-dart` development. It pushes client closer to other clients in the ecosystem. It also **contains several backwards incompatible changes**.
+
+* Return Futures from `Client.connect`, `Client.disconnect`, `Subscription.subscribe`, `Subscription.unsubscribe` methods - addresses [#31](https://github.com/centrifugal/centrifuge-dart/issues/31).
+* On initial connect fire `DisconnectEvent` on connection error - this makes behavior of `centrifuge-dart` similar to all other our clients - addresses [#56](https://github.com/centrifugal/centrifuge-dart/issues/56).
+* Add client error stream to consume `ErrorEvent` - each transport failure will emit error to this stream - addresses [#56](https://github.com/centrifugal/centrifuge-dart/issues/56).
+* Refactor subscription statuses - add `subscribing` and `error` statuses. This change is mostly internal should not affect working with Subscriptions.
+* Do not call `UnsubscribeEvent` if subscription is not successfully subscribed (i.e. in `subscribed` state). This makes behavior of `centrifuge-dart` similar to all other our clients.
+* Update disconnect reasons due to failed connection and calling `Client.Disconnect` method - make it more similar to all other connector libraries in ecosystem.
+* Add default transport timeout (10 sec) – on connect and subscribe timeouts client will auto reconnect, calls like publish, history, rpc can now throw `TimeoutException`. Also - properly pass timeout to the transport (was not before!). Again – this makes client behave similarly to all other connectors.
+* Add `presence` and `presenceStats` methods for Subscription and on client top level (for server-side subscriptions).
+* Support `streamPosition` in `SubscribeSuccessEvent`.
+* Support `streamPosition` in `ServerSubscribeEvent`.
+* Support `data` in `ServerSubscribeEvent`.
+* Implement `send` method to send async messages to a server.
+* Fix deletion during iteration over map when working with server-side subscriptions.
+* Better event String representations.
+* Improvements and fixes in examples.
+
 ## [0.7.1]
 
 * Add support for `data` in `SubscribeSuccessEvent`. This is a custom data which can be sent by a server towards client connection in subscribe result. Note that due to the bug in Centrifugo server this feature only works in Centrifugo >= v3.0.3.
