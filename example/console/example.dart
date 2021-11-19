@@ -20,7 +20,7 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       config: centrifuge.ClientConfig(
-          headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
+          headers: <String, dynamic>{'X-Example-Header': 'example'},
           onPrivateSub: (centrifuge.PrivateSubEvent event) {
             return Future.value('<SUBSCRIPTION JWT>');
           }),
@@ -36,7 +36,7 @@ void main() async {
 
     final subscription = client.getSubscription(channel);
 
-    subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
+    subscription.publishStream.listen(onSubscriptionEvent);
     subscription.joinStream.listen(onSubscriptionEvent);
     subscription.leaveStream.listen(onSubscriptionEvent);
 

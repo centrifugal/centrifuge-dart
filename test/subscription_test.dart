@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:centrifuge/src/events.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:centrifuge/src/subscription.dart';
-import 'package:centrifuge/src/events.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-import 'package:fixnum/fixnum.dart' as $fixnum;
 
 import 'src/utils.dart';
 
@@ -28,11 +28,9 @@ void main() {
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
@@ -54,22 +52,14 @@ void main() {
     };
     subscription.subscribeSuccessStream.listen(onSubscriptionEvent);
 
-    final request = protocol.SubscribeRequest()
-      ..channel = channel
-      ..token = token;
-    final result = protocol.SubscribeResult();
-
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(request, result),
+      client.sendSubscribe(channel, token),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
-    final unsubRequest = protocol.UnsubscribeRequest()..channel = channel;
-    final unsubResult = protocol.UnsubscribeResult();
-
     when(
-      client.sendMessage(unsubRequest, unsubResult),
+      client.sendUnsubscribe(channel),
     ).thenAnswer((_) async => protocol.UnsubscribeResult());
 
     await subscription.subscribe();
@@ -87,26 +77,21 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('subscription unsubscribes if wasn subscribed', () async {
+  test('subscription unsubscribes if was not subscribed', () async {
     final subscribeSuccess = subscription.subscribeSuccessStream.first;
     final unsubscribe = subscription.unsubscribeStream.first;
 
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
     when(
-      client.sendMessage(
-        protocol.UnsubscribeRequest()..channel = channel,
-        protocol.UnsubscribeResult(),
-      ),
+      client.sendUnsubscribe(channel),
     ).thenAnswer((_) async => protocol.UnsubscribeResult());
 
     subscription.subscribe();
@@ -147,11 +132,9 @@ void main() {
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer(
       (_) async => protocol.SubscribeResult()
@@ -179,11 +162,9 @@ void main() {
     subscription.subscribe();
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer((_) => Future.error('test error'));
 

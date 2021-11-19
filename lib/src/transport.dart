@@ -49,6 +49,7 @@ abstract class GeneratedMessageSender {
   Future<Rep>
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
           Req request, Rep result);
+  Future<void> sendAsyncMessage<Req extends GeneratedMessage>(Req request);
 }
 
 class Transport implements GeneratedMessageSender {
@@ -84,7 +85,7 @@ class Transport implements GeneratedMessageSender {
   Future<Rep>
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
           Req request, Rep result) async {
-    final command = _createCommand(request);
+    final command = _createCommand(request, false);
     try {
       var fut = _sendCommand(command);
       if (_config.timeout.inMicroseconds > 0) {
@@ -101,14 +102,30 @@ class Transport implements GeneratedMessageSender {
     }
   }
 
+  @override
+  Future<void> sendAsyncMessage<Req extends GeneratedMessage>(
+      Req request) async {
+    if (_socket == null) {
+      throw centrifuge.ClientDisconnectedError;
+    }
+    final command = _createCommand(request, true);
+    final List<int> data = _commandEncoder.convert(command);
+    _socket!.add(data);
+  }
+
   Future? close() {
     return _socket?.close();
   }
 
-  Command _createCommand(GeneratedMessage request) => Command()
-    ..id = _messageId++
-    ..method = _getType(request)
-    ..params = request.writeToBuffer();
+  Command _createCommand(GeneratedMessage request, bool isAsync) {
+    final cmd = Command()
+      ..method = _getType(request)
+      ..params = request.writeToBuffer();
+    if (!isAsync) {
+      cmd.id = _messageId++;
+    }
+    return cmd;
+  }
 
   Future<Reply> _sendCommand(Command command) {
     final completer = Completer<Reply>.sync();

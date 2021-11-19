@@ -1,15 +1,18 @@
 [![Build Status](https://travis-ci.org/centrifugal/centrifuge-dart.svg?branch=master)](https://travis-ci.org/centrifugal/centrifuge-dart)
 [![Coverage Status](https://coveralls.io/repos/github/centrifugal/centrifuge-dart/badge.svg?branch=master)](https://coveralls.io/github/centrifugal/centrifuge-dart?branch=master)
 
+This repo contains a Dart connector library to communicate with Centrifugo server or a server based on Centrifuge library for Go language. This client uses WebSocket transport with binary Protobuf protocol format for Centrifuge protocol message encoding. See feature matrix below to find out which protocol features are supported here at the moment.
+
 ## Example
 
-Examples:
 * `example\flutter_app` simple chat application
-* `example\console` simple console application 
+* `example\chat_app` one more chat example
+* `example\console` simple console application
+* `example\console_server_subs` demonstrates working with server-side subscriptions
 
 ## Usage
 
-Create client:
+Create a client instance:
 
 ```dart
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
@@ -19,9 +22,10 @@ final client = centrifuge.createClient("ws://localhost:8000/connection/websocket
 
 **Note that using** `?format=protobuf` **is required for Centrifugo < v3 and can be skipped for later versions**.
 
-Centrifuge-dart uses binary Protobuf protocol internally but nothing stops you from sending JSON-encoded data over it.
+Centrifuge-dart uses binary Protobuf protocol internally but nothing stops you from sending JSON-encoded data over it. Our examples demonstrate this.
 
-Connect to server:
+Connect to a server:
+
 ```dart
 await client.connect();
 ```
@@ -36,7 +40,7 @@ await client.connect();
 
 Connect and disconnect events can happen many times throughout client lifetime.
 
-Subscribe to channel:
+Subscribe to a channel:
 
 ```dart
 final subscription = client.getSubscription(channel);
@@ -51,12 +55,26 @@ subscription.unsubscribeStream.listen(onEvent);
 await subscription.subscribe();
 ```
 
-Publish:
+Publish to a channel:
 
 ```dart
 final data = utf8.encode(jsonEncode({'input': message}));
 await subscription.publish(data);
 ```
+
+When using server-side subscriptions you don't need to create Subscription instances, just set appropriate event handlers on `Client` instance:
+
+```dart
+client.connectStream.listen(onEvent);
+client.disconnectStream.listen(onEvent);
+client.subscribeStream.listen(onEvent);
+client.publishStream.listen(onEvent);
+await client.connect();
+```
+
+## Usage in background
+
+When mobile application goes to background there are many OS-specific limitations for established persistent connections. Thus in most cases you need to disconnect from a server when app moves to background and connect again when app goes to foreground.
 
 ## Feature matrix
 
@@ -81,8 +99,7 @@ await subscription.publish(data);
 - [x] top-level presence method
 - [x] top-level presence stats method
 - [x] top-level history method
-- [ ] top-level unsubscribe method
-- [ ] send asynchronous messages to server
+- [x] send asynchronous messages to server
 - [x] handle asynchronous messages from server
 - [x] send RPC commands
 - [x] subscribe to private channels with token (JWT)
@@ -97,14 +114,16 @@ await subscription.publish(data);
 - [x] history stream pagination
 - [ ] subscribe from the known StreamPosition
 
-## Instructions to update protobuf
+## Instructions for maintainers/contributors
+
+### How to update protobuf definitions
 
 1) Install `protoc` compiler
 2) Install `protoc_plugin` https://pub.dev/packages/protoc_plugin (`dart pub global activate protoc_plugin`)
 3) cd `lib/src/proto` and run `protoc --dart_out=. -I . client.proto`
 4) cd to root and run `dartfmt -w lib/ test/` (install dartfmt with `dart pub global activate dart_style`)
 
-## Instructions to release
+### How to release
 
 1) Update changelog
 2) Bump version in `pubspec.yaml`, push, create new tag

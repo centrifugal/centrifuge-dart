@@ -103,12 +103,11 @@ class SubscriptionImpl implements Subscription {
       return;
     }
     if (!_client.connected) {
+      addUnsubscribe(UnsubscribeEvent());
       return;
     }
-    final request = protocol.UnsubscribeRequest()..channel = channel;
-    await _client.sendMessage(request, protocol.UnsubscribeResult());
-    final event = UnsubscribeEvent();
-    addUnsubscribe(event);
+    await _client.sendUnsubscribe(channel);
+    addUnsubscribe(UnsubscribeEvent());
   }
 
   void unsubscribeOnDisconnect() {
@@ -150,12 +149,7 @@ class SubscriptionImpl implements Subscription {
   Future _resubscribe({required bool isResubscribed}) async {
     try {
       final token = await _client.getToken(channel);
-      final request = protocol.SubscribeRequest()
-        ..channel = channel
-        ..token = token ?? '';
-
-      final result =
-          await _client.sendMessage(request, protocol.SubscribeResult());
+      final result = await _client.sendSubscribe(channel, token);
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
       _state = _SubscriptionState.subscribed;
       _onSubscribeSuccess(event);

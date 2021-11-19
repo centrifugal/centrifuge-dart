@@ -77,7 +77,7 @@ class PublishEvent {
 
   @override
   String toString() {
-    return 'PublishEvent{data: $data}';
+    return 'PublishEvent{data: ${utf8.decode(data, allowMalformed: true)}, offset: $offset, info: $info}';
   }
 }
 
@@ -95,7 +95,7 @@ class ServerPublishEvent {
 
   @override
   String toString() {
-    return 'ServerPublishEvent{channel: $channel, data: $data}';
+    return 'ServerPublishEvent{channel: $channel, data: ${utf8.decode(data, allowMalformed: true)}, offset: $offset, info: $info}';
   }
 }
 
@@ -109,6 +109,11 @@ class ClientInfo {
   final String user;
   final List<int>? connInfo;
   final List<int>? chanInfo;
+
+  @override
+  String toString() {
+    return 'ClientInfo{client: $client, user: $user}';
+  }
 }
 
 class Publication {
