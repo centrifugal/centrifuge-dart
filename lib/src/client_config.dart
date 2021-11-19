@@ -6,7 +6,7 @@ import 'package:centrifuge/src/events.dart';
 
 class ClientConfig {
   ClientConfig(
-      {this.timeout = const Duration(seconds: 5),
+      {this.timeout = const Duration(seconds: 10),
       this.debug = false,
       this.headers = const <String, dynamic>{},
       this.tlsSkipVerify = false,

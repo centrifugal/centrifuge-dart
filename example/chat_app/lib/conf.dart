@@ -1,6 +1,6 @@
 import 'client/client.dart';
 
-const String serverAddr = "centrifugo2.herokuapp.com";
+const String serverAddr = "localhost:8000";
 
 // a demo token
 const String token =

@@ -20,11 +20,15 @@ abstract class Subscription {
 
   Stream<UnsubscribeEvent> get unsubscribeStream;
 
-  void subscribe();
+  Future<void> subscribe();
 
-  void unsubscribe();
+  Future<void> unsubscribe();
 
   Future<PublishResult> publish(List<int> data);
+
+  Future<PresenceResult> presence();
+
+  Future<PresenceStatsResult> presenceStats();
 
   Future<HistoryResult> history({int limit = 0, StreamPosition? since});
 }
@@ -73,42 +77,44 @@ class SubscriptionImpl implements Subscription {
       _client.publish(channel, data);
 
   @override
-  void subscribe() {
-    _state = _SubscriptionState.subscribed;
+  Future<void> subscribe() async {
+    if (_state != _SubscriptionState.unsubscribed) {
+      return;
+    }
+    _state = _SubscriptionState.subscribing;
     if (!_client.connected) {
       return;
     }
-    _resubscribe(isResubscribed: false);
+    await _resubscribe(isResubscribed: false);
   }
 
-  void resubscribeIfNeeded() {
-    if (_state != _SubscriptionState.subscribed) {
+  void resubscribeOnConnect() {
+    if (_state != _SubscriptionState.subscribing) {
       return null;
     }
     _resubscribe(isResubscribed: true);
   }
 
   @override
-  void unsubscribe() async {
-    if (_state != _SubscriptionState.subscribed) {
-      return;
-    }
+  Future<void> unsubscribe() async {
+    final prevState = _state;
     _state = _SubscriptionState.unsubscribed;
-
-    if (!_client.connected) {
+    if (prevState != _SubscriptionState.subscribed) {
       return;
     }
-
-    final request = protocol.UnsubscribeRequest()..channel = channel;
-    await _client.sendMessage(request, protocol.UnsubscribeResult());
-    final event = UnsubscribeEvent();
-    addUnsubscribe(event);
+    if (!_client.connected) {
+      addUnsubscribe(UnsubscribeEvent());
+      return;
+    }
+    await _client.sendUnsubscribe(channel);
+    addUnsubscribe(UnsubscribeEvent());
   }
 
-  void sendUnsubscribeEventIfNeeded() {
+  void unsubscribeOnDisconnect() {
     if (_state != _SubscriptionState.subscribed) {
       return;
     }
+    _state = _SubscriptionState.subscribing;
     final event = UnsubscribeEvent();
     addUnsubscribe(event);
   }
@@ -118,14 +124,21 @@ class SubscriptionImpl implements Subscription {
           {int limit = 0, StreamPosition? since, bool reverse = false}) =>
       _client.history(channel, limit: limit, since: since, reverse: reverse);
 
+  @override
+  Future<PresenceResult> presence() => _client.presence(channel);
+
+  @override
+  Future<PresenceStatsResult> presenceStats() => _client.presenceStats(channel);
+
   void addPublish(PublishEvent event) => _publishController.add(event);
 
   void addJoin(JoinEvent event) => _joinController.add(event);
 
   void addLeave(LeaveEvent event) => _leaveController.add(event);
 
-  void _onSubscribeSuccess(SubscribeSuccessEvent event) =>
-      _subscribeSuccessController.add(event);
+  void _onSubscribeSuccess(SubscribeSuccessEvent event) {
+    _subscribeSuccessController.add(event);
+  }
 
   void _onSubscribeError(SubscribeErrorEvent event) =>
       _subscribeErrorController.add(event);
@@ -136,17 +149,23 @@ class SubscriptionImpl implements Subscription {
   Future _resubscribe({required bool isResubscribed}) async {
     try {
       final token = await _client.getToken(channel);
-      final request = protocol.SubscribeRequest()
-        ..channel = channel
-        ..token = token ?? '';
-
-      final result =
-          await _client.sendMessage(request, protocol.SubscribeResult());
+      final result = await _client.sendSubscribe(channel, token);
       final event = SubscribeSuccessEvent.from(result, isResubscribed);
+      _state = _SubscriptionState.subscribed;
       _onSubscribeSuccess(event);
       _recover(result);
+    } on TimeoutException {
+      _client.processDisconnect(reason: 'subscribe timeout', reconnect: true);
+      _client.closeTransport();
+      return;
     } catch (exception) {
+      _state = _SubscriptionState.error;
       if (exception is errors.Error) {
+        if (exception.code == 100) {
+          _client.processDisconnect(reason: 'subscribe error', reconnect: true);
+          _client.closeTransport();
+          return;
+        }
         _onSubscribeError(
             SubscribeErrorEvent(exception.message, exception.code));
       } else {
@@ -163,4 +182,4 @@ class SubscriptionImpl implements Subscription {
   }
 }
 
-enum _SubscriptionState { subscribed, unsubscribed }
+enum _SubscriptionState { unsubscribed, subscribing, subscribed, error }

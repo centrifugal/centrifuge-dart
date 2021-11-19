@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:centrifuge/src/events.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:centrifuge/src/subscription.dart';
-import 'package:centrifuge/src/events.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
-import 'package:fixnum/fixnum.dart' as $fixnum;
 
 import 'src/utils.dart';
 
@@ -28,11 +28,9 @@ void main() {
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
@@ -45,58 +43,55 @@ void main() {
   });
 
   test('subscription resubscribes if was subscribed', () async {
-    final subscribeSuccess = () => subscription.subscribeSuccessStream.first;
-    final request = protocol.SubscribeRequest()
-      ..channel = channel
-      ..token = token;
-    final result = protocol.SubscribeResult();
+    var numOnSubscribeSuccessCalls = 0;
+    var completer = new Completer<void>();
+    final onSubscriptionEvent = (dynamic event) {
+      numOnSubscribeSuccessCalls++;
+      completer.complete();
+      completer = new Completer<void>();
+    };
+    subscription.subscribeSuccessStream.listen(onSubscriptionEvent);
 
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(request, result),
+      client.sendSubscribe(channel, token),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
-    subscription.subscribe();
+    when(
+      client.sendUnsubscribe(channel),
+    ).thenAnswer((_) async => protocol.UnsubscribeResult());
 
-    await subscribeSuccess();
+    await subscription.subscribe();
+    await completer.future;
+    await subscription.unsubscribe();
+    await subscription.subscribe();
+    await completer.future;
 
-    subscription.resubscribeIfNeeded();
-
-    await subscribeSuccess();
-
-    verify(client
-            .sendMessage<protocol.SubscribeRequest, protocol.SubscribeResult>(
-                request, result))
-        .called(2);
+    expect(numOnSubscribeSuccessCalls, 2);
   });
 
   test('subscription doesn\'t resubscribe if wasn\'t subscribed', () async {
-    subscription.resubscribeIfNeeded();
+    subscription.resubscribeOnConnect();
 
     verifyNoMoreInteractions(client);
   });
 
-  test('subscription unsubscribes if wasn subscribed', () async {
+  test('subscription unsubscribes if was not subscribed', () async {
     final subscribeSuccess = subscription.subscribeSuccessStream.first;
     final unsubscribe = subscription.unsubscribeStream.first;
 
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer((_) async => protocol.SubscribeResult()..recovered = true);
 
     when(
-      client.sendMessage(
-        protocol.UnsubscribeRequest()..channel = channel,
-        protocol.UnsubscribeResult(),
-      ),
+      client.sendUnsubscribe(channel),
     ).thenAnswer((_) async => protocol.UnsubscribeResult());
 
     subscription.subscribe();
@@ -114,19 +109,19 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('subscription sends event if was subscribed', () async {
+  test('subscription doesn\'t send event if was subscribing', () async {
     final unsubscribe = subscription.unsubscribeStream.first;
     subscription.subscribe();
 
-    subscription.sendUnsubscribeEventIfNeeded();
+    subscription.unsubscribeOnDisconnect();
 
-    expect(unsubscribe, completion(isNotNull));
+    expect(unsubscribe, doesNotComplete);
   });
 
   test('subscription doesn\'t send event if wasn\'t subscribed', () async {
     final unsubscribe = subscription.unsubscribeStream.first;
 
-    subscription.sendUnsubscribeEventIfNeeded();
+    subscription.unsubscribeOnDisconnect();
 
     expect(unsubscribe, doesNotComplete);
   });
@@ -137,11 +132,9 @@ void main() {
     when(client.getToken(channel)).thenAnswer((_) => Future.value(token));
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer(
       (_) async => protocol.SubscribeResult()
@@ -169,11 +162,9 @@ void main() {
     subscription.subscribe();
 
     when(
-      client.sendMessage(
-        protocol.SubscribeRequest()
-          ..channel = channel
-          ..token = token,
-        protocol.SubscribeResult(),
+      client.sendSubscribe(
+        channel,
+        token,
       ),
     ).thenAnswer((_) => Future.error('test error'));
 

@@ -18,10 +18,12 @@ typedef WebSocketBuilder = Future<WebSocket> Function();
 class TransportConfig {
   TransportConfig(
       {this.pingInterval = const Duration(seconds: 25),
-      this.headers = const <String, dynamic>{}});
+      this.headers = const <String, dynamic>{},
+      this.timeout = const Duration(seconds: 10)});
 
   final Duration pingInterval;
   final Map<String, dynamic> headers;
+  final Duration timeout;
 }
 
 Transport protobufTransportBuilder(
@@ -47,6 +49,7 @@ abstract class GeneratedMessageSender {
   Future<Rep>
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
           Req request, Rep result);
+  Future<void> sendAsyncMessage<Req extends GeneratedMessage>(Req request);
 }
 
 class Transport implements GeneratedMessageSender {
@@ -76,27 +79,53 @@ class Transport implements GeneratedMessageSender {
 
   int _messageId = 1;
 
-  final _completers = <int, Completer<GeneratedMessage>>{};
+  var _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
   Future<Rep>
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
           Req request, Rep result) async {
-    final command = _createCommand(request);
-    final reply = await _sendCommand(command);
+    final command = _createCommand(request, false);
+    try {
+      var fut = _sendCommand(command);
+      if (_config.timeout.inMicroseconds > 0) {
+        fut = fut.timeout(_config.timeout);
+      }
+      final reply = await fut;
+      final filledResult = _processResult(result, reply);
+      return filledResult;
+    } on TimeoutException {
+      if (command.id > 0) {
+        _completers.remove(command.id);
+      }
+      rethrow;
+    }
+  }
 
-    final filledResult = _processResult(result, reply);
-    return filledResult;
+  @override
+  Future<void> sendAsyncMessage<Req extends GeneratedMessage>(
+      Req request) async {
+    if (_socket == null) {
+      throw centrifuge.ClientDisconnectedError;
+    }
+    final command = _createCommand(request, true);
+    final List<int> data = _commandEncoder.convert(command);
+    _socket!.add(data);
   }
 
   Future? close() {
-    return _socket!.close();
+    return _socket?.close();
   }
 
-  Command _createCommand(GeneratedMessage request) => Command()
-    ..id = _messageId++
-    ..method = _getType(request)
-    ..params = request.writeToBuffer();
+  Command _createCommand(GeneratedMessage request, bool isAsync) {
+    final cmd = Command()
+      ..method = _getType(request)
+      ..params = request.writeToBuffer();
+    if (!isAsync) {
+      cmd.id = _messageId++;
+    }
+    return cmd;
+  }
 
   Future<Reply> _sendCommand(Command command) {
     final completer = Completer<Reply>.sync();
@@ -134,6 +163,10 @@ class Transport implements GeneratedMessageSender {
         return Command_MethodType.SUBSCRIBE;
       case HistoryRequest:
         return Command_MethodType.HISTORY;
+      case PresenceRequest:
+        return Command_MethodType.PRESENCE;
+      case PresenceStatsRequest:
+        return Command_MethodType.PRESENCE_STATS;
       case RPCRequest:
         return Command_MethodType.RPC;
       default:
@@ -143,8 +176,12 @@ class Transport implements GeneratedMessageSender {
 
   Function _onDone(void Function(String, bool)? onDone) {
     return () {
-      String reason = "";
+      String reason = "connection closed";
       bool reconnect = true;
+      _completers.forEach((key, value) {
+        _completers[key]?.completeError(centrifuge.ClientDisconnectedError);
+      });
+      _completers = <int, Completer<GeneratedMessage>>{};
       if (_socket!.closeReason != null) {
         try {
           final Map<String, dynamic> info = jsonDecode(_socket!.closeReason!);
@@ -161,7 +198,7 @@ class Transport implements GeneratedMessageSender {
       final List<Reply> replies = _replyDecoder.convert(input);
       replies.forEach((reply) {
         if (reply.id > 0) {
-          _completers.remove(reply.id)!.complete(reply);
+          _completers.remove(reply.id)?.complete(reply);
         } else {
           final push = Push.fromBuffer(reply.result);
 

@@ -46,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  void dispose() {
-    _centrifuge.disconnect();
+  void dispose() async {
+    await _centrifuge.disconnect();
     super.dispose();
   }
 
@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _connect() async {
     try {
-      _centrifuge.connect();
+      await _centrifuge.connect();
     } catch (exception) {
       _show(exception);
     }
@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
       onNewItem(item);
     });
 
-    _subscription.subscribe();
+    await _subscription.subscribe();
   }
 
   void _show(dynamic error) {

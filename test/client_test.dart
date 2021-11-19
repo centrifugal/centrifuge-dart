@@ -138,14 +138,6 @@ void main() {
     });
 
     test('socket closing triggers the corresponding events', () async {
-      subscription('test one').subscribe();
-
-      final unsubscribeOneFuture =
-          subscription('test one').unsubscribeStream.first;
-
-      final unsubscribeTwoFuture =
-          subscription('test two').unsubscribeStream.first;
-
       final disconnectFuture = client.disconnectStream.first;
 
       transport.onDone!('test reason', true);
@@ -154,30 +146,17 @@ void main() {
 
       expect(disconnect.reason, equals('test reason'));
       expect(disconnect.shouldReconnect, isTrue);
-
-      expect(unsubscribeOneFuture, completion(isNotNull));
-      expect(unsubscribeTwoFuture, doesNotComplete);
     });
 
     test('socket error triggers the corresponding events', () async {
-      subscription('test one').subscribe();
-
-      final unsubscribeOneFuture =
-          subscription('test one').unsubscribeStream.first;
-      final unsubscribeTwoFuture =
-          subscription('test two').unsubscribeStream.first;
-
       final disconnectFuture = client.disconnectStream.first;
 
       transport.onError!('test error');
 
       final disconnect = await disconnectFuture;
 
-      expect(disconnect.reason, equals('test error'));
+      expect(disconnect.reason, equals('connection closed'));
       expect(disconnect.shouldReconnect, isTrue);
-
-      expect(unsubscribeOneFuture, completion(isNotNull));
-      expect(unsubscribeTwoFuture, doesNotComplete);
     });
 
     test('client does not reconnect if reconnect = false', () async {
@@ -250,7 +229,7 @@ void main() {
     });
 
     test(
-        'client reconnect sends diconnect and unsubscribe events only once for the first error',
+        'client reconnect sends disconnect and unsubscribe events only once for the first error',
         () async {
       var countOneChannelSubscribe = 0;
       var countOneChannelUnsubscribe = 0;
@@ -295,7 +274,7 @@ void main() {
       expect(countClientDisconnect, 1);
 
       expect(countOneChannelSubscribe, 0);
-      expect(countOneChannelUnsubscribe, 1);
+      expect(countOneChannelUnsubscribe, 0);
 
       expect(countTwoChannelSubscribe, 0);
       expect(countTwoChannelUnsubscribe, 0);
@@ -363,7 +342,7 @@ void main() {
       expect(countClientDisconnect, 20);
 
       expect(countOneChannelSubscribe, 20);
-      expect(countOneChannelUnsubscribe, 20);
+      expect(countOneChannelUnsubscribe, 19);
 
       expect(countTwoChannelSubscribe, 0);
       expect(countTwoChannelUnsubscribe, 0);

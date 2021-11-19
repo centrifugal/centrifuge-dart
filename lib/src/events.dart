@@ -31,6 +31,17 @@ class ConnectEvent {
   }
 }
 
+class ErrorEvent {
+  ErrorEvent(this.error);
+
+  final dynamic error;
+
+  @override
+  String toString() {
+    return 'ErrorEvent{error: $error}';
+  }
+}
+
 class DisconnectEvent {
   DisconnectEvent(this.reason, this.shouldReconnect);
 
@@ -66,7 +77,7 @@ class PublishEvent {
 
   @override
   String toString() {
-    return 'PublishEvent{data: $data}';
+    return 'PublishEvent{data: ${utf8.decode(data, allowMalformed: true)}, offset: $offset, info: $info}';
   }
 }
 
@@ -84,7 +95,7 @@ class ServerPublishEvent {
 
   @override
   String toString() {
-    return 'ServerPublishEvent{channel: $channel, data: $data}';
+    return 'ServerPublishEvent{channel: $channel, data: ${utf8.decode(data, allowMalformed: true)}, offset: $offset, info: $info}';
   }
 }
 
@@ -98,6 +109,11 @@ class ClientInfo {
   final String user;
   final List<int>? connInfo;
   final List<int>? chanInfo;
+
+  @override
+  String toString() {
+    return 'ClientInfo{client: $client, user: $user}';
+  }
 }
 
 class Publication {
@@ -129,6 +145,43 @@ class HistoryResult {
   @override
   String toString() {
     return 'HistoryResult{num pubs: ${publications.length}, offset: $offset, epoch: $epoch}';
+  }
+}
+
+class PresenceResult {
+  PresenceResult(this.presence);
+
+  final Map<String, ClientInfo> presence;
+
+  static PresenceResult from(proto.PresenceResult res) {
+    final presence = <String, ClientInfo>{};
+    res.presence.forEach((clientId, ci) {
+      presence[clientId] = ClientInfo.from(ci);
+    });
+    return PresenceResult(
+      presence,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'PresenceResult{num clients: ${presence.length}}';
+  }
+}
+
+class PresenceStatsResult {
+  PresenceStatsResult(this.numClients, this.numUsers);
+
+  final int numClients;
+  final int numUsers;
+
+  static PresenceStatsResult from(proto.PresenceStatsResult res) {
+    return PresenceStatsResult(res.numClients, res.numUsers);
+  }
+
+  @override
+  String toString() {
+    return 'PresenceStatsResult{num clients: $numClients, num users: $numUsers}';
   }
 }
 
@@ -195,40 +248,63 @@ class ServerLeaveEvent {
 }
 
 class SubscribeSuccessEvent {
-  SubscribeSuccessEvent(this.isResubscribed, this.isRecovered, this.data);
+  SubscribeSuccessEvent(
+      this.isResubscribed, this.isRecovered, this.data, this.streamPosition);
 
   final bool isResubscribed;
   final bool isRecovered;
   final List<int> data;
+  final StreamPosition? streamPosition;
 
   static SubscribeSuccessEvent from(
-          proto.SubscribeResult result, bool resubscribed) =>
-      SubscribeSuccessEvent(resubscribed, result.recovered, result.data);
+      proto.SubscribeResult result, bool resubscribed) {
+    StreamPosition? streamPosition;
+    if (result.positioned) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return SubscribeSuccessEvent(
+        resubscribed, result.recovered, result.data, streamPosition);
+  }
 
   @override
   String toString() {
-    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}}';
+    return 'SubscribeSuccessEvent{isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
 class ServerSubscribeEvent {
-  ServerSubscribeEvent(this.channel, this.isResubscribed, this.isRecovered);
+  ServerSubscribeEvent(this.channel, this.isResubscribed, this.isRecovered,
+      this.data, this.streamPosition);
 
   final String channel;
   final bool isResubscribed;
   final bool isRecovered;
+  final List<int> data;
+  final StreamPosition? streamPosition;
 
   static ServerSubscribeEvent fromSubscribeResult(
-          String channel, proto.SubscribeResult result, bool resubscribed) =>
-      ServerSubscribeEvent(channel, resubscribed, result.recovered);
+      String channel, proto.SubscribeResult result, bool resubscribed) {
+    StreamPosition? streamPosition;
+    if (result.positioned) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return ServerSubscribeEvent(
+        channel, resubscribed, result.recovered, result.data, streamPosition);
+  }
 
   static ServerSubscribeEvent fromSubscribePush(
-          String channel, proto.Subscribe result, bool resubscribed) =>
-      ServerSubscribeEvent(channel, resubscribed, false);
+      String channel, proto.Subscribe result, bool resubscribed) {
+    StreamPosition? streamPosition;
+    if (result.positioned) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return ServerSubscribeEvent(
+        channel, resubscribed, false, result.data, streamPosition);
+  }
 
   @override
   String toString() {
-    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered}';
+    return 'ServerSubscribeEvent{channel: $channel, isResubscribed: $isResubscribed, isRecovered: $isRecovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
@@ -240,6 +316,11 @@ class StreamPosition {
 
   final $fixnum.Int64 offset;
   final String epoch;
+
+  @override
+  String toString() {
+    return 'StreamPosition{offset: $offset, epoch: $epoch}';
+  }
 }
 
 class SubscribeErrorEvent {

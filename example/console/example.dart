@@ -8,15 +8,19 @@ void main() async {
   final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
   final channel = 'chat:index';
 
+  final onSubscriptionEvent = (dynamic event) {
+    print('subscription $channel> $event');
+  };
+
   final onEvent = (dynamic event) {
-    print('$channel> $event');
+    print('client> $event');
   };
 
   try {
     final client = centrifuge.createClient(
       url,
       config: centrifuge.ClientConfig(
-          headers: <String, dynamic>{'user-id': 42, 'user-name': 'The Answer'},
+          headers: <String, dynamic>{'X-Example-Header': 'example'},
           onPrivateSub: (centrifuge.PrivateSubEvent event) {
             return Future.value('<SUBSCRIPTION JWT>');
           }),
@@ -24,22 +28,23 @@ void main() async {
 
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
+    client.errorStream.listen(onEvent);
 
     // Uncomment to use example token based on secret key `secret`.
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
-    client.connect();
+    await client.connect();
 
     final subscription = client.getSubscription(channel);
 
-    subscription.publishStream.map((e) => utf8.decode(e.data)).listen(onEvent);
-    subscription.joinStream.listen(onEvent);
-    subscription.leaveStream.listen(onEvent);
+    subscription.publishStream.listen(onSubscriptionEvent);
+    subscription.joinStream.listen(onSubscriptionEvent);
+    subscription.leaveStream.listen(onSubscriptionEvent);
 
-    subscription.subscribeSuccessStream.listen(onEvent);
-    subscription.subscribeErrorStream.listen(onEvent);
-    subscription.unsubscribeStream.listen(onEvent);
+    subscription.subscribeSuccessStream.listen(onSubscriptionEvent);
+    subscription.subscribeErrorStream.listen(onSubscriptionEvent);
+    subscription.unsubscribeStream.listen(onSubscriptionEvent);
 
-    subscription.subscribe();
+    await subscription.subscribe();
 
     final handler = _handleUserInput(client, subscription);
 
@@ -57,13 +62,13 @@ Function(String) _handleUserInput(
   return (String message) async {
     switch (message) {
       case '#subscribe':
-        subscription.subscribe();
+        await subscription.subscribe();
         break;
       case '#unsubscribe':
-        subscription.unsubscribe();
+        await subscription.unsubscribe();
         break;
       case '#connect':
-        client.connect();
+        await client.connect();
         break;
       case '#rpc':
         final request = jsonEncode({'param': 'test'});
@@ -71,13 +76,25 @@ Function(String) _handleUserInput(
         final result = await client.rpc('test', data);
         print('RPC result: ' + utf8.decode(result.data));
         break;
+      case '#presence':
+        final result = await subscription.presence();
+        print(result);
+        break;
+      case '#presenceStats':
+        final result = await subscription.presenceStats();
+        print(result);
+        break;
       case '#history':
         final result = await subscription.history(limit: 10);
-        print('History num publications: ' + result.publications.length.toString());
-        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
+        print('History num publications: ' +
+            result.publications.length.toString());
+        print('Stream top position: ' +
+            result.offset.toString() +
+            ', epoch: ' +
+            result.epoch);
         break;
       case '#disconnect':
-        client.disconnect();
+        await client.disconnect();
         break;
       default:
         final output = jsonEncode({'input': message});

@@ -8,9 +8,9 @@ import 'package:centrifuge/src/proto/client.pb.dart'
     hide Error, HistoryResult, StreamPosition;
 import 'package:centrifuge/src/proto/client.pb.dart' as proto;
 import 'package:centrifuge/src/transport.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:mockito/mockito.dart';
 import 'package:protobuf/protobuf.dart';
-import 'package:fixnum/fixnum.dart' as $fixnum;
 
 class MockWebSocket implements WebSocket {
   final List<Command> commands = <Command>[];
@@ -159,6 +159,12 @@ class MockTransport implements Transport {
 
     return completer.future;
   }
+
+  @override
+  Future<void> sendAsyncMessage<Req extends GeneratedMessage>(Req request) {
+    // TODO: implement sendAsyncMessage
+    throw UnimplementedError();
+  }
 }
 
 class Triplet<Req extends GeneratedMessage, Res extends GeneratedMessage> {
@@ -206,6 +212,22 @@ class MockClient extends Mock implements ClientImpl {
     return super.noSuchMethod(
         Invocation.method(#sendMessage, [request, result]),
         returnValue: Future.value(result));
+  }
+
+  @override
+  Future<proto.SubscribeResult> sendSubscribe(String channel, String? token) {
+    return super.noSuchMethod(
+        Invocation.method(#sendSubscribe, [channel, token]),
+        returnValue: Future.value(proto.SubscribeResult()));
+  }
+
+  @override
+  Future<proto.UnsubscribeResult> sendUnsubscribe(String channel) {
+    return super.noSuchMethod(
+        Invocation.method(#sendUnsubscribe, [
+          channel,
+        ]),
+        returnValue: Future.value(proto.UnsubscribeResult()));
   }
 
   @override
