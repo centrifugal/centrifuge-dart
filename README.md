@@ -74,7 +74,7 @@ await client.connect();
 
 ## Usage in background
 
-When mobile application goes to background there are many OS-specific limitations for established persistent connections. Thus in most cases you need to disconnect from a server when app moves to background and connect again when app goes to foreground.
+When a mobile application goes to the background there are OS-specific limitations for established persistent connections - which can be silently closed shortly. Thus in most cases you need to disconnect from a server when app moves to the background and connect again when app goes to the foreground.
 
 ## Feature matrix
 
