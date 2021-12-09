@@ -81,7 +81,7 @@ class Transport implements GeneratedMessageSender {
   }
 
   Future? close() {
-    return _socket!.close();
+    return _socket?.close();
   }
 
   Command _createCommand(GeneratedMessage request) => Command()
