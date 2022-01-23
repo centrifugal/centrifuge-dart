@@ -294,6 +294,12 @@ class Transport implements GeneratedMessageSender {
           reason = _socket!.closeReason!;
           reconnect =
               code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+          if (code < 3000) {
+            // We expose codes defined by Centrifuge protocol, hiding
+            // details about transport-specific error codes. We may have extra
+            // optional transportCode field in the future.
+            code = 4;
+          }
         }
         onDone!(code, reason, reconnect);
       }
