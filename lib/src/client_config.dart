@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/events.dart';
 
+enum ClientProtocolVersion { v1, v2 }
+
 class ClientConfig {
   ClientConfig(
       {this.timeout = const Duration(seconds: 10),
@@ -16,6 +18,7 @@ class ClientConfig {
       this.onPrivateSub = _defaultPrivateSubCallback,
       this.name = "dart",
       this.version = "",
+      this.protocolVersion = ClientProtocolVersion.v1,
       WaitRetry? retry})
       : retry = retry ?? _defaultRetry(maxReconnectDelay.inSeconds);
 
@@ -32,6 +35,7 @@ class ClientConfig {
   final Future? Function(int) retry;
   final String name;
   final String version;
+  final ClientProtocolVersion protocolVersion;
 }
 
 typedef WaitRetry = Future? Function(int);
