@@ -111,7 +111,7 @@ class MockTransport implements Transport {
 
   void Function(Push push)? onPush;
   void Function(dynamic)? onError;
-  void Function(String, bool)? onDone;
+  void Function(int, String, bool)? onDone;
 
   Completer<void>? _openCompleter;
 
@@ -131,7 +131,7 @@ class MockTransport implements Transport {
 
   @override
   Future open(void Function(Push push) onPush,
-      {Function? onError, void Function(String, bool)? onDone}) {
+      {Function? onError, void Function(int, String, bool)? onDone}) {
     assert(_openCompleter == null);
     _openCompleter = Completer<void>.sync();
 

@@ -140,7 +140,7 @@ void main() {
     test('socket closing triggers the corresponding events', () async {
       final disconnectFuture = client.disconnectStream.first;
 
-      transport.onDone!('test reason', true);
+      transport.onDone!(0, 'test reason', true);
 
       final disconnect = await disconnectFuture;
 
@@ -167,7 +167,7 @@ void main() {
       };
 
       for (var i = 1; i < 20; i++) {
-        transport.onDone!('test reason', false);
+        transport.onDone!(0, 'test reason', false);
         expect(retryCalled, isFalse);
       }
     });
@@ -203,7 +203,7 @@ void main() {
       retry = (_) => fail('retry shouldn\'t be called');
 
       client.disconnect();
-      transport.onDone!("", true);
+      transport.onDone!(0, "", true);
 
       expect(transport.sendList, hasLength(expectedMessages));
     });

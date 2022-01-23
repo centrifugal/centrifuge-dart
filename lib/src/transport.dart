@@ -67,7 +67,7 @@ class Transport implements GeneratedMessageSender {
 
   Future open(void onPush(Push push),
       {Function? onError,
-      void onDone(String reason, bool shouldReconnect)?}) async {
+      void onDone(int code, String reason, bool shouldReconnect)?}) async {
     _socket = await _socketBuilder();
     if (_config.pingInterval != Duration.zero) {
       _socket!.pingInterval = _config.pingInterval;
@@ -268,22 +268,35 @@ class Transport implements GeneratedMessageSender {
     }
   }
 
-  Function _onDone(void Function(String, bool)? onDone) {
+  Function _onDone(void Function(int, String, bool)? onDone) {
     return () {
-      String reason = "connection closed";
-      bool reconnect = true;
       _completers.forEach((key, value) {
         _completers[key]?.completeError(centrifuge.ClientDisconnectedError);
       });
       _completers = <int, Completer<GeneratedMessage>>{};
-      if (_socket!.closeReason != null) {
-        try {
-          final Map<String, dynamic> info = jsonDecode(_socket!.closeReason!);
-          reason = info['reason'];
-          reconnect = info['reconnect'] ?? true;
-        } catch (_) {}
+      if (_config.protocolVersion == ClientProtocolVersion.v1) {
+        String reason = "connection closed";
+        bool reconnect = true;
+        if (_socket!.closeReason != null) {
+          try {
+            final Map<String, dynamic> info = jsonDecode(_socket!.closeReason!);
+            reason = info['reason'];
+            reconnect = info['reconnect'] ?? true;
+          } catch (_) {}
+        }
+        onDone!(0, reason, reconnect);
+      } else {
+        int code = 4;
+        String reason = "connection closed";
+        bool reconnect = true;
+        if (_socket != null && _socket!.closeCode! > 0) {
+          code = _socket!.closeCode!;
+          reason = _socket!.closeReason!;
+          reconnect =
+              code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+        }
+        onDone!(code, reason, reconnect);
       }
-      onDone!(reason, reconnect);
     };
   }
 

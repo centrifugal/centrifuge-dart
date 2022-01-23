@@ -242,7 +242,7 @@ class ClientImpl implements Client {
 
   @override
   Future<void> disconnect() async {
-    _processDisconnect(reason: 'client disconnect', reconnect: false);
+    _processDisconnect(code: 0, reason: 'client disconnect', reconnect: false);
     _new = true;
     await _transport.close();
   }
@@ -275,7 +275,9 @@ class ClientImpl implements Client {
   int _retryCount = 0;
 
   void _processDisconnect(
-      {required String reason, required bool reconnect}) async {
+      {required int code,
+      required String reason,
+      required bool reconnect}) async {
     if (_state == _ClientState.disconnected) {
       return;
     }
@@ -288,7 +290,7 @@ class ClientImpl implements Client {
         final event = ServerUnsubscribeEvent.from(key);
         _unsubscribeController.add(event);
       });
-      final disconnect = DisconnectEvent(reason, reconnect);
+      final disconnect = DisconnectEvent(code, reason, reconnect);
       _disconnectController.add(disconnect);
       _new = false;
     }
@@ -328,13 +330,14 @@ class ClientImpl implements Client {
         if (_state != _ClientState.connected) {
           return;
         }
-        _processDisconnect(reason: "connection closed", reconnect: true);
-      }, onDone: (reason, reconnect) {
+        _processDisconnect(
+            code: 4, reason: "connection closed", reconnect: true);
+      }, onDone: (code, reason, reconnect) {
         if (_state != _ClientState.connected &&
             !(_state == _ClientState.connecting && _new)) {
           return;
         }
-        _processDisconnect(reason: reason, reconnect: reconnect);
+        _processDisconnect(code: code, reason: reason, reconnect: reconnect);
       });
 
       final request = protocol.ConnectRequest();
@@ -393,7 +396,7 @@ class ClientImpl implements Client {
     } catch (ex) {
       final event = ErrorEvent(ex);
       _errorController.add(event);
-      _processDisconnect(reason: "connect error", reconnect: true);
+      _processDisconnect(code: 6, reason: "connect error", reconnect: true);
       await _transport.close();
     }
   }
@@ -560,8 +563,10 @@ class ClientImpl implements Client {
 
   @internal
   void processDisconnect(
-      {required String reason, required bool reconnect}) async {
-    return _processDisconnect(reason: reason, reconnect: reconnect);
+      {required int code,
+      required String reason,
+      required bool reconnect}) async {
+    return _processDisconnect(code: code, reason: reason, reconnect: reconnect);
   }
 
   @internal

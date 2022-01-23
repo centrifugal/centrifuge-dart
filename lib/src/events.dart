@@ -43,14 +43,15 @@ class ErrorEvent {
 }
 
 class DisconnectEvent {
-  DisconnectEvent(this.reason, this.shouldReconnect);
+  DisconnectEvent(this.code, this.reason, this.shouldReconnect);
 
+  final int code;
   final String reason;
   final bool shouldReconnect;
 
   @override
   String toString() {
-    return 'DisconnectEvent{reason: $reason, shouldReconnect: $shouldReconnect}';
+    return 'DisconnectEvent{code: $code, reason: $reason, shouldReconnect: $shouldReconnect}';
   }
 }
 

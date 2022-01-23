@@ -17,8 +17,9 @@ void main() {
   Function(Push) onPush = (_) => fail('unexpected invocation');
   final Function(dynamic) onError =
       (dynamic error) => fail('unexpected invocation');
-  Function(String?, bool) onDone =
-      (String? reason, bool reconnect) => fail('unexpected invocation');
+  Function(int, String?, bool) onDone =
+      (int code, String? reason, bool reconnect) =>
+          fail('unexpected invocation');
 
   setUp(() {
     webSocket = MockWebSocket();
@@ -35,7 +36,7 @@ void main() {
     await transport.open(
       (p) => onPush(p),
       onError: (dynamic e) => onError(e),
-      onDone: (reason, reconnect) => onDone(reason, reconnect),
+      onDone: (code, reason, reconnect) => onDone(code, reason, reconnect),
     );
 
     expect(webSocket.onData, isNotNull);
@@ -47,7 +48,7 @@ void main() {
     setUp(() => transport.open(
           (p) => onPush(p),
           onError: (dynamic e) => onError(e),
-          onDone: (reason, reconnect) => onDone(reason, reconnect),
+          onDone: (code, reason, reconnect) => onDone(code, reason, reconnect),
         ));
 
     test('Transport.send() returns result', () async {
@@ -104,13 +105,12 @@ void main() {
       String? reason;
       bool? reconnect;
 
-      onDone = (r, rc) {
+      onDone = (_, r, rc) {
         reason = r;
         reconnect = rc;
       };
 
       webSocket.close(3001, '{"reason":"test reason", "reconnect":true}');
-
       expect(reason, equals('test reason'));
       expect(reconnect, isTrue);
     });
@@ -119,7 +119,7 @@ void main() {
       String? reason;
       bool? reconnect;
 
-      onDone = (r, rc) {
+      onDone = (_, r, rc) {
         reason = r;
         reconnect = rc;
       };
@@ -135,7 +135,7 @@ void main() {
       String? reason;
       bool? reconnect;
 
-      onDone = (r, rc) {
+      onDone = (_, r, rc) {
         reason = r;
         reconnect = rc;
       };
@@ -150,7 +150,7 @@ void main() {
       String? reason;
       bool? reconnect;
 
-      onDone = (r, rc) {
+      onDone = (_, r, rc) {
         reason = r;
         reconnect = rc;
       };
