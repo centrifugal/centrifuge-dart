@@ -179,8 +179,10 @@ class ClientImpl implements Client {
       ..channel = channel
       ..data = data;
 
-    final result =
-        await _transport.sendMessage(request, protocol.PublishResult());
+    final result = await _transport.sendMessage(
+      request,
+      protocol.PublishResult(),
+    );
     return PublishResult.from(result);
   }
 
@@ -205,24 +207,30 @@ class ClientImpl implements Client {
       sp.epoch = since.epoch;
       request.since = sp;
     }
-    final result =
-        await _transport.sendMessage(request, protocol.HistoryResult());
+    final result = await _transport.sendMessage(
+      request,
+      protocol.HistoryResult(),
+    );
     return HistoryResult.from(result);
   }
 
   @override
   Future<PresenceResult> presence(String channel) async {
     final request = protocol.PresenceRequest()..channel = channel;
-    final result =
-        await _transport.sendMessage(request, protocol.PresenceResult());
+    final result = await _transport.sendMessage(
+      request,
+      protocol.PresenceResult(),
+    );
     return PresenceResult.from(result);
   }
 
   @override
   Future<PresenceStatsResult> presenceStats(String channel) async {
     final request = protocol.PresenceStatsRequest()..channel = channel;
-    final result =
-        await _transport.sendMessage(request, protocol.PresenceStatsResult());
+    final result = await _transport.sendMessage(
+      request,
+      protocol.PresenceStatsResult(),
+    );
     return PresenceStatsResult.from(result);
   }
 
@@ -309,6 +317,7 @@ class ClientImpl implements Client {
       _transport = _transportBuilder(
           url: _url,
           config: TransportConfig(
+              protocolVersion: _config.protocolVersion,
               headers: _config.headers,
               pingInterval: _config.pingInterval,
               timeout: _config.timeout));
@@ -389,80 +398,128 @@ class ClientImpl implements Client {
     }
   }
 
-  void _onPush(protocol.Push push) {
+  void _handlePub(String channel, protocol.Publication pub) {
+    final subscription = _subscriptions[channel];
+    if (subscription != null) {
+      final event = PublishEvent.from(pub);
+      subscription.addPublish(event);
+      return;
+    }
+    final serverSubscription = _serverSubs[channel];
+    if (serverSubscription != null) {
+      final event = ServerPublishEvent.from(channel, pub);
+      _publishController.add(event);
+      if (_serverSubs[channel]!.recoverable && pub.offset > 0) {
+        _serverSubs[channel]!.offset = pub.offset;
+      }
+    }
+  }
+
+  void _handleJoin(String channel, protocol.Join join) {
+    final subscription = _subscriptions[channel];
+    if (subscription != null) {
+      final event = JoinEvent.from(join.info);
+      subscription.addJoin(event);
+      return;
+    }
+    final serverSubscription = _serverSubs[channel];
+    if (serverSubscription != null) {
+      final event = ServerJoinEvent.from(channel, join.info);
+      _joinController.add(event);
+    }
+  }
+
+  void _handleLeave(String channel, protocol.Leave leave) {
+    final subscription = _subscriptions[channel];
+    if (subscription != null) {
+      final event = LeaveEvent.from(leave.info);
+      subscription.addLeave(event);
+      return;
+    }
+    final serverSubscription = _serverSubs[channel];
+    if (serverSubscription != null) {
+      final event = ServerLeaveEvent.from(channel, leave.info);
+      _leaveController.add(event);
+    }
+  }
+
+  void _handleMessage(protocol.Message message) {
+    final event = MessageEvent(message.data);
+    _messageController.add(event);
+  }
+
+  void _handleSubscribe(String channel, protocol.Subscribe subscribe) {
+    final event =
+        ServerSubscribeEvent.fromSubscribePush(channel, subscribe, false);
+    _serverSubs[channel] = ServerSubscription.from(
+        channel, subscribe.recoverable, subscribe.offset, subscribe.epoch);
+    _subscribeController.add(event);
+  }
+
+  void _handleUnsubscribe(String channel) {
+    final subscription = _subscriptions[channel];
+    if (subscription != null) {
+      final event = UnsubscribeEvent();
+      subscription.addUnsubscribe(event);
+      return;
+    }
+    final serverSubscription = _serverSubs[channel];
+    if (serverSubscription != null) {
+      final event = ServerUnsubscribeEvent.from(channel);
+      _serverSubs.remove(channel);
+      _unsubscribeController.add(event);
+    }
+  }
+
+  void _handlePushV1(protocol.Push push) {
     switch (push.type) {
       case protocol.Push_PushType.PUBLICATION:
         final pub = protocol.Publication.fromBuffer(push.data);
-        final subscription = _subscriptions[push.channel];
-        if (subscription != null) {
-          final event = PublishEvent.from(pub);
-          subscription.addPublish(event);
-          break;
-        }
-        final serverSubscription = _serverSubs[push.channel];
-        if (serverSubscription != null) {
-          final event = ServerPublishEvent.from(push.channel, pub);
-          _publishController.add(event);
-          if (_serverSubs[push.channel]!.recoverable && pub.offset > 0) {
-            _serverSubs[push.channel]!.offset = pub.offset;
-          }
-        }
+        _handlePub(push.channel, pub);
         break;
       case protocol.Push_PushType.LEAVE:
         final leave = protocol.Leave.fromBuffer(push.data);
-        final subscription = _subscriptions[push.channel];
-        if (subscription != null) {
-          final event = LeaveEvent.from(leave.info);
-          subscription.addLeave(event);
-          break;
-        }
-        final serverSubscription = _serverSubs[push.channel];
-        if (serverSubscription != null) {
-          final event = ServerLeaveEvent.from(push.channel, leave.info);
-          _leaveController.add(event);
-        }
+        _handleLeave(push.channel, leave);
         break;
       case protocol.Push_PushType.JOIN:
         final join = protocol.Join.fromBuffer(push.data);
-        final subscription = _subscriptions[push.channel];
-        if (subscription != null) {
-          final event = JoinEvent.from(join.info);
-          subscription.addJoin(event);
-          break;
-        }
-        final serverSubscription = _serverSubs[push.channel];
-        if (serverSubscription != null) {
-          final event = ServerJoinEvent.from(push.channel, join.info);
-          _joinController.add(event);
-        }
+        _handleJoin(push.channel, join);
         break;
       case protocol.Push_PushType.MESSAGE:
         final message = protocol.Message.fromBuffer(push.data);
-        final event = MessageEvent(message.data);
-        _messageController.add(event);
+        _handleMessage(message);
         break;
       case protocol.Push_PushType.SUBSCRIBE:
         final subscribe = protocol.Subscribe.fromBuffer(push.data);
-        final event = ServerSubscribeEvent.fromSubscribePush(
-            push.channel, subscribe, false);
-        _serverSubs[push.channel] = ServerSubscription.from(push.channel,
-            subscribe.recoverable, subscribe.offset, subscribe.epoch);
-        _subscribeController.add(event);
+        _handleSubscribe(push.channel, subscribe);
         break;
       case protocol.Push_PushType.UNSUBSCRIBE:
-        final subscription = _subscriptions[push.channel];
-        if (subscription != null) {
-          final event = UnsubscribeEvent();
-          subscription.addUnsubscribe(event);
-          break;
-        }
-        final serverSubscription = _serverSubs[push.channel];
-        if (serverSubscription != null) {
-          final event = ServerUnsubscribeEvent.from(push.channel);
-          _serverSubs.remove(push.channel);
-          _unsubscribeController.add(event);
-        }
+        _handleUnsubscribe(push.channel);
         break;
+    }
+  }
+
+  void _handlePushV2(protocol.Push push) {
+    if (push.hasPub()) {
+      _handlePub(push.channel, push.pub);
+    } else if (push.hasJoin()) {
+      _handleJoin(push.channel, push.join);
+    } else if (push.hasLeave()) {
+      _handleLeave(push.channel, push.leave);
+    } else if (push.hasSubscribe()) {
+      _handleSubscribe(push.channel, push.subscribe);
+    } else if (push.hasUnsubscribe()) {
+      _handleUnsubscribe(push.channel);
+    } else if (push.hasMessage()) {
+      _handleMessage(push.message);
+    }
+  }
+
+  void _onPush(protocol.Push push) {
+    if (_config.protocolVersion == ClientProtocolVersion.v1) {
+      _handlePushV1(push);
+    } else {
+      _handlePushV2(push);
     }
   }
 
@@ -483,7 +540,10 @@ class ClientImpl implements Client {
   @internal
   Future<protocol.UnsubscribeResult> sendUnsubscribe(String channel) async {
     final request = protocol.UnsubscribeRequest()..channel = channel;
-    return await _transport.sendMessage(request, protocol.UnsubscribeResult());
+    return await _transport.sendMessage(
+      request,
+      protocol.UnsubscribeResult(),
+    );
   }
 
   @internal
@@ -492,7 +552,10 @@ class ClientImpl implements Client {
     final request = protocol.SubscribeRequest()
       ..channel = channel
       ..token = token ?? '';
-    return await _transport.sendMessage(request, protocol.SubscribeResult());
+    return await _transport.sendMessage(
+      request,
+      protocol.SubscribeResult(),
+    );
   }
 
   @internal

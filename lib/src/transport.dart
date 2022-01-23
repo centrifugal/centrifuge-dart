@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:centrifuge/centrifuge.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
@@ -18,12 +19,14 @@ typedef WebSocketBuilder = Future<WebSocket> Function();
 class TransportConfig {
   TransportConfig(
       {this.pingInterval = const Duration(seconds: 25),
+      this.protocolVersion = ClientProtocolVersion.v1,
       this.headers = const <String, dynamic>{},
       this.timeout = const Duration(seconds: 10)});
 
   final Duration pingInterval;
   final Map<String, dynamic> headers;
   final Duration timeout;
+  final ClientProtocolVersion protocolVersion;
 }
 
 Transport protobufTransportBuilder(
@@ -84,16 +87,61 @@ class Transport implements GeneratedMessageSender {
   @override
   Future<Rep>
       sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result) async {
-    final command = _createCommand(request, false);
+    Req request,
+    Rep result,
+  ) async {
+    final command = _createCommand(
+      request,
+      false,
+    );
     try {
       var fut = _sendCommand(command);
       if (_config.timeout.inMicroseconds > 0) {
         fut = fut.timeout(_config.timeout);
       }
       final reply = await fut;
-      final filledResult = _processResult(result, reply);
-      return filledResult;
+      if (_config.protocolVersion == ClientProtocolVersion.v1) {
+        final filledResult = _processResult(result, reply);
+        return filledResult;
+      }
+      if (reply.hasError()) {
+        throw centrifuge.Error.custom(reply.error.code, reply.error.message);
+      }
+      if (reply.hasConnect()) {
+        result.mergeFromMessage(reply.connect);
+        return result;
+      } else if (reply.hasSubscribe()) {
+        result.mergeFromMessage(reply.subscribe);
+        return result;
+      } else if (reply.hasPublish()) {
+        result.mergeFromMessage(reply.publish);
+        return result;
+      } else if (reply.hasPing()) {
+        result.mergeFromMessage(reply.publish);
+        return result;
+      } else if (reply.hasUnsubscribe()) {
+        result.mergeFromMessage(reply.unsubscribe);
+        return result;
+      } else if (reply.hasPresence()) {
+        result.mergeFromMessage(reply.presence);
+        return result;
+      } else if (reply.hasPresenceStats()) {
+        result.mergeFromMessage(reply.presenceStats);
+        return result;
+      } else if (reply.hasHistory()) {
+        result.mergeFromMessage(reply.history);
+        return result;
+      } else if (reply.hasRpc()) {
+        result.mergeFromMessage(reply.rpc);
+        return result;
+      } else if (reply.hasRefresh()) {
+        result.mergeFromMessage(reply.refresh);
+        return result;
+      } else if (reply.hasSubRefresh()) {
+        result.mergeFromMessage(reply.subRefresh);
+        return result;
+      }
+      throw ArgumentError("unknown reply type " + reply.toString());
     } on TimeoutException {
       if (command.id > 0) {
         _completers.remove(command.id);
@@ -104,11 +152,15 @@ class Transport implements GeneratedMessageSender {
 
   @override
   Future<void> sendAsyncMessage<Req extends GeneratedMessage>(
-      Req request) async {
+    Req request,
+  ) async {
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
-    final command = _createCommand(request, true);
+    final command = _createCommand(
+      request,
+      true,
+    );
     final List<int> data = _commandEncoder.convert(command);
     _socket!.add(data);
   }
@@ -117,10 +169,44 @@ class Transport implements GeneratedMessageSender {
     return _socket?.close();
   }
 
-  Command _createCommand(GeneratedMessage request, bool isAsync) {
-    final cmd = Command()
-      ..method = _getType(request)
-      ..params = request.writeToBuffer();
+  Command _createCommand(
+    GeneratedMessage request,
+    bool isAsync,
+  ) {
+    final cmd = Command();
+    if (_config.protocolVersion == ClientProtocolVersion.v1) {
+      cmd
+        ..method = _getType(request)
+        ..params = request.writeToBuffer();
+    } else {
+      if (request is ConnectRequest) {
+        cmd..connect = request;
+      } else if (request is PublishRequest) {
+        cmd..publish = request;
+      } else if (request is PingRequest) {
+        cmd..ping = request;
+      } else if (request is SubscribeRequest) {
+        cmd..subscribe = request;
+      } else if (request is UnsubscribeRequest) {
+        cmd..unsubscribe = request;
+      } else if (request is HistoryRequest) {
+        cmd..history = request;
+      } else if (request is PresenceRequest) {
+        cmd..presence = request;
+      } else if (request is PresenceStatsRequest) {
+        cmd..presenceStats = request;
+      } else if (request is RPCRequest) {
+        cmd..rpc = request;
+      } else if (request is RefreshRequest) {
+        cmd..refresh = request;
+      } else if (request is SubRefreshRequest) {
+        cmd..subRefresh = request;
+      } else if (request is SendRequest) {
+        cmd..send = request;
+      } else {
+        throw ArgumentError('unknown request type');
+      }
+    }
     if (!isAsync) {
       cmd.id = _messageId++;
     }
@@ -157,10 +243,12 @@ class Transport implements GeneratedMessageSender {
         return Command_MethodType.CONNECT;
       case PublishRequest:
         return Command_MethodType.PUBLISH;
-      case UnsubscribeRequest:
-        return Command_MethodType.UNSUBSCRIBE;
+      case PingRequest:
+        return Command_MethodType.PING;
       case SubscribeRequest:
         return Command_MethodType.SUBSCRIBE;
+      case UnsubscribeRequest:
+        return Command_MethodType.UNSUBSCRIBE;
       case HistoryRequest:
         return Command_MethodType.HISTORY;
       case PresenceRequest:
@@ -169,6 +257,12 @@ class Transport implements GeneratedMessageSender {
         return Command_MethodType.PRESENCE_STATS;
       case RPCRequest:
         return Command_MethodType.RPC;
+      case RefreshRequest:
+        return Command_MethodType.REFRESH;
+      case SubRefreshRequest:
+        return Command_MethodType.SUB_REFRESH;
+      case SendRequest:
+        return Command_MethodType.SEND;
       default:
         throw ArgumentError('unknown request type');
     }
@@ -200,9 +294,12 @@ class Transport implements GeneratedMessageSender {
         if (reply.id > 0) {
           _completers.remove(reply.id)?.complete(reply);
         } else {
-          final push = Push.fromBuffer(reply.result);
-
-          onPush(push);
+          if (_config.protocolVersion == ClientProtocolVersion.v1) {
+            final push = Push.fromBuffer(reply.result);
+            onPush(push);
+          } else {
+            onPush(reply.push);
+          }
         }
       });
     };
