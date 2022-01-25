@@ -924,7 +924,7 @@ class Publication extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
     ..aOM<ClientInfo>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', subBuilder: ClientInfo.create)
     ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..m<$core.String, $core.String>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'meta', entryClassName: 'Publication.MetaEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OS, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..m<$core.String, $core.String>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tags', entryClassName: 'Publication.TagsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OS, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..hasRequiredFields = false
   ;
 
@@ -933,7 +933,7 @@ class Publication extends $pb.GeneratedMessage {
     $core.List<$core.int>? data,
     ClientInfo? info,
     $fixnum.Int64? offset,
-    $core.Map<$core.String, $core.String>? meta,
+    $core.Map<$core.String, $core.String>? tags,
   }) {
     final _result = create();
     if (data != null) {
@@ -945,8 +945,8 @@ class Publication extends $pb.GeneratedMessage {
     if (offset != null) {
       _result.offset = offset;
     }
-    if (meta != null) {
-      _result.meta.addAll(meta);
+    if (tags != null) {
+      _result.tags.addAll(tags);
     }
     return _result;
   }
@@ -1001,7 +1001,7 @@ class Publication extends $pb.GeneratedMessage {
   void clearOffset() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.Map<$core.String, $core.String> get meta => $_getMap(3);
+  $core.Map<$core.String, $core.String> get tags => $_getMap(3);
 }
 
 class Join extends $pb.GeneratedMessage {

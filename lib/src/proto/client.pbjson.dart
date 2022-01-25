@@ -145,14 +145,14 @@ const Publication$json = const {
     const {'1': 'data', '3': 4, '4': 1, '5': 12, '10': 'data'},
     const {'1': 'info', '3': 5, '4': 1, '5': 11, '6': '.centrifugal.centrifuge.protocol.ClientInfo', '10': 'info'},
     const {'1': 'offset', '3': 6, '4': 1, '5': 4, '10': 'offset'},
-    const {'1': 'meta', '3': 7, '4': 3, '5': 11, '6': '.centrifugal.centrifuge.protocol.Publication.MetaEntry', '10': 'meta'},
+    const {'1': 'tags', '3': 7, '4': 3, '5': 11, '6': '.centrifugal.centrifuge.protocol.Publication.TagsEntry', '10': 'tags'},
   ],
-  '3': const [Publication_MetaEntry$json],
+  '3': const [Publication_TagsEntry$json],
 };
 
 @$core.Deprecated('Use publicationDescriptor instead')
-const Publication_MetaEntry$json = const {
-  '1': 'MetaEntry',
+const Publication_TagsEntry$json = const {
+  '1': 'TagsEntry',
   '2': const [
     const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
     const {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
@@ -161,7 +161,7 @@ const Publication_MetaEntry$json = const {
 };
 
 /// Descriptor for `Publication`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List publicationDescriptor = $convert.base64Decode('CgtQdWJsaWNhdGlvbhISCgRkYXRhGAQgASgMUgRkYXRhEj8KBGluZm8YBSABKAsyKy5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNsaWVudEluZm9SBGluZm8SFgoGb2Zmc2V0GAYgASgEUgZvZmZzZXQSSgoEbWV0YRgHIAMoCzI2LmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHVibGljYXRpb24uTWV0YUVudHJ5UgRtZXRhGjcKCU1ldGFFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1ZRgCIAEoCVIFdmFsdWU6AjgB');
+final $typed_data.Uint8List publicationDescriptor = $convert.base64Decode('CgtQdWJsaWNhdGlvbhISCgRkYXRhGAQgASgMUgRkYXRhEj8KBGluZm8YBSABKAsyKy5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNsaWVudEluZm9SBGluZm8SFgoGb2Zmc2V0GAYgASgEUgZvZmZzZXQSSgoEdGFncxgHIAMoCzI2LmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHVibGljYXRpb24uVGFnc0VudHJ5UgR0YWdzGjcKCVRhZ3NFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1ZRgCIAEoCVIFdmFsdWU6AjgB');
 @$core.Deprecated('Use joinDescriptor instead')
 const Join$json = const {
   '1': 'Join',
