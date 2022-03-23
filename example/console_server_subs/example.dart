@@ -13,14 +13,14 @@ void main() async {
   try {
     final client = centrifuge.createClient(
       url,
-      config: centrifuge.ClientConfig(),
+      centrifuge.ClientConfig(),
     );
 
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
     client.subscribeStream.listen(onEvent);
     client.unsubscribeStream.listen(onEvent);
-    client.publishStream.listen(onEvent);
+    client.publicationStream.listen(onEvent);
     client.joinStream.listen(onEvent);
     client.leaveStream.listen(onEvent);
 

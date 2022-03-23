@@ -7,6 +7,13 @@ option go_package = "./;protocol";
 message Error {
   uint32 code = 1;
   string message = 2;
+  bool temporary = 3;
+}
+
+message EmulationRequest {
+  string node = 1;
+  string session = 2;
+  bytes data = 3;
 }
 
 // Command sent from a client to a server.
@@ -144,6 +151,12 @@ message Leave {
 
 message Unsubscribe {
   // Field 1 removed (bool resubscribe).
+  enum Type {
+    PERMANENT = 0;
+    INSUFFICIENT = 1;
+    UNRECOVERABLE = 2;
+  }
+  Type type = 2;
 }
 
 message Subscribe {
@@ -166,6 +179,10 @@ message Connect {
   map<string, SubscribeResult> subs = 4;
   bool expires = 5;
   uint32 ttl = 6;
+  uint32 ping = 7;
+  bool pong = 8;
+  string session = 9;
+  string node = 10;
 }
 
 message Disconnect {
@@ -194,6 +211,10 @@ message ConnectResult {
   uint32 ttl = 4;
   bytes data = 5;
   map<string, SubscribeResult> subs = 6;
+  uint32 ping = 7;
+  bool pong = 8;
+  string session = 9;
+  string node = 10;
 }
 
 message RefreshRequest {

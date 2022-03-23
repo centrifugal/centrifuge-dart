@@ -73,3 +73,20 @@ class Push_PushType extends $pb.ProtobufEnum {
   const Push_PushType._($core.int v, $core.String n) : super(v, n);
 }
 
+class Unsubscribe_Type extends $pb.ProtobufEnum {
+  static const Unsubscribe_Type PERMANENT = Unsubscribe_Type._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PERMANENT');
+  static const Unsubscribe_Type INSUFFICIENT = Unsubscribe_Type._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INSUFFICIENT');
+  static const Unsubscribe_Type UNRECOVERABLE = Unsubscribe_Type._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'UNRECOVERABLE');
+
+  static const $core.List<Unsubscribe_Type> values = <Unsubscribe_Type> [
+    PERMANENT,
+    INSUFFICIENT,
+    UNRECOVERABLE,
+  ];
+
+  static final $core.Map<$core.int, Unsubscribe_Type> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static Unsubscribe_Type? valueOf($core.int value) => _byValue[value];
+
+  const Unsubscribe_Type._($core.int v, $core.String n) : super(v, n);
+}
+

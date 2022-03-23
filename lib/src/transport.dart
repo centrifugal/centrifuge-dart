@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:centrifuge/centrifuge.dart';
 import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
@@ -17,20 +15,13 @@ typedef TransportBuilder = Transport Function({
 typedef WebSocketBuilder = Future<WebSocket> Function();
 
 class TransportConfig {
-  TransportConfig(
-      {this.pingInterval = const Duration(seconds: 25),
-      this.protocolVersion = ClientProtocolVersion.v1,
-      this.headers = const <String, dynamic>{},
-      this.timeout = const Duration(seconds: 10)});
+  TransportConfig({this.headers = const <String, dynamic>{}, this.timeout = const Duration(seconds: 10)});
 
-  final Duration pingInterval;
   final Map<String, dynamic> headers;
   final Duration timeout;
-  final ClientProtocolVersion protocolVersion;
 }
 
-Transport protobufTransportBuilder(
-    {required String url, required TransportConfig config}) {
+Transport protobufTransportBuilder({required String url, required TransportConfig config}) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
 
@@ -49,15 +40,13 @@ Transport protobufTransportBuilder(
 }
 
 abstract class GeneratedMessageSender {
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result);
+  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+      Req request, Rep result);
   Future<void> sendAsyncMessage<Req extends GeneratedMessage>(Req request);
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder,
-      this._replyDecoder);
+  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
   WebSocket? _socket;
@@ -65,14 +54,9 @@ class Transport implements GeneratedMessageSender {
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
 
-  Future open(void onPush(Push push),
-      {Function? onError,
-      void onDone(int code, String reason, bool shouldReconnect)?}) async {
+  Future open(void onPush(Push push, bool isPing),
+      {Function? onError, void onDone(int code, String reason, bool shouldReconnect)?}) async {
     _socket = await _socketBuilder();
-    if (_config.pingInterval != Duration.zero) {
-      _socket!.pingInterval = _config.pingInterval;
-    }
-
     _socket!.listen(
       _onData(onPush) as void Function(dynamic)?,
       onError: onError,
@@ -85,8 +69,7 @@ class Transport implements GeneratedMessageSender {
   var _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
     Req request,
     Rep result,
   ) async {
@@ -100,12 +83,8 @@ class Transport implements GeneratedMessageSender {
         fut = fut.timeout(_config.timeout);
       }
       final reply = await fut;
-      if (_config.protocolVersion == ClientProtocolVersion.v1) {
-        final filledResult = _processResult(result, reply);
-        return filledResult;
-      }
       if (reply.hasError()) {
-        throw centrifuge.Error.custom(reply.error.code, reply.error.message);
+        throw centrifuge.Error.custom(reply.error.code, reply.error.message, reply.error.temporary);
       }
       if (reply.hasConnect()) {
         result.mergeFromMessage(reply.connect);
@@ -174,38 +153,34 @@ class Transport implements GeneratedMessageSender {
     bool isAsync,
   ) {
     final cmd = Command();
-    if (_config.protocolVersion == ClientProtocolVersion.v1) {
-      cmd
-        ..method = _getType(request)
-        ..params = request.writeToBuffer();
+    if (request is ConnectRequest) {
+      cmd..connect = request;
+    } else if (request is PublishRequest) {
+      cmd..publish = request;
+    } else if (request is PingRequest) {
+      cmd..ping = request;
+    } else if (request is SubscribeRequest) {
+      cmd..subscribe = request;
+    } else if (request is UnsubscribeRequest) {
+      cmd..unsubscribe = request;
+    } else if (request is HistoryRequest) {
+      cmd..history = request;
+    } else if (request is PresenceRequest) {
+      cmd..presence = request;
+    } else if (request is PresenceStatsRequest) {
+      cmd..presenceStats = request;
+    } else if (request is RPCRequest) {
+      cmd..rpc = request;
+    } else if (request is RefreshRequest) {
+      cmd..refresh = request;
+    } else if (request is SubRefreshRequest) {
+      cmd..subRefresh = request;
+    } else if (request is SendRequest) {
+      cmd..send = request;
+    } else if (request is Command) {
+      // Pong.
     } else {
-      if (request is ConnectRequest) {
-        cmd..connect = request;
-      } else if (request is PublishRequest) {
-        cmd..publish = request;
-      } else if (request is PingRequest) {
-        cmd..ping = request;
-      } else if (request is SubscribeRequest) {
-        cmd..subscribe = request;
-      } else if (request is UnsubscribeRequest) {
-        cmd..unsubscribe = request;
-      } else if (request is HistoryRequest) {
-        cmd..history = request;
-      } else if (request is PresenceRequest) {
-        cmd..presence = request;
-      } else if (request is PresenceStatsRequest) {
-        cmd..presenceStats = request;
-      } else if (request is RPCRequest) {
-        cmd..rpc = request;
-      } else if (request is RefreshRequest) {
-        cmd..refresh = request;
-      } else if (request is SubRefreshRequest) {
-        cmd..subRefresh = request;
-      } else if (request is SendRequest) {
-        cmd..send = request;
-      } else {
-        throw ArgumentError('unknown request type');
-      }
+      throw ArgumentError('unknown request type');
     }
     if (!isAsync) {
       cmd.id = _messageId++;
@@ -229,96 +204,38 @@ class Transport implements GeneratedMessageSender {
     return completer.future;
   }
 
-  T _processResult<T extends GeneratedMessage>(T result, Reply reply) {
-    if (reply.hasError()) {
-      throw centrifuge.Error.custom(reply.error.code, reply.error.message);
-    }
-    result.mergeFromBuffer(reply.result);
-    return result;
-  }
-
-  Command_MethodType _getType(GeneratedMessage request) {
-    switch (request.runtimeType) {
-      case ConnectRequest:
-        return Command_MethodType.CONNECT;
-      case PublishRequest:
-        return Command_MethodType.PUBLISH;
-      case PingRequest:
-        return Command_MethodType.PING;
-      case SubscribeRequest:
-        return Command_MethodType.SUBSCRIBE;
-      case UnsubscribeRequest:
-        return Command_MethodType.UNSUBSCRIBE;
-      case HistoryRequest:
-        return Command_MethodType.HISTORY;
-      case PresenceRequest:
-        return Command_MethodType.PRESENCE;
-      case PresenceStatsRequest:
-        return Command_MethodType.PRESENCE_STATS;
-      case RPCRequest:
-        return Command_MethodType.RPC;
-      case RefreshRequest:
-        return Command_MethodType.REFRESH;
-      case SubRefreshRequest:
-        return Command_MethodType.SUB_REFRESH;
-      case SendRequest:
-        return Command_MethodType.SEND;
-      default:
-        throw ArgumentError('unknown request type');
-    }
-  }
-
   Function _onDone(void Function(int, String, bool)? onDone) {
     return () {
       _completers.forEach((key, value) {
         _completers[key]?.completeError(centrifuge.ClientDisconnectedError);
       });
       _completers = <int, Completer<GeneratedMessage>>{};
-      if (_config.protocolVersion == ClientProtocolVersion.v1) {
-        String reason = "connection closed";
-        bool reconnect = true;
-        if (_socket!.closeReason != null) {
-          try {
-            final Map<String, dynamic> info = jsonDecode(_socket!.closeReason!);
-            reason = info['reason'];
-            reconnect = info['reconnect'] ?? true;
-          } catch (_) {}
+      int code = 4;
+      String reason = "connection closed";
+      bool reconnect = true;
+      if (_socket != null && _socket!.closeCode! > 0) {
+        code = _socket!.closeCode!;
+        reason = _socket!.closeReason!;
+        reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+        if (code < 3000) {
+          // We expose codes defined by Centrifuge protocol, hiding
+          // details about transport-specific error codes. We may have extra
+          // optional transportCode field in the future.
+          code = 4;
         }
-        onDone!(0, reason, reconnect);
-      } else {
-        int code = 4;
-        String reason = "connection closed";
-        bool reconnect = true;
-        if (_socket != null && _socket!.closeCode! > 0) {
-          code = _socket!.closeCode!;
-          reason = _socket!.closeReason!;
-          reconnect =
-              code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
-          if (code < 3000) {
-            // We expose codes defined by Centrifuge protocol, hiding
-            // details about transport-specific error codes. We may have extra
-            // optional transportCode field in the future.
-            code = 4;
-          }
-        }
-        onDone!(code, reason, reconnect);
       }
+      onDone!(code, reason, reconnect);
     };
   }
 
-  Function _onData(void onPush(Push push)) {
+  Function _onData(void onPush(Push push, bool isPing)) {
     return (dynamic input) {
       final List<Reply> replies = _replyDecoder.convert(input);
       replies.forEach((reply) {
         if (reply.id > 0) {
           _completers.remove(reply.id)?.complete(reply);
         } else {
-          if (_config.protocolVersion == ClientProtocolVersion.v1) {
-            final push = Push.fromBuffer(reply.result);
-            onPush(push);
-          } else {
-            onPush(reply.push);
-          }
+          onPush(reply.push, !reply.hasPush());
         }
       });
     };

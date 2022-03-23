@@ -8,8 +8,7 @@ class ServerSubscription {
   $fixnum.Int64 offset;
   String epoch;
 
-  static ServerSubscription from(String channel, bool recoverable,
-          $fixnum.Int64 offset, String epoch) =>
+  static ServerSubscription from(String channel, bool recoverable, $fixnum.Int64 offset, String epoch) =>
       ServerSubscription(channel, recoverable, offset, epoch);
 
   @override

@@ -14,13 +14,13 @@ void main() {
   late Client client;
   late MockTransport transport;
   late ClientConfig clientConfig;
-  WaitRetry? retry;
+  Backoff? backoff;
 
   final subscription = (String name) => client.getSubscription(name);
 
   setUp(() {
     transport = MockTransport();
-    clientConfig = ClientConfig(retry: (count) => retry?.call(count));
+    clientConfig = ClientConfig(backoff: (count) => backoff?.call(count));
 
     client = ClientImpl(
       url,
@@ -162,7 +162,7 @@ void main() {
     test('client does not reconnect if reconnect = false', () async {
       bool retryCalled = false;
 
-      retry = (_) async {
+      backoff = (_) async {
         retryCalled = true;
       };
 
@@ -176,7 +176,7 @@ void main() {
       late Completer<void> retryCompleter;
       int? count;
 
-      retry = (c) {
+      backoff = (c) {
         count = c;
         return retryCompleter.future;
       };
@@ -200,7 +200,7 @@ void main() {
     test('client doesn\'t reconnect on disconnect()', () async {
       final expectedMessages = transport.sendList.length;
 
-      retry = (_) => fail('retry shouldn\'t be called');
+      backoff = (_) => fail('retry shouldn\'t be called');
 
       client.disconnect();
       transport.onDone!(0, "", true);
@@ -212,7 +212,7 @@ void main() {
       Completer<void> retryCompleter = Completer<void>.sync();
       int? count;
 
-      retry = (c) {
+      backoff = (c) {
         count = c;
         return retryCompleter.future;
       };
@@ -258,7 +258,7 @@ void main() {
       client.disconnectStream.listen((_) => countClientDisconnect += 1);
 
       Completer<void> retryCompleter = Completer<void>.sync();
-      retry = (c) => retryCompleter.future;
+      backoff = (c) => retryCompleter.future;
 
       transport.onError!('test error');
 
@@ -311,7 +311,7 @@ void main() {
 
       late Completer<void> retryCompleter;
 
-      retry = (c) => retryCompleter.future;
+      backoff = (c) => retryCompleter.future;
 
       for (var i = 0; i < 20; i++) {
         final connectFuture = client.connectStream.first;

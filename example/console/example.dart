@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
-  final url = 'ws://localhost:8000/connection/websocket?format=protobuf';
+  final url = 'ws://localhost:8000/connection/websocket?cf_protocol_version=v2';
   final channel = 'chat:index';
 
   final onSubscriptionEvent = (dynamic event) {
@@ -19,30 +19,43 @@ void main() async {
   try {
     final client = centrifuge.createClient(
       url,
-      config: centrifuge.ClientConfig(
+      centrifuge.ClientConfig(
           headers: <String, dynamic>{'X-Example-Header': 'example'},
-          onPrivateSub: (centrifuge.PrivateSubEvent event) {
+          onConnectionToken: (centrifuge.ConnectionTokenEvent event) {
+            return Future.value('<CONNECTION JWT>');
+          },
+          onSubscriptionToken: (centrifuge.SubscriptionTokenEvent event) {
             return Future.value('<SUBSCRIPTION JWT>');
           }),
     );
 
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
+    client.failStream.listen(onEvent);
     client.errorStream.listen(onEvent);
+    client.subscribeStream.listen(onEvent);
 
     // Uncomment to use example token based on secret key `secret`.
     // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
     await client.connect();
 
-    final subscription = client.getSubscription(channel);
+    // try {
+    //   await client.ready().timeout(const Duration(milliseconds: 1000));
+    //   final res = await client.presence('#42');
+    //   print(res);
+    // } catch (ex) {
+    //   print(ex);
+    // }
 
-    subscription.publishStream.listen(onSubscriptionEvent);
+    final subscription = client.newSubscription(channel);
+
+    subscription.publicationStream.listen(onSubscriptionEvent);
     subscription.joinStream.listen(onSubscriptionEvent);
     subscription.leaveStream.listen(onSubscriptionEvent);
-
-    subscription.subscribeSuccessStream.listen(onSubscriptionEvent);
-    subscription.subscribeErrorStream.listen(onSubscriptionEvent);
+    subscription.subscribeStream.listen(onSubscriptionEvent);
     subscription.unsubscribeStream.listen(onSubscriptionEvent);
+    subscription.errorStream.listen(onSubscriptionEvent);
+    subscription.failStream.listen(onSubscriptionEvent);
 
     await subscription.subscribe();
 
@@ -57,8 +70,7 @@ void main() async {
   }
 }
 
-Function(String) _handleUserInput(
-    centrifuge.Client client, centrifuge.Subscription subscription) {
+Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
@@ -86,12 +98,8 @@ Function(String) _handleUserInput(
         break;
       case '#history':
         final result = await subscription.history(limit: 10);
-        print('History num publications: ' +
-            result.publications.length.toString());
-        print('Stream top position: ' +
-            result.offset.toString() +
-            ', epoch: ' +
-            result.epoch);
+        print('History num publications: ' + result.publications.length.toString());
+        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
         break;
       case '#disconnect':
         await client.disconnect();
