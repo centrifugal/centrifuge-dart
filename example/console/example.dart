@@ -20,6 +20,9 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       centrifuge.ClientConfig(
+          // Uncomment to use example token based on secret key `secret`.
+          // token:
+          // 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw',
           headers: <String, dynamic>{'X-Example-Header': 'example'},
           onConnectionToken: (centrifuge.ConnectionTokenEvent event) {
             return Future.value('<CONNECTION JWT>');
@@ -29,33 +32,35 @@ void main() async {
           }),
     );
 
+    // State changes.
     client.connectStream.listen(onEvent);
     client.disconnectStream.listen(onEvent);
     client.failStream.listen(onEvent);
+
+    // Handle async errors.
     client.errorStream.listen(onEvent);
+
+    // Server-side subscriptions.
     client.subscribeStream.listen(onEvent);
+    client.unsubscribeStream.listen(onEvent);
+    client.publicationStream.listen(onEvent);
 
-    // Uncomment to use example token based on secret key `secret`.
-    // client.setToken('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
     await client.connect();
-
-    // try {
-    //   await client.ready().timeout(const Duration(milliseconds: 1000));
-    //   final res = await client.presence('#42');
-    //   print(res);
-    // } catch (ex) {
-    //   print(ex);
-    // }
 
     final subscription = client.newSubscription(channel);
 
+    // State changes.
+    subscription.subscribeStream.listen(onSubscriptionEvent);
+    subscription.unsubscribeStream.listen(onSubscriptionEvent);
+    subscription.failStream.listen(onSubscriptionEvent);
+
+    // Messages.
     subscription.publicationStream.listen(onSubscriptionEvent);
     subscription.joinStream.listen(onSubscriptionEvent);
     subscription.leaveStream.listen(onSubscriptionEvent);
-    subscription.subscribeStream.listen(onSubscriptionEvent);
-    subscription.unsubscribeStream.listen(onSubscriptionEvent);
+
+    // Handle subscription async errors.
     subscription.errorStream.listen(onSubscriptionEvent);
-    subscription.failStream.listen(onSubscriptionEvent);
 
     await subscription.subscribe();
 

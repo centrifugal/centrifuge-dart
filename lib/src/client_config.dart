@@ -35,8 +35,6 @@ class ClientConfig {
   final String version;
 }
 
-typedef Backoff = Timer? Function(int);
-
 typedef ConnectionTokenCallback = Future<String> Function(ConnectionTokenEvent);
 
 typedef SubscriptionTokenCallback = Future<String> Function(SubscriptionTokenEvent);

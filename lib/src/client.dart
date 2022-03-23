@@ -172,44 +172,9 @@ class ClientImpl implements Client {
   }
 
   @override
-  Future<PublishResult> publish(String channel, List<int> data) async {
-    final request = protocol.PublishRequest()
-      ..channel = channel
-      ..data = data;
-
-    final result = await _transport.sendMessage(
-      request,
-      protocol.PublishResult(),
-    );
-    return PublishResult.from(result);
-  }
-
-  @override
-  Future<RPCResult> rpc(String method, List<int> data) async {
-    final request = protocol.RPCRequest();
-    request.method = method;
-    request.data = data;
-    final result = await _transport.sendMessage(request, protocol.RPCResult());
-    return RPCResult.from(result);
-  }
-
-  @override
-  Future<HistoryResult> history(String channel,
-      {int limit = 0, StreamPosition? since, bool reverse = false}) async {
-    final request = protocol.HistoryRequest()..channel = channel;
-    request.limit = limit;
-    request.reverse = reverse;
-    if (since != null) {
-      final sp = protocol.StreamPosition();
-      sp.offset = since.offset;
-      sp.epoch = since.epoch;
-      request.since = sp;
-    }
-    final result = await _transport.sendMessage(
-      request,
-      protocol.HistoryResult(),
-    );
-    return HistoryResult.from(result);
+  Future<void> disconnect() async {
+    _processDisconnect(code: 0, reason: 'client', reconnect: false);
+    await _transport.close();
   }
 
   @override
@@ -229,7 +194,51 @@ class ClientImpl implements Client {
   }
 
   @override
+  Future<PublishResult> publish(String channel, List<int> data) async {
+    await ready().timeout(_config.timeout);
+    final request = protocol.PublishRequest()
+      ..channel = channel
+      ..data = data;
+    final result = await _transport.sendMessage(
+      request,
+      protocol.PublishResult(),
+    );
+    return PublishResult.from(result);
+  }
+
+  @override
+  Future<RPCResult> rpc(String method, List<int> data) async {
+    await ready().timeout(_config.timeout);
+    final request = protocol.RPCRequest();
+    request.method = method;
+    request.data = data;
+    final result = await _transport.sendMessage(request, protocol.RPCResult());
+    return RPCResult.from(result);
+  }
+
+  @override
+  Future<HistoryResult> history(String channel,
+      {int limit = 0, StreamPosition? since, bool reverse = false}) async {
+    await ready().timeout(_config.timeout);
+    final request = protocol.HistoryRequest()..channel = channel;
+    request.limit = limit;
+    request.reverse = reverse;
+    if (since != null) {
+      final sp = protocol.StreamPosition();
+      sp.offset = since.offset;
+      sp.epoch = since.epoch;
+      request.since = sp;
+    }
+    final result = await _transport.sendMessage(
+      request,
+      protocol.HistoryResult(),
+    );
+    return HistoryResult.from(result);
+  }
+
+  @override
   Future<PresenceResult> presence(String channel) async {
+    await ready().timeout(_config.timeout);
     final request = protocol.PresenceRequest()..channel = channel;
     final result = await _transport.sendMessage(
       request,
@@ -240,6 +249,7 @@ class ClientImpl implements Client {
 
   @override
   Future<PresenceStatsResult> presenceStats(String channel) async {
+    await ready().timeout(_config.timeout);
     final request = protocol.PresenceStatsRequest()..channel = channel;
     final result = await _transport.sendMessage(
       request,
@@ -250,14 +260,9 @@ class ClientImpl implements Client {
 
   @override
   Future<void> send(List<int> data) async {
+    await ready().timeout(_config.timeout);
     final request = protocol.Message()..data = data;
     await _transport.sendAsyncMessage(request);
-  }
-
-  @override
-  Future<void> disconnect() async {
-    _processDisconnect(code: 0, reason: 'client', reconnect: false);
-    await _transport.close();
   }
 
   @override
@@ -297,6 +302,8 @@ class ClientImpl implements Client {
     _reconnectTimer?.cancel();
     _refreshTimer?.cancel();
 
+    final needDisconnectEvent = state == State.connected;
+
     if (state == State.connected) {
       _client = null;
 
@@ -306,9 +313,6 @@ class ClientImpl implements Client {
         final event = ServerUnsubscribeEvent.from(key);
         _unsubscribeController.add(event);
       });
-
-      final disconnect = DisconnectEvent(code, reason, reconnect);
-      _disconnectController.add(disconnect);
     }
 
     if (reconnect) {
@@ -316,6 +320,11 @@ class ClientImpl implements Client {
       _scheduleReconnect();
     } else {
       state = State.disconnected;
+    }
+
+    if (needDisconnectEvent) {
+      final disconnect = DisconnectEvent(code, reason, reconnect);
+      _disconnectController.add(disconnect);
     }
 
     if (!reconnect && code >= 3000) {
@@ -583,12 +592,14 @@ class ClientImpl implements Client {
     for (var i = 0; i < _readyFutures.length; i++) {
       _readyFutures[i].complete();
     }
+    _readyFutures.clear();
   }
 
   void _errorReadyFutures(dynamic error) {
     for (var i = 0; i < _readyFutures.length; i++) {
       _readyFutures[i].completeError(error);
     }
+    _readyFutures.clear();
   }
 
   void _handlePub(String channel, protocol.Publication pub) {
@@ -637,6 +648,13 @@ class ClientImpl implements Client {
   void _handleMessage(protocol.Message message) {
     final event = MessageEvent(message.data);
     _messageController.add(event);
+  }
+
+  void _handleDisconnect(protocol.Disconnect disconnect) {
+    final code = disconnect.code;
+    final bool reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+    _processDisconnect(code: disconnect.code, reason: disconnect.reason, reconnect: reconnect);
+    _transport.close();
   }
 
   void _handleSubscribe(String channel, protocol.Subscribe subscribe) {
@@ -692,8 +710,7 @@ class ClientImpl implements Client {
     } else if (push.hasMessage()) {
       _handleMessage(push.message);
     } else if (push.hasDisconnect()) {
-      // TODO: implement.
-      // _handleDisconnect(push.disconnect);
+      _handleDisconnect(push.disconnect);
     }
   }
 
@@ -701,8 +718,7 @@ class ClientImpl implements Client {
   bool isPrivateChannel(String channel) => channel.startsWith(_config.privateChannelPrefix);
 
   @internal
-  Future<protocol.UnsubscribeResult> sendUnsubscribe(String channel) async {
-    final request = protocol.UnsubscribeRequest()..channel = channel;
+  Future<protocol.UnsubscribeResult> sendUnsubscribe(protocol.UnsubscribeRequest request) async {
     return await _transport.sendMessage(
       request,
       protocol.UnsubscribeResult(),

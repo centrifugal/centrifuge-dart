@@ -96,7 +96,36 @@ class SubscriptionImpl implements Subscription {
   Stream<SubscriptionFailEvent> get failStream => _failController.stream;
 
   @override
-  Future<PublishResult> publish(List<int> data) => _client.publish(channel, data);
+  Future<void> subscribe() async {
+    if (state == SubscriptionState.subscribed) {
+      return;
+    }
+    if (state == SubscriptionState.subscribing) {
+      throw SubscriptionSubscribingError();
+    }
+    state = SubscriptionState.subscribing;
+    await _subscribe();
+  }
+
+  @override
+  Future<void> unsubscribe() async {
+    _resubscribeTimer?.cancel();
+    final prevState = state;
+    state = SubscriptionState.unsubscribed;
+    _errorReadyFutures(SubscriptionUnsubscribedError());
+    if (prevState == SubscriptionState.subscribed) {
+      _clearSubscribedState();
+    }
+    if (prevState != SubscriptionState.subscribed) {
+      return;
+    }
+    if (_client.state != State.connected) {
+      _addUnsubscribe(UnsubscribeEvent());
+      return;
+    }
+    await _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel);
+    _addUnsubscribe(UnsubscribeEvent());
+  }
 
   @override
   Future<void> ready() {
@@ -114,28 +143,28 @@ class SubscriptionImpl implements Subscription {
     return completer.future;
   }
 
-  void _completeReadyFutures() {
-    for (var i = 0; i < _readyFutures.length; i++) {
-      _readyFutures[i].complete();
-    }
-  }
-
-  void _errorReadyFutures(dynamic error) {
-    for (var i = 0; i < _readyFutures.length; i++) {
-      _readyFutures[i].completeError(error);
-    }
+  @override
+  Future<PublishResult> publish(List<int> data) async {
+    await ready().timeout(_client.config.timeout);
+    return _client.publish(channel, data);
   }
 
   @override
-  Future<void> subscribe() async {
-    if (state == SubscriptionState.subscribed) {
-      return;
-    }
-    if (state == SubscriptionState.subscribing) {
-      throw SubscriptionSubscribingError();
-    }
-    state = SubscriptionState.subscribing;
-    await _subscribe();
+  Future<HistoryResult> history({int limit = 0, StreamPosition? since, bool reverse = false}) async {
+    await ready().timeout(_client.config.timeout);
+    return _client.history(channel, limit: limit, since: since, reverse: reverse);
+  }
+
+  @override
+  Future<PresenceResult> presence() async {
+    await ready().timeout(_client.config.timeout);
+    return _client.presence(channel);
+  }
+
+  @override
+  Future<PresenceStatsResult> presenceStats() async {
+    await ready().timeout(_client.config.timeout);
+    return _client.presenceStats(channel);
   }
 
   Future<void> _subscribe() async {
@@ -148,63 +177,25 @@ class SubscriptionImpl implements Subscription {
     await _resubscribe();
   }
 
-  void resubscribeOnConnect() {
-    if (state != SubscriptionState.subscribing) {
-      return;
-    }
-    _resubscribe();
-  }
-
-  void _clearSuscribedState() {
+  void _clearSubscribedState() {
     _refreshTimer?.cancel();
   }
 
-  @override
-  Future<void> unsubscribe() async {
-    _resubscribeTimer?.cancel();
-    final prevState = state;
-    state = SubscriptionState.unsubscribed;
-    _errorReadyFutures(SubscriptionUnsubscribedError());
-    if (prevState == SubscriptionState.subscribed) {
-      _clearSuscribedState();
+  void _completeReadyFutures() {
+    for (var i = 0; i < _readyFutures.length; i++) {
+      _readyFutures[i].complete();
     }
-    if (prevState != SubscriptionState.subscribed) {
-      return;
-    }
-    if (_client.state != State.connected) {
-      addUnsubscribe(UnsubscribeEvent());
-      return;
-    }
-    await _client.sendUnsubscribe(channel);
-    addUnsubscribe(UnsubscribeEvent());
+    _readyFutures.clear();
   }
 
-  void unsubscribeOnDisconnect() {
-    _resubscribeTimer?.cancel();
-    if (state != SubscriptionState.subscribed) {
-      return;
+  void _errorReadyFutures(dynamic error) {
+    for (var i = 0; i < _readyFutures.length; i++) {
+      _readyFutures[i].completeError(error);
     }
-    _clearSuscribedState();
-    state = SubscriptionState.subscribing;
-    final event = UnsubscribeEvent();
-    addUnsubscribe(event);
+    _readyFutures.clear();
   }
 
-  @override
-  Future<HistoryResult> history({int limit = 0, StreamPosition? since, bool reverse = false}) =>
-      _client.history(channel, limit: limit, since: since, reverse: reverse);
-
-  @override
-  Future<PresenceResult> presence() => _client.presence(channel);
-
-  @override
-  Future<PresenceStatsResult> presenceStats() => _client.presenceStats(channel);
-
-  void _addSubscribe(SubscribeEvent event) {
-    _subscribeController.add(event);
-  }
-
-  void addUnsubscribe(UnsubscribeEvent event) => _unsubscribeController.add(event);
+  void _addUnsubscribe(UnsubscribeEvent event) => _unsubscribeController.add(event);
 
   void _refreshToken() async {
     final String? clientId = _client.client;
@@ -303,7 +294,7 @@ class SubscriptionImpl implements Subscription {
       final result = await _client.sendSubscribe(request);
       final event = SubscribeEvent.from(result);
       state = SubscriptionState.subscribed;
-      _addSubscribe(event);
+      _subscribeController.add(event);
       _completeReadyFutures();
       _resubscribeAttempts = 0;
       if (result.expires) {
@@ -361,6 +352,24 @@ class SubscriptionImpl implements Subscription {
     _epoch = result.epoch;
   }
 
+  void _scheduleResubscribe() {
+    final Duration delay =
+        backoffDelay(_resubscribeAttempts, _config.minResubscribeDelay, _config.maxResubscribeDelay);
+    _resubscribeTimer = Timer(delay, () {
+      if (state != SubscriptionState.subscribing) {
+        return;
+      }
+      _subscribe();
+    });
+    _resubscribeAttempts++;
+  }
+
+  void _clearPositionState() {
+    _recover = false;
+    _offset = null;
+    _epoch = null;
+  }
+
   void _fail(SubscriptionFailReason reason) async {
     unsubscribe();
     state = SubscriptionState.failed;
@@ -385,6 +394,10 @@ class SubscriptionImpl implements Subscription {
     _fail(SubscriptionFailReason.unrecoverable);
   }
 
+  void _failClient() {
+    _fail(SubscriptionFailReason.clientFailed);
+  }
+
   @internal
   void failUnrecoverable() {
     _failUnrecoverable();
@@ -393,28 +406,6 @@ class SubscriptionImpl implements Subscription {
   @internal
   void failClient() {
     _failClient();
-  }
-
-  void _failClient() {
-    _fail(SubscriptionFailReason.clientFailed);
-  }
-
-  void _scheduleResubscribe() {
-    final Duration delay =
-        backoffDelay(_resubscribeAttempts, _config.minResubscribeDelay, _config.maxResubscribeDelay);
-    _resubscribeTimer = Timer(delay, () {
-      if (state != SubscriptionState.subscribing) {
-        return;
-      }
-      _subscribe();
-    });
-    _resubscribeAttempts++;
-  }
-
-  void _clearPositionState() {
-    _recover = false;
-    _offset = null;
-    _epoch = null;
   }
 
   @internal
@@ -436,5 +427,25 @@ class SubscriptionImpl implements Subscription {
   void handleLeave(protocol.Leave leave) {
     final event = LeaveEvent.from(leave.info);
     _leaveController.add(event);
+  }
+
+  @internal
+  void resubscribeOnConnect() {
+    if (state != SubscriptionState.subscribing) {
+      return;
+    }
+    _resubscribe();
+  }
+
+  @internal
+  void unsubscribeOnDisconnect() {
+    _resubscribeTimer?.cancel();
+    if (state != SubscriptionState.subscribed) {
+      return;
+    }
+    _clearSubscribedState();
+    state = SubscriptionState.subscribing;
+    final event = UnsubscribeEvent();
+    _addUnsubscribe(event);
   }
 }
