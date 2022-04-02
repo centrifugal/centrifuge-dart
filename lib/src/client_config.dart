@@ -19,12 +19,12 @@ class ClientConfig {
       this.name = "dart",
       this.version = ""});
 
+  String? token;
+  List<int>? data;
+
   final Duration timeout;
   final Map<String, dynamic> headers;
   final bool tlsSkipVerify;
-
-  String? token;
-  List<int>? data;
   final Duration minReconnectDelay;
   final Duration maxReconnectDelay;
   final String privateChannelPrefix;

@@ -110,11 +110,13 @@ class ClientImpl implements Client {
 
   Timer? _reconnectTimer;
   Timer? _refreshTimer;
+  Timer? _pingTimer;
   bool _refreshRequired = false;
+  int _reconnectAttempts = 0;
+  int _pingInterval = 0;
+  bool _sendPong = false;
 
   State state = State.disconnected;
-
-  int _reconnectCount = 0;
 
   final _readyFutures = <Completer<void>>[];
 
@@ -168,11 +170,13 @@ class ClientImpl implements Client {
       throw ClientConnectingError();
     }
     state = State.connecting;
+    _reconnectAttempts = 0;
     await _connect();
   }
 
   @override
   Future<void> disconnect() async {
+    _reconnectAttempts = 0;
     _processDisconnect(code: 0, reason: 'client', reconnect: false);
     await _transport.close();
   }
@@ -301,6 +305,7 @@ class ClientImpl implements Client {
     }
     _reconnectTimer?.cancel();
     _refreshTimer?.cancel();
+    _pingTimer?.cancel();
 
     final needDisconnectEvent = state == State.connected;
 
@@ -368,14 +373,14 @@ class ClientImpl implements Client {
   }
 
   void _scheduleReconnect() {
-    final delay = backoffDelay(_reconnectCount, _config.minReconnectDelay, _config.maxReconnectDelay);
+    final delay = backoffDelay(_reconnectAttempts, _config.minReconnectDelay, _config.maxReconnectDelay);
     _reconnectTimer = Timer(delay, () {
       if (state != State.connecting) {
         return;
       }
       _connect();
     });
-    _reconnectCount += 1;
+    _reconnectAttempts += 1;
   }
 
   Future<void> _connect() async {
@@ -456,7 +461,7 @@ class ClientImpl implements Client {
 
       state = State.connected;
       _client = result.client;
-      _reconnectCount = 0;
+      _reconnectAttempts = 0;
       final event = ConnectEvent.from(result);
       _connectController.add(event);
       _completeReadyFutures();
@@ -488,6 +493,12 @@ class ClientImpl implements Client {
           _refreshToken();
         });
       }
+
+      _sendPong = result.pong;
+      if (result.ping > 0) {
+        _pingInterval = result.ping;
+        _setPingTimer();
+      }
     } catch (err) {
       final event = ErrorEvent(ConnectError(err));
       _errorController.add(event);
@@ -514,6 +525,16 @@ class ClientImpl implements Client {
         return;
       }
     }
+  }
+
+  void _setPingTimer() {
+    _pingTimer = Timer(Duration(seconds: _pingInterval) + _config.maxServerPingDelay, () async {
+      if (state != State.connected) {
+        return;
+      }
+      processDisconnect(code: 11, reason: 'no ping', reconnect: true);
+      await _transport.close();
+    });
   }
 
   void _refreshToken() async {
@@ -687,9 +708,14 @@ class ClientImpl implements Client {
   }
 
   void _onPing() {
-    _transport.sendAsyncMessage(
-      protocol.Command(),
-    );
+    _pingTimer?.cancel();
+    _setPingTimer();
+
+    if (_sendPong) {
+      _transport.sendAsyncMessage(
+        protocol.Command(),
+      );
+    }
   }
 
   void _onPush(protocol.Push push, bool isPing) {
@@ -753,6 +779,8 @@ class ClientImpl implements Client {
 final _random = new Random();
 
 Duration backoffDelay(int step, Duration minDelay, Duration maxDelay) {
+  // Full jitter technique.
+  // https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
   if (step > 31) {
     step = 31;
   } // Avoid RangeError.
