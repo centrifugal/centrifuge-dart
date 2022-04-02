@@ -15,14 +15,13 @@ class ConnectionTokenEvent {
 }
 
 class SubscriptionTokenEvent {
-  SubscriptionTokenEvent(this.clientID, this.channel);
+  SubscriptionTokenEvent(this.channel);
 
-  final String clientID;
   final String channel;
 
   @override
   String toString() {
-    return 'SubscriptionTokenEvent{clientID: $clientID, channel: $channel}';
+    return 'SubscriptionTokenEvent{channel: $channel}';
   }
 }
 
@@ -89,14 +88,15 @@ class MessageEvent {
 }
 
 class PublicationEvent {
-  PublicationEvent(this.data, this.offset, this.info);
+  PublicationEvent(this.data, this.offset, this.info, this.tags);
 
   final List<int> data;
   final $fixnum.Int64 offset;
   final ClientInfo? info;
+  final Map<String, String> tags;
 
   static PublicationEvent from(proto.Publication pub) =>
-      PublicationEvent(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
+      PublicationEvent(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null, pub.tags);
 
   @override
   String toString() {
@@ -105,15 +105,16 @@ class PublicationEvent {
 }
 
 class ServerPublicationEvent {
-  ServerPublicationEvent(this.channel, this.data, this.offset, this.info);
+  ServerPublicationEvent(this.channel, this.data, this.offset, this.info, this.tags);
 
   final String channel;
   final List<int> data;
   final $fixnum.Int64 offset;
   final ClientInfo? info;
+  final Map<String, String> tags;
 
-  static ServerPublicationEvent from(String channel, proto.Publication pub) =>
-      ServerPublicationEvent(channel, pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
+  static ServerPublicationEvent from(String channel, proto.Publication pub) => ServerPublicationEvent(
+      channel, pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null, pub.tags);
 
   @override
   String toString() {

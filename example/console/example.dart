@@ -8,10 +8,6 @@ void main() async {
   final url = 'ws://localhost:8000/connection/websocket?cf_protocol_version=v2';
   final channel = 'chat:index';
 
-  final onSubscriptionEvent = (dynamic event) {
-    print('subscription $channel> $event');
-  };
-
   final onEvent = (dynamic event) {
     print('client> $event');
   };
@@ -44,10 +40,16 @@ void main() async {
     client.subscribeStream.listen(onEvent);
     client.unsubscribeStream.listen(onEvent);
     client.publicationStream.listen(onEvent);
+    client.joinStream.listen(onEvent);
+    client.leaveStream.listen(onEvent);
 
     await client.connect();
 
     final subscription = client.newSubscription(channel);
+
+    final onSubscriptionEvent = (dynamic event) async {
+      print('subscription $channel> $event');
+    };
 
     // State changes.
     subscription.subscribeStream.listen(onSubscriptionEvent);

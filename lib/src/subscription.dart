@@ -199,20 +199,14 @@ class SubscriptionImpl implements Subscription {
   void _addUnsubscribe(UnsubscribeEvent event) => _unsubscribeController.add(event);
 
   void _refreshToken() async {
-    final String? clientId = _client.client;
-    if (clientId == null) {
-      return;
-    }
     try {
-      final event = SubscriptionTokenEvent(clientId, channel);
+      final event = SubscriptionTokenEvent(channel);
       final String token = await _client.config.onSubscriptionToken(event);
       if (token == "") {
         _failUnauthorized();
         return;
       }
-      if (!_config.tokenUniquePerConnection) {
-        _token = token;
-      }
+      _token = token;
     } catch (ex) {
       if (state != SubscriptionState.subscribed) {
         return;
@@ -272,8 +266,8 @@ class SubscriptionImpl implements Subscription {
   Future _resubscribe() async {
     try {
       var token = _token;
-      if (token == null && _client.isPrivateChannel(channel)) {
-        final event = SubscriptionTokenEvent(_client.client!, channel);
+      if (_client.isPrivateChannel(channel) && token == null) {
+        final event = SubscriptionTokenEvent(channel);
         token = await _client.config.onSubscriptionToken(event);
         if (token == "") {
           _failUnauthorized();
