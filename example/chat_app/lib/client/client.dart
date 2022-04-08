@@ -26,11 +26,7 @@ class ChatClient {
   void init(String token, String username, int userid) {
     const url = 'ws://${conf.serverAddr}/connection/websocket?format=protobuf';
     _client = createClient(url,
-        config: ClientConfig(headers: <String, dynamic>{
-          'user-id': userid,
-          'user-name': username
-        }))
-      ..setToken(token);
+        ClientConfig(headers: <String, dynamic>{'user-id': userid, 'user-name': username}, token: token));
     _msgSub = _client.messageStream.listen((event) {
       print("Msg: $event");
     });
@@ -41,17 +37,13 @@ class ChatClient {
     _connSub = _client.connectStream.listen((event) {
       print("Connected to server");
       Fluttertoast.showToast(
-          msg: "Centrifugo server connected",
-          backgroundColor: Colors.green,
-          textColor: Colors.white);
+          msg: "Centrifugo server connected", backgroundColor: Colors.green, textColor: Colors.white);
       onConnect();
     });
     _disconnSub = _client.disconnectStream.listen((event) {
       print("Disconnected from server");
       Fluttertoast.showToast(
-          msg: "Centrifugo server disconnected",
-          backgroundColor: Colors.red,
-          textColor: Colors.white);
+          msg: "Centrifugo server disconnected", backgroundColor: Colors.red, textColor: Colors.white);
     });
     _errorSub = _client.errorStream.listen((event) {
       print(event.error);
@@ -62,9 +54,7 @@ class ChatClient {
   Future<void> subscribe(String channel) async {
     print("Subscribing to channel $channel");
     final subscription = _client.getSubscription(channel);
-    subscription.publishStream
-        .map<String>((e) => utf8.decode(e.data))
-        .listen((data) {
+    subscription.publishStream.map<String>((e) => utf8.decode(e.data)).listen((data) {
       final d = json.decode(data) as Map<String, dynamic>;
       final username = d["username"].toString();
       final msg = d["message"].toString();
@@ -72,9 +62,7 @@ class ChatClient {
           text: msg,
           user: ChatUser(
               name: username,
-              containerColor: username == state.username
-                  ? Colors.lightBlueAccent
-                  : Colors.grey[300],
+              containerColor: username == state.username ? Colors.lightBlueAccent : Colors.grey[300],
               color: Colors.black87)));
     });
     subscription.joinStream.listen(print);
@@ -99,7 +87,7 @@ class ChatClient {
     final data = utf8.encode(output);
     try {
       await subscription?.publish(data);
-    } catch (e) {
+    } on Exception {
       rethrow;
     }
   }
