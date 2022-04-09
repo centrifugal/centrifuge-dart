@@ -199,23 +199,12 @@ final $typed_data.Uint8List leaveDescriptor = $convert.base64Decode('CgVMZWF2ZRI
 const Unsubscribe$json = const {
   '1': 'Unsubscribe',
   '2': const [
-    const {'1': 'type', '3': 2, '4': 1, '5': 14, '6': '.centrifugal.centrifuge.protocol.Unsubscribe.Type', '10': 'type'},
-  ],
-  '4': const [Unsubscribe_Type$json],
-};
-
-@$core.Deprecated('Use unsubscribeDescriptor instead')
-const Unsubscribe_Type$json = const {
-  '1': 'Type',
-  '2': const [
-    const {'1': 'PERMANENT', '2': 0},
-    const {'1': 'INSUFFICIENT', '2': 1},
-    const {'1': 'UNRECOVERABLE', '2': 2},
+    const {'1': 'code', '3': 2, '4': 1, '5': 13, '10': 'code'},
   ],
 };
 
 /// Descriptor for `Unsubscribe`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List unsubscribeDescriptor = $convert.base64Decode('CgtVbnN1YnNjcmliZRJFCgR0eXBlGAIgASgOMjEuY2VudHJpZnVnYWwuY2VudHJpZnVnZS5wcm90b2NvbC5VbnN1YnNjcmliZS5UeXBlUgR0eXBlIjoKBFR5cGUSDQoJUEVSTUFORU5UEAASEAoMSU5TVUZGSUNJRU5UEAESEQoNVU5SRUNPVkVSQUJMRRAC');
+final $typed_data.Uint8List unsubscribeDescriptor = $convert.base64Decode('CgtVbnN1YnNjcmliZRISCgRjb2RlGAIgASgNUgRjb2Rl');
 @$core.Deprecated('Use subscribeDescriptor instead')
 const Subscribe$json = const {
   '1': 'Subscribe',

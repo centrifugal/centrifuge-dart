@@ -4,25 +4,24 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:meta/meta.dart';
 
 import 'client.dart';
+import 'codes.dart';
 import 'error.dart';
 import 'events.dart';
 import 'proto/client.pb.dart' as protocol;
 import 'subscription_config.dart';
 
-enum SubscriptionState { unsubscribed, subscribing, subscribed, failed }
-
-enum SubscriptionFailReason { clientFailed, subscribeFailed, refreshFailed, unauthorized, unrecoverable }
+enum SubscriptionState { unsubscribed, subscribing, subscribed }
 
 abstract class Subscription {
   String get channel;
 
-  Stream<SubscribeEvent> get subscribeStream;
-  Stream<UnsubscribeEvent> get unsubscribeStream;
-  Stream<SubscriptionFailEvent> get failStream;
-  Stream<PublicationEvent> get publicationStream;
-  Stream<JoinEvent> get joinStream;
-  Stream<LeaveEvent> get leaveStream;
-  Stream<SubscriptionErrorEvent> get errorStream;
+  Stream<SubscribingEvent> get subscribing;
+  Stream<SubscribedEvent> get subscribed;
+  Stream<UnsubscribedEvent> get unsubscribed;
+  Stream<SubscriptionErrorEvent> get error;
+  Stream<PublicationEvent> get publication;
+  Stream<JoinEvent> get join;
+  Stream<LeaveEvent> get leave;
 
   Future<void> subscribe();
   Future<void> unsubscribe();
@@ -67,33 +66,33 @@ class SubscriptionImpl implements Subscription {
   final _publicationController = StreamController<PublicationEvent>.broadcast(sync: true);
   final _joinController = StreamController<JoinEvent>.broadcast(sync: true);
   final _leaveController = StreamController<LeaveEvent>.broadcast(sync: true);
-  final _subscribeController = StreamController<SubscribeEvent>.broadcast(sync: true);
+  final _subscribingController = StreamController<SubscribingEvent>.broadcast(sync: true);
+  final _subscribedController = StreamController<SubscribedEvent>.broadcast(sync: true);
+  final _unsubscribedController = StreamController<UnsubscribedEvent>.broadcast(sync: true);
   final _errorController = StreamController<SubscriptionErrorEvent>.broadcast(sync: true);
-  final _unsubscribeController = StreamController<UnsubscribeEvent>.broadcast(sync: true);
-  final _failController = StreamController<SubscriptionFailEvent>.broadcast(sync: true);
 
   final _readyFutures = <Completer<void>>[];
 
   @override
-  Stream<PublicationEvent> get publicationStream => _publicationController.stream;
+  Stream<PublicationEvent> get publication => _publicationController.stream;
 
   @override
-  Stream<JoinEvent> get joinStream => _joinController.stream;
+  Stream<JoinEvent> get join => _joinController.stream;
 
   @override
-  Stream<LeaveEvent> get leaveStream => _leaveController.stream;
+  Stream<LeaveEvent> get leave => _leaveController.stream;
 
   @override
-  Stream<SubscribeEvent> get subscribeStream => _subscribeController.stream;
+  Stream<SubscribingEvent> get subscribing => _subscribingController.stream;
 
   @override
-  Stream<SubscriptionErrorEvent> get errorStream => _errorController.stream;
+  Stream<SubscribedEvent> get subscribed => _subscribedController.stream;
 
   @override
-  Stream<UnsubscribeEvent> get unsubscribeStream => _unsubscribeController.stream;
+  Stream<UnsubscribedEvent> get unsubscribed => _unsubscribedController.stream;
 
   @override
-  Stream<SubscriptionFailEvent> get failStream => _failController.stream;
+  Stream<SubscriptionErrorEvent> get error => _errorController.stream;
 
   @override
   Future<void> subscribe() async {
@@ -110,6 +109,14 @@ class SubscriptionImpl implements Subscription {
 
   @override
   Future<void> unsubscribe() async {
+    return moveToUnsubscribed(unsubscribedCodeUnsubscribeCalled, 'unsubscribe called', true);
+  }
+
+  @internal
+  Future<void> moveToUnsubscribed(int code, String reason, bool sendUnsubscribe) async {
+    if (state == SubscriptionState.unsubscribed) {
+      return;
+    }
     _resubscribeTimer?.cancel();
     final prevState = state;
     state = SubscriptionState.unsubscribed;
@@ -117,15 +124,17 @@ class SubscriptionImpl implements Subscription {
     if (prevState == SubscriptionState.subscribed) {
       _clearSubscribedState();
     }
-    if (prevState != SubscriptionState.subscribed) {
-      return;
+    if (sendUnsubscribe && prevState == SubscriptionState.subscribed && _client.state == State.connected) {
+      try {
+        await _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel);
+      } on Exception {
+        _client.processDisconnect(
+            code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
+        _client.closeTransport();
+        return;
+      }
     }
-    if (_client.state != State.connected) {
-      _addUnsubscribe(UnsubscribeEvent());
-      return;
-    }
-    await _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel);
-    _addUnsubscribe(UnsubscribeEvent());
+    _addUnsubscribe(UnsubscribedEvent(code, reason));
   }
 
   @override
@@ -134,10 +143,7 @@ class SubscriptionImpl implements Subscription {
       return Future.value();
     }
     if (state != SubscriptionState.subscribing) {
-      if (state == SubscriptionState.unsubscribed) {
-        throw SubscriptionUnsubscribedError();
-      }
-      throw SubscriptionFailedError();
+      throw SubscriptionUnsubscribedError();
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
@@ -196,7 +202,9 @@ class SubscriptionImpl implements Subscription {
     _readyFutures.clear();
   }
 
-  void _addUnsubscribe(UnsubscribeEvent event) => _unsubscribeController.add(event);
+  void _addUnsubscribe(UnsubscribedEvent event) => _unsubscribedController.add(event);
+
+  void _addSubscribing(SubscribingEvent event) => _subscribingController.add(event);
 
   void _refreshToken() async {
     try {
@@ -251,7 +259,7 @@ class SubscriptionImpl implements Subscription {
           });
           return;
         }
-        _refreshFailed();
+        moveToUnsubscribed(err.code, err.message, true);
         return;
       }
       _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
@@ -287,9 +295,9 @@ class SubscriptionImpl implements Subscription {
         request.epoch = _epoch!;
       }
       final result = await _client.sendSubscribe(request);
-      final event = SubscribeEvent.from(result);
+      final event = SubscribedEvent.from(result);
       state = SubscriptionState.subscribed;
-      _subscribeController.add(event);
+      _subscribedController.add(event);
       _completeReadyFutures();
       _resubscribeAttempts = 0;
       if (result.expires) {
@@ -302,7 +310,8 @@ class SubscriptionImpl implements Subscription {
       }
       _recoverPublications(result);
     } on TimeoutException {
-      _client.processDisconnect(code: 10, reason: 'subscribe timeout', reconnect: true);
+      _client.processDisconnect(
+          code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
       _client.closeTransport();
       return;
     } catch (err) {
@@ -312,11 +321,7 @@ class SubscriptionImpl implements Subscription {
       final event = SubscriptionErrorEvent(SubscriptionSubscribeError(err));
       _errorController.add(event);
       if (err is Error) {
-        if (err.code == 112) {
-          _clearPositionState();
-          _failUnrecoverable();
-          return;
-        } else if (err.code == 109 || err.temporary) {
+        if (err.code == 109 || err.temporary) {
           if (err.code == 109) {
             // Token expired error.
             _token = null;
@@ -324,7 +329,7 @@ class SubscriptionImpl implements Subscription {
           _scheduleResubscribe();
           return;
         } else {
-          _subscribeFailed();
+          moveToUnsubscribed(err.code, err.message, false);
           return;
         }
       }
@@ -359,48 +364,8 @@ class SubscriptionImpl implements Subscription {
     _resubscribeAttempts++;
   }
 
-  void _clearPositionState() {
-    _recover = false;
-    _offset = null;
-    _epoch = null;
-  }
-
-  void _fail(SubscriptionFailReason reason) async {
-    unsubscribe();
-    state = SubscriptionState.failed;
-    final event = SubscriptionFailEvent(reason);
-    _failController.add(event);
-  }
-
-  void _subscribeFailed() {
-    _fail(SubscriptionFailReason.subscribeFailed);
-  }
-
-  void _refreshFailed() {
-    _fail(SubscriptionFailReason.refreshFailed);
-  }
-
   void _failUnauthorized() {
-    _fail(SubscriptionFailReason.unauthorized);
-  }
-
-  void _failUnrecoverable() {
-    _clearPositionState();
-    _fail(SubscriptionFailReason.unrecoverable);
-  }
-
-  void _failClient() {
-    _fail(SubscriptionFailReason.clientFailed);
-  }
-
-  @internal
-  void failUnrecoverable() {
-    _failUnrecoverable();
-  }
-
-  @internal
-  void failClient() {
-    _failClient();
+    moveToUnsubscribed(unsubscribedCodeUnauthorized, 'unauthorized', true);
   }
 
   @internal
@@ -433,14 +398,14 @@ class SubscriptionImpl implements Subscription {
   }
 
   @internal
-  void unsubscribeOnDisconnect() {
+  void moveToSubscribing(int code, String reason) {
     _resubscribeTimer?.cancel();
     if (state != SubscriptionState.subscribed) {
       return;
     }
     _clearSubscribedState();
     state = SubscriptionState.subscribing;
-    final event = UnsubscribeEvent();
-    _addUnsubscribe(event);
+    final event = SubscribingEvent(code, reason);
+    _addSubscribing(event);
   }
 }

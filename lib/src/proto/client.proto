@@ -151,12 +151,7 @@ message Leave {
 
 message Unsubscribe {
   // Field 1 removed (bool resubscribe).
-  enum Type {
-    PERMANENT = 0;
-    INSUFFICIENT = 1;
-    UNRECOVERABLE = 2;
-  }
-  Type type = 2;
+  uint32 code = 2;
 }
 
 message Subscribe {

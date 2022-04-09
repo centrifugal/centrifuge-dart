@@ -1193,17 +1193,17 @@ class Leave extends $pb.GeneratedMessage {
 
 class Unsubscribe extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Unsubscribe', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..e<Unsubscribe_Type>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: Unsubscribe_Type.PERMANENT, valueOf: Unsubscribe_Type.valueOf, enumValues: Unsubscribe_Type.values)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
   Unsubscribe._() : super();
   factory Unsubscribe({
-    Unsubscribe_Type? type,
+    $core.int? code,
   }) {
     final _result = create();
-    if (type != null) {
-      _result.type = type;
+    if (code != null) {
+      _result.code = code;
     }
     return _result;
   }
@@ -1229,13 +1229,13 @@ class Unsubscribe extends $pb.GeneratedMessage {
   static Unsubscribe? _defaultInstance;
 
   @$pb.TagNumber(2)
-  Unsubscribe_Type get type => $_getN(0);
+  $core.int get code => $_getIZ(0);
   @$pb.TagNumber(2)
-  set type(Unsubscribe_Type v) { setField(2, v); }
+  set code($core.int v) { $_setUnsignedInt32(0, v); }
   @$pb.TagNumber(2)
-  $core.bool hasType() => $_has(0);
+  $core.bool hasCode() => $_has(0);
   @$pb.TagNumber(2)
-  void clearType() => clearField(2);
+  void clearCode() => clearField(2);
 }
 
 class Subscribe extends $pb.GeneratedMessage {

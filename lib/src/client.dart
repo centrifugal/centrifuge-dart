@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart';
+import 'package:centrifuge/src/codes.dart';
 import 'package:centrifuge/src/server_subscription.dart';
 import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
@@ -13,9 +14,7 @@ import 'subscription.dart';
 import 'subscription_config.dart';
 import 'transport.dart';
 
-enum State { disconnected, connecting, connected, failed }
-
-enum FailReason { server, connectFailed, refreshFailed, unauthorized, unrecoverable }
+enum State { disconnected, connecting, connected }
 
 Client createClient(String url, [ClientConfig? config]) => ClientImpl(
       url,
@@ -24,16 +23,19 @@ Client createClient(String url, [ClientConfig? config]) => ClientImpl(
     );
 
 abstract class Client {
-  Stream<ConnectEvent> get connectStream;
-  Stream<DisconnectEvent> get disconnectStream;
-  Stream<FailEvent> get failStream;
-  Stream<ErrorEvent> get errorStream;
-  Stream<MessageEvent> get messageStream;
-  Stream<ServerSubscribeEvent> get subscribeStream;
-  Stream<ServerUnsubscribeEvent> get unsubscribeStream;
-  Stream<ServerPublicationEvent> get publicationStream;
-  Stream<ServerJoinEvent> get joinStream;
-  Stream<ServerLeaveEvent> get leaveStream;
+  Stream<ConnectingEvent> get connecting;
+  Stream<ConnectedEvent> get connected;
+  Stream<DisconnectedEvent> get disconnected;
+  Stream<ErrorEvent> get error;
+  Stream<MessageEvent> get message;
+
+  Stream<ServerSubscribedEvent> get subscribed;
+  Stream<ServerSubscribingEvent> get subscribing;
+  Stream<ServerUnsubscribedEvent> get unsubscribed;
+  Stream<ServerPublicationEvent> get publication;
+  Stream<ServerJoinEvent> get join;
+  Stream<ServerLeaveEvent> get leave;
+  State get state;
 
   /// Connect to the server.
   ///
@@ -120,46 +122,50 @@ class ClientImpl implements Client {
 
   final _readyFutures = <Completer<void>>[];
 
-  final _connectController = StreamController<ConnectEvent>.broadcast(sync: true);
-  final _disconnectController = StreamController<DisconnectEvent>.broadcast(sync: true);
-  final _failController = StreamController<FailEvent>.broadcast(sync: true);
+  final _connectedController = StreamController<ConnectedEvent>.broadcast(sync: true);
+  final _disconnectedController = StreamController<DisconnectedEvent>.broadcast(sync: true);
+  final _connectingController = StreamController<ConnectingEvent>.broadcast(sync: true);
   final _errorController = StreamController<ErrorEvent>.broadcast(sync: true);
   final _messageController = StreamController<MessageEvent>.broadcast(sync: true);
-  final _subscribeController = StreamController<ServerSubscribeEvent>.broadcast(sync: true);
-  final _unsubscribeController = StreamController<ServerUnsubscribeEvent>.broadcast(sync: true);
+  final _subscribedController = StreamController<ServerSubscribedEvent>.broadcast(sync: true);
+  final _subscribingController = StreamController<ServerSubscribingEvent>.broadcast(sync: true);
+  final _unsubscribedController = StreamController<ServerUnsubscribedEvent>.broadcast(sync: true);
   final _publicationController = StreamController<ServerPublicationEvent>.broadcast(sync: true);
   final _joinController = StreamController<ServerJoinEvent>.broadcast(sync: true);
   final _leaveController = StreamController<ServerLeaveEvent>.broadcast(sync: true);
 
   @override
-  Stream<ConnectEvent> get connectStream => _connectController.stream;
+  Stream<ConnectedEvent> get connected => _connectedController.stream;
 
   @override
-  Stream<DisconnectEvent> get disconnectStream => _disconnectController.stream;
+  Stream<DisconnectedEvent> get disconnected => _disconnectedController.stream;
 
   @override
-  Stream<FailEvent> get failStream => _failController.stream;
+  Stream<ConnectingEvent> get connecting => _connectingController.stream;
 
   @override
-  Stream<ErrorEvent> get errorStream => _errorController.stream;
+  Stream<ErrorEvent> get error => _errorController.stream;
 
   @override
-  Stream<MessageEvent> get messageStream => _messageController.stream;
+  Stream<MessageEvent> get message => _messageController.stream;
 
   @override
-  Stream<ServerSubscribeEvent> get subscribeStream => _subscribeController.stream;
+  Stream<ServerSubscribedEvent> get subscribed => _subscribedController.stream;
 
   @override
-  Stream<ServerUnsubscribeEvent> get unsubscribeStream => _unsubscribeController.stream;
+  Stream<ServerSubscribingEvent> get subscribing => _subscribingController.stream;
 
   @override
-  Stream<ServerPublicationEvent> get publicationStream => _publicationController.stream;
+  Stream<ServerUnsubscribedEvent> get unsubscribed => _unsubscribedController.stream;
 
   @override
-  Stream<ServerJoinEvent> get joinStream => _joinController.stream;
+  Stream<ServerPublicationEvent> get publication => _publicationController.stream;
 
   @override
-  Stream<ServerLeaveEvent> get leaveStream => _leaveController.stream;
+  Stream<ServerJoinEvent> get join => _joinController.stream;
+
+  @override
+  Stream<ServerLeaveEvent> get leave => _leaveController.stream;
 
   @override
   Future<void> connect() async {
@@ -170,6 +176,8 @@ class ClientImpl implements Client {
       throw ClientConnectingError();
     }
     state = State.connecting;
+    final event = ConnectingEvent(connectingCodeConnectCalled, 'connect called');
+    _connectingController.add(event);
     _reconnectAttempts = 0;
     await _connect();
   }
@@ -177,7 +185,7 @@ class ClientImpl implements Client {
   @override
   Future<void> disconnect() async {
     _reconnectAttempts = 0;
-    _processDisconnect(code: 0, reason: 'client', reconnect: false);
+    _processDisconnect(code: disconnectedCodeDisconnectCalled, reason: 'disconnect called', reconnect: false);
     await _transport.close();
   }
 
@@ -186,11 +194,8 @@ class ClientImpl implements Client {
     if (state == State.connected) {
       return Future.value();
     }
-    if (state != State.connecting) {
-      if (state == State.disconnected) {
-        throw ClientDisconnectedError();
-      }
-      throw ClientFailedError();
+    if (state == State.disconnected) {
+      throw ClientDisconnectedError();
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
@@ -300,23 +305,32 @@ class ClientImpl implements Client {
   }
 
   void _processDisconnect({required int code, required String reason, required bool reconnect}) async {
-    if (state == State.disconnected || state == State.failed) {
+    if (state == State.disconnected) {
       return;
     }
     _reconnectTimer?.cancel();
     _refreshTimer?.cancel();
     _pingTimer?.cancel();
 
-    final needDisconnectEvent = state == State.connected;
+    final prevState = state;
 
     if (state == State.connected) {
       _client = null;
 
-      _subscriptions.values.forEach((s) => s.unsubscribeOnDisconnect());
+      int subscribingCode;
+      String subscribingReason;
+      if (reconnect) {
+        subscribingCode = subscribingCodeClientConnecting;
+        subscribingReason = 'client connecting';
+      } else {
+        subscribingCode = subscribingCodeClientDisconnected;
+        subscribingReason = 'client disconnected';
+      }
+      _subscriptions.values.forEach((s) => s.moveToSubscribing(subscribingCode, subscribingReason));
 
       _serverSubs.forEach((key, value) {
-        final event = ServerUnsubscribeEvent.from(key);
-        _unsubscribeController.add(event);
+        final event = ServerSubscribingEvent.from(key);
+        _subscribingController.add(event);
       });
     }
 
@@ -327,49 +341,26 @@ class ClientImpl implements Client {
       state = State.disconnected;
     }
 
-    if (needDisconnectEvent) {
-      final disconnect = DisconnectEvent(code, reason, reconnect);
-      _disconnectController.add(disconnect);
-    }
+    final needEvent = prevState != state;
 
-    if (!reconnect && code >= 3000) {
-      _failServer(code);
+    if (needEvent) {
+      if (state == State.connecting) {
+        final event = ConnectingEvent(code, reason);
+        _connectingController.add(event);
+      } else {
+        final event = DisconnectedEvent(code, reason);
+        _disconnectedController.add(event);
+      }
     }
 
     if (state == State.disconnected) {
       _errorReadyFutures(ClientDisconnectedError());
-    } else if (state == State.failed) {
-      _errorReadyFutures(ClientFailedError());
     }
   }
 
-  void _fail(FailReason reason, int disconnectCode) {
-    _processDisconnect(code: disconnectCode, reason: "failed", reconnect: false);
-    state = State.failed;
-    final failEvent = FailEvent(reason);
-    _failController.add(failEvent);
-    _subscriptions.values.forEach((s) => s.failClient());
-  }
-
-  void _connectFailed() {
-    _fail(FailReason.connectFailed, 5);
-  }
-
-  void _refreshFailed() {
-    _fail(FailReason.refreshFailed, 6);
-  }
-
   void _failUnauthorized() {
-    _fail(FailReason.unauthorized, 7);
-  }
-
-  void _failUnrecoverable() {
-    _serverSubs.clear();
-    _fail(FailReason.unrecoverable, 8);
-  }
-
-  void _failServer(int disconnectCode) {
-    _fail(FailReason.server, disconnectCode);
+    _processDisconnect(code: disconnectedCodeUnauthorized, reason: 'unauthorized', reconnect: false);
+    _transport.close();
   }
 
   void _scheduleReconnect() {
@@ -417,10 +408,10 @@ class ClientImpl implements Client {
         if (state != State.connected) {
           return;
         }
+        _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
         _transport.close();
-        _processDisconnect(code: 4, reason: "connection closed", reconnect: true);
       }, onDone: (code, reason, reconnect) {
-        if (state != State.connected && !(state == State.connecting)) {
+        if (state == State.disconnected) {
           return;
         }
         _processDisconnect(code: code, reason: reason, reconnect: reconnect);
@@ -462,14 +453,14 @@ class ClientImpl implements Client {
       state = State.connected;
       _client = result.client;
       _reconnectAttempts = 0;
-      final event = ConnectEvent.from(result);
-      _connectController.add(event);
+      final event = ConnectedEvent.from(result);
+      _connectedController.add(event);
       _completeReadyFutures();
 
       result.subs.forEach((key, value) {
         _serverSubs[key] = ServerSubscription(key, value.recoverable, value.offset, value.epoch);
-        final event = ServerSubscribeEvent.fromSubscribeResult(key, value);
-        _subscribeController.add(event);
+        final event = ServerSubscribedEvent.fromSubscribeResult(key, value);
+        _subscribedController.add(event);
         value.publications.forEach((element) {
           final event = ServerPublicationEvent.from(key, element);
           _publicationController.add(event);
@@ -479,6 +470,12 @@ class ClientImpl implements Client {
         });
       });
 
+      _serverSubs.forEach((key, value) {
+        if (!result.subs.containsKey(key)) {
+          final event = ServerUnsubscribedEvent.from(key);
+          _unsubscribedController.add(event);
+        }
+      });
       _serverSubs.removeWhere((key, value) => !result.subs.containsKey(key));
 
       for (SubscriptionImpl subscription in _subscriptions.values) {
@@ -502,22 +499,19 @@ class ClientImpl implements Client {
     } catch (err) {
       final event = ErrorEvent(ConnectError(err));
       _errorController.add(event);
-      await _transport.close();
       if (err is Error) {
         if (err.code == 109) {
           // token expired.
           _refreshRequired = true;
           _scheduleReconnect();
           return;
-        } else if (err.code == 112) {
-          // unrecoverable position.
-          _failUnrecoverable();
-          return;
         } else if (!err.temporary) {
-          _connectFailed();
+          _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+          _transport.close();
           return;
         } else {
-          _scheduleReconnect();
+          _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+          _transport.close();
           return;
         }
       } else {
@@ -532,7 +526,7 @@ class ClientImpl implements Client {
       if (state != State.connected) {
         return;
       }
-      processDisconnect(code: 11, reason: 'no ping', reconnect: true);
+      processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
       await _transport.close();
     });
   }
@@ -597,7 +591,8 @@ class ClientImpl implements Client {
           });
           return;
         }
-        _refreshFailed();
+        _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+        _transport.close();
         return;
       }
       _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
@@ -679,31 +674,27 @@ class ClientImpl implements Client {
   }
 
   void _handleSubscribe(String channel, protocol.Subscribe subscribe) {
-    final event = ServerSubscribeEvent.fromSubscribePush(channel, subscribe, false);
+    final event = ServerSubscribedEvent.fromSubscribePush(channel, subscribe, false);
     _serverSubs[channel] =
         ServerSubscription.from(channel, subscribe.recoverable, subscribe.offset, subscribe.epoch);
-    _subscribeController.add(event);
+    _subscribedController.add(event);
   }
 
-  void _handleUnsubscribe(String channel, protocol.Unsubscribe_Type type) {
+  void _handleUnsubscribe(String channel, protocol.Unsubscribe unsubscribe) {
     final subscription = _subscriptions[channel];
     if (subscription != null) {
-      if (type == protocol.Unsubscribe_Type.INSUFFICIENT) {
-        // TODO: Better handling without unsubscribed state.
-        subscription.unsubscribe();
-        subscription.subscribe();
-      } else if (type == protocol.Unsubscribe_Type.UNRECOVERABLE) {
-        subscription.failUnrecoverable();
+      if (unsubscribe.code < 2500) {
+        subscription.moveToUnsubscribed(unsubscribe.code, 'server', false);
       } else {
-        subscription.unsubscribe();
+        subscription.moveToSubscribing(unsubscribe.code, 'server');
       }
       return;
     }
     final serverSubscription = _serverSubs[channel];
     if (serverSubscription != null) {
-      final event = ServerUnsubscribeEvent.from(channel);
+      final event = ServerUnsubscribedEvent.from(channel);
       _serverSubs.remove(channel);
-      _unsubscribeController.add(event);
+      _unsubscribedController.add(event);
     }
   }
 
@@ -732,7 +723,7 @@ class ClientImpl implements Client {
     } else if (push.hasSubscribe()) {
       _handleSubscribe(push.channel, push.subscribe);
     } else if (push.hasUnsubscribe()) {
-      _handleUnsubscribe(push.channel, push.unsubscribe.type);
+      _handleUnsubscribe(push.channel, push.unsubscribe);
     } else if (push.hasMessage()) {
       _handleMessage(push.message);
     } else if (push.hasDisconnect()) {

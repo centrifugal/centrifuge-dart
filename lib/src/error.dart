@@ -25,13 +25,6 @@ class ClientDisconnectedError {
   }
 }
 
-class ClientFailedError {
-  @override
-  String toString() {
-    return 'Client failed';
-  }
-}
-
 class SubscriptionSubscribingError {
   @override
   String toString() {

@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:centrifuge/src/client.dart';
-import 'package:centrifuge/src/subscription.dart';
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'proto/client.pb.dart' as proto;
 
@@ -25,22 +23,6 @@ class SubscriptionTokenEvent {
   }
 }
 
-class ConnectEvent {
-  ConnectEvent(this.client, this.version, this.data);
-
-  final String client;
-  final String version;
-  final List<int> data;
-
-  static ConnectEvent from(proto.ConnectResult result) =>
-      ConnectEvent(result.client, result.version, result.data);
-
-  @override
-  String toString() {
-    return 'ConnectEvent{client: $client, version: $version, data: ${utf8.decode(data, allowMalformed: true)}}';
-  }
-}
-
 class ErrorEvent {
   ErrorEvent(this.error);
 
@@ -52,27 +34,43 @@ class ErrorEvent {
   }
 }
 
-class DisconnectEvent {
-  DisconnectEvent(this.code, this.reason, this.reconnect);
+class ConnectingEvent {
+  ConnectingEvent(this.code, this.reason);
 
   final int code;
   final String reason;
-  final bool reconnect;
 
   @override
   String toString() {
-    return 'DisconnectEvent{code: $code, reason: $reason, reconnect: $reconnect}';
+    return 'ConnectingEvent{code: $code, reason: $reason}';
   }
 }
 
-class FailEvent {
-  FailEvent(this.reason);
+class ConnectedEvent {
+  ConnectedEvent(this.client, this.version, this.data);
 
-  final FailReason reason;
+  final String client;
+  final String version;
+  final List<int> data;
+
+  static ConnectedEvent from(proto.ConnectResult result) =>
+      ConnectedEvent(result.client, result.version, result.data);
 
   @override
   String toString() {
-    return 'FailEvent{reason: $reason}';
+    return 'ConnectedEvent{client: $client, version: $version, data: ${utf8.decode(data, allowMalformed: true)}}';
+  }
+}
+
+class DisconnectedEvent {
+  DisconnectedEvent(this.code, this.reason);
+
+  final int code;
+  final String reason;
+
+  @override
+  String toString() {
+    return 'DisconnectEvent{code: $code, reason: $reason}';
   }
 }
 
@@ -268,54 +266,54 @@ class ServerLeaveEvent {
   }
 }
 
-class SubscribeEvent {
-  SubscribeEvent(this.recovered, this.data, this.streamPosition);
+class SubscribedEvent {
+  SubscribedEvent(this.recovered, this.data, this.streamPosition);
 
   final bool recovered;
   final List<int> data;
   final StreamPosition? streamPosition;
 
-  static SubscribeEvent from(proto.SubscribeResult result) {
+  static SubscribedEvent from(proto.SubscribeResult result) {
     StreamPosition? streamPosition;
     if (result.positioned) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return SubscribeEvent(result.recovered, result.data, streamPosition);
+    return SubscribedEvent(result.recovered, result.data, streamPosition);
   }
 
   @override
   String toString() {
-    return 'SubscribeEvent{recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
+    return 'SubscribedEvent{recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
-class ServerSubscribeEvent {
-  ServerSubscribeEvent(this.channel, this.recovered, this.data, this.streamPosition);
+class ServerSubscribedEvent {
+  ServerSubscribedEvent(this.channel, this.recovered, this.data, this.streamPosition);
 
   final String channel;
   final bool recovered;
   final List<int> data;
   final StreamPosition? streamPosition;
 
-  static ServerSubscribeEvent fromSubscribeResult(String channel, proto.SubscribeResult result) {
+  static ServerSubscribedEvent fromSubscribeResult(String channel, proto.SubscribeResult result) {
     StreamPosition? streamPosition;
     if (result.positioned) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return ServerSubscribeEvent(channel, result.recovered, result.data, streamPosition);
+    return ServerSubscribedEvent(channel, result.recovered, result.data, streamPosition);
   }
 
-  static ServerSubscribeEvent fromSubscribePush(String channel, proto.Subscribe result, bool resubscribed) {
+  static ServerSubscribedEvent fromSubscribePush(String channel, proto.Subscribe result, bool resubscribed) {
     StreamPosition? streamPosition;
     if (result.positioned) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return ServerSubscribeEvent(channel, false, result.data, streamPosition);
+    return ServerSubscribedEvent(channel, false, result.data, streamPosition);
   }
 
   @override
   String toString() {
-    return 'ServerSubscribeEvent{channel: $channel, recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
+    return 'ServerSubscribedEvent{channel: $channel, recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
@@ -344,34 +342,53 @@ class SubscriptionErrorEvent {
   }
 }
 
-class SubscriptionFailEvent {
-  final SubscriptionFailReason reason;
+class SubscribingEvent {
+  final int code;
+  final String reason;
 
-  SubscriptionFailEvent(this.reason);
+  SubscribingEvent(this.code, this.reason);
 
   @override
   String toString() {
-    return 'SubscriptionFailEvent{reason: $reason}';
+    return 'SubscribingEvent{code: $code, reason: $reason}';
   }
 }
 
-class UnsubscribeEvent {
+class UnsubscribedEvent {
+  final int code;
+  final String reason;
+
+  UnsubscribedEvent(this.code, this.reason);
+
   @override
   String toString() {
-    return 'UnsubscribeEvent{}';
+    return 'UnsubscribedEvent{}';
   }
 }
 
-class ServerUnsubscribeEvent {
-  ServerUnsubscribeEvent(this.channel);
+class ServerSubscribingEvent {
+  ServerSubscribingEvent(this.channel);
 
   final String channel;
 
-  static ServerUnsubscribeEvent from(String channel) => ServerUnsubscribeEvent(channel);
+  static ServerSubscribingEvent from(String channel) => ServerSubscribingEvent(channel);
 
   @override
   String toString() {
-    return 'ServerUnsubscribeEvent{channel: $channel}';
+    return 'ServerSubscribingEvent{channel: $channel}';
+  }
+}
+
+class ServerUnsubscribedEvent {
+  ServerUnsubscribedEvent(this.channel);
+
+  final String channel;
+
+  static ServerUnsubscribedEvent from(String channel) => ServerUnsubscribedEvent(channel);
+
+  @override
+  String toString() {
+    return 'ServerUnsubscribedEvent{channel: $channel}';
   }
 }
 

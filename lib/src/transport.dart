@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:protobuf/protobuf.dart';
 
 import 'codec.dart';
+import 'codes.dart';
 import 'error.dart' as centrifuge;
 import 'proto/client.pb.dart' hide Error;
 
@@ -210,18 +211,23 @@ class Transport implements GeneratedMessageSender {
         _completers[key]?.completeError(centrifuge.ClientDisconnectedError);
       });
       _completers = <int, Completer<GeneratedMessage>>{};
-      int code = 4;
-      String reason = "connection closed";
+      int code = connectingCodeTransportClosed;
+      String reason = "transport closed";
       bool reconnect = true;
       if (_socket != null && _socket!.closeCode! > 0) {
         code = _socket!.closeCode!;
         reason = _socket!.closeReason!;
         reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
         if (code < 3000) {
-          // We expose codes defined by Centrifuge protocol, hiding
-          // details about transport-specific error codes. We may have extra
-          // optional transportCode field in the future.
-          code = 4;
+          if (code == 1009) {
+            code = disconnectCodeMessageSizeLimit;
+            reason = "message size limit exceeded";
+          } else {
+            // We expose codes defined by Centrifuge protocol, hiding
+            // details about transport-specific error codes. We may have extra
+            // optional transportCode field in the future.
+            code = connectingCodeTransportClosed;
+          }
         }
       }
       onDone!(code, reason, reconnect);
