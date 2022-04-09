@@ -18,7 +18,9 @@ abstract class Subscription {
   Stream<SubscribingEvent> get subscribing;
   Stream<SubscribedEvent> get subscribed;
   Stream<UnsubscribedEvent> get unsubscribed;
+
   Stream<SubscriptionErrorEvent> get error;
+
   Stream<PublicationEvent> get publication;
   Stream<JoinEvent> get join;
   Stream<LeaveEvent> get leave;
@@ -60,6 +62,7 @@ class SubscriptionImpl implements Subscription {
 
   @override
   final String channel;
+
   final ClientImpl _client;
   final SubscriptionConfig _config;
 

@@ -26,15 +26,20 @@ abstract class Client {
   Stream<ConnectingEvent> get connecting;
   Stream<ConnectedEvent> get connected;
   Stream<DisconnectedEvent> get disconnected;
+
   Stream<ErrorEvent> get error;
+
   Stream<MessageEvent> get message;
 
   Stream<ServerSubscribedEvent> get subscribed;
   Stream<ServerSubscribingEvent> get subscribing;
   Stream<ServerUnsubscribedEvent> get unsubscribed;
+
   Stream<ServerPublicationEvent> get publication;
   Stream<ServerJoinEvent> get join;
   Stream<ServerLeaveEvent> get leave;
+
+  /// State of client.
   State get state;
 
   /// Connect to the server.
@@ -118,6 +123,7 @@ class ClientImpl implements Client {
   int _pingInterval = 0;
   bool _sendPong = false;
 
+  @override
   State state = State.disconnected;
 
   final _readyFutures = <Completer<void>>[];
