@@ -29,19 +29,20 @@ void main() async {
     );
 
     // State changes.
-    client.connectStream.listen(onEvent);
-    client.disconnectStream.listen(onEvent);
-    client.failStream.listen(onEvent);
+    client.connecting.listen(onEvent);
+    client.connected.listen(onEvent);
+    client.disconnected.listen(onEvent);
 
     // Handle async errors.
-    client.errorStream.listen(onEvent);
+    client.error.listen(onEvent);
 
     // Server-side subscriptions.
-    client.subscribeStream.listen(onEvent);
-    client.unsubscribeStream.listen(onEvent);
-    client.publicationStream.listen(onEvent);
-    client.joinStream.listen(onEvent);
-    client.leaveStream.listen(onEvent);
+    client.subscribing.listen(onEvent);
+    client.subscribed.listen(onEvent);
+    client.unsubscribed.listen(onEvent);
+    client.publication.listen(onEvent);
+    client.join.listen(onEvent);
+    client.leave.listen(onEvent);
 
     await client.connect();
 
@@ -52,17 +53,17 @@ void main() async {
     };
 
     // State changes.
-    subscription.subscribeStream.listen(onSubscriptionEvent);
-    subscription.unsubscribeStream.listen(onSubscriptionEvent);
-    subscription.failStream.listen(onSubscriptionEvent);
+    subscription.subscribing.listen(onSubscriptionEvent);
+    subscription.subscribed.listen(onSubscriptionEvent);
+    subscription.unsubscribed.listen(onSubscriptionEvent);
 
     // Messages.
-    subscription.publicationStream.listen(onSubscriptionEvent);
-    subscription.joinStream.listen(onSubscriptionEvent);
-    subscription.leaveStream.listen(onSubscriptionEvent);
+    subscription.publication.listen(onSubscriptionEvent);
+    subscription.join.listen(onSubscriptionEvent);
+    subscription.leave.listen(onSubscriptionEvent);
 
     // Handle subscription async errors.
-    subscription.errorStream.listen(onSubscriptionEvent);
+    subscription.error.listen(onSubscriptionEvent);
 
     await subscription.subscribe();
 
