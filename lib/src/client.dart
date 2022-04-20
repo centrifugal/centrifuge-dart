@@ -322,17 +322,8 @@ class ClientImpl implements Client {
 
     if (state == State.connected) {
       _client = null;
-
-      int subscribingCode;
-      String subscribingReason;
-      if (reconnect) {
-        subscribingCode = subscribingCodeClientConnecting;
-        subscribingReason = 'client connecting';
-      } else {
-        subscribingCode = subscribingCodeClientDisconnected;
-        subscribingReason = 'client disconnected';
-      }
-      _subscriptions.values.forEach((s) => s.moveToSubscribing(subscribingCode, subscribingReason));
+      _subscriptions.values
+          .forEach((s) => s.moveToSubscribing(subscribingCodeTransportClosed, "transport closed"));
 
       _serverSubs.forEach((key, value) {
         final event = ServerSubscribingEvent.from(key);
