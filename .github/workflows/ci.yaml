@@ -18,5 +18,8 @@ jobs:
       - name: Install coveralls
         run: sudo gem install coveralls-lcov 
 
+      - name: Start Centrifugo
+        run: docker run -d -p 8000:8000 centrifugo/centrifugo:latest centrifugo --client_insecure
+
       - name: Run tests
         run: bash tool/test.sh
