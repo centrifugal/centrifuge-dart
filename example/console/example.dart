@@ -44,8 +44,6 @@ void main() async {
     client.join.listen(onEvent);
     client.leave.listen(onEvent);
 
-    await client.connect();
-
     final subscription = client.newSubscription(channel);
 
     final onSubscriptionEvent = (dynamic event) async {
@@ -66,6 +64,8 @@ void main() async {
     subscription.error.listen(onSubscriptionEvent);
 
     await subscription.subscribe();
+
+    await client.connect();
 
     final handler = _handleUserInput(client, subscription);
 

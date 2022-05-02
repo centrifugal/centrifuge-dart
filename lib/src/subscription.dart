@@ -107,6 +107,8 @@ class SubscriptionImpl implements Subscription {
     }
     _resubscribeAttempts = 0;
     state = SubscriptionState.subscribing;
+    final event = SubscribingEvent(subscribingCodeSubscribeCalled, 'subscribe called');
+    _subscribingController.add(event);
     await _subscribe();
   }
 
