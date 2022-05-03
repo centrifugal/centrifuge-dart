@@ -376,10 +376,10 @@ class ClientImpl implements Client {
       return;
     }
 
-    if (_refreshRequired) {
+    if (_refreshRequired || (_token == null && _config.getConnectionToken != null)) {
       final event = ConnectionTokenEvent();
       try {
-        final String token = await _config.onConnectionToken(event);
+        final String token = await _config.getConnectionToken!(event);
         if (token == "") {
           _failUnauthorized();
           return;
@@ -529,9 +529,12 @@ class ClientImpl implements Client {
   }
 
   void _refreshToken() async {
+    if (_config.getConnectionToken == null) {
+      return;
+    }
     try {
       final event = ConnectionTokenEvent();
-      final String token = await _config.onConnectionToken(event);
+      final String token = await _config.getConnectionToken!(event);
       if (token == "") {
         _failUnauthorized();
         return;

@@ -370,11 +370,13 @@ const SubscribeRequest$json = const {
     const {'1': 'epoch', '3': 6, '4': 1, '5': 9, '10': 'epoch'},
     const {'1': 'offset', '3': 7, '4': 1, '5': 4, '10': 'offset'},
     const {'1': 'data', '3': 8, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'positioned', '3': 9, '4': 1, '5': 8, '10': 'positioned'},
+    const {'1': 'recoverable', '3': 10, '4': 1, '5': 8, '10': 'recoverable'},
   ],
 };
 
 /// Descriptor for `SubscribeRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscribeRequestDescriptor = $convert.base64Decode('ChBTdWJzY3JpYmVSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFAoFdG9rZW4YAiABKAlSBXRva2VuEhgKB3JlY292ZXIYAyABKAhSB3JlY292ZXISFAoFZXBvY2gYBiABKAlSBWVwb2NoEhYKBm9mZnNldBgHIAEoBFIGb2Zmc2V0EhIKBGRhdGEYCCABKAxSBGRhdGE=');
+final $typed_data.Uint8List subscribeRequestDescriptor = $convert.base64Decode('ChBTdWJzY3JpYmVSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFAoFdG9rZW4YAiABKAlSBXRva2VuEhgKB3JlY292ZXIYAyABKAhSB3JlY292ZXISFAoFZXBvY2gYBiABKAlSBWVwb2NoEhYKBm9mZnNldBgHIAEoBFIGb2Zmc2V0EhIKBGRhdGEYCCABKAxSBGRhdGESHgoKcG9zaXRpb25lZBgJIAEoCFIKcG9zaXRpb25lZBIgCgtyZWNvdmVyYWJsZRgKIAEoCFILcmVjb3ZlcmFibGU=');
 @$core.Deprecated('Use subscribeResultDescriptor instead')
 const SubscribeResult$json = const {
   '1': 'SubscribeResult',
@@ -388,11 +390,12 @@ const SubscribeResult$json = const {
     const {'1': 'offset', '3': 9, '4': 1, '5': 4, '10': 'offset'},
     const {'1': 'positioned', '3': 10, '4': 1, '5': 8, '10': 'positioned'},
     const {'1': 'data', '3': 11, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'was_recovering', '3': 12, '4': 1, '5': 8, '10': 'wasRecovering'},
   ],
 };
 
 /// Descriptor for `SubscribeResult`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscribeResultDescriptor = $convert.base64Decode('Cg9TdWJzY3JpYmVSZXN1bHQSGAoHZXhwaXJlcxgBIAEoCFIHZXhwaXJlcxIQCgN0dGwYAiABKA1SA3R0bBIgCgtyZWNvdmVyYWJsZRgDIAEoCFILcmVjb3ZlcmFibGUSFAoFZXBvY2gYBiABKAlSBWVwb2NoElAKDHB1YmxpY2F0aW9ucxgHIAMoCzIsLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHVibGljYXRpb25SDHB1YmxpY2F0aW9ucxIcCglyZWNvdmVyZWQYCCABKAhSCXJlY292ZXJlZBIWCgZvZmZzZXQYCSABKARSBm9mZnNldBIeCgpwb3NpdGlvbmVkGAogASgIUgpwb3NpdGlvbmVkEhIKBGRhdGEYCyABKAxSBGRhdGE=');
+final $typed_data.Uint8List subscribeResultDescriptor = $convert.base64Decode('Cg9TdWJzY3JpYmVSZXN1bHQSGAoHZXhwaXJlcxgBIAEoCFIHZXhwaXJlcxIQCgN0dGwYAiABKA1SA3R0bBIgCgtyZWNvdmVyYWJsZRgDIAEoCFILcmVjb3ZlcmFibGUSFAoFZXBvY2gYBiABKAlSBWVwb2NoElAKDHB1YmxpY2F0aW9ucxgHIAMoCzIsLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuUHVibGljYXRpb25SDHB1YmxpY2F0aW9ucxIcCglyZWNvdmVyZWQYCCABKAhSCXJlY292ZXJlZBIWCgZvZmZzZXQYCSABKARSBm9mZnNldBIeCgpwb3NpdGlvbmVkGAogASgIUgpwb3NpdGlvbmVkEhIKBGRhdGEYCyABKAxSBGRhdGESJQoOd2FzX3JlY292ZXJpbmcYDCABKAhSDXdhc1JlY292ZXJpbmc=');
 @$core.Deprecated('Use subRefreshRequestDescriptor instead')
 const SubRefreshRequest$json = const {
   '1': 'SubRefreshRequest',

@@ -47,10 +47,14 @@ class SubscriptionImpl implements Subscription {
   bool _recover = false;
   $fixnum.Int64? _offset;
   String? _epoch;
+  bool _positioned = false;
+  bool _recoverable = false;
 
   SubscriptionImpl(this.channel, this._client, this._config) {
     _token = _config.token;
     _data = _config.data;
+    _positioned = _config.positioned;
+    _recoverable = _config.recoverable;
     if (_config.since != null) {
       _recover = true;
       _offset = _config.since!.offset;
@@ -214,7 +218,7 @@ class SubscriptionImpl implements Subscription {
   void _refreshToken() async {
     try {
       final event = SubscriptionTokenEvent(channel);
-      final String token = await _client.config.onSubscriptionToken(event);
+      final String token = await _client.config.getSubscriptionToken(event);
       if (token == "") {
         _failUnauthorized();
         return;
@@ -281,7 +285,7 @@ class SubscriptionImpl implements Subscription {
       var token = _token;
       if (_client.isPrivateChannel(channel) && token == null) {
         final event = SubscriptionTokenEvent(channel);
-        token = await _client.config.onSubscriptionToken(event);
+        token = await _client.config.getSubscriptionToken(event);
         if (token == "") {
           _failUnauthorized();
           return;
@@ -299,6 +303,8 @@ class SubscriptionImpl implements Subscription {
         request.offset = _offset!;
         request.epoch = _epoch!;
       }
+      request.positioned = _positioned;
+      request.recoverable = _recoverable;
       final result = await _client.sendSubscribe(request);
       final event = SubscribedEvent.from(result);
       state = SubscriptionState.subscribed;

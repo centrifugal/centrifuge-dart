@@ -14,8 +14,8 @@ class ClientConfig {
       this.maxReconnectDelay = const Duration(seconds: 20),
       this.privateChannelPrefix = "\$",
       this.maxServerPingDelay = const Duration(seconds: 10),
-      this.onConnectionToken = _defaultConnectionTokenCallback,
-      this.onSubscriptionToken = _defaultSubscriptionTokenCallback,
+      this.getConnectionToken,
+      this.getSubscriptionToken = _defaultSubscriptionTokenCallback,
       this.name = "dart",
       this.version = ""});
 
@@ -29,8 +29,8 @@ class ClientConfig {
   final Duration maxReconnectDelay;
   final String privateChannelPrefix;
   final Duration maxServerPingDelay;
-  final SubscriptionTokenCallback onSubscriptionToken;
-  final ConnectionTokenCallback onConnectionToken;
+  final ConnectionTokenCallback? getConnectionToken;
+  final SubscriptionTokenCallback getSubscriptionToken;
   final String name;
   final String version;
 }
@@ -38,7 +38,5 @@ class ClientConfig {
 typedef ConnectionTokenCallback = Future<String> Function(ConnectionTokenEvent);
 
 typedef SubscriptionTokenCallback = Future<String> Function(SubscriptionTokenEvent);
-
-Future<String> _defaultConnectionTokenCallback(ConnectionTokenEvent event) => Future.value("");
 
 Future<String> _defaultSubscriptionTokenCallback(SubscriptionTokenEvent event) => Future.value("");

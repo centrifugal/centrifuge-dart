@@ -231,6 +231,8 @@ message SubscribeRequest {
   string epoch = 6;
   uint64 offset = 7;
   bytes data = 8;
+  bool positioned = 9;
+  bool recoverable = 10;
 }
 
 message SubscribeResult {
@@ -244,6 +246,7 @@ message SubscribeResult {
   uint64 offset = 9;
   bool positioned = 10;
   bytes data = 11;
+  bool was_recovering = 12;
 }
 
 message SubRefreshRequest {

@@ -2099,6 +2099,8 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
     ..a<$fixnum.Int64>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.List<$core.int>>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
+    ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recoverable')
     ..hasRequiredFields = false
   ;
 
@@ -2110,6 +2112,8 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     $core.String? epoch,
     $fixnum.Int64? offset,
     $core.List<$core.int>? data,
+    $core.bool? positioned,
+    $core.bool? recoverable,
   }) {
     final _result = create();
     if (channel != null) {
@@ -2129,6 +2133,12 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     }
     if (data != null) {
       _result.data = data;
+    }
+    if (positioned != null) {
+      _result.positioned = positioned;
+    }
+    if (recoverable != null) {
+      _result.recoverable = recoverable;
     }
     return _result;
   }
@@ -2206,6 +2216,24 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(5);
   @$pb.TagNumber(8)
   void clearData() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.bool get positioned => $_getBF(6);
+  @$pb.TagNumber(9)
+  set positioned($core.bool v) { $_setBool(6, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasPositioned() => $_has(6);
+  @$pb.TagNumber(9)
+  void clearPositioned() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.bool get recoverable => $_getBF(7);
+  @$pb.TagNumber(10)
+  set recoverable($core.bool v) { $_setBool(7, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasRecoverable() => $_has(7);
+  @$pb.TagNumber(10)
+  void clearRecoverable() => clearField(10);
 }
 
 class SubscribeResult extends $pb.GeneratedMessage {
@@ -2219,6 +2247,7 @@ class SubscribeResult extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
     ..a<$core.List<$core.int>>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'wasRecovering')
     ..hasRequiredFields = false
   ;
 
@@ -2233,6 +2262,7 @@ class SubscribeResult extends $pb.GeneratedMessage {
     $fixnum.Int64? offset,
     $core.bool? positioned,
     $core.List<$core.int>? data,
+    $core.bool? wasRecovering,
   }) {
     final _result = create();
     if (expires != null) {
@@ -2261,6 +2291,9 @@ class SubscribeResult extends $pb.GeneratedMessage {
     }
     if (data != null) {
       _result.data = data;
+    }
+    if (wasRecovering != null) {
+      _result.wasRecovering = wasRecovering;
     }
     return _result;
   }
@@ -2359,6 +2392,15 @@ class SubscribeResult extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(8);
   @$pb.TagNumber(11)
   void clearData() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.bool get wasRecovering => $_getBF(9);
+  @$pb.TagNumber(12)
+  set wasRecovering($core.bool v) { $_setBool(9, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasWasRecovering() => $_has(9);
+  @$pb.TagNumber(12)
+  void clearWasRecovering() => clearField(12);
 }
 
 class SubRefreshRequest extends $pb.GeneratedMessage {
