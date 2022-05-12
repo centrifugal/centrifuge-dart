@@ -684,9 +684,9 @@ class ClientImpl implements Client {
     final subscription = _subscriptions[channel];
     if (subscription != null) {
       if (unsubscribe.code < 2500) {
-        subscription.moveToUnsubscribed(unsubscribe.code, 'server', false);
+        subscription.moveToUnsubscribed(unsubscribe.code, unsubscribe.reason, false);
       } else {
-        subscription.moveToSubscribing(unsubscribe.code, 'server');
+        subscription.moveToSubscribing(unsubscribe.code, unsubscribe.reason);
       }
       return;
     }

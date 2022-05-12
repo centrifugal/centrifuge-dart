@@ -306,6 +306,11 @@ class SubscriptionImpl implements Subscription {
       request.positioned = _positioned;
       request.recoverable = _recoverable;
       final result = await _client.sendSubscribe(request);
+      if (result.recoverable) {
+        _recover = true;
+        _epoch = result.epoch;
+        _offset = result.offset;
+      }
       final event = SubscribedEvent.from(result);
       state = SubscriptionState.subscribed;
       _subscribedController.add(event);
@@ -319,7 +324,11 @@ class SubscriptionImpl implements Subscription {
           _refreshToken();
         });
       }
-      _recoverPublications(result);
+      if (result.publications.isNotEmpty) {
+        for (protocol.Publication pub in result.publications) {
+          handlePublication(pub);
+        }
+      }
     } on TimeoutException {
       _client.processDisconnect(
           code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
@@ -347,20 +356,6 @@ class SubscriptionImpl implements Subscription {
       _scheduleResubscribe();
       return;
     }
-  }
-
-  void _recoverPublications(protocol.SubscribeResult result) {
-    if (result.recoverable) {
-      _recover = true;
-    }
-    if (result.publications.isNotEmpty) {
-      for (protocol.Publication pub in result.publications) {
-        handlePublication(pub);
-      }
-    } else {
-      _offset = result.offset;
-    }
-    _epoch = result.epoch;
   }
 
   void _scheduleResubscribe() {

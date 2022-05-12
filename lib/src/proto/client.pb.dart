@@ -1194,16 +1194,21 @@ class Leave extends $pb.GeneratedMessage {
 class Unsubscribe extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Unsubscribe', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OU3)
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason')
     ..hasRequiredFields = false
   ;
 
   Unsubscribe._() : super();
   factory Unsubscribe({
     $core.int? code,
+    $core.String? reason,
   }) {
     final _result = create();
     if (code != null) {
       _result.code = code;
+    }
+    if (reason != null) {
+      _result.reason = reason;
     }
     return _result;
   }
@@ -1236,6 +1241,15 @@ class Unsubscribe extends $pb.GeneratedMessage {
   $core.bool hasCode() => $_has(0);
   @$pb.TagNumber(2)
   void clearCode() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get reason => $_getSZ(1);
+  @$pb.TagNumber(3)
+  set reason($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasReason() => $_has(1);
+  @$pb.TagNumber(3)
+  void clearReason() => clearField(3);
 }
 
 class Subscribe extends $pb.GeneratedMessage {

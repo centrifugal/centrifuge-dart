@@ -200,11 +200,12 @@ const Unsubscribe$json = const {
   '1': 'Unsubscribe',
   '2': const [
     const {'1': 'code', '3': 2, '4': 1, '5': 13, '10': 'code'},
+    const {'1': 'reason', '3': 3, '4': 1, '5': 9, '10': 'reason'},
   ],
 };
 
 /// Descriptor for `Unsubscribe`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List unsubscribeDescriptor = $convert.base64Decode('CgtVbnN1YnNjcmliZRISCgRjb2RlGAIgASgNUgRjb2Rl');
+final $typed_data.Uint8List unsubscribeDescriptor = $convert.base64Decode('CgtVbnN1YnNjcmliZRISCgRjb2RlGAIgASgNUgRjb2RlEhYKBnJlYXNvbhgDIAEoCVIGcmVhc29u');
 @$core.Deprecated('Use subscribeDescriptor instead')
 const Subscribe$json = const {
   '1': 'Subscribe',

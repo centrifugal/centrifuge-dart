@@ -267,53 +267,64 @@ class ServerLeaveEvent {
 }
 
 class SubscribedEvent {
-  SubscribedEvent(this.recovered, this.data, this.streamPosition);
+  SubscribedEvent(
+      this.wasRecovering, this.recovered, this.data, this.streamPosition, this.positioned, this.recoverable);
 
   final bool recovered;
+  final bool wasRecovering;
+  final bool positioned;
+  final bool recoverable;
   final List<int> data;
   final StreamPosition? streamPosition;
 
   static SubscribedEvent from(proto.SubscribeResult result) {
     StreamPosition? streamPosition;
-    if (result.positioned) {
+    if (result.positioned || result.recoverable) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return SubscribedEvent(result.recovered, result.data, streamPosition);
+    return SubscribedEvent(result.wasRecovering, result.recovered, result.data, streamPosition,
+        result.positioned, result.recoverable);
   }
 
   @override
   String toString() {
-    return 'SubscribedEvent{recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
+    return 'SubscribedEvent{wasRecovering: $wasRecovering, recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
 class ServerSubscribedEvent {
-  ServerSubscribedEvent(this.channel, this.recovered, this.data, this.streamPosition);
+  ServerSubscribedEvent(this.channel, this.wasRecovering, this.recovered, this.data, this.streamPosition,
+      this.positioned, this.recoverable);
 
   final String channel;
   final bool recovered;
+  final bool wasRecovering;
+  final bool positioned;
+  final bool recoverable;
   final List<int> data;
   final StreamPosition? streamPosition;
 
   static ServerSubscribedEvent fromSubscribeResult(String channel, proto.SubscribeResult result) {
     StreamPosition? streamPosition;
-    if (result.positioned) {
+    if (result.positioned || result.recoverable) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return ServerSubscribedEvent(channel, result.recovered, result.data, streamPosition);
+    return ServerSubscribedEvent(channel, result.wasRecovering, result.recovered, result.data, streamPosition,
+        result.positioned, result.recoverable);
   }
 
   static ServerSubscribedEvent fromSubscribePush(String channel, proto.Subscribe result, bool resubscribed) {
     StreamPosition? streamPosition;
-    if (result.positioned) {
+    if (result.positioned || result.recoverable) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
-    return ServerSubscribedEvent(channel, false, result.data, streamPosition);
+    return ServerSubscribedEvent(
+        channel, false, false, result.data, streamPosition, result.positioned, result.recoverable);
   }
 
   @override
   String toString() {
-    return 'ServerSubscribedEvent{channel: $channel, recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
+    return 'ServerSubscribedEvent{channel: $channel, wasRecovering: $wasRecovering, recovered: $recovered, data: ${utf8.decode(data, allowMalformed: true)}, streamPosition: $streamPosition}';
   }
 }
 
