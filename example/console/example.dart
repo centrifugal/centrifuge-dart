@@ -16,16 +16,14 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       centrifuge.ClientConfig(
-          // Uncomment to use example token based on secret key `secret`.
-          // token:
-          // 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw',
-          headers: <String, dynamic>{'X-Example-Header': 'example'},
-          onConnectionToken: (centrifuge.ConnectionTokenEvent event) {
-            return Future.value('<CONNECTION JWT>');
-          },
-          onSubscriptionToken: (centrifuge.SubscriptionTokenEvent event) {
-            return Future.value('<SUBSCRIPTION JWT>');
-          }),
+        // Uncomment to use example token based on secret key `secret`.
+        // token:
+        // 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw',
+        // getToken: (centrifuge.ConnectionTokenEvent event) {
+        //   return Future.value('');
+        // },
+        headers: <String, dynamic>{'X-Example-Header': 'example'},
+      ),
     );
 
     // State changes.
@@ -44,7 +42,14 @@ void main() async {
     client.join.listen(onEvent);
     client.leave.listen(onEvent);
 
-    final subscription = client.newSubscription(channel);
+    final subscription = client.newSubscription(
+      channel,
+      centrifuge.SubscriptionConfig(
+          // getToken: (centrifuge.SubscriptionTokenEvent event) {
+          //   return Future.value('');
+          // },
+          ),
+    );
 
     final onSubscriptionEvent = (dynamic event) async {
       print('subscription $channel> $event');

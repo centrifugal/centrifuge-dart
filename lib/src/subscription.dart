@@ -218,7 +218,7 @@ class SubscriptionImpl implements Subscription {
   void _refreshToken() async {
     try {
       final event = SubscriptionTokenEvent(channel);
-      final String token = await _client.config.getSubscriptionToken(event);
+      final String token = await _config.getToken!(event);
       if (token == "") {
         _failUnauthorized();
         return;
@@ -283,9 +283,9 @@ class SubscriptionImpl implements Subscription {
   Future _resubscribe() async {
     try {
       var token = _token;
-      if (_client.isPrivateChannel(channel) && token == null) {
+      if (token == null && _config.getToken != null) {
         final event = SubscriptionTokenEvent(channel);
-        token = await _client.config.getSubscriptionToken(event);
+        token = await _config.getToken!(event);
         if (token == "") {
           _failUnauthorized();
           return;

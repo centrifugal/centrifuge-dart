@@ -376,10 +376,10 @@ class ClientImpl implements Client {
       return;
     }
 
-    if (_refreshRequired || (_token == null && _config.getConnectionToken != null)) {
+    if (_refreshRequired || (_token == null && _config.getToken != null)) {
       final event = ConnectionTokenEvent();
       try {
-        final String token = await _config.getConnectionToken!(event);
+        final String token = await _config.getToken!(event);
         if (token == "") {
           _failUnauthorized();
           return;
@@ -529,12 +529,12 @@ class ClientImpl implements Client {
   }
 
   void _refreshToken() async {
-    if (_config.getConnectionToken == null) {
+    if (_config.getToken == null) {
       return;
     }
     try {
       final event = ConnectionTokenEvent();
-      final String token = await _config.getConnectionToken!(event);
+      final String token = await _config.getToken!(event);
       if (token == "") {
         _failUnauthorized();
         return;
@@ -730,9 +730,6 @@ class ClientImpl implements Client {
       _handleDisconnect(push.disconnect);
     }
   }
-
-  @internal
-  bool isPrivateChannel(String channel) => channel.startsWith(_config.privateChannelPrefix);
 
   @internal
   Future<protocol.UnsubscribeResult> sendUnsubscribe(protocol.UnsubscribeRequest request) async {

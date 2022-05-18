@@ -12,10 +12,8 @@ class ClientConfig {
       this.timeout = const Duration(seconds: 10),
       this.minReconnectDelay = const Duration(milliseconds: 500),
       this.maxReconnectDelay = const Duration(seconds: 20),
-      this.privateChannelPrefix = "\$",
       this.maxServerPingDelay = const Duration(seconds: 10),
-      this.getConnectionToken,
-      this.getSubscriptionToken = _defaultSubscriptionTokenCallback,
+      this.getToken,
       this.name = "dart",
       this.version = ""});
 
@@ -27,16 +25,10 @@ class ClientConfig {
   final bool tlsSkipVerify;
   final Duration minReconnectDelay;
   final Duration maxReconnectDelay;
-  final String privateChannelPrefix;
   final Duration maxServerPingDelay;
-  final ConnectionTokenCallback? getConnectionToken;
-  final SubscriptionTokenCallback getSubscriptionToken;
+  final ConnectionTokenCallback? getToken;
   final String name;
   final String version;
 }
 
 typedef ConnectionTokenCallback = Future<String> Function(ConnectionTokenEvent);
-
-typedef SubscriptionTokenCallback = Future<String> Function(SubscriptionTokenEvent);
-
-Future<String> _defaultSubscriptionTokenCallback(SubscriptionTokenEvent event) => Future.value("");
