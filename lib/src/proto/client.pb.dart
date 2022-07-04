@@ -2115,6 +2115,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
     ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
     ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recoverable')
+    ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'joinLeave')
     ..hasRequiredFields = false
   ;
 
@@ -2128,6 +2129,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     $core.List<$core.int>? data,
     $core.bool? positioned,
     $core.bool? recoverable,
+    $core.bool? joinLeave,
   }) {
     final _result = create();
     if (channel != null) {
@@ -2153,6 +2155,9 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     }
     if (recoverable != null) {
       _result.recoverable = recoverable;
+    }
+    if (joinLeave != null) {
+      _result.joinLeave = joinLeave;
     }
     return _result;
   }
@@ -2248,6 +2253,15 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   $core.bool hasRecoverable() => $_has(7);
   @$pb.TagNumber(10)
   void clearRecoverable() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.bool get joinLeave => $_getBF(8);
+  @$pb.TagNumber(11)
+  set joinLeave($core.bool v) { $_setBool(8, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasJoinLeave() => $_has(8);
+  @$pb.TagNumber(11)
+  void clearJoinLeave() => clearField(11);
 }
 
 class SubscribeResult extends $pb.GeneratedMessage {

@@ -234,6 +234,7 @@ message SubscribeRequest {
   bytes data = 8;
   bool positioned = 9;
   bool recoverable = 10;
+  bool join_leave = 11;
 }
 
 message SubscribeResult {

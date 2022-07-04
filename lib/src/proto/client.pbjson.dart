@@ -373,11 +373,12 @@ const SubscribeRequest$json = const {
     const {'1': 'data', '3': 8, '4': 1, '5': 12, '10': 'data'},
     const {'1': 'positioned', '3': 9, '4': 1, '5': 8, '10': 'positioned'},
     const {'1': 'recoverable', '3': 10, '4': 1, '5': 8, '10': 'recoverable'},
+    const {'1': 'join_leave', '3': 11, '4': 1, '5': 8, '10': 'joinLeave'},
   ],
 };
 
 /// Descriptor for `SubscribeRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscribeRequestDescriptor = $convert.base64Decode('ChBTdWJzY3JpYmVSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFAoFdG9rZW4YAiABKAlSBXRva2VuEhgKB3JlY292ZXIYAyABKAhSB3JlY292ZXISFAoFZXBvY2gYBiABKAlSBWVwb2NoEhYKBm9mZnNldBgHIAEoBFIGb2Zmc2V0EhIKBGRhdGEYCCABKAxSBGRhdGESHgoKcG9zaXRpb25lZBgJIAEoCFIKcG9zaXRpb25lZBIgCgtyZWNvdmVyYWJsZRgKIAEoCFILcmVjb3ZlcmFibGU=');
+final $typed_data.Uint8List subscribeRequestDescriptor = $convert.base64Decode('ChBTdWJzY3JpYmVSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFAoFdG9rZW4YAiABKAlSBXRva2VuEhgKB3JlY292ZXIYAyABKAhSB3JlY292ZXISFAoFZXBvY2gYBiABKAlSBWVwb2NoEhYKBm9mZnNldBgHIAEoBFIGb2Zmc2V0EhIKBGRhdGEYCCABKAxSBGRhdGESHgoKcG9zaXRpb25lZBgJIAEoCFIKcG9zaXRpb25lZBIgCgtyZWNvdmVyYWJsZRgKIAEoCFILcmVjb3ZlcmFibGUSHQoKam9pbl9sZWF2ZRgLIAEoCFIJam9pbkxlYXZl');
 @$core.Deprecated('Use subscribeResultDescriptor instead')
 const SubscribeResult$json = const {
   '1': 'SubscribeResult',

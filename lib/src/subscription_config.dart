@@ -8,6 +8,7 @@ class SubscriptionConfig {
       this.since,
       this.positioned = false,
       this.recoverable = false,
+      this.joinLeave = false,
       this.minResubscribeDelay = const Duration(milliseconds: 500),
       this.maxResubscribeDelay = const Duration(milliseconds: 20000)});
 
@@ -17,6 +18,7 @@ class SubscriptionConfig {
   StreamPosition? since;
   final bool positioned;
   final bool recoverable;
+  final bool joinLeave;
   final Duration minResubscribeDelay;
   final Duration maxResubscribeDelay;
 }
