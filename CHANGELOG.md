@@ -1,3 +1,15 @@
+## [0.9.0]
+
+**Breaking changes**
+
+This release adopts a new iteration of Centrifugal protocol and a new iteration of API. Client now behaves according to the client [SDK API specification](https://centrifugal.dev/docs/transports/client_api). The work has been done according to [Centrifugo v4 roadmap](https://github.com/centrifugal/centrifugo/issues/500).
+
+All the current core features of Centrifugal client protocol are now supported here.  
+
+New release only works with Centrifugo >= v4.0.0 and [Centrifuge](https://github.com/centrifugal/centrifuge) >= 0.25.0. See [Centrifugo v4 migration guide](https://centrifugal.dev/docs/getting-started/migration_v4) for details about the changes in the ecosystem.
+
+Note, that Centrifugo v4 supports clients working over the previous protocol iteration, so you can update Centrifugo to v4 without any changes on the client side (but you need to turn on `use_client_protocol_v1_by_default` option in the configuration of Centrifugo, see Centrifugo v4 migration guide for details).
+
 ## [0.8.0]
 
 Version 0.8.0 is the next iteration of `centrifuge-dart` development. It pushes client closer to other clients in the ecosystem. It also **contains several backwards incompatible changes**.
