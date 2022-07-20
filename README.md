@@ -33,7 +33,7 @@ When a mobile application goes to the background there are OS-specific limitatio
 
 1) Update changelog
 2) Bump version in `pubspec.yaml`, push, create new tag
-3) `pub publish`
+3) `dart pub publish`
 
 ## Author
 
