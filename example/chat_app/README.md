@@ -11,8 +11,7 @@ By default it will run with the Centrifugo public demo instance. To run locally 
       "anonymous": false,
       "publish": true,
       "join_leave": true,
-      "presence": true,
-      "presence_stats": true
+      "presence": true
     }
   ]
 }

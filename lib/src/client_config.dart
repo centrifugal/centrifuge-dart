@@ -1,47 +1,34 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/events.dart';
 
 class ClientConfig {
   ClientConfig(
-      {this.timeout = const Duration(seconds: 10),
-      this.debug = false,
+      {this.token,
+      this.data,
       this.headers = const <String, dynamic>{},
       this.tlsSkipVerify = false,
+      this.timeout = const Duration(seconds: 10),
+      this.minReconnectDelay = const Duration(milliseconds: 500),
       this.maxReconnectDelay = const Duration(seconds: 20),
-      this.privateChannelPrefix = "\$",
-      this.pingInterval = const Duration(seconds: 25),
-      this.onPrivateSub = _defaultPrivateSubCallback,
+      this.maxServerPingDelay = const Duration(seconds: 10),
+      this.getToken,
       this.name = "dart",
-      this.version = "",
-      WaitRetry? retry})
-      : retry = retry ?? _defaultRetry(maxReconnectDelay.inSeconds);
+      this.version = ""});
+
+  String? token;
+  List<int>? data;
 
   final Duration timeout;
-  final bool debug;
   final Map<String, dynamic> headers;
-
   final bool tlsSkipVerify;
-
+  final Duration minReconnectDelay;
   final Duration maxReconnectDelay;
-  final String privateChannelPrefix;
-  final Duration pingInterval;
-  final PrivateSubCallback onPrivateSub;
-  final Future? Function(int) retry;
+  final Duration maxServerPingDelay;
+  final ConnectionTokenCallback? getToken;
   final String name;
   final String version;
 }
 
-typedef WaitRetry = Future? Function(int);
-
-typedef PrivateSubCallback = Future<String> Function(PrivateSubEvent);
-
-WaitRetry _defaultRetry(int maxReconnectDelay) => (int count) {
-      final seconds = min(0.5 * pow(2, count), maxReconnectDelay).toInt();
-      return Future<void>.delayed(Duration(seconds: seconds));
-    };
-
-Future<String> _defaultPrivateSubCallback(PrivateSubEvent event) =>
-    Future.value("");
+typedef ConnectionTokenCallback = Future<String> Function(ConnectionTokenEvent);

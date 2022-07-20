@@ -7,10 +7,22 @@ option go_package = "./;protocol";
 message Error {
   uint32 code = 1;
   string message = 2;
+  bool temporary = 3;
 }
 
+message EmulationRequest {
+  string node = 1;
+  string session = 2;
+  bytes data = 3;
+}
+
+// Command sent from a client to a server.
+// ProtocolVersion1 uses id, method and params fields.
+// ProtocolVersion2 uses id and one of the possible request messages.
 message Command {
+  // Id of command to let client match replies to commands.
   uint32 id = 1;
+
   enum MethodType {
     CONNECT = 0;
     SUBSCRIBE = 1;
@@ -25,16 +37,63 @@ message Command {
     REFRESH = 10;
     SUB_REFRESH = 11;
   }
+  // Method is used in ProtocolVersion1 only.
   MethodType method = 2;
+
+  // Params is used in ProtocolVersion1 only.
   bytes params = 3;
+
+  // ProtocolVersion2 client can send one of the following requests. Server will
+  // only take the first non-null request out of these and may return an error if
+  // client passed more than one request. We are not using oneof here due to JSON
+  // interoperability concerns.
+  ConnectRequest connect = 4;
+  SubscribeRequest subscribe = 5;
+  UnsubscribeRequest unsubscribe = 6;
+  PublishRequest publish = 7;
+  PresenceRequest presence = 8;
+  PresenceStatsRequest presence_stats = 9;
+  HistoryRequest history = 10;
+  PingRequest ping = 11;
+  SendRequest send = 12;
+  RPCRequest rpc = 13;
+  RefreshRequest refresh = 14;
+  SubRefreshRequest sub_refresh = 15;
 }
 
+// Reply sent from a server to a client.
+// ProtocolVersion1 uses id, error and result fields.
+// ProtocolVersion2 uses id and one of the possible concrete result messages.
 message Reply {
+  // Id will only be set to a value > 0 for replies to commands. For pushes
+  // it will have zero value.
   uint32 id = 1;
+  // Error can only be set in replies to commands. For pushes it will have zero value.
   Error error = 2;
+
+  // Result is used in ProtocolVersion1 only.
   bytes result = 3;
+
+  // ProtocolVersion2 server can send one of the following fields. We are not using
+  // oneof here due to JSON interoperability concerns.
+  Push push = 4;
+  ConnectResult connect = 5;
+  SubscribeResult subscribe = 6;
+  UnsubscribeResult unsubscribe = 7;
+  PublishResult publish = 8;
+  PresenceResult presence = 9;
+  PresenceStatsResult presence_stats = 10;
+  HistoryResult history = 11;
+  PingResult ping = 12;
+  RPCResult rpc = 13;
+  RefreshResult refresh = 14;
+  SubRefreshResult sub_refresh = 15;
 }
 
+// Push can be sent to a client as part of Reply in case of bidirectional transport or
+// without additional wrapping in case of unidirectional transports.
+// ProtocolVersion1 uses type, channel and data fields.
+// ProtocolVersion2 uses channel and one of the possible concrete push messages.
 message Push {
   enum PushType {
     PUBLICATION = 0;
@@ -47,9 +106,24 @@ message Push {
     DISCONNECT = 7;
     REFRESH = 8;
   }
+  // Type is used in ProtocolVersion1 only.
   PushType type = 1;
   string channel = 2;
+
+  // Data is used in ProtocolVersion1 only.
   bytes data = 3;
+
+  // ProtocolVersion2 server can push one of the following fields to the client. We are
+  // not using oneof here due to JSON interoperability concerns.
+  Publication pub = 4;
+  Join join = 5;
+  Leave leave = 6;
+  Unsubscribe unsubscribe = 7;
+  Message message = 8;
+  Subscribe subscribe = 9;
+  Connect connect = 10;
+  Disconnect disconnect = 11;
+  Refresh refresh = 12;
 }
 
 message ClientInfo {
@@ -64,6 +138,7 @@ message Publication {
   bytes data = 4;
   ClientInfo info = 5;
   uint64 offset = 6;
+  map<string, string> tags = 7;
 }
 
 message Join {
@@ -76,6 +151,8 @@ message Leave {
 
 message Unsubscribe {
   // Field 1 removed (bool resubscribe).
+  uint32 code = 2;
+  string reason = 3;
 }
 
 message Subscribe {
@@ -98,6 +175,10 @@ message Connect {
   map<string, SubscribeResult> subs = 4;
   bool expires = 5;
   uint32 ttl = 6;
+  uint32 ping = 7;
+  bool pong = 8;
+  string session = 9;
+  string node = 10;
 }
 
 message Disconnect {
@@ -126,6 +207,10 @@ message ConnectResult {
   uint32 ttl = 4;
   bytes data = 5;
   map<string, SubscribeResult> subs = 6;
+  uint32 ping = 7;
+  bool pong = 8;
+  string session = 9;
+  string node = 10;
 }
 
 message RefreshRequest {
@@ -146,6 +231,10 @@ message SubscribeRequest {
   // 4-5 skipped here for backwards compatibility.
   string epoch = 6;
   uint64 offset = 7;
+  bytes data = 8;
+  bool positioned = 9;
+  bool recoverable = 10;
+  bool join_leave = 11;
 }
 
 message SubscribeResult {
@@ -159,6 +248,7 @@ message SubscribeResult {
   uint64 offset = 9;
   bool positioned = 10;
   bytes data = 11;
+  bool was_recovering = 12;
 }
 
 message SubRefreshRequest {

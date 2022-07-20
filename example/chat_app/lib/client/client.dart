@@ -12,8 +12,9 @@ import '../state.dart' as state;
 class ChatClient {
   late Client _client;
 
-  StreamSubscription<ConnectEvent>? _connSub;
-  StreamSubscription<DisconnectEvent>? _disconnSub;
+  StreamSubscription<ConnectedEvent>? _connectedSub;
+  StreamSubscription<ConnectingEvent>? _connectingSub;
+  StreamSubscription<DisconnectedEvent>? _disconnSub;
   StreamSubscription<ErrorEvent>? _errorSub;
 
   late StreamSubscription<MessageEvent> _msgSub;
@@ -26,34 +27,32 @@ class ChatClient {
   void init(String token, String username, int userid) {
     const url = 'ws://${conf.serverAddr}/connection/websocket?format=protobuf';
     _client = createClient(url,
-        config: ClientConfig(headers: <String, dynamic>{
-          'user-id': userid,
-          'user-name': username
-        }))
-      ..setToken(token);
-    _msgSub = _client.messageStream.listen((event) {
+        ClientConfig(headers: <String, dynamic>{'user-id': userid, 'user-name': username}, token: token));
+    _msgSub = _client.message.listen((event) {
       print("Msg: $event");
     });
   }
 
   Future<void> connect(VoidCallback onConnect) async {
     print("Connecting to Centrifugo server at ${conf.serverAddr}");
-    _connSub = _client.connectStream.listen((event) {
+    _connectedSub = _client.connected.listen((event) {
       print("Connected to server");
       Fluttertoast.showToast(
-          msg: "Centrifugo server connected",
-          backgroundColor: Colors.green,
-          textColor: Colors.white);
+          msg: "Centrifugo server connected", backgroundColor: Colors.green, textColor: Colors.white);
       onConnect();
     });
-    _disconnSub = _client.disconnectStream.listen((event) {
+    _connectingSub = _client.connecting.listen((event) {
+      print("Connecting to server");
+      Fluttertoast.showToast(
+          msg: "Connecting to Centrifugo server", backgroundColor: Colors.green, textColor: Colors.white);
+      onConnect();
+    });
+    _disconnSub = _client.disconnected.listen((event) {
       print("Disconnected from server");
       Fluttertoast.showToast(
-          msg: "Centrifugo server disconnected",
-          backgroundColor: Colors.red,
-          textColor: Colors.white);
+          msg: "Centrifugo server disconnected", backgroundColor: Colors.red, textColor: Colors.white);
     });
-    _errorSub = _client.errorStream.listen((event) {
+    _errorSub = _client.error.listen((event) {
       print(event.error);
     });
     await _client.connect();
@@ -62,9 +61,7 @@ class ChatClient {
   Future<void> subscribe(String channel) async {
     print("Subscribing to channel $channel");
     final subscription = _client.getSubscription(channel);
-    subscription.publishStream
-        .map<String>((e) => utf8.decode(e.data))
-        .listen((data) {
+    subscription!.publication.map<String>((e) => utf8.decode(e.data)).listen((data) {
       final d = json.decode(data) as Map<String, dynamic>;
       final username = d["username"].toString();
       final msg = d["message"].toString();
@@ -72,23 +69,24 @@ class ChatClient {
           text: msg,
           user: ChatUser(
               name: username,
-              containerColor: username == state.username
-                  ? Colors.lightBlueAccent
-                  : Colors.grey[300],
+              containerColor: username == state.username ? Colors.lightBlueAccent : Colors.grey[300],
               color: Colors.black87)));
     });
-    subscription.joinStream.listen(print);
-    subscription.leaveStream.listen(print);
-    subscription.subscribeSuccessStream.listen(print);
-    subscription.subscribeErrorStream.listen(print);
-    subscription.unsubscribeStream.listen(print);
+    subscription.join.listen(print);
+    subscription.leave.listen(print);
+    subscription.subscribed.listen(print);
+    subscription.subscribing.listen(print);
+    subscription.error.listen(print);
+    subscription.unsubscribed.listen(print);
     this.subscription = subscription;
     await subscription.subscribe();
   }
 
   Future<void> dispose() async {
-    await _connSub?.cancel();
+    await _connectingSub?.cancel();
+    await _connectedSub?.cancel();
     await _disconnSub?.cancel();
+    await _errorSub?.cancel();
     await _msgSub.cancel();
     await _chatMsgController.close();
   }
@@ -99,7 +97,7 @@ class ChatClient {
     final data = utf8.encode(output);
     try {
       await subscription?.publish(data);
-    } catch (e) {
+    } on Exception {
       rethrow;
     }
   }

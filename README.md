@@ -1,7 +1,13 @@
 [![Build Status](https://travis-ci.org/centrifugal/centrifuge-dart.svg?branch=master)](https://travis-ci.org/centrifugal/centrifuge-dart)
 [![Coverage Status](https://coveralls.io/repos/github/centrifugal/centrifuge-dart/badge.svg?branch=master)](https://coveralls.io/github/centrifugal/centrifuge-dart?branch=master)
 
-This repo contains a Dart connector library to communicate with Centrifugo server or a server based on Centrifuge library for Go language. This client uses WebSocket transport with binary Protobuf protocol format for Centrifuge protocol message encoding. See feature matrix below to find out which protocol features are supported here at the moment.
+Websocket client for [Centrifugo](https://github.com/centrifugal/centrifugo) server and [Centrifuge](https://github.com/centrifugal/centrifuge) library. 
+
+There is no v1 release of this library yet – API still evolves. At the moment patch version updates only contain backwards compatible changes, minor version updates can have backwards incompatible API changes.
+
+Check out [client SDK API specification](https://centrifugal.dev/docs/transports/client_api) to learn how this SDK behaves. It's recommended to read that before starting to work with this SDK as the spec covers common SDK behavior - describes client and subscription state transitions, main options and methods. Also check out examples folder.
+
+The features implemented by this SDK can be found in [SDK feature matrix](https://centrifugal.dev/docs/transports/client_sdk#sdk-feature-matrix).
 
 ## Example
 
@@ -10,109 +16,9 @@ This repo contains a Dart connector library to communicate with Centrifugo serve
 * `example\console` simple console application
 * `example\console_server_subs` demonstrates working with server-side subscriptions
 
-## Usage
-
-Create a client instance:
-
-```dart
-import 'package:centrifuge/centrifuge.dart' as centrifuge;
-
-final client = centrifuge.createClient("ws://localhost:8000/connection/websocket?format=protobuf");
-```
-
-**Note that using** `?format=protobuf` **is required for Centrifugo < v3 and can be skipped for later versions**.
-
-Centrifuge-dart uses binary Protobuf protocol internally but nothing stops you from sending JSON-encoded data over it. Our examples demonstrate this.
-
-Connect to a server:
-
-```dart
-await client.connect();
-```
-
-To handle connect and disconnect events you can listen to `connectStream` and `disconnectStream`:
-
-```dart
-client.connectStream.listen(onEvent);
-client.disconnectStream.listen(onEvent);
-await client.connect();
-```
-
-Connect and disconnect events can happen many times throughout client lifetime.
-
-Subscribe to a channel:
-
-```dart
-final subscription = client.getSubscription(channel);
-
-subscription.publishStream.listen(onEvent);
-subscription.joinStream.listen(onEvent);  
-subscription.leaveStream.listen(onEvent);
-subscription.subscribeSuccessStream.listen(onEvent);
-subscription.subscribeErrorStream.listen(onEvent);
-subscription.unsubscribeStream.listen(onEvent);
-
-await subscription.subscribe();
-```
-
-Publish to a channel:
-
-```dart
-final data = utf8.encode(jsonEncode({'input': message}));
-await subscription.publish(data);
-```
-
-When using server-side subscriptions you don't need to create Subscription instances, just set appropriate event handlers on `Client` instance:
-
-```dart
-client.connectStream.listen(onEvent);
-client.disconnectStream.listen(onEvent);
-client.subscribeStream.listen(onEvent);
-client.publishStream.listen(onEvent);
-await client.connect();
-```
-
 ## Usage in background
 
 When a mobile application goes to the background there are OS-specific limitations for established persistent connections - which can be silently closed shortly. Thus in most cases you need to disconnect from a server when app moves to the background and connect again when app goes to the foreground.
-
-## Feature matrix
-
-- [ ] connect to server using JSON protocol format
-- [x] connect to server using Protobuf protocol format
-- [x] connect with token (JWT)
-- [x] connect with custom header
-- [x] automatic reconnect in case of errors, network problems etc
-- [x] exponential backoff for reconnect
-- [x] connect and disconnect events
-- [x] handle disconnect reason
-- [x] subscribe on channel and handle asynchronous Publications
-- [x] handle Join and Leave messages
-- [x] handle Unsubscribe notifications
-- [x] reconnect on subscribe timeout
-- [x] publish method of Subscription
-- [x] unsubscribe method of Subscription
-- [x] presence method of Subscription
-- [x] presence stats method of Subscription
-- [x] history method of Subscription
-- [x] top-level publish method
-- [x] top-level presence method
-- [x] top-level presence stats method
-- [x] top-level history method
-- [x] send asynchronous messages to server
-- [x] handle asynchronous messages from server
-- [x] send RPC commands
-- [x] subscribe to private channels with token (JWT)
-- [ ] connection JWT refresh
-- [ ] private channel subscription token (JWT) refresh
-- [ ] handle connection expired error
-- [ ] handle subscription expired error
-- [x] ping/pong to find broken connection
-- [ ] message recovery mechanism for client-side subscriptions
-- [x] server-side subscriptions
-- [x] message recovery mechanism for server-side subscriptions
-- [x] history stream pagination
-- [ ] subscribe from the known StreamPosition
 
 ## Instructions for maintainers/contributors
 

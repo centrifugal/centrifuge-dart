@@ -95,40 +95,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _subscribe() async {
     final channel = 'chat:index';
-    _subscription = _centrifuge.getSubscription(channel);
+    _subscription = _centrifuge.newSubscription(channel);
 
-    _subscription.subscribeErrorStream.listen(_show);
-    _subscription.subscribeSuccessStream.listen(_show);
-    _subscription.unsubscribeStream.listen(_show);
+    _subscription.subscribing.listen(_show);
+    _subscription.subscribed.listen(_show);
+    _subscription.unsubscribed.listen(_show);
 
     final onNewItem = (_ChatItem item) {
       setState(() {
         _items.add(item);
       });
-      Future.delayed(Duration(milliseconds: 125),
-          () => _controller.jumpTo(64.0 + _controller.offset));
+      Future.delayed(Duration(milliseconds: 125), () => _controller.jumpTo(64.0 + _controller.offset));
     };
 
-    _subscription.joinStream.listen((event) {
+    _subscription.join.listen((event) {
       final user = event.user;
       final client = event.client;
 
-      final item = _ChatItem(
-          title: 'User $user joined channel $channel',
-          subtitle: '(client ID $client)');
+      final item = _ChatItem(title: 'User $user joined channel $channel', subtitle: '(client ID $client)');
       onNewItem(item);
     });
 
-    _subscription.leaveStream.listen((event) {
+    _subscription.leave.listen((event) {
       final user = event.user;
       final client = event.client;
-      final item = _ChatItem(
-          title: 'User $user left channel $channel',
-          subtitle: '(client ID $client)');
+      final item = _ChatItem(title: 'User $user left channel $channel', subtitle: '(client ID $client)');
       onNewItem(item);
     });
 
-    _subscription.publishStream.listen((event) {
+    _subscription.publication.listen((event) {
       final String message = json.decode(utf8.decode(event.data))['input'];
 
       final item = _ChatItem(title: message, subtitle: 'User: user');
