@@ -1,3 +1,10 @@
+## [0.9.1]
+
+* Fix setting initial connection token
+* Fix setting connection data
+* Fix LateInitializationError if transport is not initialized yet
+* Better string representation of `UnsubscribedEvent`
+
 ## [0.9.0]
 
 **Breaking changes**
