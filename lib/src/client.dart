@@ -98,7 +98,10 @@ abstract class Client {
 }
 
 class ClientImpl implements Client {
-  ClientImpl(this._url, this._config, this._transportBuilder);
+  ClientImpl(this._url, this._config, this._transportBuilder) {
+    _token = _config.token;
+    _data = _config.data;
+  };
 
   final TransportBuilder _transportBuilder;
   final _subscriptions = <String, SubscriptionImpl>{};
