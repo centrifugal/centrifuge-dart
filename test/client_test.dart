@@ -20,7 +20,7 @@ void main() {
     test('connect emits error event when url invalid', () async {
       final client = centrifuge.createClient(
         "invalid",
-        centrifuge.ClientConfig(token: "test", data: utf8.encode('test connect data')),
+        centrifuge.ClientConfig(data: utf8.encode('test connect data')),
       );
       final errorFinish = client.error.first;
       client.connect();
@@ -31,7 +31,7 @@ void main() {
     test('can connect and disconnect', () async {
       final client = centrifuge.createClient(
         url,
-        centrifuge.ClientConfig(token: "test", data: utf8.encode('test connect data')),
+        centrifuge.ClientConfig(data: utf8.encode('test connect data')),
       );
       final connectFinish = client.connected.first;
       client.connect();
