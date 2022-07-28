@@ -16,11 +16,12 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       centrifuge.ClientConfig(
-        // Uncomment to use example token based on secret key `secret`.
-        // token:
-        // 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw',
+        // Uncomment to use example token based on secret key `secret` for user `testsuite_jwt`.
+        token:
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw',
         // getToken: (centrifuge.ConnectionTokenEvent event) {
-        //   return Future.value('');
+        //   return Future.value(
+        //       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
         // },
         headers: <String, dynamic>{'X-Example-Header': 'example'},
       ),
@@ -45,10 +46,10 @@ void main() async {
     final subscription = client.newSubscription(
       channel,
       centrifuge.SubscriptionConfig(
-          // getToken: (centrifuge.SubscriptionTokenEvent event) {
-          //   return Future.value('');
-          // },
-          ),
+        getToken: (centrifuge.SubscriptionTokenEvent event) {
+          return Future.value('');
+        },
+      ),
     );
 
     final onSubscriptionEvent = (dynamic event) async {

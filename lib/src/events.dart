@@ -373,7 +373,7 @@ class UnsubscribedEvent {
 
   @override
   String toString() {
-    return 'UnsubscribedEvent{}';
+    return 'UnsubscribedEvent{code $code, reason: $reason}';
   }
 }
 
