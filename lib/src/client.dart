@@ -91,7 +91,7 @@ abstract class Client {
 
   /// Remove the [Subscription] from internal registry and unsubscribe from [Subscription.channel].
   ///
-  void removeSubscription(Subscription subscription);
+  Future<void> removeSubscription(Subscription subscription);
 
   /// Get map wirth all registered client-side subscriptions.
   Map<String, Subscription> subscriptions();
@@ -302,9 +302,10 @@ class ClientImpl implements Client {
   }
 
   @override
-  void removeSubscription(Subscription subscription) {
+  Future<void> removeSubscription(Subscription subscription) async {
     final String channel = subscription.channel;
-    subscription.unsubscribe();
+    await subscription.unsubscribe();
+    _subscriptions[channel]?.close();
     _subscriptions.remove(channel);
   }
 
