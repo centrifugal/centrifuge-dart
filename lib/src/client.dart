@@ -7,12 +7,8 @@ import 'package:centrifuge/src/server_subscription.dart';
 import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 
-import 'client_config.dart';
-import 'events.dart';
 import 'proto/client.pb.dart' as protocol;
 import 'subscription.dart';
-import 'subscription_config.dart';
-import 'transport.dart';
 
 enum State { disconnected, connecting, connected }
 
