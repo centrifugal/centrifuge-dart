@@ -12,8 +12,8 @@ dart pub global activate coverage
 dart pub get
 
 # Verify that the libraries are error and warning-free.
-echo "Running dartanalyzer..."
-dartanalyzer $DARTANALYZER_FLAGS \
+echo "Running dart analyzer..."
+dart analyze $DARTANALYZER_FLAGS \
   lib/
 
 # Run the tests.
