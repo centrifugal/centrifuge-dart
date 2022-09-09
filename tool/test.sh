@@ -13,7 +13,7 @@ dart pub get
 
 # Verify that the libraries are error and warning-free.
 echo "Running dartanalyzer..."
-dartanalyzer $DARTANALYZER_FLAGS \
+dart analyze $DARTANALYZER_FLAGS \
   lib/
 
 # Run the tests.
