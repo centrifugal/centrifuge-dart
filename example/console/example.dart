@@ -93,6 +93,9 @@ Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscript
       case '#unsubscribe':
         await subscription.unsubscribe();
         break;
+      case '#remove':
+        await client.removeSubscription(subscription);
+        break;
       case '#connect':
         await client.connect();
         break;

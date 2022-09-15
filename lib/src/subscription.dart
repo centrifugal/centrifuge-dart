@@ -124,6 +124,17 @@ class SubscriptionImpl implements Subscription {
   }
 
   @internal
+  void close() {
+    _publicationController.close();
+    _joinController.close();
+    _leaveController.close();
+    _unsubscribedController.close();
+    _errorController.close();
+    _subscribedController.close();
+    _subscribingController.close();
+  }
+
+  @internal
   Future<void> moveToUnsubscribed(int code, String reason, bool sendUnsubscribe) async {
     if (state == SubscriptionState.unsubscribed) {
       return;

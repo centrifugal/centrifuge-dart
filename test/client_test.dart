@@ -47,12 +47,12 @@ void main() {
   });
 
   group('Subscription', () {
-    test('newSubscription/removeSubscription work correctly', () {
+    test('newSubscription/removeSubscription work correctly', () async {
       final client = centrifuge.createClient(url, centrifuge.ClientConfig());
       final s1 = client.newSubscription('some_channel');
       expect(true, client.getSubscription(s1.channel) != null);
       expect(true, client.subscriptions().isNotEmpty);
-      client.removeSubscription(s1);
+      await client.removeSubscription(s1);
       expect(false, client.getSubscription(s1.channel) != null);
     });
 
