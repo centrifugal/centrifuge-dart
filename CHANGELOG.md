@@ -1,3 +1,8 @@
+## [0.9.2]
+
+* Fix null check for close reason, fixes [#66](https://github.com/centrifugal/centrifuge-dart/issues/66)
+* Close subscription streams on remove [#67](https://github.com/centrifugal/centrifuge-dart/pull/67)
+
 ## [0.9.1]
 
 * Fix setting initial connection token
