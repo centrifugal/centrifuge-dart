@@ -214,9 +214,11 @@ class Transport implements GeneratedMessageSender {
       int code = connectingCodeTransportClosed;
       String reason = "transport closed";
       bool reconnect = true;
-      if (_socket != null && _socket!.closeCode! > 0) {
+      if (_socket != null && _socket!.closeCode != null && _socket!.closeCode! > 0) {
         code = _socket!.closeCode!;
-        reason = _socket!.closeReason!;
+        if (_socket!.closeReason != null) {
+          reason = _socket!.closeReason!;
+        }
         reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
         if (code < 3000) {
           if (code == 1009) {
