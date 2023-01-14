@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 
 void main() async {
-  final url = 'ws://localhost:8000/connection/websocket?cf_protocol_version=v2';
+  final url = 'ws://localhost:8000/connection/websocket';
   final channel = 'chat:index';
 
   final onEvent = (dynamic event) {
