@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,6 +6,15 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket';
   final channel = 'chat:index';
+  final userName = 'dart';
+  // generate user JWT token for user "dart":
+  // ./centrifugo gentoken -u dart
+  final userJwtToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbm91Z2giLCJleHAiOjE2NzQ3MjcyMzcsImlhdCI6MTY3NDEyMjQzN30.jsKrRp-4jcJun-KlKb_z8J3rJwL7QWV8EZpWyl5g1ds';
+  // generate subscription JWT token for user "dart" and channel "chat:index":
+  // ./centrifugo gensubtoken -u dart -s chat:index
+  final subscriptionJwtToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbm91Z2giLCJleHAiOjE2NzQ3Mjg1ODUsImlhdCI6MTY3NDEyMzc4NSwiY2hhbm5lbCI6ImNoYXQ6aW5kZXgifQ.BRWR0DMFULXrnCn1F9EulerFCP-XY8QIgcl_lV7U1SU';
 
   final onEvent = (dynamic event) {
     print('client> $event');
@@ -16,9 +24,9 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       centrifuge.ClientConfig(
+        name: userName,
         // Uncomment to use example token based on secret key `secret` for user `testsuite_jwt`.
-        token:
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw',
+        token: userJwtToken,
         // getToken: (centrifuge.ConnectionTokenEvent event) {
         //   return Future.value(
         //       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
@@ -46,9 +54,10 @@ void main() async {
     final subscription = client.newSubscription(
       channel,
       centrifuge.SubscriptionConfig(
-        getToken: (centrifuge.SubscriptionTokenEvent event) {
-          return Future.value('');
-        },
+        token: subscriptionJwtToken,
+        // getToken: (centrifuge.SubscriptionTokenEvent event) {
+        //   return Future.value('');
+        // },
       ),
     );
 
@@ -84,7 +93,8 @@ void main() async {
   }
 }
 
-Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscription subscription) {
+Function(String) _handleUserInput(
+    centrifuge.Client client, centrifuge.Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
@@ -115,8 +125,12 @@ Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscript
         break;
       case '#history':
         final result = await subscription.history(limit: 10);
-        print('History num publications: ' + result.publications.length.toString());
-        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
+        print('History num publications: ' +
+            result.publications.length.toString());
+        print('Stream top position: ' +
+            result.offset.toString() +
+            ', epoch: ' +
+            result.epoch);
         break;
       case '#disconnect':
         await client.disconnect();
