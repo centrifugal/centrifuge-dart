@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../conf.dart' as conf;
-import '../state.dart' as state;
 
 class ChatClient {
   late Client _client;
@@ -24,10 +23,19 @@ class ChatClient {
 
   Stream<ChatMessage> get messages => _chatMsgController.stream;
 
-  void init(String token, String username, int userid) {
+  void init(String token, String chatUserName, int chatUserId) {
     const url = 'ws://${conf.serverAddr}/connection/websocket?format=protobuf';
-    _client = createClient(url,
-        ClientConfig(headers: <String, dynamic>{'user-id': userid, 'user-name': username}, token: token));
+    _client = createClient(
+      url,
+      ClientConfig(
+        name: conf.userName,
+        token: conf.userJwtToken,
+        headers: <String, dynamic>{
+          'user-id': chatUserId,
+          'user-name': chatUserName,
+        },
+      ),
+    );
     _msgSub = _client.message.listen((event) {
       print("Msg: $event");
     });
@@ -38,19 +46,27 @@ class ChatClient {
     _connectedSub = _client.connected.listen((event) {
       print("Connected to server");
       Fluttertoast.showToast(
-          msg: "Centrifugo server connected", backgroundColor: Colors.green, textColor: Colors.white);
+        msg: "Centrifugo server connected",
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
       onConnect();
     });
     _connectingSub = _client.connecting.listen((event) {
       print("Connecting to server");
       Fluttertoast.showToast(
-          msg: "Connecting to Centrifugo server", backgroundColor: Colors.green, textColor: Colors.white);
-      onConnect();
+        msg: "Connecting to Centrifugo server",
+        backgroundColor: Colors.green[900],
+        textColor: Colors.white,
+      );
     });
     _disconnSub = _client.disconnected.listen((event) {
       print("Disconnected from server");
       Fluttertoast.showToast(
-          msg: "Centrifugo server disconnected", backgroundColor: Colors.red, textColor: Colors.white);
+        msg: "Centrifugo server disconnected",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     });
     _errorSub = _client.error.listen((event) {
       print(event.error);
@@ -60,17 +76,31 @@ class ChatClient {
 
   Future<void> subscribe(String channel) async {
     print("Subscribing to channel $channel");
-    final subscription = _client.getSubscription(channel);
-    subscription!.publication.map<String>((e) => utf8.decode(e.data)).listen((data) {
+    final subscription = _client.getSubscription(channel) ??
+        _client.newSubscription(
+          channel,
+          SubscriptionConfig(
+            token: conf.subscriptionJwtToken,
+          ),
+        );
+    subscription.publication
+        .map<String>((e) => utf8.decode(e.data))
+        .listen((data) {
       final d = json.decode(data) as Map<String, dynamic>;
       final username = d["username"].toString();
       final msg = d["message"].toString();
-      _chatMsgController.sink.add(ChatMessage(
+      _chatMsgController.sink.add(
+        ChatMessage(
           text: msg,
           user: ChatUser(
-              name: username,
-              containerColor: username == state.username ? Colors.lightBlueAccent : Colors.grey[300],
-              color: Colors.black87)));
+            name: username,
+            containerColor: username == conf.userName
+                ? Colors.lightBlueAccent
+                : Colors.grey[300],
+            color: Colors.black87,
+          ),
+        ),
+      );
     });
     subscription.join.listen(print);
     subscription.leave.listen(print);
