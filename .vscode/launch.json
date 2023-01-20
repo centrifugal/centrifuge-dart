@@ -13,21 +13,24 @@
             "name": "chat_app",
             "cwd": "example\\chat_app",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": ["--web-port", "3000"]
         },
         {
             "name": "chat_app (profile mode)",
             "cwd": "example\\chat_app",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": ["--web-port", "3000"]
         },
         {
             "name": "chat_app (release mode)",
             "cwd": "example\\chat_app",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": ["--web-port", "3000"]
         }
     ]
 }
