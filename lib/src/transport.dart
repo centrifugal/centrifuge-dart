@@ -36,9 +36,10 @@ Transport protobufTransportBuilder({
 
   final transport = Transport(
     () async {
-      final channel = WebSocketChannel.connect(
+      final channel = connect(
         Uri.parse(url),
         protocols: ['centrifuge-protobuf'],
+        headers: config.headers,
       );
       await channel.ready;
       return channel;

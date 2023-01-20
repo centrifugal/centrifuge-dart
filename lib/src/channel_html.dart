@@ -3,10 +3,17 @@ import 'dart:typed_data';
 import 'package:web_socket_channel/html.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-/// Sends the given [data] over the specified [channel]
-void sendData(ByteBuffer data, WebSocketChannel channel) {
-  (channel as HtmlWebSocketChannel).innerWebSocket.sendByteBuffer(data);
-}
+/// Connects the web socket channel
+WebSocketChannel connect(
+  Uri uri, {
+  Iterable<String>? protocols,
+  Map<String, dynamic>? headers,
+}) =>
+    HtmlWebSocketChannel.connect(
+      uri,
+      protocols: protocols,
+      binaryType: BinaryType.list,
+    );
 
 /// Extends the web socket channel
 extension HtmlWebSocketChannelExtension on WebSocketChannel {
