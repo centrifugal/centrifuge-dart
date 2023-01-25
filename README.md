@@ -12,12 +12,11 @@ Note that connection headers can only be set on platforms that support `dart:io`
 
 > **The latest `centrifuge-dart` is compatible only with the latest [Centrifugo](https://github.com/centrifugal/centrifugo) server (v4) and [Centrifuge](https://github.com/centrifugal/centrifuge) >= 0.25.0. For Centrifugo v2, Centrifugo v3 and Centrifuge < 0.25.0 you should use `centrifuge-dart` v0.8.0.**
 
-## Example
+## Examples
 
 * `example\flutter_app` simple chat application
 * `example\chat_app` one more chat example
 * `example\console` simple console application
-* `example\console_server_subs` demonstrates working with server-side subscriptions
 
 ## Usage in background
 

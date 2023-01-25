@@ -6,7 +6,7 @@ import 'conf.dart' as conf;
 import 'state.dart' as state;
 
 class ConnectToServer extends StatefulWidget {
-  const ConnectToServer();
+  const ConnectToServer({super.key});
 
   @override
   State<ConnectToServer> createState() => _ConnectToServerState();
@@ -36,10 +36,10 @@ class _ConnectToServerState extends State<ConnectToServer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 15.0),
-            const Text("Connecting to server ...")
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(height: 15.0),
+            Text("Connecting to server ...")
           ],
         ),
       ),
