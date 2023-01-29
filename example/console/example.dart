@@ -8,13 +8,13 @@ void main() async {
   final channel = 'chat:index';
   final userName = 'dart';
   // generate user JWT token for user "dart":
-  // ./centrifugo gentoken -u dart
+  // ./centrifugo gentoken --user dart
   final userJwtToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbm91Z2giLCJleHAiOjE2NzQ3MjcyMzcsImlhdCI6MTY3NDEyMjQzN30.jsKrRp-4jcJun-KlKb_z8J3rJwL7QWV8EZpWyl5g1ds';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiZXhwIjoyMjc5NDQzNjgwLCJpYXQiOjE2NzQ2NDM2ODB9.XgsPZzAD4kMj7HdybJfpMGuDaRmuLvhUUxCGHs3mtXA';
   // generate subscription JWT token for user "dart" and channel "chat:index":
-  // ./centrifugo gensubtoken -u dart -s chat:index
+  // ./centrifugo gensubtoken --user dart --channel chat:index
   final subscriptionJwtToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbm91Z2giLCJleHAiOjE2NzQ3Mjg1ODUsImlhdCI6MTY3NDEyMzc4NSwiY2hhbm5lbCI6ImNoYXQ6aW5kZXgifQ.BRWR0DMFULXrnCn1F9EulerFCP-XY8QIgcl_lV7U1SU';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiZXhwIjoyMjc5NDQ0MDE4LCJpYXQiOjE2NzQ2NDQwMTgsImNoYW5uZWwiOiJjaGF0OmluZGV4In0.FjpnF6ofq3XCr1iqnwTZcpxCx6btuzCnn29DAIJbsBo';
 
   final onEvent = (dynamic event) {
     print('client> $event');
@@ -25,12 +25,8 @@ void main() async {
       url,
       centrifuge.ClientConfig(
         name: userName,
-        // Uncomment to use example token based on secret key `secret` for user `testsuite_jwt`.
         token: userJwtToken,
-        // getToken: (centrifuge.ConnectionTokenEvent event) {
-        //   return Future.value(
-        //       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0c3VpdGVfand0In0.hPmHsVqvtY88PvK4EmJlcdwNuKFuy3BGaF7dMaKdPlw');
-        // },
+        // Headers are only supported on platforms that support dart:io
         headers: <String, dynamic>{'X-Example-Header': 'example'},
       ),
     );

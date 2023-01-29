@@ -14,15 +14,15 @@ const userName = 'dart';
 /// The user's JWT token
 ///
 /// generate user JWT token for user "dart":
-/// ./centrifugo gentoken -u dart
+/// ./centrifugo gentoken --user dart
 const userJwtToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbm91Z2giLCJleHAiOjE2NzQ3MjcyMzcsImlhdCI6MTY3NDEyMjQzN30.jsKrRp-4jcJun-KlKb_z8J3rJwL7QWV8EZpWyl5g1ds';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiZXhwIjoyMjc5NDQzNjgwLCJpYXQiOjE2NzQ2NDM2ODB9.XgsPZzAD4kMj7HdybJfpMGuDaRmuLvhUUxCGHs3mtXA';
 
 /// The subscription token
 ///
 /// generate subscription JWT token for user "dart" and channel "chat:index":
-/// ./centrifugo gensubtoken -u dart -s chat:index
+/// ./centrifugo gensubtoken --user dart --channel chat:index
 const subscriptionJwtToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlbm91Z2giLCJleHAiOjE2NzQ3Mjg1ODUsImlhdCI6MTY3NDEyMzc4NSwiY2hhbm5lbCI6ImNoYXQ6aW5kZXgifQ.BRWR0DMFULXrnCn1F9EulerFCP-XY8QIgcl_lV7U1SU';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiZXhwIjoyMjc5NDQ0MDE4LCJpYXQiOjE2NzQ2NDQwMTgsImNoYW5uZWwiOiJjaGF0OmluZGV4In0.FjpnF6ofq3XCr1iqnwTZcpxCx6btuzCnn29DAIJbsBo';
 
 final ChatClient cli = ChatClient();

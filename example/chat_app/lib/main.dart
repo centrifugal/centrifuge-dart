@@ -9,15 +9,17 @@ final Map<String, Widget Function(BuildContext)> routes = {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Centrifuge Dart chat app',
-      home: LoginPage(),
+      home: const LoginPage(),
       routes: routes,
     );
   }

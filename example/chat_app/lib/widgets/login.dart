@@ -14,7 +14,7 @@ class _LoginFormState extends State<LoginForm> {
       Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
         const Icon(Icons.person),
         const Padding(padding: EdgeInsets.only(right: 10.0)),
-        Container(
+        SizedBox(
             width: 250.0,
             child: TextField(
               controller: _controller,
@@ -25,7 +25,6 @@ class _LoginFormState extends State<LoginForm> {
       ]),
       const Padding(padding: EdgeInsets.only(top: 35.0)),
       ElevatedButton(
-        child: const Text("Login"),
         onPressed: () {
           state.username = _controller.text;
           widget.onLoggedIn();
@@ -33,16 +32,17 @@ class _LoginFormState extends State<LoginForm> {
         style: ButtonStyle(
             shape: MaterialStateProperty.all(RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.0)))),
+        child: const Text("Login"),
       )
     ]);
   }
 }
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({required this.onLoggedIn});
+  const LoginForm({super.key, required this.onLoggedIn});
 
   final VoidCallback onLoggedIn;
 
   @override
-  _LoginFormState createState() => _LoginFormState();
+  State<LoginForm> createState() => _LoginFormState();
 }

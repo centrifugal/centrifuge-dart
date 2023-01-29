@@ -26,9 +26,6 @@ class _ChatPageState extends State<ChatPage> {
         onSend: (msg) async {
           await conf.cli.sendMsg(msg);
         },
-        onLoadEarlier: () {
-          print("loading...");
-        },
       ),
     );
   }
@@ -41,8 +38,8 @@ class _ChatPageState extends State<ChatPage> {
 }
 
 class ChatPage extends StatefulWidget {
-  const ChatPage();
+  const ChatPage({super.key});
 
   @override
-  _ChatPageState createState() => _ChatPageState();
+  State<ChatPage> createState() => _ChatPageState();
 }
