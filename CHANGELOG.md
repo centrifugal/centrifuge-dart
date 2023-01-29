@@ -1,3 +1,7 @@
+## [0.9.3]
+
+* Add support for web platform – [#73](https://github.com/centrifugal/centrifuge-dart/pull/73)
+
 ## [0.9.2]
 
 * Fix null check for close reason, fixes [#66](https://github.com/centrifugal/centrifuge-dart/issues/66)
