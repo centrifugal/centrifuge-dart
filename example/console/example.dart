@@ -89,8 +89,7 @@ void main() async {
   }
 }
 
-Function(String) _handleUserInput(
-    centrifuge.Client client, centrifuge.Subscription subscription) {
+Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscription subscription) {
   return (String message) async {
     switch (message) {
       case '#subscribe':
@@ -121,12 +120,8 @@ Function(String) _handleUserInput(
         break;
       case '#history':
         final result = await subscription.history(limit: 10);
-        print('History num publications: ' +
-            result.publications.length.toString());
-        print('Stream top position: ' +
-            result.offset.toString() +
-            ', epoch: ' +
-            result.epoch);
+        print('History num publications: ' + result.publications.length.toString());
+        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
         break;
       case '#disconnect':
         await client.disconnect();

@@ -10,7 +10,8 @@ class ClientConfig {
   /// Note that headers are only used on platforms that support dart:io,
   /// so on web the headers will be ignored.
   ClientConfig({
-    this.token,
+    this.token = '',
+    this.getToken,
     this.data,
     this.headers = const <String, dynamic>{},
     this.tlsSkipVerify = false,
@@ -18,13 +19,15 @@ class ClientConfig {
     this.minReconnectDelay = const Duration(milliseconds: 500),
     this.maxReconnectDelay = const Duration(seconds: 20),
     this.maxServerPingDelay = const Duration(seconds: 10),
-    this.getToken,
     this.name = 'dart',
     this.version = '',
   });
 
   /// The initial token used for authentication
-  String? token;
+  String token;
+
+  /// Callback to get/refresh tokens
+  final ConnectionTokenCallback? getToken;
 
   /// The data send for the first request
   List<int>? data;
@@ -41,9 +44,6 @@ class ClientConfig {
   final Duration minReconnectDelay;
   final Duration maxReconnectDelay;
   final Duration maxServerPingDelay;
-
-  /// Callback to retrieve tokens
-  final ConnectionTokenCallback? getToken;
 
   /// The user's name
   final String name;

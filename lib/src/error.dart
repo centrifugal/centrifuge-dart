@@ -100,3 +100,14 @@ class SubscriptionRefreshError {
     return 'Subscription refresh error: $error';
   }
 }
+
+class UnauthorizedException implements Exception {
+  final String message;
+
+  UnauthorizedException([this.message = "unauthorized"]);
+
+  @override
+  String toString() {
+    return 'UnauthorizedException';
+  }
+}
