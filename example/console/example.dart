@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
-import 'package:mockito/mockito.dart';
 
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket';
