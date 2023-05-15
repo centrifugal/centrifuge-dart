@@ -24,11 +24,11 @@ void main() async {
     final client = centrifuge.createClient(
       url,
       centrifuge.ClientConfig(
-        name: userName,
-        token: userJwtToken,
-        // Headers are only supported on platforms that support dart:io
-        headers: <String, dynamic>{'X-Example-Header': 'example'},
-      ),
+          name: userName,
+          token: userJwtToken,
+          // Headers are only supported on platforms that support dart:io
+          headers: <String, dynamic>{'X-Example-Header': 'example'},
+          minReconnectDelay: Duration(milliseconds: 50)),
     );
 
     // State changes.
@@ -50,11 +50,11 @@ void main() async {
     final subscription = client.newSubscription(
       channel,
       centrifuge.SubscriptionConfig(
-        token: subscriptionJwtToken,
-        // getToken: (centrifuge.SubscriptionTokenEvent event) {
-        //   return Future.value('');
-        // },
-      ),
+          // token: subscriptionJwtToken,
+          // getToken: (centrifuge.SubscriptionTokenEvent event) {
+          //   return Future.value('');
+          // },
+          ),
     );
 
     final onSubscriptionEvent = (dynamic event) async {
@@ -89,8 +89,8 @@ void main() async {
   }
 }
 
-Function(String) _handleUserInput(
-    centrifuge.Client client, centrifuge.Subscription subscription) {
+Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscription subscription) {
+  var c = 0;
   return (String message) async {
     switch (message) {
       case '#subscribe':
@@ -121,24 +121,28 @@ Function(String) _handleUserInput(
         break;
       case '#history':
         final result = await subscription.history(limit: 10);
-        print('History num publications: ' +
-            result.publications.length.toString());
-        print('Stream top position: ' +
-            result.offset.toString() +
-            ', epoch: ' +
-            result.epoch);
+        print('History num publications: ' + result.publications.length.toString());
+        print('Stream top position: ' + result.offset.toString() + ', epoch: ' + result.epoch);
         break;
       case '#disconnect':
         await client.disconnect();
         break;
       default:
-        final output = jsonEncode({'input': message});
-        final data = utf8.encode(output);
-        try {
-          await subscription.publish(data);
-        } catch (ex) {
-          print("can't publish: $ex");
+        if (c % 2 == 0) {
+          print("DISCONNECT");
+          await subscription.unsubscribe();
+        } else {
+          print("CONNECT");
+          await subscription.subscribe();
         }
+        c += 1;
+        // final output = jsonEncode({'input': message});
+        // final data = utf8.encode(output);
+        // try {
+        //   await subscription.publish(data);
+        // } catch (ex) {
+        //   print("can't publish: $ex");
+        // }
         break;
     }
     return;

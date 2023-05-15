@@ -19,7 +19,7 @@ typedef WebSocketBuilder = Future<WebSocketChannel> Function();
 class TransportConfig {
   TransportConfig({
     this.headers = const <String, dynamic>{},
-    this.timeout = const Duration(seconds: 10),
+    this.timeout = const Duration(seconds: 5),
   });
 
   final Map<String, dynamic> headers;
@@ -52,15 +52,13 @@ Transport protobufTransportBuilder({
 }
 
 abstract class GeneratedMessageSender {
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-          Req request, Rep result);
+  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+      Req request, Rep result);
   Future<void> sendAsyncMessage<Req extends GeneratedMessage>(Req request);
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder,
-      this._replyDecoder);
+  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder);
 
   final WebSocketBuilder _socketBuilder;
   WebSocketChannel? _socket;
@@ -69,8 +67,7 @@ class Transport implements GeneratedMessageSender {
   final TransportConfig _config;
 
   Future open(void onPush(Push push, bool isPing),
-      {Function? onError,
-      void onDone(int code, String reason, bool shouldReconnect)?}) async {
+      {Function? onError, void onDone(int code, String reason, bool shouldReconnect)?}) async {
     final socket = await _socketBuilder();
     _socket = socket;
     socket.stream.listen(
@@ -85,8 +82,7 @@ class Transport implements GeneratedMessageSender {
   var _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<Rep>
-      sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
+  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
     Req request,
     Rep result,
   ) async {
@@ -101,8 +97,7 @@ class Transport implements GeneratedMessageSender {
       }
       final reply = await fut;
       if (reply.hasError()) {
-        throw centrifuge.Error.custom(
-            reply.error.code, reply.error.message, reply.error.temporary);
+        throw centrifuge.Error.custom(reply.error.code, reply.error.message, reply.error.temporary);
       }
       if (reply.hasConnect()) {
         result.mergeFromMessage(reply.connect);
@@ -209,13 +204,13 @@ class Transport implements GeneratedMessageSender {
   Future<Reply> _sendCommand(Command command) {
     final completer = Completer<Reply>.sync();
 
-    _completers[command.id] = completer;
-
-    final data = _commandEncoder.convert(command);
-
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
+
+    _completers[command.id] = completer;
+
+    final data = _commandEncoder.convert(command);
 
     _socket!.sendData(data);
 
@@ -231,15 +226,12 @@ class Transport implements GeneratedMessageSender {
       int code = connectingCodeTransportClosed;
       String reason = "transport closed";
       bool reconnect = true;
-      if (_socket != null &&
-          _socket!.closeCode != null &&
-          _socket!.closeCode! > 0) {
+      if (_socket != null && _socket!.closeCode != null && _socket!.closeCode! > 0) {
         code = _socket!.closeCode!;
         if (_socket!.closeReason != null) {
           reason = _socket!.closeReason!;
         }
-        reconnect =
-            code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+        reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
         if (code < 3000) {
           if (code == 1009) {
             code = disconnectCodeMessageSizeLimit;

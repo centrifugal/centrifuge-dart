@@ -121,6 +121,7 @@ class ClientImpl implements Client {
   int _reconnectAttempts = 0;
   int _pingInterval = 0;
   bool _sendPong = false;
+  bool _inConnect = false;
 
   @override
   State state = State.disconnected;
@@ -178,7 +179,7 @@ class ClientImpl implements Client {
       return;
     }
     if (state == State.connecting) {
-      throw ClientConnectingError();
+      return ready();
     }
     state = State.connecting;
     final event = ConnectingEvent(connectingCodeConnectCalled, 'connect called');
@@ -190,8 +191,8 @@ class ClientImpl implements Client {
   @override
   Future<void> disconnect() async {
     _reconnectAttempts = 0;
-    _processDisconnect(code: disconnectedCodeDisconnectCalled, reason: 'disconnect called', reconnect: false);
-    await _transport?.close();
+    await _processDisconnect(
+        code: disconnectedCodeDisconnectCalled, reason: 'disconnect called', reconnect: false);
   }
 
   @override
@@ -310,7 +311,9 @@ class ClientImpl implements Client {
     return _subscriptions;
   }
 
-  void _processDisconnect({required int code, required String reason, required bool reconnect}) async {
+  Future<void> _processDisconnect(
+      {required int code, required String reason, required bool reconnect}) async {
+    print(state);
     if (state == State.disconnected) {
       return;
     }
@@ -333,7 +336,6 @@ class ClientImpl implements Client {
 
     if (reconnect) {
       state = State.connecting;
-      _scheduleReconnect();
     } else {
       state = State.disconnected;
     }
@@ -353,14 +355,16 @@ class ClientImpl implements Client {
     if (state == State.disconnected) {
       _errorReadyFutures(ClientDisconnectedError());
     }
+
+    if (_transport != null) {
+      final transport = _transport;
+      _transport = null;
+      await transport?.close();
+    }
   }
 
   void _failUnauthorized() {
     _processDisconnect(code: disconnectedCodeUnauthorized, reason: 'unauthorized', reconnect: false);
-    if (_transport == null) {
-      return;
-    }
-    _transport!.close();
   }
 
   void _scheduleReconnect() {
@@ -378,6 +382,10 @@ class ClientImpl implements Client {
     if (state != State.connecting) {
       return;
     }
+    if (_inConnect) {
+      return;
+    }
+    _inConnect = true;
 
     if (_refreshRequired || (_token == null && _config.getToken != null)) {
       final event = ConnectionTokenEvent();
@@ -385,6 +393,7 @@ class ClientImpl implements Client {
         final String token = await _config.getToken!(event);
         if (token == "") {
           _failUnauthorized();
+          _inConnect = false;
           return;
         }
         _token = token;
@@ -392,37 +401,53 @@ class ClientImpl implements Client {
       } catch (ex) {
         final event = ErrorEvent(RefreshError(ex));
         _errorController.add(event);
-        if (_transport != null) {
-          await _transport!.close();
+        _inConnect = false;
+        if (state == State.connecting) {
+          _scheduleReconnect();
         }
-        _scheduleReconnect();
         return;
       }
     }
 
-    _transport = _transportBuilder(
+    if (state != State.connecting) {
+      _inConnect = false;
+      return;
+    }
+
+    final transport = _transportBuilder(
         url: _url, config: TransportConfig(headers: _config.headers, timeout: _config.timeout));
 
     try {
-      await _transport!.open(_onPush, onError: (dynamic error) {
+      await transport.open(_onPush, onError: (dynamic error) {
         final event = ErrorEvent(TransportError(error));
         _errorController.add(event);
         if (state != State.connected) {
           return;
         }
         _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
-        _transport!.close();
+        transport.close();
       }, onDone: (code, reason, reconnect) {
         if (state == State.disconnected) {
           return;
         }
         _processDisconnect(code: code, reason: reason, reconnect: reconnect);
+        if (state == State.connecting) {
+          _scheduleReconnect();
+        }
       });
     } catch (ex) {
       final event = ErrorEvent(TransportError(ex));
       _errorController.add(event);
-      await _transport!.close();
-      _scheduleReconnect();
+      if (state == State.connecting) {
+        _scheduleReconnect();
+      }
+      _inConnect = false;
+      return;
+    }
+
+    if (state != State.connecting) {
+      _inConnect = false;
+      await transport.close();
       return;
     }
 
@@ -447,11 +472,18 @@ class ClientImpl implements Client {
     }
 
     try {
-      final result = await _transport!.sendMessage(
+      final result = await transport.sendMessage(
         request,
         protocol.ConnectResult(),
       );
 
+      if (state != State.connecting) {
+        _inConnect = false;
+        await transport.close();
+        return;
+      }
+
+      _transport = transport;
       state = State.connected;
       _client = result.client;
       _reconnectAttempts = 0;
@@ -487,6 +519,7 @@ class ClientImpl implements Client {
       if (result.expires) {
         _refreshTimer = Timer(Duration(seconds: result.ttl), () {
           if (state != State.connected) {
+            _inConnect = false;
             return;
           }
           _refreshToken();
@@ -499,27 +532,41 @@ class ClientImpl implements Client {
         _setPingTimer();
       }
     } catch (err) {
+      if (state != State.connecting) {
+        _inConnect = false;
+        return;
+      }
       final event = ErrorEvent(ConnectError(err));
       _errorController.add(event);
       if (err is Error) {
         if (err.code == 109) {
           // token expired.
           _refreshRequired = true;
-          _scheduleReconnect();
+          await transport.close();
+          _inConnect = false;
           return;
         } else if (!err.temporary) {
           _processDisconnect(code: err.code, reason: err.message, reconnect: false);
-          _transport!.close();
+          await transport.close();
+          _inConnect = false;
           return;
         } else {
           _processDisconnect(code: err.code, reason: err.message, reconnect: false);
-          _transport!.close();
+          await transport.close();
+          _inConnect = false;
           return;
         }
       } else {
-        _scheduleReconnect();
+        _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
+        await transport.close();
+        _inConnect = false;
         return;
       }
+    }
+    _inConnect = false;
+    if (state != State.connected) {
+      await transport.close();
+      return;
     }
   }
 
@@ -529,7 +576,6 @@ class ClientImpl implements Client {
         return;
       }
       processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
-      await _transport!.close();
     });
   }
 
@@ -597,7 +643,6 @@ class ClientImpl implements Client {
           return;
         }
         _processDisconnect(code: err.code, reason: err.message, reconnect: false);
-        _transport!.close();
         return;
       }
       _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
@@ -675,7 +720,6 @@ class ClientImpl implements Client {
     final code = disconnect.code;
     final bool reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
     _processDisconnect(code: disconnect.code, reason: disconnect.reason, reconnect: reconnect);
-    _transport!.close();
   }
 
   void _handleSubscribe(String channel, protocol.Subscribe subscribe) {
@@ -708,9 +752,13 @@ class ClientImpl implements Client {
     _setPingTimer();
 
     if (_sendPong) {
-      _transport!.sendAsyncMessage(
-        protocol.Command(),
-      );
+      try {
+        _transport?.sendAsyncMessage(
+          protocol.Command(),
+        );
+      } on ClientDisconnectedError {
+        //
+      }
     }
   }
 
@@ -738,6 +786,9 @@ class ClientImpl implements Client {
 
   @internal
   Future<protocol.UnsubscribeResult> sendUnsubscribe(protocol.UnsubscribeRequest request) async {
+    if (_transport == null) {
+      throw ClientDisconnectedError();
+    }
     return await _transport!.sendMessage(
       request,
       protocol.UnsubscribeResult(),
@@ -746,6 +797,9 @@ class ClientImpl implements Client {
 
   @internal
   Future<protocol.SubscribeResult> sendSubscribe(protocol.SubscribeRequest request) async {
+    if (_transport == null) {
+      throw ClientDisconnectedError();
+    }
     return await _transport!.sendMessage(
       request,
       protocol.SubscribeResult(),
@@ -754,6 +808,9 @@ class ClientImpl implements Client {
 
   @internal
   Future<protocol.SubRefreshResult> sendSubRefresh(protocol.SubRefreshRequest request) async {
+    if (_transport == null) {
+      throw ClientDisconnectedError();
+    }
     return await _transport!.sendMessage(
       request,
       protocol.SubRefreshResult(),
@@ -766,7 +823,7 @@ class ClientImpl implements Client {
   }
 
   @internal
-  void closeTransport() async => await _transport!.close();
+  void closeTransport() async => await _transport?.close();
 }
 
 final _random = new Random();
