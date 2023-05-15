@@ -313,7 +313,6 @@ class ClientImpl implements Client {
 
   Future<void> _processDisconnect(
       {required int code, required String reason, required bool reconnect}) async {
-    print(state);
     if (state == State.disconnected) {
       return;
     }
