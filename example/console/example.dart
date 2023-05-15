@@ -22,14 +22,13 @@ void main() async {
 
   try {
     final client = centrifuge.createClient(
-      url,
-      centrifuge.ClientConfig(
+        url,
+        centrifuge.ClientConfig(
           name: userName,
           token: userJwtToken,
           // Headers are only supported on platforms that support dart:io
           headers: <String, dynamic>{'X-Example-Header': 'example'},
-          minReconnectDelay: Duration(milliseconds: 50)),
-    );
+        ));
 
     // State changes.
     client.connecting.listen(onEvent);
@@ -50,11 +49,11 @@ void main() async {
     final subscription = client.newSubscription(
       channel,
       centrifuge.SubscriptionConfig(
-          // token: subscriptionJwtToken,
-          // getToken: (centrifuge.SubscriptionTokenEvent event) {
-          //   return Future.value('');
-          // },
-          ),
+        token: subscriptionJwtToken,
+        // getToken: (centrifuge.SubscriptionTokenEvent event) {
+        //   return Future.value('');
+        // },
+      ),
     );
 
     final onSubscriptionEvent = (dynamic event) async {
@@ -90,7 +89,6 @@ void main() async {
 }
 
 Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscription subscription) {
-  var c = 0;
   return (String message) async {
     switch (message) {
       case '#subscribe':
