@@ -128,21 +128,13 @@ Function(String) _handleUserInput(centrifuge.Client client, centrifuge.Subscript
         await client.disconnect();
         break;
       default:
-        if (c % 2 == 0) {
-          print("DISCONNECT");
-          await subscription.unsubscribe();
-        } else {
-          print("CONNECT");
-          await subscription.subscribe();
+        final output = jsonEncode({'input': message});
+        final data = utf8.encode(output);
+        try {
+          await subscription.publish(data);
+        } catch (ex) {
+          print("can't publish: $ex");
         }
-        c += 1;
-        // final output = jsonEncode({'input': message});
-        // final data = utf8.encode(output);
-        // try {
-        //   await subscription.publish(data);
-        // } catch (ex) {
-        //   print("can't publish: $ex");
-        // }
         break;
     }
     return;
