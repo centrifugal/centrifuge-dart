@@ -109,7 +109,7 @@ class SubscriptionImpl implements Subscription {
       return;
     }
     if (state == SubscriptionState.subscribing) {
-      throw SubscriptionSubscribingError();
+      return ready();
     }
     _resubscribeAttempts = 0;
     state = SubscriptionState.subscribing;

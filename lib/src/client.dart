@@ -756,7 +756,7 @@ class ClientImpl implements Client {
           protocol.Command(),
         );
       } on ClientDisconnectedError {
-        // No need to handle in special way - pong can't be sent but connection is closed anyway.
+        // No need to handle in a special way - pong can't be sent but connection is closed anyway.
       }
     }
   }
