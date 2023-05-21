@@ -1,3 +1,8 @@
+## [0.9.4]
+
+* Improving reconnect behaviour upon bad network conditions (like connect timeout), [#79](https://github.com/centrifugal/centrifuge-dart/pull/79)
+* [#79](https://github.com/centrifugal/centrifuge-dart/pull/79) also handles ClientDisconnectedError in _onPing method, addresses [#76](https://github.com/centrifugal/centrifuge-dart/issues/76)
+
 ## [0.9.3]
 
 * Add support for web platform – [#73](https://github.com/centrifugal/centrifuge-dart/pull/73)
