@@ -19,7 +19,7 @@ typedef WebSocketBuilder = Future<WebSocketChannel> Function();
 class TransportConfig {
   TransportConfig({
     this.headers = const <String, dynamic>{},
-    this.timeout = const Duration(seconds: 10),
+    this.timeout = const Duration(seconds: 5),
   });
 
   final Map<String, dynamic> headers;
@@ -204,13 +204,13 @@ class Transport implements GeneratedMessageSender {
   Future<Reply> _sendCommand(Command command) {
     final completer = Completer<Reply>.sync();
 
-    _completers[command.id] = completer;
-
-    final data = _commandEncoder.convert(command);
-
     if (_socket == null) {
       throw centrifuge.ClientDisconnectedError;
     }
+
+    _completers[command.id] = completer;
+
+    final data = _commandEncoder.convert(command);
 
     _socket!.sendData(data);
 

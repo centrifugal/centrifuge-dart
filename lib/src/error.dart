@@ -11,13 +11,6 @@ class Error {
   }
 }
 
-class ClientConnectingError {
-  @override
-  String toString() {
-    return 'Client connecting';
-  }
-}
-
 class ClientDisconnectedError {
   @override
   String toString() {
@@ -25,24 +18,10 @@ class ClientDisconnectedError {
   }
 }
 
-class SubscriptionSubscribingError {
-  @override
-  String toString() {
-    return 'Subscription subscribing';
-  }
-}
-
 class SubscriptionUnsubscribedError {
   @override
   String toString() {
     return 'Subscription unsubscribed';
-  }
-}
-
-class SubscriptionFailedError {
-  @override
-  String toString() {
-    return 'Subscription failed';
   }
 }
 

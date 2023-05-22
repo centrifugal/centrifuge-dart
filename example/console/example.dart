@@ -22,14 +22,13 @@ void main() async {
 
   try {
     final client = centrifuge.createClient(
-      url,
-      centrifuge.ClientConfig(
-        name: userName,
-        token: userJwtToken,
-        // Headers are only supported on platforms that support dart:io
-        headers: <String, dynamic>{'X-Example-Header': 'example'},
-      ),
-    );
+        url,
+        centrifuge.ClientConfig(
+          name: userName,
+          token: userJwtToken,
+          // Headers are only supported on platforms that support dart:io
+          headers: <String, dynamic>{'X-Example-Header': 'example'},
+        ));
 
     // State changes.
     client.connecting.listen(onEvent);
