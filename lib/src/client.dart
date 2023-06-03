@@ -44,7 +44,11 @@ abstract class Client {
 
   /// Disconnect from the server.
   ///
-  Future<void> disconnect({bool resetConnectionToken = false});
+  Future<void> disconnect();
+
+  /// Set allows updating connection token.
+  ///
+  void setToken(String token);
 
   /// Ready resolves when client successfully connected.
   /// Throws exceptions if called not in connecting or connected state.
@@ -189,10 +193,12 @@ class ClientImpl implements Client {
   }
 
   @override
-  Future<void> disconnect({bool resetConnectionToken = false}) async {
-    if (resetConnectionToken) {
-      _token = '';
-    }
+  void setToken(String token) {
+    _token = token;
+  }
+
+  @override
+  Future<void> disconnect() async {
     _reconnectAttempts = 0;
     await _processDisconnect(
         code: disconnectedCodeDisconnectCalled, reason: 'disconnect called', reconnect: false);
