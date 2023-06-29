@@ -2,7 +2,7 @@ import 'events.dart';
 
 class SubscriptionConfig {
   SubscriptionConfig(
-      {this.token,
+      {this.token = '',
       this.getToken,
       this.data,
       this.since,
@@ -12,7 +12,7 @@ class SubscriptionConfig {
       this.minResubscribeDelay = const Duration(milliseconds: 500),
       this.maxResubscribeDelay = const Duration(milliseconds: 20000)});
 
-  String? token;
+  String token;
   final SubscriptionTokenCallback? getToken;
   List<int>? data;
   StreamPosition? since;

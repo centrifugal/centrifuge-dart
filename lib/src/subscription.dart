@@ -39,7 +39,7 @@ abstract class Subscription {
 }
 
 class SubscriptionImpl implements Subscription {
-  String? _token;
+  String _token = '';
   List<int>? _data;
   Timer? _refreshTimer;
   Timer? _resubscribeTimer;
@@ -232,13 +232,13 @@ class SubscriptionImpl implements Subscription {
     try {
       final event = SubscriptionTokenEvent(channel);
       final String token = await _config.getToken!(event);
-      if (token == "") {
-        _failUnauthorized();
-        return;
-      }
       _token = token;
     } catch (ex) {
       if (state != SubscriptionState.subscribed) {
+        return;
+      }
+      if (ex is UnauthorizedException) {
+        _failUnauthorized();
         return;
       }
       final event = SubscriptionErrorEvent(SubscriptionRefreshError(ex));
@@ -255,7 +255,7 @@ class SubscriptionImpl implements Subscription {
     try {
       final request = protocol.SubRefreshRequest()
         ..channel = channel
-        ..token = _token ?? '';
+        ..token = _token;
       final result = await _client.sendSubRefresh(request);
       if (result.expires) {
         _refreshTimer = Timer(Duration(seconds: result.ttl), () {
@@ -296,7 +296,7 @@ class SubscriptionImpl implements Subscription {
   Future _resubscribe() async {
     try {
       var token = _token;
-      if (token == null && _config.getToken != null) {
+      if (token == '' && _config.getToken != null) {
         final event = SubscriptionTokenEvent(channel);
         token = await _config.getToken!(event);
         if (token == "") {
@@ -307,7 +307,7 @@ class SubscriptionImpl implements Subscription {
       }
       final request = protocol.SubscribeRequest()
         ..channel = channel
-        ..token = token ?? '';
+        ..token = token;
       if (_data != null) {
         request..data = _data!;
       }
@@ -352,13 +352,17 @@ class SubscriptionImpl implements Subscription {
       if (state != SubscriptionState.subscribing || _client.state != State.connected) {
         return;
       }
+      if (err is UnauthorizedException) {
+        _failUnauthorized();
+        return;
+      }
       final event = SubscriptionErrorEvent(SubscriptionSubscribeError(err));
       _errorController.add(event);
       if (err is Error) {
         if (err.code == 109 || err.temporary) {
           if (err.code == 109) {
             // Token expired error.
-            _token = null;
+            _token = '';
           }
           _scheduleResubscribe();
           return;

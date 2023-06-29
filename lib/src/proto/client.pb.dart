@@ -10,10 +10,6 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'client.pbenum.dart';
-
-export 'client.pbenum.dart';
-
 class Error extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Error', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OU3)
@@ -167,8 +163,6 @@ class EmulationRequest extends $pb.GeneratedMessage {
 class Command extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Command', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU3)
-    ..e<Command_MethodType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'method', $pb.PbFieldType.OE, defaultOrMaker: Command_MethodType.CONNECT, valueOf: Command_MethodType.valueOf, enumValues: Command_MethodType.values)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'params', $pb.PbFieldType.OY)
     ..aOM<ConnectRequest>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connect', subBuilder: ConnectRequest.create)
     ..aOM<SubscribeRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscribe', subBuilder: SubscribeRequest.create)
     ..aOM<UnsubscribeRequest>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unsubscribe', subBuilder: UnsubscribeRequest.create)
@@ -187,8 +181,6 @@ class Command extends $pb.GeneratedMessage {
   Command._() : super();
   factory Command({
     $core.int? id,
-    Command_MethodType? method,
-    $core.List<$core.int>? params,
     ConnectRequest? connect,
     SubscribeRequest? subscribe,
     UnsubscribeRequest? unsubscribe,
@@ -205,12 +197,6 @@ class Command extends $pb.GeneratedMessage {
     final _result = create();
     if (id != null) {
       _result.id = id;
-    }
-    if (method != null) {
-      _result.method = method;
-    }
-    if (params != null) {
-      _result.params = params;
     }
     if (connect != null) {
       _result.connect = connect;
@@ -280,162 +266,143 @@ class Command extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
 
-  @$pb.TagNumber(2)
-  Command_MethodType get method => $_getN(1);
-  @$pb.TagNumber(2)
-  set method(Command_MethodType v) { setField(2, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasMethod() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearMethod() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.List<$core.int> get params => $_getN(2);
-  @$pb.TagNumber(3)
-  set params($core.List<$core.int> v) { $_setBytes(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasParams() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearParams() => clearField(3);
-
   @$pb.TagNumber(4)
-  ConnectRequest get connect => $_getN(3);
+  ConnectRequest get connect => $_getN(1);
   @$pb.TagNumber(4)
   set connect(ConnectRequest v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasConnect() => $_has(3);
+  $core.bool hasConnect() => $_has(1);
   @$pb.TagNumber(4)
   void clearConnect() => clearField(4);
   @$pb.TagNumber(4)
-  ConnectRequest ensureConnect() => $_ensure(3);
+  ConnectRequest ensureConnect() => $_ensure(1);
 
   @$pb.TagNumber(5)
-  SubscribeRequest get subscribe => $_getN(4);
+  SubscribeRequest get subscribe => $_getN(2);
   @$pb.TagNumber(5)
   set subscribe(SubscribeRequest v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasSubscribe() => $_has(4);
+  $core.bool hasSubscribe() => $_has(2);
   @$pb.TagNumber(5)
   void clearSubscribe() => clearField(5);
   @$pb.TagNumber(5)
-  SubscribeRequest ensureSubscribe() => $_ensure(4);
+  SubscribeRequest ensureSubscribe() => $_ensure(2);
 
   @$pb.TagNumber(6)
-  UnsubscribeRequest get unsubscribe => $_getN(5);
+  UnsubscribeRequest get unsubscribe => $_getN(3);
   @$pb.TagNumber(6)
   set unsubscribe(UnsubscribeRequest v) { setField(6, v); }
   @$pb.TagNumber(6)
-  $core.bool hasUnsubscribe() => $_has(5);
+  $core.bool hasUnsubscribe() => $_has(3);
   @$pb.TagNumber(6)
   void clearUnsubscribe() => clearField(6);
   @$pb.TagNumber(6)
-  UnsubscribeRequest ensureUnsubscribe() => $_ensure(5);
+  UnsubscribeRequest ensureUnsubscribe() => $_ensure(3);
 
   @$pb.TagNumber(7)
-  PublishRequest get publish => $_getN(6);
+  PublishRequest get publish => $_getN(4);
   @$pb.TagNumber(7)
   set publish(PublishRequest v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasPublish() => $_has(6);
+  $core.bool hasPublish() => $_has(4);
   @$pb.TagNumber(7)
   void clearPublish() => clearField(7);
   @$pb.TagNumber(7)
-  PublishRequest ensurePublish() => $_ensure(6);
+  PublishRequest ensurePublish() => $_ensure(4);
 
   @$pb.TagNumber(8)
-  PresenceRequest get presence => $_getN(7);
+  PresenceRequest get presence => $_getN(5);
   @$pb.TagNumber(8)
   set presence(PresenceRequest v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasPresence() => $_has(7);
+  $core.bool hasPresence() => $_has(5);
   @$pb.TagNumber(8)
   void clearPresence() => clearField(8);
   @$pb.TagNumber(8)
-  PresenceRequest ensurePresence() => $_ensure(7);
+  PresenceRequest ensurePresence() => $_ensure(5);
 
   @$pb.TagNumber(9)
-  PresenceStatsRequest get presenceStats => $_getN(8);
+  PresenceStatsRequest get presenceStats => $_getN(6);
   @$pb.TagNumber(9)
   set presenceStats(PresenceStatsRequest v) { setField(9, v); }
   @$pb.TagNumber(9)
-  $core.bool hasPresenceStats() => $_has(8);
+  $core.bool hasPresenceStats() => $_has(6);
   @$pb.TagNumber(9)
   void clearPresenceStats() => clearField(9);
   @$pb.TagNumber(9)
-  PresenceStatsRequest ensurePresenceStats() => $_ensure(8);
+  PresenceStatsRequest ensurePresenceStats() => $_ensure(6);
 
   @$pb.TagNumber(10)
-  HistoryRequest get history => $_getN(9);
+  HistoryRequest get history => $_getN(7);
   @$pb.TagNumber(10)
   set history(HistoryRequest v) { setField(10, v); }
   @$pb.TagNumber(10)
-  $core.bool hasHistory() => $_has(9);
+  $core.bool hasHistory() => $_has(7);
   @$pb.TagNumber(10)
   void clearHistory() => clearField(10);
   @$pb.TagNumber(10)
-  HistoryRequest ensureHistory() => $_ensure(9);
+  HistoryRequest ensureHistory() => $_ensure(7);
 
   @$pb.TagNumber(11)
-  PingRequest get ping => $_getN(10);
+  PingRequest get ping => $_getN(8);
   @$pb.TagNumber(11)
   set ping(PingRequest v) { setField(11, v); }
   @$pb.TagNumber(11)
-  $core.bool hasPing() => $_has(10);
+  $core.bool hasPing() => $_has(8);
   @$pb.TagNumber(11)
   void clearPing() => clearField(11);
   @$pb.TagNumber(11)
-  PingRequest ensurePing() => $_ensure(10);
+  PingRequest ensurePing() => $_ensure(8);
 
   @$pb.TagNumber(12)
-  SendRequest get send => $_getN(11);
+  SendRequest get send => $_getN(9);
   @$pb.TagNumber(12)
   set send(SendRequest v) { setField(12, v); }
   @$pb.TagNumber(12)
-  $core.bool hasSend() => $_has(11);
+  $core.bool hasSend() => $_has(9);
   @$pb.TagNumber(12)
   void clearSend() => clearField(12);
   @$pb.TagNumber(12)
-  SendRequest ensureSend() => $_ensure(11);
+  SendRequest ensureSend() => $_ensure(9);
 
   @$pb.TagNumber(13)
-  RPCRequest get rpc => $_getN(12);
+  RPCRequest get rpc => $_getN(10);
   @$pb.TagNumber(13)
   set rpc(RPCRequest v) { setField(13, v); }
   @$pb.TagNumber(13)
-  $core.bool hasRpc() => $_has(12);
+  $core.bool hasRpc() => $_has(10);
   @$pb.TagNumber(13)
   void clearRpc() => clearField(13);
   @$pb.TagNumber(13)
-  RPCRequest ensureRpc() => $_ensure(12);
+  RPCRequest ensureRpc() => $_ensure(10);
 
   @$pb.TagNumber(14)
-  RefreshRequest get refresh => $_getN(13);
+  RefreshRequest get refresh => $_getN(11);
   @$pb.TagNumber(14)
   set refresh(RefreshRequest v) { setField(14, v); }
   @$pb.TagNumber(14)
-  $core.bool hasRefresh() => $_has(13);
+  $core.bool hasRefresh() => $_has(11);
   @$pb.TagNumber(14)
   void clearRefresh() => clearField(14);
   @$pb.TagNumber(14)
-  RefreshRequest ensureRefresh() => $_ensure(13);
+  RefreshRequest ensureRefresh() => $_ensure(11);
 
   @$pb.TagNumber(15)
-  SubRefreshRequest get subRefresh => $_getN(14);
+  SubRefreshRequest get subRefresh => $_getN(12);
   @$pb.TagNumber(15)
   set subRefresh(SubRefreshRequest v) { setField(15, v); }
   @$pb.TagNumber(15)
-  $core.bool hasSubRefresh() => $_has(14);
+  $core.bool hasSubRefresh() => $_has(12);
   @$pb.TagNumber(15)
   void clearSubRefresh() => clearField(15);
   @$pb.TagNumber(15)
-  SubRefreshRequest ensureSubRefresh() => $_ensure(14);
+  SubRefreshRequest ensureSubRefresh() => $_ensure(12);
 }
 
 class Reply extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Reply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU3)
     ..aOM<Error>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'result', $pb.PbFieldType.OY)
     ..aOM<Push>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'push', subBuilder: Push.create)
     ..aOM<ConnectResult>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connect', subBuilder: ConnectResult.create)
     ..aOM<SubscribeResult>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscribe', subBuilder: SubscribeResult.create)
@@ -455,7 +422,6 @@ class Reply extends $pb.GeneratedMessage {
   factory Reply({
     $core.int? id,
     Error? error,
-    $core.List<$core.int>? result,
     Push? push,
     ConnectResult? connect,
     SubscribeResult? subscribe,
@@ -475,9 +441,6 @@ class Reply extends $pb.GeneratedMessage {
     }
     if (error != null) {
       _result.error = error;
-    }
-    if (result != null) {
-      _result.result = result;
     }
     if (push != null) {
       _result.push = push;
@@ -558,153 +521,142 @@ class Reply extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   Error ensureError() => $_ensure(1);
 
-  @$pb.TagNumber(3)
-  $core.List<$core.int> get result => $_getN(2);
-  @$pb.TagNumber(3)
-  set result($core.List<$core.int> v) { $_setBytes(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasResult() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearResult() => clearField(3);
-
   @$pb.TagNumber(4)
-  Push get push => $_getN(3);
+  Push get push => $_getN(2);
   @$pb.TagNumber(4)
   set push(Push v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasPush() => $_has(3);
+  $core.bool hasPush() => $_has(2);
   @$pb.TagNumber(4)
   void clearPush() => clearField(4);
   @$pb.TagNumber(4)
-  Push ensurePush() => $_ensure(3);
+  Push ensurePush() => $_ensure(2);
 
   @$pb.TagNumber(5)
-  ConnectResult get connect => $_getN(4);
+  ConnectResult get connect => $_getN(3);
   @$pb.TagNumber(5)
   set connect(ConnectResult v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasConnect() => $_has(4);
+  $core.bool hasConnect() => $_has(3);
   @$pb.TagNumber(5)
   void clearConnect() => clearField(5);
   @$pb.TagNumber(5)
-  ConnectResult ensureConnect() => $_ensure(4);
+  ConnectResult ensureConnect() => $_ensure(3);
 
   @$pb.TagNumber(6)
-  SubscribeResult get subscribe => $_getN(5);
+  SubscribeResult get subscribe => $_getN(4);
   @$pb.TagNumber(6)
   set subscribe(SubscribeResult v) { setField(6, v); }
   @$pb.TagNumber(6)
-  $core.bool hasSubscribe() => $_has(5);
+  $core.bool hasSubscribe() => $_has(4);
   @$pb.TagNumber(6)
   void clearSubscribe() => clearField(6);
   @$pb.TagNumber(6)
-  SubscribeResult ensureSubscribe() => $_ensure(5);
+  SubscribeResult ensureSubscribe() => $_ensure(4);
 
   @$pb.TagNumber(7)
-  UnsubscribeResult get unsubscribe => $_getN(6);
+  UnsubscribeResult get unsubscribe => $_getN(5);
   @$pb.TagNumber(7)
   set unsubscribe(UnsubscribeResult v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasUnsubscribe() => $_has(6);
+  $core.bool hasUnsubscribe() => $_has(5);
   @$pb.TagNumber(7)
   void clearUnsubscribe() => clearField(7);
   @$pb.TagNumber(7)
-  UnsubscribeResult ensureUnsubscribe() => $_ensure(6);
+  UnsubscribeResult ensureUnsubscribe() => $_ensure(5);
 
   @$pb.TagNumber(8)
-  PublishResult get publish => $_getN(7);
+  PublishResult get publish => $_getN(6);
   @$pb.TagNumber(8)
   set publish(PublishResult v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasPublish() => $_has(7);
+  $core.bool hasPublish() => $_has(6);
   @$pb.TagNumber(8)
   void clearPublish() => clearField(8);
   @$pb.TagNumber(8)
-  PublishResult ensurePublish() => $_ensure(7);
+  PublishResult ensurePublish() => $_ensure(6);
 
   @$pb.TagNumber(9)
-  PresenceResult get presence => $_getN(8);
+  PresenceResult get presence => $_getN(7);
   @$pb.TagNumber(9)
   set presence(PresenceResult v) { setField(9, v); }
   @$pb.TagNumber(9)
-  $core.bool hasPresence() => $_has(8);
+  $core.bool hasPresence() => $_has(7);
   @$pb.TagNumber(9)
   void clearPresence() => clearField(9);
   @$pb.TagNumber(9)
-  PresenceResult ensurePresence() => $_ensure(8);
+  PresenceResult ensurePresence() => $_ensure(7);
 
   @$pb.TagNumber(10)
-  PresenceStatsResult get presenceStats => $_getN(9);
+  PresenceStatsResult get presenceStats => $_getN(8);
   @$pb.TagNumber(10)
   set presenceStats(PresenceStatsResult v) { setField(10, v); }
   @$pb.TagNumber(10)
-  $core.bool hasPresenceStats() => $_has(9);
+  $core.bool hasPresenceStats() => $_has(8);
   @$pb.TagNumber(10)
   void clearPresenceStats() => clearField(10);
   @$pb.TagNumber(10)
-  PresenceStatsResult ensurePresenceStats() => $_ensure(9);
+  PresenceStatsResult ensurePresenceStats() => $_ensure(8);
 
   @$pb.TagNumber(11)
-  HistoryResult get history => $_getN(10);
+  HistoryResult get history => $_getN(9);
   @$pb.TagNumber(11)
   set history(HistoryResult v) { setField(11, v); }
   @$pb.TagNumber(11)
-  $core.bool hasHistory() => $_has(10);
+  $core.bool hasHistory() => $_has(9);
   @$pb.TagNumber(11)
   void clearHistory() => clearField(11);
   @$pb.TagNumber(11)
-  HistoryResult ensureHistory() => $_ensure(10);
+  HistoryResult ensureHistory() => $_ensure(9);
 
   @$pb.TagNumber(12)
-  PingResult get ping => $_getN(11);
+  PingResult get ping => $_getN(10);
   @$pb.TagNumber(12)
   set ping(PingResult v) { setField(12, v); }
   @$pb.TagNumber(12)
-  $core.bool hasPing() => $_has(11);
+  $core.bool hasPing() => $_has(10);
   @$pb.TagNumber(12)
   void clearPing() => clearField(12);
   @$pb.TagNumber(12)
-  PingResult ensurePing() => $_ensure(11);
+  PingResult ensurePing() => $_ensure(10);
 
   @$pb.TagNumber(13)
-  RPCResult get rpc => $_getN(12);
+  RPCResult get rpc => $_getN(11);
   @$pb.TagNumber(13)
   set rpc(RPCResult v) { setField(13, v); }
   @$pb.TagNumber(13)
-  $core.bool hasRpc() => $_has(12);
+  $core.bool hasRpc() => $_has(11);
   @$pb.TagNumber(13)
   void clearRpc() => clearField(13);
   @$pb.TagNumber(13)
-  RPCResult ensureRpc() => $_ensure(12);
+  RPCResult ensureRpc() => $_ensure(11);
 
   @$pb.TagNumber(14)
-  RefreshResult get refresh => $_getN(13);
+  RefreshResult get refresh => $_getN(12);
   @$pb.TagNumber(14)
   set refresh(RefreshResult v) { setField(14, v); }
   @$pb.TagNumber(14)
-  $core.bool hasRefresh() => $_has(13);
+  $core.bool hasRefresh() => $_has(12);
   @$pb.TagNumber(14)
   void clearRefresh() => clearField(14);
   @$pb.TagNumber(14)
-  RefreshResult ensureRefresh() => $_ensure(13);
+  RefreshResult ensureRefresh() => $_ensure(12);
 
   @$pb.TagNumber(15)
-  SubRefreshResult get subRefresh => $_getN(14);
+  SubRefreshResult get subRefresh => $_getN(13);
   @$pb.TagNumber(15)
   set subRefresh(SubRefreshResult v) { setField(15, v); }
   @$pb.TagNumber(15)
-  $core.bool hasSubRefresh() => $_has(14);
+  $core.bool hasSubRefresh() => $_has(13);
   @$pb.TagNumber(15)
   void clearSubRefresh() => clearField(15);
   @$pb.TagNumber(15)
-  SubRefreshResult ensureSubRefresh() => $_ensure(14);
+  SubRefreshResult ensureSubRefresh() => $_ensure(13);
 }
 
 class Push extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Push', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..e<Push_PushType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: Push_PushType.PUBLICATION, valueOf: Push_PushType.valueOf, enumValues: Push_PushType.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
     ..aOM<Publication>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pub', subBuilder: Publication.create)
     ..aOM<Join>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'join', subBuilder: Join.create)
     ..aOM<Leave>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'leave', subBuilder: Leave.create)
@@ -719,9 +671,7 @@ class Push extends $pb.GeneratedMessage {
 
   Push._() : super();
   factory Push({
-    Push_PushType? type,
     $core.String? channel,
-    $core.List<$core.int>? data,
     Publication? pub,
     Join? join,
     Leave? leave,
@@ -733,14 +683,8 @@ class Push extends $pb.GeneratedMessage {
     Refresh? refresh,
   }) {
     final _result = create();
-    if (type != null) {
-      _result.type = type;
-    }
     if (channel != null) {
       _result.channel = channel;
-    }
-    if (data != null) {
-      _result.data = data;
     }
     if (pub != null) {
       _result.pub = pub;
@@ -792,131 +736,113 @@ class Push extends $pb.GeneratedMessage {
   static Push getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Push>(create);
   static Push? _defaultInstance;
 
-  @$pb.TagNumber(1)
-  Push_PushType get type => $_getN(0);
-  @$pb.TagNumber(1)
-  set type(Push_PushType v) { setField(1, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasType() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearType() => clearField(1);
-
   @$pb.TagNumber(2)
-  $core.String get channel => $_getSZ(1);
+  $core.String get channel => $_getSZ(0);
   @$pb.TagNumber(2)
-  set channel($core.String v) { $_setString(1, v); }
+  set channel($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(2)
-  $core.bool hasChannel() => $_has(1);
+  $core.bool hasChannel() => $_has(0);
   @$pb.TagNumber(2)
   void clearChannel() => clearField(2);
 
-  @$pb.TagNumber(3)
-  $core.List<$core.int> get data => $_getN(2);
-  @$pb.TagNumber(3)
-  set data($core.List<$core.int> v) { $_setBytes(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasData() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearData() => clearField(3);
-
   @$pb.TagNumber(4)
-  Publication get pub => $_getN(3);
+  Publication get pub => $_getN(1);
   @$pb.TagNumber(4)
   set pub(Publication v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasPub() => $_has(3);
+  $core.bool hasPub() => $_has(1);
   @$pb.TagNumber(4)
   void clearPub() => clearField(4);
   @$pb.TagNumber(4)
-  Publication ensurePub() => $_ensure(3);
+  Publication ensurePub() => $_ensure(1);
 
   @$pb.TagNumber(5)
-  Join get join => $_getN(4);
+  Join get join => $_getN(2);
   @$pb.TagNumber(5)
   set join(Join v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasJoin() => $_has(4);
+  $core.bool hasJoin() => $_has(2);
   @$pb.TagNumber(5)
   void clearJoin() => clearField(5);
   @$pb.TagNumber(5)
-  Join ensureJoin() => $_ensure(4);
+  Join ensureJoin() => $_ensure(2);
 
   @$pb.TagNumber(6)
-  Leave get leave => $_getN(5);
+  Leave get leave => $_getN(3);
   @$pb.TagNumber(6)
   set leave(Leave v) { setField(6, v); }
   @$pb.TagNumber(6)
-  $core.bool hasLeave() => $_has(5);
+  $core.bool hasLeave() => $_has(3);
   @$pb.TagNumber(6)
   void clearLeave() => clearField(6);
   @$pb.TagNumber(6)
-  Leave ensureLeave() => $_ensure(5);
+  Leave ensureLeave() => $_ensure(3);
 
   @$pb.TagNumber(7)
-  Unsubscribe get unsubscribe => $_getN(6);
+  Unsubscribe get unsubscribe => $_getN(4);
   @$pb.TagNumber(7)
   set unsubscribe(Unsubscribe v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasUnsubscribe() => $_has(6);
+  $core.bool hasUnsubscribe() => $_has(4);
   @$pb.TagNumber(7)
   void clearUnsubscribe() => clearField(7);
   @$pb.TagNumber(7)
-  Unsubscribe ensureUnsubscribe() => $_ensure(6);
+  Unsubscribe ensureUnsubscribe() => $_ensure(4);
 
   @$pb.TagNumber(8)
-  Message get message => $_getN(7);
+  Message get message => $_getN(5);
   @$pb.TagNumber(8)
   set message(Message v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasMessage() => $_has(7);
+  $core.bool hasMessage() => $_has(5);
   @$pb.TagNumber(8)
   void clearMessage() => clearField(8);
   @$pb.TagNumber(8)
-  Message ensureMessage() => $_ensure(7);
+  Message ensureMessage() => $_ensure(5);
 
   @$pb.TagNumber(9)
-  Subscribe get subscribe => $_getN(8);
+  Subscribe get subscribe => $_getN(6);
   @$pb.TagNumber(9)
   set subscribe(Subscribe v) { setField(9, v); }
   @$pb.TagNumber(9)
-  $core.bool hasSubscribe() => $_has(8);
+  $core.bool hasSubscribe() => $_has(6);
   @$pb.TagNumber(9)
   void clearSubscribe() => clearField(9);
   @$pb.TagNumber(9)
-  Subscribe ensureSubscribe() => $_ensure(8);
+  Subscribe ensureSubscribe() => $_ensure(6);
 
   @$pb.TagNumber(10)
-  Connect get connect => $_getN(9);
+  Connect get connect => $_getN(7);
   @$pb.TagNumber(10)
   set connect(Connect v) { setField(10, v); }
   @$pb.TagNumber(10)
-  $core.bool hasConnect() => $_has(9);
+  $core.bool hasConnect() => $_has(7);
   @$pb.TagNumber(10)
   void clearConnect() => clearField(10);
   @$pb.TagNumber(10)
-  Connect ensureConnect() => $_ensure(9);
+  Connect ensureConnect() => $_ensure(7);
 
   @$pb.TagNumber(11)
-  Disconnect get disconnect => $_getN(10);
+  Disconnect get disconnect => $_getN(8);
   @$pb.TagNumber(11)
   set disconnect(Disconnect v) { setField(11, v); }
   @$pb.TagNumber(11)
-  $core.bool hasDisconnect() => $_has(10);
+  $core.bool hasDisconnect() => $_has(8);
   @$pb.TagNumber(11)
   void clearDisconnect() => clearField(11);
   @$pb.TagNumber(11)
-  Disconnect ensureDisconnect() => $_ensure(10);
+  Disconnect ensureDisconnect() => $_ensure(8);
 
   @$pb.TagNumber(12)
-  Refresh get refresh => $_getN(11);
+  Refresh get refresh => $_getN(9);
   @$pb.TagNumber(12)
   set refresh(Refresh v) { setField(12, v); }
   @$pb.TagNumber(12)
-  $core.bool hasRefresh() => $_has(11);
+  $core.bool hasRefresh() => $_has(9);
   @$pb.TagNumber(12)
   void clearRefresh() => clearField(12);
   @$pb.TagNumber(12)
-  Refresh ensureRefresh() => $_ensure(11);
+  Refresh ensureRefresh() => $_ensure(9);
 }
 
 class ClientInfo extends $pb.GeneratedMessage {

@@ -46,6 +46,10 @@ abstract class Client {
   ///
   Future<void> disconnect();
 
+  /// Set allows updating connection token.
+  ///
+  void setToken(String token);
+
   /// Ready resolves when client successfully connected.
   /// Throws exceptions if called not in connecting or connected state.
   Future<void> ready();
@@ -109,7 +113,7 @@ class ClientImpl implements Client {
   ClientConfig _config;
   ClientConfig get config => _config;
 
-  String? _token;
+  String _token = '';
   List<int>? _data;
   String? _client;
   String? get client => _client;
@@ -186,6 +190,11 @@ class ClientImpl implements Client {
     _connectingController.add(event);
     _reconnectAttempts = 0;
     await _connect();
+  }
+
+  @override
+  void setToken(String token) {
+    _token = token;
   }
 
   @override
@@ -386,18 +395,18 @@ class ClientImpl implements Client {
     }
     _inConnect = true;
 
-    if (_refreshRequired || (_token == null && _config.getToken != null)) {
+    if (_refreshRequired || (_token == '' && _config.getToken != null)) {
       final event = ConnectionTokenEvent();
       try {
         final String token = await _config.getToken!(event);
-        if (token == "") {
-          _failUnauthorized();
-          _inConnect = false;
-          return;
-        }
         _token = token;
         _refreshRequired = false;
       } catch (ex) {
+        if (ex is UnauthorizedException) {
+          _inConnect = false;
+          _failUnauthorized();
+          return;
+        }
         final event = ErrorEvent(RefreshError(ex));
         _errorController.add(event);
         _inConnect = false;
@@ -451,8 +460,8 @@ class ClientImpl implements Client {
     }
 
     final request = protocol.ConnectRequest();
-    if (_token != null) {
-      request.token = _token!;
+    if (_token != '') {
+      request.token = _token;
     }
     if (_data != null) {
       request.data = _data!;
@@ -585,13 +594,13 @@ class ClientImpl implements Client {
     try {
       final event = ConnectionTokenEvent();
       final String token = await _config.getToken!(event);
-      if (token == "") {
-        _failUnauthorized();
-        return;
-      }
       _token = token;
     } catch (ex) {
       if (state != State.connected) {
+        return;
+      }
+      if (ex is UnauthorizedException) {
+        _failUnauthorized();
         return;
       }
       final event = ErrorEvent(RefreshError(ex));
@@ -607,8 +616,8 @@ class ClientImpl implements Client {
 
     final request = protocol.RefreshRequest();
 
-    if (_token != null) {
-      request.token = _token!;
+    if (_token != '') {
+      request.token = _token;
     }
 
     try {
