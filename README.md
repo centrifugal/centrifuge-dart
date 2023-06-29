@@ -8,7 +8,7 @@ The features implemented by this SDK can be found in [SDK feature matrix](https:
 
 Note that custom WebSocket connection Upgrade headers can only be set on platforms that support `dart:io`. So notably custom headers set in the configuration of `Client` are ignored on the web platform.
 
-> **The latest `centrifuge-dart` is compatible only with the latest [Centrifugo](https://github.com/centrifugal/centrifugo) server (v4) and [Centrifuge](https://github.com/centrifugal/centrifuge) >= 0.25.0. For Centrifugo v2, Centrifugo v3 and Centrifuge < 0.25.0 you should use `centrifuge-dart` v0.8.0.**
+> **The latest `centrifuge-dart` is compatible with [Centrifugo](https://github.com/centrifugal/centrifugo) server v5 and v4 and [Centrifuge](https://github.com/centrifugal/centrifuge) >= 0.25.0. For Centrifugo v2, Centrifugo v3 and Centrifuge < 0.25.0 you should use `centrifuge-dart` v0.8.0.**
 
 ## Examples
 
