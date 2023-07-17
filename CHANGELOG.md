@@ -1,6 +1,6 @@
 ## [0.11.0]
 
-* Update protobuf dependency from `^2.0.0` to `^3.0.0`
+* Update protobuf dependency from `^2.0.0` to `^3.0.0`. Requires Dart 2.19
 
 ## [0.10.0]
 
