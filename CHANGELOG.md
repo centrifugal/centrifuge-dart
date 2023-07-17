@@ -1,3 +1,7 @@
+## [0.11.0]
+
+* Update protobuf dependency from `^2.0.0` to `^3.0.0`
+
 ## [0.10.0]
 
 **Breaking change!** This release changes the semantics of working with connection tokens described in [Centrifugo v5 release post](https://centrifugal.dev/blog/2023/06/29/centrifugo-v5-released#token-behaviour-adjustments-in-sdks).
