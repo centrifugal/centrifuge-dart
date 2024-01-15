@@ -33,10 +33,10 @@ class _ConnectToServerState extends State<ConnectToServer> {
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
-          children: const [
+          children: [
             CircularProgressIndicator(),
             SizedBox(height: 15.0),
             Text("Connecting to server ...")
