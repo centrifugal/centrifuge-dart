@@ -8,9 +8,15 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     environment: test_ci
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk: [2.19, stable, beta]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
 
       - name: Install dependencies
         run: dart pub get
