@@ -6,7 +6,6 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 void main() async {
   final url = 'ws://localhost:8000/connection/websocket';
   final channel = 'chat:index';
-  final userName = 'dart';
   // generate user JWT token for user "dart":
   // ./centrifugo gentoken --user dart
   final userJwtToken =
@@ -24,7 +23,6 @@ void main() async {
     final client = centrifuge.createClient(
         url,
         centrifuge.ClientConfig(
-          name: userName,
           token: userJwtToken,
           // Headers are only supported on platforms that support dart:io
           headers: <String, dynamic>{'X-Example-Header': 'example'},

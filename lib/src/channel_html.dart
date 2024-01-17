@@ -22,7 +22,7 @@ extension HtmlWebSocketChannelExtension on WebSocketChannel {
     final channel = this;
     if (channel is HtmlWebSocketChannel) {
       final byteBuffer = data is Uint8List ? data.buffer : Uint8List.fromList(data).buffer;
-      channel.innerWebSocket.sendByteBuffer(byteBuffer);
+      channel.sink.add(byteBuffer);
     } else {
       channel.sink.add(data);
     }
