@@ -20,7 +20,6 @@ extension HtmlWebSocketChannelExtension on WebSocketChannel {
   /// Sends the given binary [data]
   void sendData(List<int> data) {
     final channel = this;
-    // channel.sink.add(data);
     if (channel is HtmlWebSocketChannel) {
       final byteBuffer = data is Uint8List ? data.buffer : Uint8List.fromList(data).buffer;
       channel.sink.add(byteBuffer);
