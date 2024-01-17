@@ -30,7 +30,6 @@ class ChatClient {
     _client = createClient(
       url,
       ClientConfig(
-        name: conf.userName,
         token: conf.userJwtToken,
         headers: <String, dynamic>{
           'user-id': chatUserId,
@@ -85,9 +84,7 @@ class ChatClient {
             token: conf.subscriptionJwtToken,
           ),
         );
-    subscription.publication
-        .map<String>((e) => utf8.decode(e.data))
-        .listen((data) {
+    subscription.publication.map<String>((e) => utf8.decode(e.data)).listen((data) {
       final d = json.decode(data) as Map<String, dynamic>;
       final username = d["username"].toString();
       final msg = d["message"].toString();
@@ -96,9 +93,7 @@ class ChatClient {
           text: msg,
           user: ChatUser(
             name: username,
-            containerColor: username == conf.userName
-                ? Colors.lightBlueAccent
-                : Colors.grey[300],
+            containerColor: username == conf.userName ? Colors.lightBlueAccent : Colors.grey[300],
             color: Colors.black87,
           ),
         ),
