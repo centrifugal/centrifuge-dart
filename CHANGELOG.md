@@ -1,3 +1,7 @@
+## [0.12.0]
+
+* Fix websocket usage in web env (fixes `The method 'sendByteBuffer' isn't defined for the type 'WebSocket'` error), add simple web example [#85](https://github.com/centrifugal/centrifuge-dart/pull/85)
+
 ## [0.11.0]
 
 * Update protobuf dependency from `^2.0.0` to `^3.0.0`. Requires Dart 2.19
