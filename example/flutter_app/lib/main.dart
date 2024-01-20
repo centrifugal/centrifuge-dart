@@ -109,16 +109,16 @@ class _MyHomePageState extends State<MyHomePage> {
     };
 
     _subscription.join.listen((event) {
-      final user = event.info.user;
-      final client = event.info.client;
+      final user = event.user;
+      final client = event.client;
 
       final item = _ChatItem(title: 'User $user joined channel $channel', subtitle: '(client ID $client)');
       onNewItem(item);
     });
 
     _subscription.leave.listen((event) {
-      final user = event.info.user;
-      final client = event.info.client;
+      final user = event.user;
+      final client = event.client;
       final item = _ChatItem(title: 'User $user left channel $channel', subtitle: '(client ID $client)');
       onNewItem(item);
     });
