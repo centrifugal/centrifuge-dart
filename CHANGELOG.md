@@ -1,3 +1,7 @@
+## [0.14.0]
+
+* `connInfo` and `chanInfo` for join/leave events by @hetao29 [#84](https://github.com/centrifugal/centrifuge-dart/pull/84)
+
 ## [0.13.0]
 
 * Relax Protobuf dependency requirements to be `>=2.0.0 <4.0.0` instead of `^3.0.0`
