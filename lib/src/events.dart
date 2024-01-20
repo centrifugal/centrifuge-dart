@@ -205,56 +205,69 @@ class PresenceStatsResult {
 }
 
 class JoinEvent {
-  JoinEvent(this.info);
+  JoinEvent(this.client, this.user, this.connInfo, this.chanInfo);
 
-  final proto.ClientInfo info;
+  final String client;
+  final String user;
+  final List<int>? connInfo;
+  final List<int>? chanInfo;
 
-  static JoinEvent from(proto.ClientInfo info) => JoinEvent(info);
+  static JoinEvent from(proto.ClientInfo info) => JoinEvent(info.client, info.user, info.connInfo, info.chanInfo);
 
   @override
   String toString() {
-    return 'JoinEvent{clientInfo:$info, user: $info.user, client: $info.client}';
+    return 'JoinEvent{user: $user, client: $client}';
   }
 }
 
 class ServerJoinEvent {
-  ServerJoinEvent(this.channel, this.info);
+  ServerJoinEvent(this.channel, this.client, this.user, this.connInfo, this.chanInfo);
 
   final String channel;
-  final proto.ClientInfo info;
+  final String client;
+  final String user;
+  final List<int>? connInfo;
+  final List<int>? chanInfo;
 
-  static ServerJoinEvent from(String channel, proto.ClientInfo info) => ServerJoinEvent(channel, info);
+  static ServerJoinEvent from(String channel, proto.ClientInfo info) =>
+      ServerJoinEvent(channel, info.client, info.user, info.connInfo, info.chanInfo);
 
   @override
   String toString() {
-    return 'ServerJoinEvent{clientInfo:$info, user: $info.user, client: $info.client,channel: $channel}';
+    return 'ServerJoinEvent{channel: $channel, user: $user, client: $client}';
   }
 }
 
 class LeaveEvent {
-  LeaveEvent(this.info);
+  LeaveEvent(this.client, this.user, this.connInfo, this.chanInfo);
 
-  final proto.ClientInfo info;
+  final String client;
+  final String user;
+  final List<int>? connInfo;
+  final List<int>? chanInfo;
 
-  static LeaveEvent from(proto.ClientInfo info) => LeaveEvent(info);
+  static LeaveEvent from(proto.ClientInfo info) => LeaveEvent(info.client, info.user, info.connInfo, info.chanInfo);
 
   @override
   String toString() {
-    return 'LeaveEvent{clientInfo:$info, user: $info.user, client: $info.client}';
+    return 'LeaveEvent{user: $user, client: $client}';
   }
 }
 
 class ServerLeaveEvent {
-  ServerLeaveEvent(this.channel, this.info);
+  ServerLeaveEvent(this.channel, this.client, this.user, this.connInfo, this.chanInfo);
 
   final String channel;
-  final proto.ClientInfo info;
+  final String client;
+  final String user;
+  final List<int>? connInfo;
+  final List<int>? chanInfo;
 
-  static ServerLeaveEvent from(String channel, proto.ClientInfo info) => ServerLeaveEvent(channel, info);
-
+  static ServerLeaveEvent from(String channel, proto.ClientInfo info) =>
+      ServerLeaveEvent(channel, info.client, info.user, info.connInfo, info.chanInfo);
   @override
   String toString() {
-    return 'ServerLeaveEvent{clientInfo:$info, user: $info.user, client: $info.client,channel: $channel}';
+    return 'ServerLeaveEvent{channel: $channel, user: $user, client: $client}';
   }
 }
 
