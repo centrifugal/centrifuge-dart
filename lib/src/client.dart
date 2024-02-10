@@ -100,7 +100,6 @@ abstract class Client {
 class ClientImpl implements Client {
   ClientImpl(this._url, this._config, this._transportBuilder) {
     _token = _config.token;
-    _data = _config.data;
   }
 
   final TransportBuilder _transportBuilder;
@@ -114,7 +113,7 @@ class ClientImpl implements Client {
   ClientConfig get config => _config;
 
   String _token = '';
-  List<int>? _data;
+  List<int>? get _data => _config.data;
   String? _client;
   String? get client => _client;
 
