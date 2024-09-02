@@ -1,3 +1,7 @@
+## [0.14.1]
+
+* Add callback to update connection data [#88](https://github.com/centrifugal/centrifuge-dart/pull/88)
+
 ## [0.14.0]
 
 * `connInfo` and `chanInfo` for join/leave events by @hetao29 [#84](https://github.com/centrifugal/centrifuge-dart/pull/84)
