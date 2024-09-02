@@ -13,6 +13,7 @@ class ClientConfig {
     this.token = '',
     this.getToken,
     this.data,
+    this.getData,
     this.headers = const <String, dynamic>{},
     this.tlsSkipVerify = false,
     this.timeout = const Duration(seconds: 10),
@@ -31,6 +32,9 @@ class ClientConfig {
 
   /// The data send for the first request
   List<int>? data;
+
+  /// Callback to get/renew connection data
+  final ConnectionDataCallback? getData;
 
   /// The connection timeout
   final Duration timeout;
@@ -53,3 +57,5 @@ class ClientConfig {
 }
 
 typedef ConnectionTokenCallback = Future<String> Function(ConnectionTokenEvent);
+
+typedef ConnectionDataCallback = Future<List<int>?>? Function();

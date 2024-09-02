@@ -463,8 +463,9 @@ class ClientImpl implements Client {
     if (_token != '') {
       request.token = _token;
     }
-    if (_data != null) {
-      request.data = _data!;
+    final data = _config.getData != null ? await _config.getData!() : _data;
+    if (data != null) {
+      request.data = data;
     }
     request.name = _config.name;
     request.version = _config.version;
