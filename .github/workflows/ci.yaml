@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sdk: [3.3, stable, beta]
+        sdk: [3.4, stable, beta] # note, not testing on 3.3 due to build_runner CI dependency problem.
     steps:
       - uses: actions/checkout@v4
 
