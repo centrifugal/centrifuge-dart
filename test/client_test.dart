@@ -28,6 +28,18 @@ void main() {
       expect(true, event.error.toString().contains('Unsupported URL scheme'));
     });
 
+    test('invalid token - disconnect code received', () async {
+      final client = centrifuge.createClient(
+        url,
+        centrifuge.ClientConfig(token: "invalid"),
+      );
+      final disconnectFinish = client.disconnected.first;
+      client.connect();
+      final disconnect = await disconnectFinish;
+      expect(centrifuge.State.disconnected, client.state);
+      expect(disconnect.code, 3500);
+    });
+
     test('can connect and disconnect', () async {
       final client = centrifuge.createClient(
         url,
