@@ -4,7 +4,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 import 'package:test/test.dart';
 
 void main() {
-  final url = 'ws://localhost:8000/connection/websocket?cf_protocol_version=v2';
+  final url = 'ws://localhost:8000/connection/websocket';
 
   setUp(() {});
 
