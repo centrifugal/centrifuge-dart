@@ -1,12 +1,12 @@
-import 'dart:html';
+import 'package:web/web.dart' as web;
 
 import 'package:centrifuge/centrifuge.dart';
 
 void main() {
-  querySelector('#output')?.text = 'Your Dart app is running.';
+  web.document.querySelector('#output')?.text = 'Your Dart app is running.';
 
   void onEvent(dynamic event) {
-    querySelector('#output')?.text = 'client> $event';
+    web.document.querySelector('#output')?.text = 'client> $event';
   }
 
   const url = 'ws://localhost:8000/connection/websocket';
