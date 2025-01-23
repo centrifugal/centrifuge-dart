@@ -12,7 +12,9 @@ void main() {
   const url = 'ws://localhost:8000/connection/websocket';
   Client client = createClient(
     url,
-    ClientConfig(),
+    ClientConfig(
+      headers: <String, dynamic>{'Authorization': 'example'},
+    ),
   );
 
   // State changes.
