@@ -7,18 +7,9 @@ import 'package:centrifuge/src/server_subscription.dart';
 import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 
+import 'platform/vm.dart' if (dart.library.js_interop) 'platform/js.dart';
 import 'proto/client.pb.dart' as protocol;
 import 'subscription.dart';
-import 'web_in.dart' if (dart.library.js_interop) 'web_in.dart' as web;
-import 'web_out.dart' if (dart.library.io) 'web_out.dart' as nonweb;
-
-bool isWeb() {
-  try {
-    return web.isWebContext();
-  } catch (_) {
-    return nonweb.isWebContext();
-  }
-}
 
 enum State { disconnected, connecting, connected }
 
@@ -62,7 +53,7 @@ abstract class Client {
 
   /// Set allows updating connection headers.
   ///
-  void setHeaders(Map<String, dynamic> headers);
+  void setHeaders(Map<String, String> headers);
 
   /// Ready resolves when client successfully connected.
   /// Throws exceptions if called not in connecting or connected state.
@@ -115,7 +106,7 @@ class ClientImpl implements Client {
   ClientImpl(this._url, this._config, this._transportBuilder) {
     _token = _config.token;
     _data = _config.data;
-    _headers = _config.headers;
+    _headers = Map<String, String>.of(_config.headers);
   }
 
   final TransportBuilder _transportBuilder;
@@ -128,7 +119,7 @@ class ClientImpl implements Client {
   ClientConfig _config;
   ClientConfig get config => _config;
 
-  Map<String, dynamic> _headers = {};
+  Map<String, String> _headers = {};
   String _token = '';
   List<int>? _data;
   String? _client;
@@ -214,8 +205,8 @@ class ClientImpl implements Client {
   }
 
   @override
-  void setHeaders(Map<String, dynamic> headers) {
-    _headers = headers;
+  void setHeaders(Map<String, String> headers) {
+    _headers = Map<String, String>.of(headers);
   }
 
   @override
@@ -491,14 +482,9 @@ class ClientImpl implements Client {
     request.name = _config.name;
     request.version = _config.version;
 
-    if (isWeb()) {
+    if (isWeb) {
       // Use headers emulation in web context.
-      final Map<String, String> emulatedHeaders = Map.fromEntries(
-        _headers.entries
-            .where((entry) => entry.value is String)
-            .map((entry) => MapEntry(entry.key, entry.value as String)),
-      );
-      request.headers.addAll(emulatedHeaders);
+      request.headers.addAll(_headers);
     }
 
     if (_serverSubs.isNotEmpty) {

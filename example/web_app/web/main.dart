@@ -13,7 +13,7 @@ void main() {
   Client client = createClient(
     url,
     ClientConfig(
-      headers: <String, dynamic>{'Authorization': 'example'},
+      headers: <String, String>{'Authorization': 'example'},
     ),
   );
 
