@@ -24,8 +24,10 @@ void main() async {
         url,
         centrifuge.ClientConfig(
           token: userJwtToken,
-          // Headers are only supported on platforms that support dart:io
-          headers: <String, dynamic>{'X-Example-Header': 'example'},
+          // If you want to use Headers in web environment – make sure your headers use
+          // string values, centrifuge-dart will then automatically attach them to connect
+          // frame (using Headers Emulation feature).
+          headers: <String, String>{'X-Example-Header': 'example'},
         ));
 
     // State changes.

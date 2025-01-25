@@ -14,7 +14,7 @@ class ClientConfig {
     this.getToken,
     this.data,
     this.getData,
-    this.headers = const <String, dynamic>{},
+    this.headers = const <String, String>{},
     this.tlsSkipVerify = false,
     this.timeout = const Duration(seconds: 10),
     this.minReconnectDelay = const Duration(milliseconds: 500),
@@ -41,8 +41,10 @@ class ClientConfig {
 
   /// Headers that are set when connecting the web socket on dart:io platforms.
   ///
-  /// Note that headers are ignored on the web platform.
-  final Map<String, dynamic> headers;
+  /// Note that headers on the web platform use Headers Emulation (since Centrifugo v6)
+  /// – i.e. headers are sent to Centrifugo in first protocol message but then automatically
+  /// translated to HTTP headers by Centrifugo in the proxy request to the backend.
+  final Map<String, String> headers;
 
   final bool tlsSkipVerify;
   final Duration minReconnectDelay;
