@@ -18,7 +18,7 @@ jobs:
           sdk: ${{ matrix.sdk }}
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --no-example
 
       - name: Install coveralls
         run: sudo gem install coveralls-lcov 
