@@ -7,6 +7,7 @@ import 'package:centrifuge/src/server_subscription.dart';
 import 'package:centrifuge/src/transport.dart';
 import 'package:meta/meta.dart';
 
+import 'platform/vm.dart' if (dart.library.js_interop) 'platform/js.dart';
 import 'proto/client.pb.dart' as protocol;
 import 'subscription.dart';
 
@@ -49,6 +50,10 @@ abstract class Client {
   /// Set allows updating connection token.
   ///
   void setToken(String token);
+
+  /// Set allows updating connection headers.
+  ///
+  void setHeaders(Map<String, String> headers);
 
   /// Ready resolves when client successfully connected.
   /// Throws exceptions if called not in connecting or connected state.
@@ -101,6 +106,7 @@ class ClientImpl implements Client {
   ClientImpl(this._url, this._config, this._transportBuilder) {
     _token = _config.token;
     _data = _config.data;
+    _headers = Map<String, String>.of(_config.headers);
   }
 
   final TransportBuilder _transportBuilder;
@@ -113,6 +119,7 @@ class ClientImpl implements Client {
   ClientConfig _config;
   ClientConfig get config => _config;
 
+  Map<String, String> _headers = {};
   String _token = '';
   List<int>? _data;
   String? _client;
@@ -195,6 +202,11 @@ class ClientImpl implements Client {
   @override
   void setToken(String token) {
     _token = token;
+  }
+
+  @override
+  void setHeaders(Map<String, String> headers) {
+    _headers = Map<String, String>.of(headers);
   }
 
   @override
@@ -422,8 +434,8 @@ class ClientImpl implements Client {
       return;
     }
 
-    final transport = _transportBuilder(
-        url: _url, config: TransportConfig(headers: _config.headers, timeout: _config.timeout));
+    final transport =
+        _transportBuilder(url: _url, config: TransportConfig(headers: _headers, timeout: _config.timeout));
 
     try {
       await transport.open(_onPush, onError: (dynamic error) {
@@ -469,6 +481,11 @@ class ClientImpl implements Client {
     }
     request.name = _config.name;
     request.version = _config.version;
+
+    if (isWeb) {
+      // Use headers emulation in web context.
+      request.headers.addAll(_headers);
+    }
 
     if (_serverSubs.isNotEmpty) {
       _serverSubs.forEach((key, value) {
@@ -560,7 +577,7 @@ class ClientImpl implements Client {
           _inConnect = false;
           return;
         } else {
-          _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+          _processDisconnect(code: err.code, reason: err.message, reconnect: true);
           await transport.close();
           _inConnect = false;
           return;

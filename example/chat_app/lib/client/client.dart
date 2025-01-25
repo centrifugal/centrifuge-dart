@@ -31,8 +31,8 @@ class ChatClient {
       url,
       ClientConfig(
         token: conf.userJwtToken,
-        headers: <String, dynamic>{
-          'user-id': chatUserId,
+        headers: <String, String>{
+          'user-id': chatUserId.toString(),
           'user-name': chatUserName,
         },
       ),
