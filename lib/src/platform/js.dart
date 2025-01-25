@@ -1,1 +1,1 @@
-bool get isWeb => true;
+const bool isWeb = true;
