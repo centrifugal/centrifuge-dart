@@ -1,12 +1,12 @@
 Websocket client for [Centrifugo](https://github.com/centrifugal/centrifugo) server and [Centrifuge](https://github.com/centrifugal/centrifuge) library. 
 
-There is no v1 release of this library yet – API still evolves. At the moment patch version updates only contain backwards compatible changes, minor version updates can have backwards incompatible API changes.
+Since there is no v1 release yet, patch version updates only contain backwards compatible changes, minor version updates can have backwards incompatible API changes.
 
 Check out [client SDK API specification](https://centrifugal.dev/docs/transports/client_api) to learn how this SDK behaves. It's recommended to read that before starting to work with this SDK as the spec covers common SDK behavior - describes client and subscription state transitions, main options and methods. Also check out examples folder.
 
 The features implemented by this SDK can be found in [SDK feature matrix](https://centrifugal.dev/docs/transports/client_sdk#sdk-feature-matrix).
 
-Note that custom WebSocket connection Upgrade headers can only be set on platforms that support `dart:io`. So notably custom headers set in the configuration of `Client` are ignored on the web platform.
+Note that custom WebSocket connection Upgrade headers are sent natively on platforms that support `dart:io` and in web context headers are sent using Centrifugo v6 [Headers Emulation](https://centrifugal.dev/blog/2025/01/16/centrifugo-v6-released#headers-emulation) feature.
 
 > **The latest `centrifuge-dart` is compatible with [Centrifugo](https://github.com/centrifugal/centrifugo) server v6, v5 and v4 and [Centrifuge](https://github.com/centrifugal/centrifuge) >= 0.25.0. For Centrifugo v2, Centrifugo v3 and Centrifuge < 0.25.0 you should use `centrifuge-dart` v0.8.0.**
 
@@ -19,6 +19,10 @@ Note that custom WebSocket connection Upgrade headers can only be set on platfor
 ## Usage in background
 
 When a mobile application goes to the background there are OS-specific limitations for established persistent connections - which can be silently closed shortly. Thus in most cases you need to disconnect from a server when app moves to the background and connect again when app goes to the foreground.
+
+## Alternative SDK
+
+See also [PlugFox/spinify](https://github.com/PlugFox/spinify) for an alternative Dart (Flutter) real-time client SDK implementation.
 
 ## Instructions for maintainers/contributors
 
