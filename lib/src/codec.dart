@@ -11,12 +11,11 @@ class ProtobufCommandEncoder extends CommandEncoder {
   @override
   List<int> convert(Command input) {
     final commandData = input.writeToBuffer();
-    final length = commandData.lengthInBytes;
 
-    final writer = CodedBufferWriter();
-    writer.writeInt32NoTag(length);
-
-    return writer.toBuffer() + commandData;
+    return (CodedBufferWriter()
+          ..writeInt32NoTag(commandData.length)
+          ..writeRawBytes(commandData))
+        .toBuffer();
   }
 }
 
