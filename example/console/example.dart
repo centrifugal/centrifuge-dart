@@ -9,15 +9,15 @@ void main() async {
   // generate user JWT token for user "dart":
   // ./centrifugo gentoken --user dart
   // For this example we generated token using HMAC secret key "secret". Don't forget
-  // that it's just an example, and tokens never should be generated on client side and
-  // HMAC secret revealed to client side.
+  // that it's just an example, and tokens must NEVER be generated on client side and
+  // HMAC secret must NEVER be revealed to client side.
   final userJwtToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiaWF0IjoxNzM3ODAwOTcxfQ.m30QzH9nxqMSJw3g5gL5Tjqnu-veQSn4RcH47ZozqQI';
   // generate subscription JWT token for user "dart" and channel "chat:index":
   // ./centrifugo gensubtoken --user dart --channel chat:index
   // For this example we generated subscription token using HMAC secret key "secret". Don't forget
-  // that it's just an example, and tokens never should be generated on client side and
-  // HMAC secret revealed to client side.
+  // that it's just an example, and tokens must NEVER be generated on client side and
+  // HMAC secret must NEVER be revealed to client side.
   final subscriptionJwtToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiaWF0IjoxNzM3ODAxMDIwLCJjaGFubmVsIjoiY2hhdDppbmRleCJ9.fe3WguZKkGiTyacpUW-WJW-1yzpZTHAFO6FWo7gbbTs';
 
