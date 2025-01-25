@@ -6,7 +6,6 @@ jobs:
   build:
     # Prevent duplicate builds on internal PRs.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
-    environment: test_ci
     runs-on: ubuntu-latest
     strategy:
       matrix:
