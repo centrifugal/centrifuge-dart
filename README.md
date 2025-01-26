@@ -35,7 +35,7 @@ See also [PlugFox/spinify](https://github.com/PlugFox/spinify) for an alternativ
 
 ### How to release
 
-1) Bump version in `pubspec.yaml`, push, create new tag
+1) Update CHANGELOG.md, bump version in `pubspec.yaml`, push, create new tag
 2) [ONLY IF THERE ARE ISSUES WITH CI PUBLISH] `dart pub publish`
 
 ## Author

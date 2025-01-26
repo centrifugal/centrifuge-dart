@@ -1,3 +1,12 @@
+## [0.15.0]
+
+* Update `web_socket_channel`, min SDK is now 3.3 [#91](https://github.com/centrifugal/centrifuge-dart/pull/91) 
+* Support [headers emulation](https://centrifugal.dev/blog/2025/01/16/centrifugo-v6-released#headers-emulation). Also added `setHeaders` method to update headers [#92](https://github.com/centrifugal/centrifuge-dart/pull/92).
+
+This release changes `headers` in `ClientConfig` from `Map<String, dynamic>` to `Map<String, String>`. This is a **breaking change**, but it must not cause huge troubles beyond a simple refactoring.
+
+Usages of `dart.html` were removed in this release. Also some internal optimizations were done to allocate less when constructing Protobuf command data.
+
 ## [0.14.1]
 
 * Add callback to update connection data [#88](https://github.com/centrifugal/centrifuge-dart/pull/88)
