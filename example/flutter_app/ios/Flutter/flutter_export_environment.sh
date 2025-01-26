@@ -1,6 +1,6 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/usr/local/Caskroom/flutter/3.10.6/flutter"
+export "FLUTTER_ROOT=/usr/local/Caskroom/flutter/3.24.4/flutter"
 export "FLUTTER_APPLICATION_PATH=/Users/fz/projects/centrifugal/centrifuge-dart/example/flutter_app"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"

@@ -8,12 +8,18 @@ void main() async {
   final channel = 'chat:index';
   // generate user JWT token for user "dart":
   // ./centrifugo gentoken --user dart
+  // For this example we generated token using HMAC secret key "secret". Don't forget
+  // that it's just an example, and tokens must NEVER be generated on client side and
+  // HMAC secret must NEVER be revealed to client side.
   final userJwtToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiZXhwIjoyMjc5NDQzNjgwLCJpYXQiOjE2NzQ2NDM2ODB9.XgsPZzAD4kMj7HdybJfpMGuDaRmuLvhUUxCGHs3mtXA';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiaWF0IjoxNzM3ODAwOTcxfQ.m30QzH9nxqMSJw3g5gL5Tjqnu-veQSn4RcH47ZozqQI';
   // generate subscription JWT token for user "dart" and channel "chat:index":
   // ./centrifugo gensubtoken --user dart --channel chat:index
+  // For this example we generated subscription token using HMAC secret key "secret". Don't forget
+  // that it's just an example, and tokens must NEVER be generated on client side and
+  // HMAC secret must NEVER be revealed to client side.
   final subscriptionJwtToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiZXhwIjoyMjc5NDQ0MDE4LCJpYXQiOjE2NzQ2NDQwMTgsImNoYW5uZWwiOiJjaGF0OmluZGV4In0.FjpnF6ofq3XCr1iqnwTZcpxCx6btuzCnn29DAIJbsBo';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXJ0IiwiaWF0IjoxNzM3ODAxMDIwLCJjaGFubmVsIjoiY2hhdDppbmRleCJ9.fe3WguZKkGiTyacpUW-WJW-1yzpZTHAFO6FWo7gbbTs';
 
   final onEvent = (dynamic event) {
     print('client> $event');
@@ -24,8 +30,10 @@ void main() async {
         url,
         centrifuge.ClientConfig(
           token: userJwtToken,
-          // Headers are only supported on platforms that support dart:io
-          headers: <String, dynamic>{'X-Example-Header': 'example'},
+          // If you want to use Headers in web environment – make sure your headers use
+          // string values, centrifuge-dart will then automatically attach them to connect
+          // frame (using Headers Emulation feature).
+          headers: <String, String>{'X-Example-Header': 'example'},
         ));
 
     // State changes.

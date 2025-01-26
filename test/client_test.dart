@@ -4,7 +4,7 @@ import 'package:centrifuge/centrifuge.dart' as centrifuge;
 import 'package:test/test.dart';
 
 void main() {
-  final url = 'ws://localhost:8000/connection/websocket?cf_protocol_version=v2';
+  final url = 'ws://localhost:8000/connection/websocket';
 
   setUp(() {});
 
@@ -26,6 +26,18 @@ void main() {
       client.connect();
       final event = await errorFinish;
       expect(true, event.error.toString().contains('Unsupported URL scheme'));
+    });
+
+    test('invalid token - disconnect code received', () async {
+      final client = centrifuge.createClient(
+        url,
+        centrifuge.ClientConfig(token: "invalid"),
+      );
+      final disconnectFinish = client.disconnected.first;
+      client.connect();
+      final disconnect = await disconnectFinish;
+      expect(centrifuge.State.disconnected, client.state);
+      expect(disconnect.code, 3500);
     });
 
     test('can connect and disconnect', () async {

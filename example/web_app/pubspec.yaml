@@ -10,6 +10,7 @@ environment:
 dependencies:
   centrifuge:
     path: ../../
+  web: ^1.1.0
 
 publish_to: none
 

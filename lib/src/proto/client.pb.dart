@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: client.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -11,33 +15,34 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Error extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Error', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OU3)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'temporary')
-    ..hasRequiredFields = false
-  ;
-
-  Error._() : super();
   factory Error({
     $core.int? code,
     $core.String? message,
     $core.bool? temporary,
   }) {
-    final _result = create();
+    final $result = create();
     if (code != null) {
-      _result.code = code;
+      $result.code = code;
     }
     if (message != null) {
-      _result.message = message;
+      $result.message = message;
     }
     if (temporary != null) {
-      _result.temporary = temporary;
+      $result.temporary = temporary;
     }
-    return _result;
+    return $result;
   }
+  Error._() : super();
   factory Error.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Error.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Error', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OU3)
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aOB(3, _omitFieldNames ? '' : 'temporary')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -47,8 +52,10 @@ class Error extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error)) as Error; // ignore: deprecated_member_use
+  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error)) as Error;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Error create() => Error._();
   Error createEmptyInstance() => create();
@@ -86,33 +93,34 @@ class Error extends $pb.GeneratedMessage {
 }
 
 class EmulationRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'EmulationRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'node')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'session')
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  EmulationRequest._() : super();
   factory EmulationRequest({
     $core.String? node,
     $core.String? session,
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (node != null) {
-      _result.node = node;
+      $result.node = node;
     }
     if (session != null) {
-      _result.session = session;
+      $result.session = session;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  EmulationRequest._() : super();
   factory EmulationRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory EmulationRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EmulationRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'node')
+    ..aOS(2, _omitFieldNames ? '' : 'session')
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -122,8 +130,10 @@ class EmulationRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  EmulationRequest copyWith(void Function(EmulationRequest) updates) => super.copyWith((message) => updates(message as EmulationRequest)) as EmulationRequest; // ignore: deprecated_member_use
+  EmulationRequest copyWith(void Function(EmulationRequest) updates) => super.copyWith((message) => updates(message as EmulationRequest)) as EmulationRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static EmulationRequest create() => EmulationRequest._();
   EmulationRequest createEmptyInstance() => create();
@@ -160,25 +170,9 @@ class EmulationRequest extends $pb.GeneratedMessage {
   void clearData() => clearField(3);
 }
 
+/// Command sent from a client to a server.
+/// ProtocolVersion2 uses id and one of the possible request messages.
 class Command extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Command', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU3)
-    ..aOM<ConnectRequest>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connect', subBuilder: ConnectRequest.create)
-    ..aOM<SubscribeRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscribe', subBuilder: SubscribeRequest.create)
-    ..aOM<UnsubscribeRequest>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unsubscribe', subBuilder: UnsubscribeRequest.create)
-    ..aOM<PublishRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publish', subBuilder: PublishRequest.create)
-    ..aOM<PresenceRequest>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'presence', subBuilder: PresenceRequest.create)
-    ..aOM<PresenceStatsRequest>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'presenceStats', subBuilder: PresenceStatsRequest.create)
-    ..aOM<HistoryRequest>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'history', subBuilder: HistoryRequest.create)
-    ..aOM<PingRequest>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ping', subBuilder: PingRequest.create)
-    ..aOM<SendRequest>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'send', subBuilder: SendRequest.create)
-    ..aOM<RPCRequest>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpc', subBuilder: RPCRequest.create)
-    ..aOM<RefreshRequest>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'refresh', subBuilder: RefreshRequest.create)
-    ..aOM<SubRefreshRequest>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subRefresh', subBuilder: SubRefreshRequest.create)
-    ..hasRequiredFields = false
-  ;
-
-  Command._() : super();
   factory Command({
     $core.int? id,
     ConnectRequest? connect,
@@ -194,50 +188,69 @@ class Command extends $pb.GeneratedMessage {
     RefreshRequest? refresh,
     SubRefreshRequest? subRefresh,
   }) {
-    final _result = create();
+    final $result = create();
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
     if (connect != null) {
-      _result.connect = connect;
+      $result.connect = connect;
     }
     if (subscribe != null) {
-      _result.subscribe = subscribe;
+      $result.subscribe = subscribe;
     }
     if (unsubscribe != null) {
-      _result.unsubscribe = unsubscribe;
+      $result.unsubscribe = unsubscribe;
     }
     if (publish != null) {
-      _result.publish = publish;
+      $result.publish = publish;
     }
     if (presence != null) {
-      _result.presence = presence;
+      $result.presence = presence;
     }
     if (presenceStats != null) {
-      _result.presenceStats = presenceStats;
+      $result.presenceStats = presenceStats;
     }
     if (history != null) {
-      _result.history = history;
+      $result.history = history;
     }
     if (ping != null) {
-      _result.ping = ping;
+      $result.ping = ping;
     }
     if (send != null) {
-      _result.send = send;
+      $result.send = send;
     }
     if (rpc != null) {
-      _result.rpc = rpc;
+      $result.rpc = rpc;
     }
     if (refresh != null) {
-      _result.refresh = refresh;
+      $result.refresh = refresh;
     }
     if (subRefresh != null) {
-      _result.subRefresh = subRefresh;
+      $result.subRefresh = subRefresh;
     }
-    return _result;
+    return $result;
   }
+  Command._() : super();
   factory Command.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Command.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Command', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OU3)
+    ..aOM<ConnectRequest>(4, _omitFieldNames ? '' : 'connect', subBuilder: ConnectRequest.create)
+    ..aOM<SubscribeRequest>(5, _omitFieldNames ? '' : 'subscribe', subBuilder: SubscribeRequest.create)
+    ..aOM<UnsubscribeRequest>(6, _omitFieldNames ? '' : 'unsubscribe', subBuilder: UnsubscribeRequest.create)
+    ..aOM<PublishRequest>(7, _omitFieldNames ? '' : 'publish', subBuilder: PublishRequest.create)
+    ..aOM<PresenceRequest>(8, _omitFieldNames ? '' : 'presence', subBuilder: PresenceRequest.create)
+    ..aOM<PresenceStatsRequest>(9, _omitFieldNames ? '' : 'presenceStats', subBuilder: PresenceStatsRequest.create)
+    ..aOM<HistoryRequest>(10, _omitFieldNames ? '' : 'history', subBuilder: HistoryRequest.create)
+    ..aOM<PingRequest>(11, _omitFieldNames ? '' : 'ping', subBuilder: PingRequest.create)
+    ..aOM<SendRequest>(12, _omitFieldNames ? '' : 'send', subBuilder: SendRequest.create)
+    ..aOM<RPCRequest>(13, _omitFieldNames ? '' : 'rpc', subBuilder: RPCRequest.create)
+    ..aOM<RefreshRequest>(14, _omitFieldNames ? '' : 'refresh', subBuilder: RefreshRequest.create)
+    ..aOM<SubRefreshRequest>(15, _omitFieldNames ? '' : 'subRefresh', subBuilder: SubRefreshRequest.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -247,8 +260,10 @@ class Command extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Command copyWith(void Function(Command) updates) => super.copyWith((message) => updates(message as Command)) as Command; // ignore: deprecated_member_use
+  Command copyWith(void Function(Command) updates) => super.copyWith((message) => updates(message as Command)) as Command;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Command create() => Command._();
   Command createEmptyInstance() => create();
@@ -257,6 +272,7 @@ class Command extends $pb.GeneratedMessage {
   static Command getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Command>(create);
   static Command? _defaultInstance;
 
+  /// Id of command to let client match replies to commands.
   @$pb.TagNumber(1)
   $core.int get id => $_getIZ(0);
   @$pb.TagNumber(1)
@@ -266,6 +282,10 @@ class Command extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
 
+  /// ProtocolVersion2 client can send one of the following requests. Server will
+  /// only take the first non-null request out of these and may return an error if
+  /// client passed more than one request. We are not using oneof here due to JSON
+  /// interoperability concerns.
   @$pb.TagNumber(4)
   ConnectRequest get connect => $_getN(1);
   @$pb.TagNumber(4)
@@ -399,26 +419,9 @@ class Command extends $pb.GeneratedMessage {
   SubRefreshRequest ensureSubRefresh() => $_ensure(12);
 }
 
+/// Reply sent from a server to a client.
+/// ProtocolVersion2 uses id and one of the possible concrete result messages.
 class Reply extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Reply', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU3)
-    ..aOM<Error>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
-    ..aOM<Push>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'push', subBuilder: Push.create)
-    ..aOM<ConnectResult>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connect', subBuilder: ConnectResult.create)
-    ..aOM<SubscribeResult>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscribe', subBuilder: SubscribeResult.create)
-    ..aOM<UnsubscribeResult>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unsubscribe', subBuilder: UnsubscribeResult.create)
-    ..aOM<PublishResult>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publish', subBuilder: PublishResult.create)
-    ..aOM<PresenceResult>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'presence', subBuilder: PresenceResult.create)
-    ..aOM<PresenceStatsResult>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'presenceStats', subBuilder: PresenceStatsResult.create)
-    ..aOM<HistoryResult>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'history', subBuilder: HistoryResult.create)
-    ..aOM<PingResult>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ping', subBuilder: PingResult.create)
-    ..aOM<RPCResult>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rpc', subBuilder: RPCResult.create)
-    ..aOM<RefreshResult>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'refresh', subBuilder: RefreshResult.create)
-    ..aOM<SubRefreshResult>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subRefresh', subBuilder: SubRefreshResult.create)
-    ..hasRequiredFields = false
-  ;
-
-  Reply._() : super();
   factory Reply({
     $core.int? id,
     Error? error,
@@ -435,53 +438,73 @@ class Reply extends $pb.GeneratedMessage {
     RefreshResult? refresh,
     SubRefreshResult? subRefresh,
   }) {
-    final _result = create();
+    final $result = create();
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
     if (error != null) {
-      _result.error = error;
+      $result.error = error;
     }
     if (push != null) {
-      _result.push = push;
+      $result.push = push;
     }
     if (connect != null) {
-      _result.connect = connect;
+      $result.connect = connect;
     }
     if (subscribe != null) {
-      _result.subscribe = subscribe;
+      $result.subscribe = subscribe;
     }
     if (unsubscribe != null) {
-      _result.unsubscribe = unsubscribe;
+      $result.unsubscribe = unsubscribe;
     }
     if (publish != null) {
-      _result.publish = publish;
+      $result.publish = publish;
     }
     if (presence != null) {
-      _result.presence = presence;
+      $result.presence = presence;
     }
     if (presenceStats != null) {
-      _result.presenceStats = presenceStats;
+      $result.presenceStats = presenceStats;
     }
     if (history != null) {
-      _result.history = history;
+      $result.history = history;
     }
     if (ping != null) {
-      _result.ping = ping;
+      $result.ping = ping;
     }
     if (rpc != null) {
-      _result.rpc = rpc;
+      $result.rpc = rpc;
     }
     if (refresh != null) {
-      _result.refresh = refresh;
+      $result.refresh = refresh;
     }
     if (subRefresh != null) {
-      _result.subRefresh = subRefresh;
+      $result.subRefresh = subRefresh;
     }
-    return _result;
+    return $result;
   }
+  Reply._() : super();
   factory Reply.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Reply.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Reply', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OU3)
+    ..aOM<Error>(2, _omitFieldNames ? '' : 'error', subBuilder: Error.create)
+    ..aOM<Push>(4, _omitFieldNames ? '' : 'push', subBuilder: Push.create)
+    ..aOM<ConnectResult>(5, _omitFieldNames ? '' : 'connect', subBuilder: ConnectResult.create)
+    ..aOM<SubscribeResult>(6, _omitFieldNames ? '' : 'subscribe', subBuilder: SubscribeResult.create)
+    ..aOM<UnsubscribeResult>(7, _omitFieldNames ? '' : 'unsubscribe', subBuilder: UnsubscribeResult.create)
+    ..aOM<PublishResult>(8, _omitFieldNames ? '' : 'publish', subBuilder: PublishResult.create)
+    ..aOM<PresenceResult>(9, _omitFieldNames ? '' : 'presence', subBuilder: PresenceResult.create)
+    ..aOM<PresenceStatsResult>(10, _omitFieldNames ? '' : 'presenceStats', subBuilder: PresenceStatsResult.create)
+    ..aOM<HistoryResult>(11, _omitFieldNames ? '' : 'history', subBuilder: HistoryResult.create)
+    ..aOM<PingResult>(12, _omitFieldNames ? '' : 'ping', subBuilder: PingResult.create)
+    ..aOM<RPCResult>(13, _omitFieldNames ? '' : 'rpc', subBuilder: RPCResult.create)
+    ..aOM<RefreshResult>(14, _omitFieldNames ? '' : 'refresh', subBuilder: RefreshResult.create)
+    ..aOM<SubRefreshResult>(15, _omitFieldNames ? '' : 'subRefresh', subBuilder: SubRefreshResult.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -491,8 +514,10 @@ class Reply extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Reply copyWith(void Function(Reply) updates) => super.copyWith((message) => updates(message as Reply)) as Reply; // ignore: deprecated_member_use
+  Reply copyWith(void Function(Reply) updates) => super.copyWith((message) => updates(message as Reply)) as Reply;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Reply create() => Reply._();
   Reply createEmptyInstance() => create();
@@ -501,6 +526,8 @@ class Reply extends $pb.GeneratedMessage {
   static Reply getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Reply>(create);
   static Reply? _defaultInstance;
 
+  /// Id will only be set to a value > 0 for replies to commands. For pushes
+  /// it will have zero value.
   @$pb.TagNumber(1)
   $core.int get id => $_getIZ(0);
   @$pb.TagNumber(1)
@@ -510,6 +537,7 @@ class Reply extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
 
+  /// Error can only be set in replies to commands. For pushes it will have zero value.
   @$pb.TagNumber(2)
   Error get error => $_getN(1);
   @$pb.TagNumber(2)
@@ -521,6 +549,8 @@ class Reply extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   Error ensureError() => $_ensure(1);
 
+  /// ProtocolVersion2 server can send one of the following fields. We are not using
+  /// oneof here due to JSON interoperability concerns.
   @$pb.TagNumber(4)
   Push get push => $_getN(2);
   @$pb.TagNumber(4)
@@ -654,22 +684,10 @@ class Reply extends $pb.GeneratedMessage {
   SubRefreshResult ensureSubRefresh() => $_ensure(13);
 }
 
+/// Push can be sent to a client as part of Reply in case of bidirectional transport or
+/// without additional wrapping in case of unidirectional transports.
+/// ProtocolVersion2 uses channel and one of the possible concrete push messages.
 class Push extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Push', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..aOM<Publication>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pub', subBuilder: Publication.create)
-    ..aOM<Join>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'join', subBuilder: Join.create)
-    ..aOM<Leave>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'leave', subBuilder: Leave.create)
-    ..aOM<Unsubscribe>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unsubscribe', subBuilder: Unsubscribe.create)
-    ..aOM<Message>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message', subBuilder: Message.create)
-    ..aOM<Subscribe>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscribe', subBuilder: Subscribe.create)
-    ..aOM<Connect>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connect', subBuilder: Connect.create)
-    ..aOM<Disconnect>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disconnect', subBuilder: Disconnect.create)
-    ..aOM<Refresh>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'refresh', subBuilder: Refresh.create)
-    ..hasRequiredFields = false
-  ;
-
-  Push._() : super();
   factory Push({
     $core.String? channel,
     Publication? pub,
@@ -682,41 +700,57 @@ class Push extends $pb.GeneratedMessage {
     Disconnect? disconnect,
     Refresh? refresh,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
     if (pub != null) {
-      _result.pub = pub;
+      $result.pub = pub;
     }
     if (join != null) {
-      _result.join = join;
+      $result.join = join;
     }
     if (leave != null) {
-      _result.leave = leave;
+      $result.leave = leave;
     }
     if (unsubscribe != null) {
-      _result.unsubscribe = unsubscribe;
+      $result.unsubscribe = unsubscribe;
     }
     if (message != null) {
-      _result.message = message;
+      $result.message = message;
     }
     if (subscribe != null) {
-      _result.subscribe = subscribe;
+      $result.subscribe = subscribe;
     }
     if (connect != null) {
-      _result.connect = connect;
+      $result.connect = connect;
     }
     if (disconnect != null) {
-      _result.disconnect = disconnect;
+      $result.disconnect = disconnect;
     }
     if (refresh != null) {
-      _result.refresh = refresh;
+      $result.refresh = refresh;
     }
-    return _result;
+    return $result;
   }
+  Push._() : super();
   factory Push.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Push.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Push', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(2, _omitFieldNames ? '' : 'channel')
+    ..aOM<Publication>(4, _omitFieldNames ? '' : 'pub', subBuilder: Publication.create)
+    ..aOM<Join>(5, _omitFieldNames ? '' : 'join', subBuilder: Join.create)
+    ..aOM<Leave>(6, _omitFieldNames ? '' : 'leave', subBuilder: Leave.create)
+    ..aOM<Unsubscribe>(7, _omitFieldNames ? '' : 'unsubscribe', subBuilder: Unsubscribe.create)
+    ..aOM<Message>(8, _omitFieldNames ? '' : 'message', subBuilder: Message.create)
+    ..aOM<Subscribe>(9, _omitFieldNames ? '' : 'subscribe', subBuilder: Subscribe.create)
+    ..aOM<Connect>(10, _omitFieldNames ? '' : 'connect', subBuilder: Connect.create)
+    ..aOM<Disconnect>(11, _omitFieldNames ? '' : 'disconnect', subBuilder: Disconnect.create)
+    ..aOM<Refresh>(12, _omitFieldNames ? '' : 'refresh', subBuilder: Refresh.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -726,8 +760,10 @@ class Push extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Push copyWith(void Function(Push) updates) => super.copyWith((message) => updates(message as Push)) as Push; // ignore: deprecated_member_use
+  Push copyWith(void Function(Push) updates) => super.copyWith((message) => updates(message as Push)) as Push;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Push create() => Push._();
   Push createEmptyInstance() => create();
@@ -745,6 +781,8 @@ class Push extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearChannel() => clearField(2);
 
+  /// ProtocolVersion2 server can push one of the following fields to the client. We are
+  /// not using oneof here due to JSON interoperability concerns.
   @$pb.TagNumber(4)
   Publication get pub => $_getN(1);
   @$pb.TagNumber(4)
@@ -846,38 +884,39 @@ class Push extends $pb.GeneratedMessage {
 }
 
 class ClientInfo extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ClientInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'client')
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connInfo', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chanInfo', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  ClientInfo._() : super();
   factory ClientInfo({
     $core.String? user,
     $core.String? client,
     $core.List<$core.int>? connInfo,
     $core.List<$core.int>? chanInfo,
   }) {
-    final _result = create();
+    final $result = create();
     if (user != null) {
-      _result.user = user;
+      $result.user = user;
     }
     if (client != null) {
-      _result.client = client;
+      $result.client = client;
     }
     if (connInfo != null) {
-      _result.connInfo = connInfo;
+      $result.connInfo = connInfo;
     }
     if (chanInfo != null) {
-      _result.chanInfo = chanInfo;
+      $result.chanInfo = chanInfo;
     }
-    return _result;
+    return $result;
   }
+  ClientInfo._() : super();
   factory ClientInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ClientInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ClientInfo', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'user')
+    ..aOS(2, _omitFieldNames ? '' : 'client')
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'connInfo', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'chanInfo', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -887,8 +926,10 @@ class ClientInfo extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ClientInfo copyWith(void Function(ClientInfo) updates) => super.copyWith((message) => updates(message as ClientInfo)) as ClientInfo; // ignore: deprecated_member_use
+  ClientInfo copyWith(void Function(ClientInfo) updates) => super.copyWith((message) => updates(message as ClientInfo)) as ClientInfo;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ClientInfo create() => ClientInfo._();
   ClientInfo createEmptyInstance() => create();
@@ -935,38 +976,54 @@ class ClientInfo extends $pb.GeneratedMessage {
 }
 
 class Publication extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Publication', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..aOM<ClientInfo>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', subBuilder: ClientInfo.create)
-    ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..m<$core.String, $core.String>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tags', entryClassName: 'Publication.TagsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OS, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
-    ..hasRequiredFields = false
-  ;
-
-  Publication._() : super();
   factory Publication({
     $core.List<$core.int>? data,
     ClientInfo? info,
     $fixnum.Int64? offset,
     $core.Map<$core.String, $core.String>? tags,
+    $core.bool? delta,
+    $fixnum.Int64? time,
+    $core.String? channel,
   }) {
-    final _result = create();
+    final $result = create();
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (info != null) {
-      _result.info = info;
+      $result.info = info;
     }
     if (offset != null) {
-      _result.offset = offset;
+      $result.offset = offset;
     }
     if (tags != null) {
-      _result.tags.addAll(tags);
+      $result.tags.addAll(tags);
     }
-    return _result;
+    if (delta != null) {
+      $result.delta = delta;
+    }
+    if (time != null) {
+      $result.time = time;
+    }
+    if (channel != null) {
+      $result.channel = channel;
+    }
+    return $result;
   }
+  Publication._() : super();
   factory Publication.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Publication.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Publication', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOM<ClientInfo>(5, _omitFieldNames ? '' : 'info', subBuilder: ClientInfo.create)
+    ..a<$fixnum.Int64>(6, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..m<$core.String, $core.String>(7, _omitFieldNames ? '' : 'tags', entryClassName: 'Publication.TagsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OS, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..aOB(8, _omitFieldNames ? '' : 'delta')
+    ..aInt64(9, _omitFieldNames ? '' : 'time')
+    ..aOS(10, _omitFieldNames ? '' : 'channel')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -976,8 +1033,10 @@ class Publication extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Publication copyWith(void Function(Publication) updates) => super.copyWith((message) => updates(message as Publication)) as Publication; // ignore: deprecated_member_use
+  Publication copyWith(void Function(Publication) updates) => super.copyWith((message) => updates(message as Publication)) as Publication;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Publication create() => Publication._();
   Publication createEmptyInstance() => create();
@@ -1017,26 +1076,54 @@ class Publication extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(7)
   $core.Map<$core.String, $core.String> get tags => $_getMap(3);
+
+  @$pb.TagNumber(8)
+  $core.bool get delta => $_getBF(4);
+  @$pb.TagNumber(8)
+  set delta($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasDelta() => $_has(4);
+  @$pb.TagNumber(8)
+  void clearDelta() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get time => $_getI64(5);
+  @$pb.TagNumber(9)
+  set time($fixnum.Int64 v) { $_setInt64(5, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasTime() => $_has(5);
+  @$pb.TagNumber(9)
+  void clearTime() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.String get channel => $_getSZ(6);
+  @$pb.TagNumber(10)
+  set channel($core.String v) { $_setString(6, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasChannel() => $_has(6);
+  @$pb.TagNumber(10)
+  void clearChannel() => clearField(10);
 }
 
 class Join extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Join', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOM<ClientInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', subBuilder: ClientInfo.create)
-    ..hasRequiredFields = false
-  ;
-
-  Join._() : super();
   factory Join({
     ClientInfo? info,
   }) {
-    final _result = create();
+    final $result = create();
     if (info != null) {
-      _result.info = info;
+      $result.info = info;
     }
-    return _result;
+    return $result;
   }
+  Join._() : super();
   factory Join.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Join.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Join', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOM<ClientInfo>(1, _omitFieldNames ? '' : 'info', subBuilder: ClientInfo.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1046,8 +1133,10 @@ class Join extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Join copyWith(void Function(Join) updates) => super.copyWith((message) => updates(message as Join)) as Join; // ignore: deprecated_member_use
+  Join copyWith(void Function(Join) updates) => super.copyWith((message) => updates(message as Join)) as Join;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Join create() => Join._();
   Join createEmptyInstance() => create();
@@ -1069,23 +1158,24 @@ class Join extends $pb.GeneratedMessage {
 }
 
 class Leave extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Leave', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOM<ClientInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', subBuilder: ClientInfo.create)
-    ..hasRequiredFields = false
-  ;
-
-  Leave._() : super();
   factory Leave({
     ClientInfo? info,
   }) {
-    final _result = create();
+    final $result = create();
     if (info != null) {
-      _result.info = info;
+      $result.info = info;
     }
-    return _result;
+    return $result;
   }
+  Leave._() : super();
   factory Leave.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Leave.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Leave', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOM<ClientInfo>(1, _omitFieldNames ? '' : 'info', subBuilder: ClientInfo.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1095,8 +1185,10 @@ class Leave extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Leave copyWith(void Function(Leave) updates) => super.copyWith((message) => updates(message as Leave)) as Leave; // ignore: deprecated_member_use
+  Leave copyWith(void Function(Leave) updates) => super.copyWith((message) => updates(message as Leave)) as Leave;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Leave create() => Leave._();
   Leave createEmptyInstance() => create();
@@ -1118,28 +1210,29 @@ class Leave extends $pb.GeneratedMessage {
 }
 
 class Unsubscribe extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Unsubscribe', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OU3)
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason')
-    ..hasRequiredFields = false
-  ;
-
-  Unsubscribe._() : super();
   factory Unsubscribe({
     $core.int? code,
     $core.String? reason,
   }) {
-    final _result = create();
+    final $result = create();
     if (code != null) {
-      _result.code = code;
+      $result.code = code;
     }
     if (reason != null) {
-      _result.reason = reason;
+      $result.reason = reason;
     }
-    return _result;
+    return $result;
   }
+  Unsubscribe._() : super();
   factory Unsubscribe.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Unsubscribe.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Unsubscribe', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OU3)
+    ..aOS(3, _omitFieldNames ? '' : 'reason')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1149,8 +1242,10 @@ class Unsubscribe extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Unsubscribe copyWith(void Function(Unsubscribe) updates) => super.copyWith((message) => updates(message as Unsubscribe)) as Unsubscribe; // ignore: deprecated_member_use
+  Unsubscribe copyWith(void Function(Unsubscribe) updates) => super.copyWith((message) => updates(message as Unsubscribe)) as Unsubscribe;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Unsubscribe create() => Unsubscribe._();
   Unsubscribe createEmptyInstance() => create();
@@ -1179,16 +1274,6 @@ class Unsubscribe extends $pb.GeneratedMessage {
 }
 
 class Subscribe extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Subscribe', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recoverable')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
-    ..a<$core.List<$core.int>>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  Subscribe._() : super();
   factory Subscribe({
     $core.bool? recoverable,
     $core.String? epoch,
@@ -1196,26 +1281,37 @@ class Subscribe extends $pb.GeneratedMessage {
     $core.bool? positioned,
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (recoverable != null) {
-      _result.recoverable = recoverable;
+      $result.recoverable = recoverable;
     }
     if (epoch != null) {
-      _result.epoch = epoch;
+      $result.epoch = epoch;
     }
     if (offset != null) {
-      _result.offset = offset;
+      $result.offset = offset;
     }
     if (positioned != null) {
-      _result.positioned = positioned;
+      $result.positioned = positioned;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  Subscribe._() : super();
   factory Subscribe.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Subscribe.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Subscribe', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'recoverable')
+    ..aOS(4, _omitFieldNames ? '' : 'epoch')
+    ..a<$fixnum.Int64>(5, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOB(6, _omitFieldNames ? '' : 'positioned')
+    ..a<$core.List<$core.int>>(7, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1225,8 +1321,10 @@ class Subscribe extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Subscribe copyWith(void Function(Subscribe) updates) => super.copyWith((message) => updates(message as Subscribe)) as Subscribe; // ignore: deprecated_member_use
+  Subscribe copyWith(void Function(Subscribe) updates) => super.copyWith((message) => updates(message as Subscribe)) as Subscribe;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Subscribe create() => Subscribe._();
   Subscribe createEmptyInstance() => create();
@@ -1282,23 +1380,24 @@ class Subscribe extends $pb.GeneratedMessage {
 }
 
 class Message extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Message', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  Message._() : super();
   factory Message({
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  Message._() : super();
   factory Message.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Message.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Message', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1308,8 +1407,10 @@ class Message extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Message copyWith(void Function(Message) updates) => super.copyWith((message) => updates(message as Message)) as Message; // ignore: deprecated_member_use
+  Message copyWith(void Function(Message) updates) => super.copyWith((message) => updates(message as Message)) as Message;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Message create() => Message._();
   Message createEmptyInstance() => create();
@@ -1329,21 +1430,6 @@ class Message extends $pb.GeneratedMessage {
 }
 
 class Connect extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Connect', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'client')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..m<$core.String, SubscribeResult>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subs', entryClassName: 'Connect.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
-    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
-    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ping', $pb.PbFieldType.OU3)
-    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pong')
-    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'session')
-    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'node')
-    ..hasRequiredFields = false
-  ;
-
-  Connect._() : super();
   factory Connect({
     $core.String? client,
     $core.String? version,
@@ -1355,42 +1441,63 @@ class Connect extends $pb.GeneratedMessage {
     $core.bool? pong,
     $core.String? session,
     $core.String? node,
+    $fixnum.Int64? time,
   }) {
-    final _result = create();
+    final $result = create();
     if (client != null) {
-      _result.client = client;
+      $result.client = client;
     }
     if (version != null) {
-      _result.version = version;
+      $result.version = version;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (subs != null) {
-      _result.subs.addAll(subs);
+      $result.subs.addAll(subs);
     }
     if (expires != null) {
-      _result.expires = expires;
+      $result.expires = expires;
     }
     if (ttl != null) {
-      _result.ttl = ttl;
+      $result.ttl = ttl;
     }
     if (ping != null) {
-      _result.ping = ping;
+      $result.ping = ping;
     }
     if (pong != null) {
-      _result.pong = pong;
+      $result.pong = pong;
     }
     if (session != null) {
-      _result.session = session;
+      $result.session = session;
     }
     if (node != null) {
-      _result.node = node;
+      $result.node = node;
     }
-    return _result;
+    if (time != null) {
+      $result.time = time;
+    }
+    return $result;
   }
+  Connect._() : super();
   factory Connect.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Connect.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Connect', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'client')
+    ..aOS(2, _omitFieldNames ? '' : 'version')
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..m<$core.String, SubscribeResult>(4, _omitFieldNames ? '' : 'subs', entryClassName: 'Connect.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, valueDefaultOrMaker: SubscribeResult.getDefault, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..aOB(5, _omitFieldNames ? '' : 'expires')
+    ..a<$core.int>(6, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'ping', $pb.PbFieldType.OU3)
+    ..aOB(8, _omitFieldNames ? '' : 'pong')
+    ..aOS(9, _omitFieldNames ? '' : 'session')
+    ..aOS(10, _omitFieldNames ? '' : 'node')
+    ..aInt64(11, _omitFieldNames ? '' : 'time')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1400,8 +1507,10 @@ class Connect extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Connect copyWith(void Function(Connect) updates) => super.copyWith((message) => updates(message as Connect)) as Connect; // ignore: deprecated_member_use
+  Connect copyWith(void Function(Connect) updates) => super.copyWith((message) => updates(message as Connect)) as Connect;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Connect create() => Connect._();
   Connect createEmptyInstance() => create();
@@ -1493,36 +1602,46 @@ class Connect extends $pb.GeneratedMessage {
   $core.bool hasNode() => $_has(9);
   @$pb.TagNumber(10)
   void clearNode() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $fixnum.Int64 get time => $_getI64(10);
+  @$pb.TagNumber(11)
+  set time($fixnum.Int64 v) { $_setInt64(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasTime() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearTime() => clearField(11);
 }
 
 class Disconnect extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Disconnect', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OU3)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason')
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reconnect')
-    ..hasRequiredFields = false
-  ;
-
-  Disconnect._() : super();
   factory Disconnect({
     $core.int? code,
     $core.String? reason,
     $core.bool? reconnect,
   }) {
-    final _result = create();
+    final $result = create();
     if (code != null) {
-      _result.code = code;
+      $result.code = code;
     }
     if (reason != null) {
-      _result.reason = reason;
+      $result.reason = reason;
     }
     if (reconnect != null) {
-      _result.reconnect = reconnect;
+      $result.reconnect = reconnect;
     }
-    return _result;
+    return $result;
   }
+  Disconnect._() : super();
   factory Disconnect.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Disconnect.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Disconnect', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OU3)
+    ..aOS(2, _omitFieldNames ? '' : 'reason')
+    ..aOB(3, _omitFieldNames ? '' : 'reconnect')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1532,8 +1651,10 @@ class Disconnect extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Disconnect copyWith(void Function(Disconnect) updates) => super.copyWith((message) => updates(message as Disconnect)) as Disconnect; // ignore: deprecated_member_use
+  Disconnect copyWith(void Function(Disconnect) updates) => super.copyWith((message) => updates(message as Disconnect)) as Disconnect;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Disconnect create() => Disconnect._();
   Disconnect createEmptyInstance() => create();
@@ -1571,28 +1692,29 @@ class Disconnect extends $pb.GeneratedMessage {
 }
 
 class Refresh extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Refresh', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  Refresh._() : super();
   factory Refresh({
     $core.bool? expires,
     $core.int? ttl,
   }) {
-    final _result = create();
+    final $result = create();
     if (expires != null) {
-      _result.expires = expires;
+      $result.expires = expires;
     }
     if (ttl != null) {
-      _result.ttl = ttl;
+      $result.ttl = ttl;
     }
-    return _result;
+    return $result;
   }
+  Refresh._() : super();
   factory Refresh.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Refresh.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Refresh', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'expires')
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1602,8 +1724,10 @@ class Refresh extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Refresh copyWith(void Function(Refresh) updates) => super.copyWith((message) => updates(message as Refresh)) as Refresh; // ignore: deprecated_member_use
+  Refresh copyWith(void Function(Refresh) updates) => super.copyWith((message) => updates(message as Refresh)) as Refresh;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Refresh create() => Refresh._();
   Refresh createEmptyInstance() => create();
@@ -1632,43 +1756,49 @@ class Refresh extends $pb.GeneratedMessage {
 }
 
 class ConnectRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..m<$core.String, SubscribeRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subs', entryClassName: 'ConnectRequest.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeRequest.create, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
-    ..hasRequiredFields = false
-  ;
-
-  ConnectRequest._() : super();
   factory ConnectRequest({
     $core.String? token,
     $core.List<$core.int>? data,
     $core.Map<$core.String, SubscribeRequest>? subs,
     $core.String? name,
     $core.String? version,
+    $core.Map<$core.String, $core.String>? headers,
   }) {
-    final _result = create();
+    final $result = create();
     if (token != null) {
-      _result.token = token;
+      $result.token = token;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (subs != null) {
-      _result.subs.addAll(subs);
+      $result.subs.addAll(subs);
     }
     if (name != null) {
-      _result.name = name;
+      $result.name = name;
     }
     if (version != null) {
-      _result.version = version;
+      $result.version = version;
     }
-    return _result;
+    if (headers != null) {
+      $result.headers.addAll(headers);
+    }
+    return $result;
   }
+  ConnectRequest._() : super();
   factory ConnectRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ConnectRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'token')
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..m<$core.String, SubscribeRequest>(3, _omitFieldNames ? '' : 'subs', entryClassName: 'ConnectRequest.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeRequest.create, valueDefaultOrMaker: SubscribeRequest.getDefault, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..aOS(4, _omitFieldNames ? '' : 'name')
+    ..aOS(5, _omitFieldNames ? '' : 'version')
+    ..m<$core.String, $core.String>(6, _omitFieldNames ? '' : 'headers', entryClassName: 'ConnectRequest.HeadersEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OS, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1678,8 +1808,10 @@ class ConnectRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectRequest copyWith(void Function(ConnectRequest) updates) => super.copyWith((message) => updates(message as ConnectRequest)) as ConnectRequest; // ignore: deprecated_member_use
+  ConnectRequest copyWith(void Function(ConnectRequest) updates) => super.copyWith((message) => updates(message as ConnectRequest)) as ConnectRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ConnectRequest create() => ConnectRequest._();
   ConnectRequest createEmptyInstance() => create();
@@ -1726,24 +1858,12 @@ class ConnectRequest extends $pb.GeneratedMessage {
   $core.bool hasVersion() => $_has(4);
   @$pb.TagNumber(5)
   void clearVersion() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.Map<$core.String, $core.String> get headers => $_getMap(5);
 }
 
 class ConnectResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'client')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
-    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..m<$core.String, SubscribeResult>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subs', entryClassName: 'ConnectResult.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
-    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ping', $pb.PbFieldType.OU3)
-    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pong')
-    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'session')
-    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'node')
-    ..hasRequiredFields = false
-  ;
-
-  ConnectResult._() : super();
   factory ConnectResult({
     $core.String? client,
     $core.String? version,
@@ -1755,42 +1875,63 @@ class ConnectResult extends $pb.GeneratedMessage {
     $core.bool? pong,
     $core.String? session,
     $core.String? node,
+    $fixnum.Int64? time,
   }) {
-    final _result = create();
+    final $result = create();
     if (client != null) {
-      _result.client = client;
+      $result.client = client;
     }
     if (version != null) {
-      _result.version = version;
+      $result.version = version;
     }
     if (expires != null) {
-      _result.expires = expires;
+      $result.expires = expires;
     }
     if (ttl != null) {
-      _result.ttl = ttl;
+      $result.ttl = ttl;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (subs != null) {
-      _result.subs.addAll(subs);
+      $result.subs.addAll(subs);
     }
     if (ping != null) {
-      _result.ping = ping;
+      $result.ping = ping;
     }
     if (pong != null) {
-      _result.pong = pong;
+      $result.pong = pong;
     }
     if (session != null) {
-      _result.session = session;
+      $result.session = session;
     }
     if (node != null) {
-      _result.node = node;
+      $result.node = node;
     }
-    return _result;
+    if (time != null) {
+      $result.time = time;
+    }
+    return $result;
   }
+  ConnectResult._() : super();
   factory ConnectResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory ConnectResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'client')
+    ..aOS(2, _omitFieldNames ? '' : 'version')
+    ..aOB(3, _omitFieldNames ? '' : 'expires')
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(5, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..m<$core.String, SubscribeResult>(6, _omitFieldNames ? '' : 'subs', entryClassName: 'ConnectResult.SubsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: SubscribeResult.create, valueDefaultOrMaker: SubscribeResult.getDefault, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'ping', $pb.PbFieldType.OU3)
+    ..aOB(8, _omitFieldNames ? '' : 'pong')
+    ..aOS(9, _omitFieldNames ? '' : 'session')
+    ..aOS(10, _omitFieldNames ? '' : 'node')
+    ..aInt64(11, _omitFieldNames ? '' : 'time')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1800,8 +1941,10 @@ class ConnectResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectResult copyWith(void Function(ConnectResult) updates) => super.copyWith((message) => updates(message as ConnectResult)) as ConnectResult; // ignore: deprecated_member_use
+  ConnectResult copyWith(void Function(ConnectResult) updates) => super.copyWith((message) => updates(message as ConnectResult)) as ConnectResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ConnectResult create() => ConnectResult._();
   ConnectResult createEmptyInstance() => create();
@@ -1893,26 +2036,36 @@ class ConnectResult extends $pb.GeneratedMessage {
   $core.bool hasNode() => $_has(9);
   @$pb.TagNumber(10)
   void clearNode() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $fixnum.Int64 get time => $_getI64(10);
+  @$pb.TagNumber(11)
+  set time($fixnum.Int64 v) { $_setInt64(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasTime() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearTime() => clearField(11);
 }
 
 class RefreshRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RefreshRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
-    ..hasRequiredFields = false
-  ;
-
-  RefreshRequest._() : super();
   factory RefreshRequest({
     $core.String? token,
   }) {
-    final _result = create();
+    final $result = create();
     if (token != null) {
-      _result.token = token;
+      $result.token = token;
     }
-    return _result;
+    return $result;
   }
+  RefreshRequest._() : super();
   factory RefreshRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RefreshRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RefreshRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'token')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1922,8 +2075,10 @@ class RefreshRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RefreshRequest copyWith(void Function(RefreshRequest) updates) => super.copyWith((message) => updates(message as RefreshRequest)) as RefreshRequest; // ignore: deprecated_member_use
+  RefreshRequest copyWith(void Function(RefreshRequest) updates) => super.copyWith((message) => updates(message as RefreshRequest)) as RefreshRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RefreshRequest create() => RefreshRequest._();
   RefreshRequest createEmptyInstance() => create();
@@ -1943,38 +2098,39 @@ class RefreshRequest extends $pb.GeneratedMessage {
 }
 
 class RefreshResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RefreshResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'client')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  RefreshResult._() : super();
   factory RefreshResult({
     $core.String? client,
     $core.String? version,
     $core.bool? expires,
     $core.int? ttl,
   }) {
-    final _result = create();
+    final $result = create();
     if (client != null) {
-      _result.client = client;
+      $result.client = client;
     }
     if (version != null) {
-      _result.version = version;
+      $result.version = version;
     }
     if (expires != null) {
-      _result.expires = expires;
+      $result.expires = expires;
     }
     if (ttl != null) {
-      _result.ttl = ttl;
+      $result.ttl = ttl;
     }
-    return _result;
+    return $result;
   }
+  RefreshResult._() : super();
   factory RefreshResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RefreshResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RefreshResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'client')
+    ..aOS(2, _omitFieldNames ? '' : 'version')
+    ..aOB(3, _omitFieldNames ? '' : 'expires')
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1984,8 +2140,10 @@ class RefreshResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RefreshResult copyWith(void Function(RefreshResult) updates) => super.copyWith((message) => updates(message as RefreshResult)) as RefreshResult; // ignore: deprecated_member_use
+  RefreshResult copyWith(void Function(RefreshResult) updates) => super.copyWith((message) => updates(message as RefreshResult)) as RefreshResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RefreshResult create() => RefreshResult._();
   RefreshResult createEmptyInstance() => create();
@@ -2032,20 +2190,6 @@ class RefreshResult extends $pb.GeneratedMessage {
 }
 
 class SubscribeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SubscribeRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recover')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..a<$fixnum.Int64>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.List<$core.int>>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
-    ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recoverable')
-    ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'joinLeave')
-    ..hasRequiredFields = false
-  ;
-
-  SubscribeRequest._() : super();
   factory SubscribeRequest({
     $core.String? channel,
     $core.String? token,
@@ -2056,39 +2200,59 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     $core.bool? positioned,
     $core.bool? recoverable,
     $core.bool? joinLeave,
+    $core.String? delta,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
     if (token != null) {
-      _result.token = token;
+      $result.token = token;
     }
     if (recover != null) {
-      _result.recover = recover;
+      $result.recover = recover;
     }
     if (epoch != null) {
-      _result.epoch = epoch;
+      $result.epoch = epoch;
     }
     if (offset != null) {
-      _result.offset = offset;
+      $result.offset = offset;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (positioned != null) {
-      _result.positioned = positioned;
+      $result.positioned = positioned;
     }
     if (recoverable != null) {
-      _result.recoverable = recoverable;
+      $result.recoverable = recoverable;
     }
     if (joinLeave != null) {
-      _result.joinLeave = joinLeave;
+      $result.joinLeave = joinLeave;
     }
-    return _result;
+    if (delta != null) {
+      $result.delta = delta;
+    }
+    return $result;
   }
+  SubscribeRequest._() : super();
   factory SubscribeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SubscribeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SubscribeRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..aOS(2, _omitFieldNames ? '' : 'token')
+    ..aOB(3, _omitFieldNames ? '' : 'recover')
+    ..aOS(6, _omitFieldNames ? '' : 'epoch')
+    ..a<$fixnum.Int64>(7, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.List<$core.int>>(8, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOB(9, _omitFieldNames ? '' : 'positioned')
+    ..aOB(10, _omitFieldNames ? '' : 'recoverable')
+    ..aOB(11, _omitFieldNames ? '' : 'joinLeave')
+    ..aOS(12, _omitFieldNames ? '' : 'delta')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2098,8 +2262,10 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SubscribeRequest copyWith(void Function(SubscribeRequest) updates) => super.copyWith((message) => updates(message as SubscribeRequest)) as SubscribeRequest; // ignore: deprecated_member_use
+  SubscribeRequest copyWith(void Function(SubscribeRequest) updates) => super.copyWith((message) => updates(message as SubscribeRequest)) as SubscribeRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SubscribeRequest create() => SubscribeRequest._();
   SubscribeRequest createEmptyInstance() => create();
@@ -2188,24 +2354,18 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   $core.bool hasJoinLeave() => $_has(8);
   @$pb.TagNumber(11)
   void clearJoinLeave() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.String get delta => $_getSZ(9);
+  @$pb.TagNumber(12)
+  set delta($core.String v) { $_setString(9, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasDelta() => $_has(9);
+  @$pb.TagNumber(12)
+  void clearDelta() => clearField(12);
 }
 
 class SubscribeResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SubscribeResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recoverable')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..pc<Publication>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
-    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recovered')
-    ..a<$fixnum.Int64>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'positioned')
-    ..a<$core.List<$core.int>>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..aOB(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'wasRecovering')
-    ..hasRequiredFields = false
-  ;
-
-  SubscribeResult._() : super();
   factory SubscribeResult({
     $core.bool? expires,
     $core.int? ttl,
@@ -2217,42 +2377,63 @@ class SubscribeResult extends $pb.GeneratedMessage {
     $core.bool? positioned,
     $core.List<$core.int>? data,
     $core.bool? wasRecovering,
+    $core.bool? delta,
   }) {
-    final _result = create();
+    final $result = create();
     if (expires != null) {
-      _result.expires = expires;
+      $result.expires = expires;
     }
     if (ttl != null) {
-      _result.ttl = ttl;
+      $result.ttl = ttl;
     }
     if (recoverable != null) {
-      _result.recoverable = recoverable;
+      $result.recoverable = recoverable;
     }
     if (epoch != null) {
-      _result.epoch = epoch;
+      $result.epoch = epoch;
     }
     if (publications != null) {
-      _result.publications.addAll(publications);
+      $result.publications.addAll(publications);
     }
     if (recovered != null) {
-      _result.recovered = recovered;
+      $result.recovered = recovered;
     }
     if (offset != null) {
-      _result.offset = offset;
+      $result.offset = offset;
     }
     if (positioned != null) {
-      _result.positioned = positioned;
+      $result.positioned = positioned;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (wasRecovering != null) {
-      _result.wasRecovering = wasRecovering;
+      $result.wasRecovering = wasRecovering;
     }
-    return _result;
+    if (delta != null) {
+      $result.delta = delta;
+    }
+    return $result;
   }
+  SubscribeResult._() : super();
   factory SubscribeResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SubscribeResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SubscribeResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'expires')
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..aOB(3, _omitFieldNames ? '' : 'recoverable')
+    ..aOS(6, _omitFieldNames ? '' : 'epoch')
+    ..pc<Publication>(7, _omitFieldNames ? '' : 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
+    ..aOB(8, _omitFieldNames ? '' : 'recovered')
+    ..a<$fixnum.Int64>(9, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOB(10, _omitFieldNames ? '' : 'positioned')
+    ..a<$core.List<$core.int>>(11, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOB(12, _omitFieldNames ? '' : 'wasRecovering')
+    ..aOB(13, _omitFieldNames ? '' : 'delta')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2262,8 +2443,10 @@ class SubscribeResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SubscribeResult copyWith(void Function(SubscribeResult) updates) => super.copyWith((message) => updates(message as SubscribeResult)) as SubscribeResult; // ignore: deprecated_member_use
+  SubscribeResult copyWith(void Function(SubscribeResult) updates) => super.copyWith((message) => updates(message as SubscribeResult)) as SubscribeResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SubscribeResult create() => SubscribeResult._();
   SubscribeResult createEmptyInstance() => create();
@@ -2355,31 +2538,41 @@ class SubscribeResult extends $pb.GeneratedMessage {
   $core.bool hasWasRecovering() => $_has(9);
   @$pb.TagNumber(12)
   void clearWasRecovering() => clearField(12);
+
+  @$pb.TagNumber(13)
+  $core.bool get delta => $_getBF(10);
+  @$pb.TagNumber(13)
+  set delta($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasDelta() => $_has(10);
+  @$pb.TagNumber(13)
+  void clearDelta() => clearField(13);
 }
 
 class SubRefreshRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SubRefreshRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
-    ..hasRequiredFields = false
-  ;
-
-  SubRefreshRequest._() : super();
   factory SubRefreshRequest({
     $core.String? channel,
     $core.String? token,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
     if (token != null) {
-      _result.token = token;
+      $result.token = token;
     }
-    return _result;
+    return $result;
   }
+  SubRefreshRequest._() : super();
   factory SubRefreshRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SubRefreshRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SubRefreshRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..aOS(2, _omitFieldNames ? '' : 'token')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2389,8 +2582,10 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) => super.copyWith((message) => updates(message as SubRefreshRequest)) as SubRefreshRequest; // ignore: deprecated_member_use
+  SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) => super.copyWith((message) => updates(message as SubRefreshRequest)) as SubRefreshRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SubRefreshRequest create() => SubRefreshRequest._();
   SubRefreshRequest createEmptyInstance() => create();
@@ -2419,28 +2614,29 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
 }
 
 class SubRefreshResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SubRefreshResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'expires')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ttl', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  SubRefreshResult._() : super();
   factory SubRefreshResult({
     $core.bool? expires,
     $core.int? ttl,
   }) {
-    final _result = create();
+    final $result = create();
     if (expires != null) {
-      _result.expires = expires;
+      $result.expires = expires;
     }
     if (ttl != null) {
-      _result.ttl = ttl;
+      $result.ttl = ttl;
     }
-    return _result;
+    return $result;
   }
+  SubRefreshResult._() : super();
   factory SubRefreshResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SubRefreshResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SubRefreshResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'expires')
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2450,8 +2646,10 @@ class SubRefreshResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SubRefreshResult copyWith(void Function(SubRefreshResult) updates) => super.copyWith((message) => updates(message as SubRefreshResult)) as SubRefreshResult; // ignore: deprecated_member_use
+  SubRefreshResult copyWith(void Function(SubRefreshResult) updates) => super.copyWith((message) => updates(message as SubRefreshResult)) as SubRefreshResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SubRefreshResult create() => SubRefreshResult._();
   SubRefreshResult createEmptyInstance() => create();
@@ -2480,23 +2678,24 @@ class SubRefreshResult extends $pb.GeneratedMessage {
 }
 
 class UnsubscribeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UnsubscribeRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..hasRequiredFields = false
-  ;
-
-  UnsubscribeRequest._() : super();
   factory UnsubscribeRequest({
     $core.String? channel,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
-    return _result;
+    return $result;
   }
+  UnsubscribeRequest._() : super();
   factory UnsubscribeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory UnsubscribeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UnsubscribeRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2506,8 +2705,10 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) => super.copyWith((message) => updates(message as UnsubscribeRequest)) as UnsubscribeRequest; // ignore: deprecated_member_use
+  UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) => super.copyWith((message) => updates(message as UnsubscribeRequest)) as UnsubscribeRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UnsubscribeRequest create() => UnsubscribeRequest._();
   UnsubscribeRequest createEmptyInstance() => create();
@@ -2527,14 +2728,15 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
 }
 
 class UnsubscribeResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UnsubscribeResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+  factory UnsubscribeResult() => create();
+  UnsubscribeResult._() : super();
+  factory UnsubscribeResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UnsubscribeResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UnsubscribeResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  UnsubscribeResult._() : super();
-  factory UnsubscribeResult() => create();
-  factory UnsubscribeResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UnsubscribeResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2544,8 +2746,10 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) => super.copyWith((message) => updates(message as UnsubscribeResult)) as UnsubscribeResult; // ignore: deprecated_member_use
+  UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) => super.copyWith((message) => updates(message as UnsubscribeResult)) as UnsubscribeResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UnsubscribeResult create() => UnsubscribeResult._();
   UnsubscribeResult createEmptyInstance() => create();
@@ -2556,28 +2760,29 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
 }
 
 class PublishRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PublishRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  PublishRequest._() : super();
   factory PublishRequest({
     $core.String? channel,
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  PublishRequest._() : super();
   factory PublishRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PublishRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PublishRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2587,8 +2792,10 @@ class PublishRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PublishRequest copyWith(void Function(PublishRequest) updates) => super.copyWith((message) => updates(message as PublishRequest)) as PublishRequest; // ignore: deprecated_member_use
+  PublishRequest copyWith(void Function(PublishRequest) updates) => super.copyWith((message) => updates(message as PublishRequest)) as PublishRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PublishRequest create() => PublishRequest._();
   PublishRequest createEmptyInstance() => create();
@@ -2617,14 +2824,15 @@ class PublishRequest extends $pb.GeneratedMessage {
 }
 
 class PublishResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PublishResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+  factory PublishResult() => create();
+  PublishResult._() : super();
+  factory PublishResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PublishResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PublishResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  PublishResult._() : super();
-  factory PublishResult() => create();
-  factory PublishResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory PublishResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2634,8 +2842,10 @@ class PublishResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PublishResult copyWith(void Function(PublishResult) updates) => super.copyWith((message) => updates(message as PublishResult)) as PublishResult; // ignore: deprecated_member_use
+  PublishResult copyWith(void Function(PublishResult) updates) => super.copyWith((message) => updates(message as PublishResult)) as PublishResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PublishResult create() => PublishResult._();
   PublishResult createEmptyInstance() => create();
@@ -2646,23 +2856,24 @@ class PublishResult extends $pb.GeneratedMessage {
 }
 
 class PresenceRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PresenceRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..hasRequiredFields = false
-  ;
-
-  PresenceRequest._() : super();
   factory PresenceRequest({
     $core.String? channel,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
-    return _result;
+    return $result;
   }
+  PresenceRequest._() : super();
   factory PresenceRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PresenceRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PresenceRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2672,8 +2883,10 @@ class PresenceRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PresenceRequest copyWith(void Function(PresenceRequest) updates) => super.copyWith((message) => updates(message as PresenceRequest)) as PresenceRequest; // ignore: deprecated_member_use
+  PresenceRequest copyWith(void Function(PresenceRequest) updates) => super.copyWith((message) => updates(message as PresenceRequest)) as PresenceRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PresenceRequest create() => PresenceRequest._();
   PresenceRequest createEmptyInstance() => create();
@@ -2693,23 +2906,24 @@ class PresenceRequest extends $pb.GeneratedMessage {
 }
 
 class PresenceResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PresenceResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..m<$core.String, ClientInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'presence', entryClassName: 'PresenceResult.PresenceEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: ClientInfo.create, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
-    ..hasRequiredFields = false
-  ;
-
-  PresenceResult._() : super();
   factory PresenceResult({
     $core.Map<$core.String, ClientInfo>? presence,
   }) {
-    final _result = create();
+    final $result = create();
     if (presence != null) {
-      _result.presence.addAll(presence);
+      $result.presence.addAll(presence);
     }
-    return _result;
+    return $result;
   }
+  PresenceResult._() : super();
   factory PresenceResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PresenceResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PresenceResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..m<$core.String, ClientInfo>(1, _omitFieldNames ? '' : 'presence', entryClassName: 'PresenceResult.PresenceEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: ClientInfo.create, valueDefaultOrMaker: ClientInfo.getDefault, packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2719,8 +2933,10 @@ class PresenceResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PresenceResult copyWith(void Function(PresenceResult) updates) => super.copyWith((message) => updates(message as PresenceResult)) as PresenceResult; // ignore: deprecated_member_use
+  PresenceResult copyWith(void Function(PresenceResult) updates) => super.copyWith((message) => updates(message as PresenceResult)) as PresenceResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PresenceResult create() => PresenceResult._();
   PresenceResult createEmptyInstance() => create();
@@ -2734,23 +2950,24 @@ class PresenceResult extends $pb.GeneratedMessage {
 }
 
 class PresenceStatsRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PresenceStatsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..hasRequiredFields = false
-  ;
-
-  PresenceStatsRequest._() : super();
   factory PresenceStatsRequest({
     $core.String? channel,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
-    return _result;
+    return $result;
   }
+  PresenceStatsRequest._() : super();
   factory PresenceStatsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PresenceStatsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PresenceStatsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2760,8 +2977,10 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) => super.copyWith((message) => updates(message as PresenceStatsRequest)) as PresenceStatsRequest; // ignore: deprecated_member_use
+  PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) => super.copyWith((message) => updates(message as PresenceStatsRequest)) as PresenceStatsRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PresenceStatsRequest create() => PresenceStatsRequest._();
   PresenceStatsRequest createEmptyInstance() => create();
@@ -2781,28 +3000,29 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
 }
 
 class PresenceStatsResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PresenceStatsResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'numClients', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'numUsers', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  PresenceStatsResult._() : super();
   factory PresenceStatsResult({
     $core.int? numClients,
     $core.int? numUsers,
   }) {
-    final _result = create();
+    final $result = create();
     if (numClients != null) {
-      _result.numClients = numClients;
+      $result.numClients = numClients;
     }
     if (numUsers != null) {
-      _result.numUsers = numUsers;
+      $result.numUsers = numUsers;
     }
-    return _result;
+    return $result;
   }
+  PresenceStatsResult._() : super();
   factory PresenceStatsResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory PresenceStatsResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PresenceStatsResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'numClients', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'numUsers', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2812,8 +3032,10 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) => super.copyWith((message) => updates(message as PresenceStatsResult)) as PresenceStatsResult; // ignore: deprecated_member_use
+  PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) => super.copyWith((message) => updates(message as PresenceStatsResult)) as PresenceStatsResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PresenceStatsResult create() => PresenceStatsResult._();
   PresenceStatsResult createEmptyInstance() => create();
@@ -2842,28 +3064,29 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
 }
 
 class StreamPosition extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StreamPosition', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..hasRequiredFields = false
-  ;
-
-  StreamPosition._() : super();
   factory StreamPosition({
     $fixnum.Int64? offset,
     $core.String? epoch,
   }) {
-    final _result = create();
+    final $result = create();
     if (offset != null) {
-      _result.offset = offset;
+      $result.offset = offset;
     }
     if (epoch != null) {
-      _result.epoch = epoch;
+      $result.epoch = epoch;
     }
-    return _result;
+    return $result;
   }
+  StreamPosition._() : super();
   factory StreamPosition.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory StreamPosition.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'StreamPosition', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(2, _omitFieldNames ? '' : 'epoch')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2873,8 +3096,10 @@ class StreamPosition extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  StreamPosition copyWith(void Function(StreamPosition) updates) => super.copyWith((message) => updates(message as StreamPosition)) as StreamPosition; // ignore: deprecated_member_use
+  StreamPosition copyWith(void Function(StreamPosition) updates) => super.copyWith((message) => updates(message as StreamPosition)) as StreamPosition;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static StreamPosition create() => StreamPosition._();
   StreamPosition createEmptyInstance() => create();
@@ -2903,38 +3128,39 @@ class StreamPosition extends $pb.GeneratedMessage {
 }
 
 class HistoryRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HistoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channel')
-    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'limit', $pb.PbFieldType.O3)
-    ..aOM<StreamPosition>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'since', subBuilder: StreamPosition.create)
-    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reverse')
-    ..hasRequiredFields = false
-  ;
-
-  HistoryRequest._() : super();
   factory HistoryRequest({
     $core.String? channel,
     $core.int? limit,
     StreamPosition? since,
     $core.bool? reverse,
   }) {
-    final _result = create();
+    final $result = create();
     if (channel != null) {
-      _result.channel = channel;
+      $result.channel = channel;
     }
     if (limit != null) {
-      _result.limit = limit;
+      $result.limit = limit;
     }
     if (since != null) {
-      _result.since = since;
+      $result.since = since;
     }
     if (reverse != null) {
-      _result.reverse = reverse;
+      $result.reverse = reverse;
     }
-    return _result;
+    return $result;
   }
+  HistoryRequest._() : super();
   factory HistoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HistoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HistoryRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.O3)
+    ..aOM<StreamPosition>(8, _omitFieldNames ? '' : 'since', subBuilder: StreamPosition.create)
+    ..aOB(9, _omitFieldNames ? '' : 'reverse')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -2944,8 +3170,10 @@ class HistoryRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  HistoryRequest copyWith(void Function(HistoryRequest) updates) => super.copyWith((message) => updates(message as HistoryRequest)) as HistoryRequest; // ignore: deprecated_member_use
+  HistoryRequest copyWith(void Function(HistoryRequest) updates) => super.copyWith((message) => updates(message as HistoryRequest)) as HistoryRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static HistoryRequest create() => HistoryRequest._();
   HistoryRequest createEmptyInstance() => create();
@@ -2994,33 +3222,34 @@ class HistoryRequest extends $pb.GeneratedMessage {
 }
 
 class HistoryResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HistoryResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..pc<Publication>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'epoch')
-    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..hasRequiredFields = false
-  ;
-
-  HistoryResult._() : super();
   factory HistoryResult({
     $core.Iterable<Publication>? publications,
     $core.String? epoch,
     $fixnum.Int64? offset,
   }) {
-    final _result = create();
+    final $result = create();
     if (publications != null) {
-      _result.publications.addAll(publications);
+      $result.publications.addAll(publications);
     }
     if (epoch != null) {
-      _result.epoch = epoch;
+      $result.epoch = epoch;
     }
     if (offset != null) {
-      _result.offset = offset;
+      $result.offset = offset;
     }
-    return _result;
+    return $result;
   }
+  HistoryResult._() : super();
   factory HistoryResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HistoryResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HistoryResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..pc<Publication>(1, _omitFieldNames ? '' : 'publications', $pb.PbFieldType.PM, subBuilder: Publication.create)
+    ..aOS(2, _omitFieldNames ? '' : 'epoch')
+    ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -3030,8 +3259,10 @@ class HistoryResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  HistoryResult copyWith(void Function(HistoryResult) updates) => super.copyWith((message) => updates(message as HistoryResult)) as HistoryResult; // ignore: deprecated_member_use
+  HistoryResult copyWith(void Function(HistoryResult) updates) => super.copyWith((message) => updates(message as HistoryResult)) as HistoryResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static HistoryResult create() => HistoryResult._();
   HistoryResult createEmptyInstance() => create();
@@ -3063,14 +3294,15 @@ class HistoryResult extends $pb.GeneratedMessage {
 }
 
 class PingRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PingRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+  factory PingRequest() => create();
+  PingRequest._() : super();
+  factory PingRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PingRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PingRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  PingRequest._() : super();
-  factory PingRequest() => create();
-  factory PingRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory PingRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -3080,8 +3312,10 @@ class PingRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PingRequest copyWith(void Function(PingRequest) updates) => super.copyWith((message) => updates(message as PingRequest)) as PingRequest; // ignore: deprecated_member_use
+  PingRequest copyWith(void Function(PingRequest) updates) => super.copyWith((message) => updates(message as PingRequest)) as PingRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PingRequest create() => PingRequest._();
   PingRequest createEmptyInstance() => create();
@@ -3092,14 +3326,15 @@ class PingRequest extends $pb.GeneratedMessage {
 }
 
 class PingResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PingResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+  factory PingResult() => create();
+  PingResult._() : super();
+  factory PingResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PingResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'PingResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  PingResult._() : super();
-  factory PingResult() => create();
-  factory PingResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory PingResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -3109,8 +3344,10 @@ class PingResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  PingResult copyWith(void Function(PingResult) updates) => super.copyWith((message) => updates(message as PingResult)) as PingResult; // ignore: deprecated_member_use
+  PingResult copyWith(void Function(PingResult) updates) => super.copyWith((message) => updates(message as PingResult)) as PingResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static PingResult create() => PingResult._();
   PingResult createEmptyInstance() => create();
@@ -3121,28 +3358,29 @@ class PingResult extends $pb.GeneratedMessage {
 }
 
 class RPCRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RPCRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'method')
-    ..hasRequiredFields = false
-  ;
-
-  RPCRequest._() : super();
   factory RPCRequest({
     $core.List<$core.int>? data,
     $core.String? method,
   }) {
-    final _result = create();
+    final $result = create();
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
     if (method != null) {
-      _result.method = method;
+      $result.method = method;
     }
-    return _result;
+    return $result;
   }
+  RPCRequest._() : super();
   factory RPCRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RPCRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RPCRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOS(2, _omitFieldNames ? '' : 'method')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -3152,8 +3390,10 @@ class RPCRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RPCRequest copyWith(void Function(RPCRequest) updates) => super.copyWith((message) => updates(message as RPCRequest)) as RPCRequest; // ignore: deprecated_member_use
+  RPCRequest copyWith(void Function(RPCRequest) updates) => super.copyWith((message) => updates(message as RPCRequest)) as RPCRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RPCRequest create() => RPCRequest._();
   RPCRequest createEmptyInstance() => create();
@@ -3182,23 +3422,24 @@ class RPCRequest extends $pb.GeneratedMessage {
 }
 
 class RPCResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RPCResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  RPCResult._() : super();
   factory RPCResult({
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  RPCResult._() : super();
   factory RPCResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RPCResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RPCResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -3208,8 +3449,10 @@ class RPCResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RPCResult copyWith(void Function(RPCResult) updates) => super.copyWith((message) => updates(message as RPCResult)) as RPCResult; // ignore: deprecated_member_use
+  RPCResult copyWith(void Function(RPCResult) updates) => super.copyWith((message) => updates(message as RPCResult)) as RPCResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RPCResult create() => RPCResult._();
   RPCResult createEmptyInstance() => create();
@@ -3229,23 +3472,24 @@ class RPCResult extends $pb.GeneratedMessage {
 }
 
 class SendRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  SendRequest._() : super();
   factory SendRequest({
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  SendRequest._() : super();
   factory SendRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SendRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -3255,8 +3499,10 @@ class SendRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SendRequest copyWith(void Function(SendRequest) updates) => super.copyWith((message) => updates(message as SendRequest)) as SendRequest; // ignore: deprecated_member_use
+  SendRequest copyWith(void Function(SendRequest) updates) => super.copyWith((message) => updates(message as SendRequest)) as SendRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SendRequest create() => SendRequest._();
   SendRequest createEmptyInstance() => create();
@@ -3275,3 +3521,6 @@ class SendRequest extends $pb.GeneratedMessage {
   void clearData() => clearField(1);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
