@@ -402,10 +402,11 @@ class SubscriptionImpl implements Subscription {
 
   @internal
   void handlePublication(protocol.Publication pub) {
-    final event = PublicationEvent.from(pub);
+    var event = PublicationEvent.from(pub);
     if (_deltaNegotiated) {
       if (pub.delta) {
-        event.data = applyDelta(Uint8List.fromList(_prevData!), Uint8List.fromList(pub.data));
+        final newData = applyDelta(Uint8List.fromList(_prevData!), Uint8List.fromList(pub.data));
+        event = event.copyWith(data: newData);
       }
       _prevData = event.data;
     }
