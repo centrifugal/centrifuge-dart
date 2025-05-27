@@ -87,7 +87,7 @@ class MessageEvent {
 class PublicationEvent {
   PublicationEvent(this.data, this.offset, this.info, this.tags);
 
-  final List<int> data;
+  List<int> data;
   final $fixnum.Int64 offset;
   final ClientInfo? info;
   final Map<String, String> tags;

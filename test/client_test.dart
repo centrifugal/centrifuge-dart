@@ -73,5 +73,16 @@ void main() {
       client.newSubscription('channel');
       expect(() => client.newSubscription('channel'), throwsException);
     });
+
+    test('subscribes with fossil', () async {
+      final client = centrifuge.createClient(url, centrifuge.ClientConfig());
+      final s1 = client.newSubscription('some_channel', centrifuge.SubscriptionConfig(
+        delta: centrifuge.DeltaType.fossil
+      ));
+      expect(true, client.getSubscription(s1.channel) != null);
+      expect(true, client.subscriptions().isNotEmpty);
+      await client.removeSubscription(s1);
+      expect(false, client.getSubscription(s1.channel) != null);
+    });
   });
 }
