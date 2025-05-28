@@ -1,5 +1,11 @@
 import 'events.dart';
 
+/// Enum for supported delta encoding algorithms.
+enum DeltaType {
+  none,
+  fossil,
+}
+
 class SubscriptionConfig {
   SubscriptionConfig(
       {this.token = '',
@@ -10,7 +16,8 @@ class SubscriptionConfig {
       this.recoverable = false,
       this.joinLeave = false,
       this.minResubscribeDelay = const Duration(milliseconds: 500),
-      this.maxResubscribeDelay = const Duration(milliseconds: 20000)});
+      this.maxResubscribeDelay = const Duration(milliseconds: 20000),
+      this.delta = DeltaType.none});
 
   String token;
   final SubscriptionTokenCallback? getToken;
@@ -21,6 +28,7 @@ class SubscriptionConfig {
   final bool joinLeave;
   final Duration minResubscribeDelay;
   final Duration maxResubscribeDelay;
+  final DeltaType delta;
 }
 
 typedef SubscriptionTokenCallback = Future<String> Function(SubscriptionTokenEvent);

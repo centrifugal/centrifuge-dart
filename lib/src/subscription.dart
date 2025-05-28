@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:centrifuge/src/fossil.dart';
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:meta/meta.dart';
 
@@ -50,6 +52,8 @@ class SubscriptionImpl implements Subscription {
   bool _positioned = false;
   bool _recoverable = false;
   bool _joinLeave = false;
+  bool _deltaNegotiated = false;
+  List<int>? _prevData;
 
   SubscriptionImpl(this.channel, this._client, this._config) {
     _token = _config.token;
@@ -316,6 +320,9 @@ class SubscriptionImpl implements Subscription {
         request.offset = _offset!;
         request.epoch = _epoch!;
       }
+      if (_config.delta == DeltaType.fossil) {
+        request.delta = "fossil";
+      }
       request.positioned = _positioned;
       request.recoverable = _recoverable;
       request.joinLeave = _joinLeave;
@@ -325,6 +332,7 @@ class SubscriptionImpl implements Subscription {
         _epoch = result.epoch;
         _offset = result.offset;
       }
+      _deltaNegotiated = result.delta;
       final event = SubscribedEvent.from(result);
       state = SubscriptionState.subscribed;
       _subscribedController.add(event);
@@ -394,7 +402,14 @@ class SubscriptionImpl implements Subscription {
 
   @internal
   void handlePublication(protocol.Publication pub) {
-    final event = PublicationEvent.from(pub);
+    var event = PublicationEvent.from(pub);
+    if (_deltaNegotiated) {
+      if (pub.delta) {
+        final newData = applyDelta(Uint8List.fromList(_prevData!), Uint8List.fromList(pub.data));
+        event = event.copyWith(data: newData);
+      }
+      _prevData = event.data;
+    }
     _publicationController.add(event);
     if (pub.offset > 0) {
       _offset = pub.offset;

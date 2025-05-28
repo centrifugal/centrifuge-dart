@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fixnum/fixnum.dart' as $fixnum;
+import 'package:meta/meta.dart';
 import 'proto/client.pb.dart' as proto;
 
 class ConnectionTokenEvent {
@@ -94,6 +95,10 @@ class PublicationEvent {
 
   static PublicationEvent from(proto.Publication pub) =>
       PublicationEvent(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null, pub.tags);
+
+  @internal
+  PublicationEvent copyWith({List<int>? data}) =>
+      PublicationEvent(data ?? this.data, offset, info, tags);
 
   @override
   String toString() {
