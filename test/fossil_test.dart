@@ -18,7 +18,7 @@ void main() {
     // There are test cases in testdata/fossil/1 through 5
     for (var i = 1; i <= 5; i++) {
       test('Delta case #$i', () {
-        final baseDir = 'testdata/fossil/$i';
+        final baseDir = 'test/testdata/fossil/$i';
         final originPath = '$baseDir/origin';
         final deltaPath = '$baseDir/delta';
         final targetPath = '$baseDir/target';
