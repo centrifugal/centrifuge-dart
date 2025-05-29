@@ -1,3 +1,7 @@
+## [0.15.1]
+
+* Support Fossil delta compression, [#97](https://github.com/centrifugal/centrifuge-dart/pull/97)
+
 ## [0.15.0]
 
 * Update `web_socket_channel`, min SDK is now 3.3 [#91](https://github.com/centrifugal/centrifuge-dart/pull/91) 
