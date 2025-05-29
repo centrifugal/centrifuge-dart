@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
+
+// WARNING: Internal test, do not rely on fossil.dart outside this scope.
+import 'package:centrifuge/src/fossil.dart';
 import 'package:test/test.dart';
-import 'fossil.dart';
 
 Uint8List readBytes(String path) {
   final file = File(path);
