@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         sdk: [3.4, stable, beta] # note, not testing on 3.3 due to build_runner CI dependency problem.
+        protobuf: ["3.1.0", "4.1.0"] # Test latest v3 and latest v4
     steps:
       - uses: actions/checkout@v4
 
@@ -19,6 +20,9 @@ jobs:
 
       - name: Install dependencies
         run: dart pub get
+
+      - name: Override protobuf version
+        run: dart pub add protobuf:${{ matrix.protobuf }}
 
       - name: Install coveralls
         run: sudo gem install coveralls-lcov 
