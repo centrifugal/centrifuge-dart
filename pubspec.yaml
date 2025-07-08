@@ -1,5 +1,5 @@
 name: centrifuge
-version: 0.15.1
+version: 0.16.0
 
 description: >
   Dart client to communicate with Centrifuge and Centrifugo from Flutter and VM

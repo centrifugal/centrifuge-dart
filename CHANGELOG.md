@@ -1,3 +1,7 @@
+## [0.16.0]
+
+* Allow usage of protobuf v4 as dependency, drop protobuf v2
+
 ## [0.15.1]
 
 * Support Fossil delta compression, [#97](https://github.com/centrifugal/centrifuge-dart/pull/97)
