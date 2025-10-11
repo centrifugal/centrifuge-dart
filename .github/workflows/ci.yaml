@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sdk: [3.4, stable, beta] # note, not testing on 3.3 due to build_runner CI dependency problem.
+        sdk: [3.6, stable, beta] # note, not testing on 3.3 due to build_runner CI dependency problem.
         protobuf: ["3.1.0", "4.0.0", "5.0.0"] # make sure works with both protobuf versions.
     steps:
       - uses: actions/checkout@v4
