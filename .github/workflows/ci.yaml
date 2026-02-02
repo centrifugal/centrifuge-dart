@@ -10,34 +10,18 @@ jobs:
     strategy:
       matrix:
         # Test compatible SDK and protobuf version combinations
-        # protobuf 3.1.0: SDK >= 2.19
-        # protobuf 4.0.0: SDK >= 3.3
-        # protobuf 4.1.0: SDK >= 3.6
-        # protobuf 4.2.0+: SDK >= 3.7
         # protobuf 5.0.0+: SDK >= 3.7
         include:
-          # Test older protobuf versions with SDK 3.4
-          - sdk: "3.4"
-            protobuf: "3.1.0"
-          - sdk: "3.4"
-            protobuf: "4.0.0"
-          # Test latest protobuf versions with SDK 3.7+ (stable and beta)
-          - sdk: stable
-            protobuf: "3.1.0"
-          - sdk: stable
-            protobuf: "4.0.0"
-          - sdk: stable
-            protobuf: "4.2.0"
+          # Test with oldest SDK supported.
+          - sdk: "3.7"
+            protobuf: "5.0.0"
+          - sdk: "3.7"
+            protobuf: "6.0.0"
+          # Test latest protobuf versions with SDK stable and beta
           - sdk: stable
             protobuf: "5.0.0"
           - sdk: stable
             protobuf: "6.0.0"
-          - sdk: beta
-            protobuf: "3.1.0"
-          - sdk: beta
-            protobuf: "4.0.0"
-          - sdk: beta
-            protobuf: "4.2.0"
           - sdk: beta
             protobuf: "5.0.0"
           - sdk: beta
