@@ -1,6 +1,8 @@
-## [0.17.0]
+## [0.18.0]
 
+* Min SDK version is 3.7
 * Allow usage of protobuf v6 as dependency
+* Drop support for Protobuf v3, v4.
 
 ## [0.17.0]
 
