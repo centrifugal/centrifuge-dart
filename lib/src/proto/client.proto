@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package centrifugal.centrifuge.protocol;
 
-option go_package = "./;protocol";
+option go_package = "github.com/centrifugal/protocol";
 
 message Error {
   uint32 code = 1;
@@ -17,14 +17,13 @@ message EmulationRequest {
 }
 
 // Command sent from a client to a server.
-// ProtocolVersion2 uses id and one of the possible request messages.
 message Command {
   // Id of command to let client match replies to commands.
   uint32 id = 1;
 
   reserved 2, 3;
 
-  // ProtocolVersion2 client can send one of the following requests. Server will
+  // Client can send one of the following requests. Server will
   // only take the first non-null request out of these and may return an error if
   // client passed more than one request. We are not using oneof here due to JSON
   // interoperability concerns.
@@ -42,13 +41,13 @@ message Command {
   SubRefreshRequest sub_refresh = 15;
 }
 
-// Reply sent from a server to a client.
-// ProtocolVersion2 uses id and one of the possible concrete result messages.
+// Reply is sent from a server to a client is sent as a response to Command or
+// can be an async server-to-client Push.
 message Reply {
   // Id will only be set to a value > 0 for replies to commands. For pushes
-  // it will have zero value.
+  // coming from server to client it has zero value.
   uint32 id = 1;
-  // Error can only be set in replies to commands. For pushes it will have zero value.
+  // Error can only be set in replies to commands. For pushes it is never set.
   Error error = 2;
 
   reserved 3;
@@ -71,12 +70,12 @@ message Reply {
 
 // Push can be sent to a client as part of Reply in case of bidirectional transport or
 // without additional wrapping in case of unidirectional transports.
-// ProtocolVersion2 uses channel and one of the possible concrete push messages.
 message Push {
-  reserved 1, 3;
+  reserved 3;
+  int64 id = 1; // Optional numeric channel ID to avoid sending string channel in Push (bandwidth optimization).
   string channel = 2;
 
-  // ProtocolVersion2 server can push one of the following fields to the client. We are
+  // Server can push one of the following fields to the client. We are
   // not using oneof here due to JSON interoperability concerns.
   Publication pub = 4;
   Join join = 5;
@@ -89,6 +88,7 @@ message Push {
   Refresh refresh = 12;
 }
 
+// ClientInfo contains information about client connection.
 message ClientInfo {
   string user = 1;
   string client = 2;
@@ -96,31 +96,36 @@ message ClientInfo {
   bytes chan_info = 4;
 }
 
+// Publication in channel.
 message Publication {
   reserved 1, 2, 3;
-  bytes data = 4;
-  ClientInfo info = 5;
-  uint64 offset = 6;
-  map<string, string> tags = 7;
+  bytes data = 4; // Data contains publication payload.
+  ClientInfo info = 5; // Info contains optional information about publisher. Usually it is set only if publication goes from the client side.
+  uint64 offset = 6; // Offset is a stream offset of the publication. Epoch is given in SubscribeResult.
+  map<string, string> tags = 7; // Optional tags associated with publication.
   bool delta = 8;  // When set indicates that data in Publication is a delta from previous data.
   int64 time = 9;  // Optional time of publication as Unix timestamp milliseconds.
   string channel = 10; // Optional channel name if Publication relates to wildcard subscription.
 }
 
+// Join to channel.
 message Join {
   ClientInfo info = 1;
 }
 
+// Leave from channel.
 message Leave {
   ClientInfo info = 1;
 }
 
+// Unsubscribe from channel.
 message Unsubscribe {
   reserved 1;
   uint32 code = 2;
   string reason = 3;
 }
 
+// Subscribe to channel, used for server-side subscriptions.
 message Subscribe {
   bool recoverable = 1;
   reserved 2, 3;
@@ -130,6 +135,7 @@ message Subscribe {
   bytes data = 7;
 }
 
+// Message from client to server. No Reply is sent in response to Message.
 message Message {
   bytes data = 1;
 }
@@ -166,6 +172,7 @@ message ConnectRequest {
   string name = 4;
   string version = 5;
   map<string, string> headers = 6;
+  int64 flag = 7; // Enable connection level features.
 }
 
 message ConnectResult {
@@ -205,6 +212,8 @@ message SubscribeRequest {
   bool recoverable = 10;
   bool join_leave = 11;
   string delta = 12;
+  FilterNode tf = 13; // Optional server side filter based on publication tags .
+  int64 flag = 14; // Enable subscription level features.
 }
 
 message SubscribeResult {
@@ -220,6 +229,7 @@ message SubscribeResult {
   bytes data = 11;
   bool was_recovering = 12;
   bool delta = 13;
+  int64 id = 14; // Optional numeric channel ID to avoid sending string channel in the following Pushes (bandwidth optimization).
 }
 
 message SubRefreshRequest {
@@ -296,4 +306,39 @@ message RPCResult {
 
 message SendRequest{
   bytes data = 1;
+}
+
+message FilterNode {
+  // Operation type for this node:
+  // - "" (empty string) → leaf node (comparison)
+  // - "and" → logical AND of child nodes
+  // - "or"  → logical OR of child nodes
+  // - "not" → logical NOT of a single child node
+  string op = 1;
+  // Key for comparison (only valid for leaf nodes).
+  string key = 2;
+  // Comparison operator for leaf nodes.
+  // Only meaningful if op == "".
+  // Supported values:
+  //   "eq"   → equal
+  //   "neq"  → not equal
+  //   "in"   → value is in vals
+  //   "nin"  → value is not in vals
+  //   "ex"   → key exists in tags
+  //   "nex"  → key does not exist
+  //   "sw"   → string starts with val
+  //   "ew"   → string ends with val
+  //   "ct"   → string contains val
+  //   "lt"   → numeric less than val
+  //   "lte"  → numeric less than or equal val
+  //   "gt"   → numeric greater than val
+  //   "gte"  → numeric greater than or equal val
+  string cmp = 3;
+  // Single value used in most comparisons (e.g. "eq").
+  string val = 4;
+  // Multiple values used for set comparisons ("in", "nin").
+  repeated string vals = 5;
+  // Child nodes.
+  // Used for logical operations: "and", "or", "not".
+  repeated FilterNode nodes = 6;
 }

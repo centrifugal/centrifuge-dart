@@ -1,5 +1,9 @@
 ## [0.17.0]
 
+* Allow usage of protobuf v6 as dependency
+
+## [0.17.0]
+
 * Allow usage of protobuf v5 as dependency
 
 ## [0.16.0]
