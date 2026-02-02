@@ -1,5 +1,5 @@
 name: centrifuge
-version: 0.17.0
+version: 0.18.0
 
 description: >
   Dart client to communicate with Centrifuge and Centrifugo from Flutter and VM
@@ -8,12 +8,12 @@ description: >
 homepage: https://github.com/centrifugal/centrifuge-dart
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.7.0 <4.0.0'
 
 dependencies:
   fixnum: ^1.0.0
   meta: ^1.3.0
-  protobuf: ">=3.0.0 <6.0.0"
+  protobuf: ">=5.0.0 <7.0.0"
   web_socket_channel: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
