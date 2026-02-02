@@ -8,7 +8,7 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: curly_braces_in_flow_control_structures
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: non_constant_identifier_names
 
 import 'dart:core' as $core;
 
@@ -44,13 +44,13 @@ class Error extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'code', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OU3)
     ..aOS(2, _omitFieldNames ? '' : 'message')
     ..aOB(3, _omitFieldNames ? '' : 'temporary')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Error clone() => deepCopy();
+  Error clone() => Error()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Error copyWith(void Function(Error) updates) =>
       super.copyWith((message) => updates(message as Error)) as Error;
@@ -62,6 +62,7 @@ class Error extends $pb.GeneratedMessage {
   static Error create() => Error._();
   @$core.override
   Error createEmptyInstance() => create();
+  static $pb.PbList<Error> createRepeated() => $pb.PbList<Error>();
   @$core.pragma('dart2js:noInline')
   static Error getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Error>(create);
@@ -129,7 +130,7 @@ class EmulationRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  EmulationRequest clone() => deepCopy();
+  EmulationRequest clone() => EmulationRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   EmulationRequest copyWith(void Function(EmulationRequest) updates) =>
       super.copyWith((message) => updates(message as EmulationRequest))
@@ -142,6 +143,8 @@ class EmulationRequest extends $pb.GeneratedMessage {
   static EmulationRequest create() => EmulationRequest._();
   @$core.override
   EmulationRequest createEmptyInstance() => create();
+  static $pb.PbList<EmulationRequest> createRepeated() =>
+      $pb.PbList<EmulationRequest>();
   @$core.pragma('dart2js:noInline')
   static EmulationRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<EmulationRequest>(create);
@@ -223,7 +226,7 @@ class Command extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'id', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OU3)
     ..aOM<ConnectRequest>(4, _omitFieldNames ? '' : 'connect',
         subBuilder: ConnectRequest.create)
     ..aOM<SubscribeRequest>(5, _omitFieldNames ? '' : 'subscribe',
@@ -251,7 +254,7 @@ class Command extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Command clone() => deepCopy();
+  Command clone() => Command()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Command copyWith(void Function(Command) updates) =>
       super.copyWith((message) => updates(message as Command)) as Command;
@@ -263,6 +266,7 @@ class Command extends $pb.GeneratedMessage {
   static Command create() => Command._();
   @$core.override
   Command createEmptyInstance() => create();
+  static $pb.PbList<Command> createRepeated() => $pb.PbList<Command>();
   @$core.pragma('dart2js:noInline')
   static Command getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Command>(create);
@@ -466,7 +470,7 @@ class Reply extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'id', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OU3)
     ..aOM<Error>(2, _omitFieldNames ? '' : 'error', subBuilder: Error.create)
     ..aOM<Push>(4, _omitFieldNames ? '' : 'push', subBuilder: Push.create)
     ..aOM<ConnectResult>(5, _omitFieldNames ? '' : 'connect',
@@ -494,7 +498,7 @@ class Reply extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Reply clone() => deepCopy();
+  Reply clone() => Reply()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Reply copyWith(void Function(Reply) updates) =>
       super.copyWith((message) => updates(message as Reply)) as Reply;
@@ -506,6 +510,7 @@ class Reply extends $pb.GeneratedMessage {
   static Reply create() => Reply._();
   @$core.override
   Reply createEmptyInstance() => create();
+  static $pb.PbList<Reply> createRepeated() => $pb.PbList<Reply>();
   @$core.pragma('dart2js:noInline')
   static Reply getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Reply>(create);
@@ -735,7 +740,7 @@ class Push extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Push clone() => deepCopy();
+  Push clone() => Push()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Push copyWith(void Function(Push) updates) =>
       super.copyWith((message) => updates(message as Push)) as Push;
@@ -747,6 +752,7 @@ class Push extends $pb.GeneratedMessage {
   static Push create() => Push._();
   @$core.override
   Push createEmptyInstance() => create();
+  static $pb.PbList<Push> createRepeated() => $pb.PbList<Push>();
   @$core.pragma('dart2js:noInline')
   static Push getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Push>(create);
@@ -911,7 +917,7 @@ class ClientInfo extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ClientInfo clone() => deepCopy();
+  ClientInfo clone() => ClientInfo()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ClientInfo copyWith(void Function(ClientInfo) updates) =>
       super.copyWith((message) => updates(message as ClientInfo)) as ClientInfo;
@@ -923,6 +929,7 @@ class ClientInfo extends $pb.GeneratedMessage {
   static ClientInfo create() => ClientInfo._();
   @$core.override
   ClientInfo createEmptyInstance() => create();
+  static $pb.PbList<ClientInfo> createRepeated() => $pb.PbList<ClientInfo>();
   @$core.pragma('dart2js:noInline')
   static ClientInfo getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ClientInfo>(create);
@@ -1018,7 +1025,7 @@ class Publication extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Publication clone() => deepCopy();
+  Publication clone() => Publication()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Publication copyWith(void Function(Publication) updates) =>
       super.copyWith((message) => updates(message as Publication))
@@ -1031,6 +1038,7 @@ class Publication extends $pb.GeneratedMessage {
   static Publication create() => Publication._();
   @$core.override
   Publication createEmptyInstance() => create();
+  static $pb.PbList<Publication> createRepeated() => $pb.PbList<Publication>();
   @$core.pragma('dart2js:noInline')
   static Publication getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<Publication>(create);
@@ -1125,7 +1133,7 @@ class Join extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Join clone() => deepCopy();
+  Join clone() => Join()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Join copyWith(void Function(Join) updates) =>
       super.copyWith((message) => updates(message as Join)) as Join;
@@ -1137,6 +1145,7 @@ class Join extends $pb.GeneratedMessage {
   static Join create() => Join._();
   @$core.override
   Join createEmptyInstance() => create();
+  static $pb.PbList<Join> createRepeated() => $pb.PbList<Join>();
   @$core.pragma('dart2js:noInline')
   static Join getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Join>(create);
@@ -1183,7 +1192,7 @@ class Leave extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Leave clone() => deepCopy();
+  Leave clone() => Leave()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Leave copyWith(void Function(Leave) updates) =>
       super.copyWith((message) => updates(message as Leave)) as Leave;
@@ -1195,6 +1204,7 @@ class Leave extends $pb.GeneratedMessage {
   static Leave create() => Leave._();
   @$core.override
   Leave createEmptyInstance() => create();
+  static $pb.PbList<Leave> createRepeated() => $pb.PbList<Leave>();
   @$core.pragma('dart2js:noInline')
   static Leave getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Leave>(create);
@@ -1238,12 +1248,12 @@ class Unsubscribe extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aI(2, _omitFieldNames ? '' : 'code', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OU3)
     ..aOS(3, _omitFieldNames ? '' : 'reason')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Unsubscribe clone() => deepCopy();
+  Unsubscribe clone() => Unsubscribe()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Unsubscribe copyWith(void Function(Unsubscribe) updates) =>
       super.copyWith((message) => updates(message as Unsubscribe))
@@ -1256,6 +1266,7 @@ class Unsubscribe extends $pb.GeneratedMessage {
   static Unsubscribe create() => Unsubscribe._();
   @$core.override
   Unsubscribe createEmptyInstance() => create();
+  static $pb.PbList<Unsubscribe> createRepeated() => $pb.PbList<Unsubscribe>();
   @$core.pragma('dart2js:noInline')
   static Unsubscribe getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<Unsubscribe>(create);
@@ -1322,7 +1333,7 @@ class Subscribe extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Subscribe clone() => deepCopy();
+  Subscribe clone() => Subscribe()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Subscribe copyWith(void Function(Subscribe) updates) =>
       super.copyWith((message) => updates(message as Subscribe)) as Subscribe;
@@ -1334,6 +1345,7 @@ class Subscribe extends $pb.GeneratedMessage {
   static Subscribe create() => Subscribe._();
   @$core.override
   Subscribe createEmptyInstance() => create();
+  static $pb.PbList<Subscribe> createRepeated() => $pb.PbList<Subscribe>();
   @$core.pragma('dart2js:noInline')
   static Subscribe getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Subscribe>(create);
@@ -1414,7 +1426,7 @@ class Message extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Message clone() => deepCopy();
+  Message clone() => Message()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Message copyWith(void Function(Message) updates) =>
       super.copyWith((message) => updates(message as Message)) as Message;
@@ -1426,6 +1438,7 @@ class Message extends $pb.GeneratedMessage {
   static Message create() => Message._();
   @$core.override
   Message createEmptyInstance() => create();
+  static $pb.PbList<Message> createRepeated() => $pb.PbList<Message>();
   @$core.pragma('dart2js:noInline')
   static Message getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Message>(create);
@@ -1496,8 +1509,8 @@ class Connect extends $pb.GeneratedMessage {
         valueDefaultOrMaker: SubscribeResult.getDefault,
         packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..aOB(5, _omitFieldNames ? '' : 'expires')
-    ..aI(6, _omitFieldNames ? '' : 'ttl', fieldType: $pb.PbFieldType.OU3)
-    ..aI(7, _omitFieldNames ? '' : 'ping', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(6, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'ping', $pb.PbFieldType.OU3)
     ..aOB(8, _omitFieldNames ? '' : 'pong')
     ..aOS(9, _omitFieldNames ? '' : 'session')
     ..aOS(10, _omitFieldNames ? '' : 'node')
@@ -1505,7 +1518,7 @@ class Connect extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Connect clone() => deepCopy();
+  Connect clone() => Connect()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Connect copyWith(void Function(Connect) updates) =>
       super.copyWith((message) => updates(message as Connect)) as Connect;
@@ -1517,6 +1530,7 @@ class Connect extends $pb.GeneratedMessage {
   static Connect create() => Connect._();
   @$core.override
   Connect createEmptyInstance() => create();
+  static $pb.PbList<Connect> createRepeated() => $pb.PbList<Connect>();
   @$core.pragma('dart2js:noInline')
   static Connect getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Connect>(create);
@@ -1643,13 +1657,13 @@ class Disconnect extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'code', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'code', $pb.PbFieldType.OU3)
     ..aOS(2, _omitFieldNames ? '' : 'reason')
     ..aOB(3, _omitFieldNames ? '' : 'reconnect')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Disconnect clone() => deepCopy();
+  Disconnect clone() => Disconnect()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Disconnect copyWith(void Function(Disconnect) updates) =>
       super.copyWith((message) => updates(message as Disconnect)) as Disconnect;
@@ -1661,6 +1675,7 @@ class Disconnect extends $pb.GeneratedMessage {
   static Disconnect create() => Disconnect._();
   @$core.override
   Disconnect createEmptyInstance() => create();
+  static $pb.PbList<Disconnect> createRepeated() => $pb.PbList<Disconnect>();
   @$core.pragma('dart2js:noInline')
   static Disconnect getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<Disconnect>(create);
@@ -1720,11 +1735,11 @@ class Refresh extends $pb.GeneratedMessage {
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'expires')
-    ..aI(2, _omitFieldNames ? '' : 'ttl', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Refresh clone() => deepCopy();
+  Refresh clone() => Refresh()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Refresh copyWith(void Function(Refresh) updates) =>
       super.copyWith((message) => updates(message as Refresh)) as Refresh;
@@ -1736,6 +1751,7 @@ class Refresh extends $pb.GeneratedMessage {
   static Refresh create() => Refresh._();
   @$core.override
   Refresh createEmptyInstance() => create();
+  static $pb.PbList<Refresh> createRepeated() => $pb.PbList<Refresh>();
   @$core.pragma('dart2js:noInline')
   static Refresh getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Refresh>(create);
@@ -1816,7 +1832,7 @@ class ConnectRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ConnectRequest clone() => deepCopy();
+  ConnectRequest clone() => ConnectRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ConnectRequest copyWith(void Function(ConnectRequest) updates) =>
       super.copyWith((message) => updates(message as ConnectRequest))
@@ -1829,6 +1845,8 @@ class ConnectRequest extends $pb.GeneratedMessage {
   static ConnectRequest create() => ConnectRequest._();
   @$core.override
   ConnectRequest createEmptyInstance() => create();
+  static $pb.PbList<ConnectRequest> createRepeated() =>
+      $pb.PbList<ConnectRequest>();
   @$core.pragma('dart2js:noInline')
   static ConnectRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ConnectRequest>(create);
@@ -1932,7 +1950,7 @@ class ConnectResult extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'client')
     ..aOS(2, _omitFieldNames ? '' : 'version')
     ..aOB(3, _omitFieldNames ? '' : 'expires')
-    ..aI(4, _omitFieldNames ? '' : 'ttl', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
     ..a<$core.List<$core.int>>(
         5, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
     ..m<$core.String, SubscribeResult>(6, _omitFieldNames ? '' : 'subs',
@@ -1942,7 +1960,7 @@ class ConnectResult extends $pb.GeneratedMessage {
         valueCreator: SubscribeResult.create,
         valueDefaultOrMaker: SubscribeResult.getDefault,
         packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
-    ..aI(7, _omitFieldNames ? '' : 'ping', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'ping', $pb.PbFieldType.OU3)
     ..aOB(8, _omitFieldNames ? '' : 'pong')
     ..aOS(9, _omitFieldNames ? '' : 'session')
     ..aOS(10, _omitFieldNames ? '' : 'node')
@@ -1950,7 +1968,7 @@ class ConnectResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ConnectResult clone() => deepCopy();
+  ConnectResult clone() => ConnectResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ConnectResult copyWith(void Function(ConnectResult) updates) =>
       super.copyWith((message) => updates(message as ConnectResult))
@@ -1963,6 +1981,8 @@ class ConnectResult extends $pb.GeneratedMessage {
   static ConnectResult create() => ConnectResult._();
   @$core.override
   ConnectResult createEmptyInstance() => create();
+  static $pb.PbList<ConnectResult> createRepeated() =>
+      $pb.PbList<ConnectResult>();
   @$core.pragma('dart2js:noInline')
   static ConnectResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ConnectResult>(create);
@@ -2089,7 +2109,7 @@ class RefreshRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RefreshRequest clone() => deepCopy();
+  RefreshRequest clone() => RefreshRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RefreshRequest copyWith(void Function(RefreshRequest) updates) =>
       super.copyWith((message) => updates(message as RefreshRequest))
@@ -2102,6 +2122,8 @@ class RefreshRequest extends $pb.GeneratedMessage {
   static RefreshRequest create() => RefreshRequest._();
   @$core.override
   RefreshRequest createEmptyInstance() => create();
+  static $pb.PbList<RefreshRequest> createRepeated() =>
+      $pb.PbList<RefreshRequest>();
   @$core.pragma('dart2js:noInline')
   static RefreshRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<RefreshRequest>(create);
@@ -2149,11 +2171,11 @@ class RefreshResult extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'client')
     ..aOS(2, _omitFieldNames ? '' : 'version')
     ..aOB(3, _omitFieldNames ? '' : 'expires')
-    ..aI(4, _omitFieldNames ? '' : 'ttl', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RefreshResult clone() => deepCopy();
+  RefreshResult clone() => RefreshResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RefreshResult copyWith(void Function(RefreshResult) updates) =>
       super.copyWith((message) => updates(message as RefreshResult))
@@ -2166,6 +2188,8 @@ class RefreshResult extends $pb.GeneratedMessage {
   static RefreshResult create() => RefreshResult._();
   @$core.override
   RefreshResult createEmptyInstance() => create();
+  static $pb.PbList<RefreshResult> createRepeated() =>
+      $pb.PbList<RefreshResult>();
   @$core.pragma('dart2js:noInline')
   static RefreshResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<RefreshResult>(create);
@@ -2271,7 +2295,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscribeRequest clone() => deepCopy();
+  SubscribeRequest clone() => SubscribeRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   SubscribeRequest copyWith(void Function(SubscribeRequest) updates) =>
       super.copyWith((message) => updates(message as SubscribeRequest))
@@ -2284,6 +2308,8 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   static SubscribeRequest create() => SubscribeRequest._();
   @$core.override
   SubscribeRequest createEmptyInstance() => create();
+  static $pb.PbList<SubscribeRequest> createRepeated() =>
+      $pb.PbList<SubscribeRequest>();
   @$core.pragma('dart2js:noInline')
   static SubscribeRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SubscribeRequest>(create);
@@ -2446,10 +2472,11 @@ class SubscribeResult extends $pb.GeneratedMessage {
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'expires')
-    ..aI(2, _omitFieldNames ? '' : 'ttl', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
     ..aOB(3, _omitFieldNames ? '' : 'recoverable')
     ..aOS(6, _omitFieldNames ? '' : 'epoch')
-    ..pPM<Publication>(7, _omitFieldNames ? '' : 'publications',
+    ..pc<Publication>(
+        7, _omitFieldNames ? '' : 'publications', $pb.PbFieldType.PM,
         subBuilder: Publication.create)
     ..aOB(8, _omitFieldNames ? '' : 'recovered')
     ..a<$fixnum.Int64>(9, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6,
@@ -2463,7 +2490,7 @@ class SubscribeResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscribeResult clone() => deepCopy();
+  SubscribeResult clone() => SubscribeResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   SubscribeResult copyWith(void Function(SubscribeResult) updates) =>
       super.copyWith((message) => updates(message as SubscribeResult))
@@ -2476,6 +2503,8 @@ class SubscribeResult extends $pb.GeneratedMessage {
   static SubscribeResult create() => SubscribeResult._();
   @$core.override
   SubscribeResult createEmptyInstance() => create();
+  static $pb.PbList<SubscribeResult> createRepeated() =>
+      $pb.PbList<SubscribeResult>();
   @$core.pragma('dart2js:noInline')
   static SubscribeResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SubscribeResult>(create);
@@ -2614,7 +2643,7 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubRefreshRequest clone() => deepCopy();
+  SubRefreshRequest clone() => SubRefreshRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   SubRefreshRequest copyWith(void Function(SubRefreshRequest) updates) =>
       super.copyWith((message) => updates(message as SubRefreshRequest))
@@ -2627,6 +2656,8 @@ class SubRefreshRequest extends $pb.GeneratedMessage {
   static SubRefreshRequest create() => SubRefreshRequest._();
   @$core.override
   SubRefreshRequest createEmptyInstance() => create();
+  static $pb.PbList<SubRefreshRequest> createRepeated() =>
+      $pb.PbList<SubRefreshRequest>();
   @$core.pragma('dart2js:noInline')
   static SubRefreshRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SubRefreshRequest>(create);
@@ -2677,11 +2708,11 @@ class SubRefreshResult extends $pb.GeneratedMessage {
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'expires')
-    ..aI(2, _omitFieldNames ? '' : 'ttl', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'ttl', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubRefreshResult clone() => deepCopy();
+  SubRefreshResult clone() => SubRefreshResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   SubRefreshResult copyWith(void Function(SubRefreshResult) updates) =>
       super.copyWith((message) => updates(message as SubRefreshResult))
@@ -2694,6 +2725,8 @@ class SubRefreshResult extends $pb.GeneratedMessage {
   static SubRefreshResult create() => SubRefreshResult._();
   @$core.override
   SubRefreshResult createEmptyInstance() => create();
+  static $pb.PbList<SubRefreshResult> createRepeated() =>
+      $pb.PbList<SubRefreshResult>();
   @$core.pragma('dart2js:noInline')
   static SubRefreshResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SubRefreshResult>(create);
@@ -2745,7 +2778,7 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  UnsubscribeRequest clone() => deepCopy();
+  UnsubscribeRequest clone() => UnsubscribeRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   UnsubscribeRequest copyWith(void Function(UnsubscribeRequest) updates) =>
       super.copyWith((message) => updates(message as UnsubscribeRequest))
@@ -2758,6 +2791,8 @@ class UnsubscribeRequest extends $pb.GeneratedMessage {
   static UnsubscribeRequest create() => UnsubscribeRequest._();
   @$core.override
   UnsubscribeRequest createEmptyInstance() => create();
+  static $pb.PbList<UnsubscribeRequest> createRepeated() =>
+      $pb.PbList<UnsubscribeRequest>();
   @$core.pragma('dart2js:noInline')
   static UnsubscribeRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<UnsubscribeRequest>(create);
@@ -2793,7 +2828,7 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  UnsubscribeResult clone() => deepCopy();
+  UnsubscribeResult clone() => UnsubscribeResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   UnsubscribeResult copyWith(void Function(UnsubscribeResult) updates) =>
       super.copyWith((message) => updates(message as UnsubscribeResult))
@@ -2806,6 +2841,8 @@ class UnsubscribeResult extends $pb.GeneratedMessage {
   static UnsubscribeResult create() => UnsubscribeResult._();
   @$core.override
   UnsubscribeResult createEmptyInstance() => create();
+  static $pb.PbList<UnsubscribeResult> createRepeated() =>
+      $pb.PbList<UnsubscribeResult>();
   @$core.pragma('dart2js:noInline')
   static UnsubscribeResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<UnsubscribeResult>(create);
@@ -2843,7 +2880,7 @@ class PublishRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PublishRequest clone() => deepCopy();
+  PublishRequest clone() => PublishRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PublishRequest copyWith(void Function(PublishRequest) updates) =>
       super.copyWith((message) => updates(message as PublishRequest))
@@ -2856,6 +2893,8 @@ class PublishRequest extends $pb.GeneratedMessage {
   static PublishRequest create() => PublishRequest._();
   @$core.override
   PublishRequest createEmptyInstance() => create();
+  static $pb.PbList<PublishRequest> createRepeated() =>
+      $pb.PbList<PublishRequest>();
   @$core.pragma('dart2js:noInline')
   static PublishRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PublishRequest>(create);
@@ -2900,7 +2939,7 @@ class PublishResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PublishResult clone() => deepCopy();
+  PublishResult clone() => PublishResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PublishResult copyWith(void Function(PublishResult) updates) =>
       super.copyWith((message) => updates(message as PublishResult))
@@ -2913,6 +2952,8 @@ class PublishResult extends $pb.GeneratedMessage {
   static PublishResult create() => PublishResult._();
   @$core.override
   PublishResult createEmptyInstance() => create();
+  static $pb.PbList<PublishResult> createRepeated() =>
+      $pb.PbList<PublishResult>();
   @$core.pragma('dart2js:noInline')
   static PublishResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PublishResult>(create);
@@ -2946,7 +2987,7 @@ class PresenceRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PresenceRequest clone() => deepCopy();
+  PresenceRequest clone() => PresenceRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PresenceRequest copyWith(void Function(PresenceRequest) updates) =>
       super.copyWith((message) => updates(message as PresenceRequest))
@@ -2959,6 +3000,8 @@ class PresenceRequest extends $pb.GeneratedMessage {
   static PresenceRequest create() => PresenceRequest._();
   @$core.override
   PresenceRequest createEmptyInstance() => create();
+  static $pb.PbList<PresenceRequest> createRepeated() =>
+      $pb.PbList<PresenceRequest>();
   @$core.pragma('dart2js:noInline')
   static PresenceRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PresenceRequest>(create);
@@ -3007,7 +3050,7 @@ class PresenceResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PresenceResult clone() => deepCopy();
+  PresenceResult clone() => PresenceResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PresenceResult copyWith(void Function(PresenceResult) updates) =>
       super.copyWith((message) => updates(message as PresenceResult))
@@ -3020,6 +3063,8 @@ class PresenceResult extends $pb.GeneratedMessage {
   static PresenceResult create() => PresenceResult._();
   @$core.override
   PresenceResult createEmptyInstance() => create();
+  static $pb.PbList<PresenceResult> createRepeated() =>
+      $pb.PbList<PresenceResult>();
   @$core.pragma('dart2js:noInline')
   static PresenceResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PresenceResult>(create);
@@ -3056,7 +3101,8 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PresenceStatsRequest clone() => deepCopy();
+  PresenceStatsRequest clone() =>
+      PresenceStatsRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PresenceStatsRequest copyWith(void Function(PresenceStatsRequest) updates) =>
       super.copyWith((message) => updates(message as PresenceStatsRequest))
@@ -3069,6 +3115,8 @@ class PresenceStatsRequest extends $pb.GeneratedMessage {
   static PresenceStatsRequest create() => PresenceStatsRequest._();
   @$core.override
   PresenceStatsRequest createEmptyInstance() => create();
+  static $pb.PbList<PresenceStatsRequest> createRepeated() =>
+      $pb.PbList<PresenceStatsRequest>();
   @$core.pragma('dart2js:noInline')
   static PresenceStatsRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PresenceStatsRequest>(create);
@@ -3109,12 +3157,12 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'numClients', fieldType: $pb.PbFieldType.OU3)
-    ..aI(2, _omitFieldNames ? '' : 'numUsers', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'numClients', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'numUsers', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PresenceStatsResult clone() => deepCopy();
+  PresenceStatsResult clone() => PresenceStatsResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PresenceStatsResult copyWith(void Function(PresenceStatsResult) updates) =>
       super.copyWith((message) => updates(message as PresenceStatsResult))
@@ -3127,6 +3175,8 @@ class PresenceStatsResult extends $pb.GeneratedMessage {
   static PresenceStatsResult create() => PresenceStatsResult._();
   @$core.override
   PresenceStatsResult createEmptyInstance() => create();
+  static $pb.PbList<PresenceStatsResult> createRepeated() =>
+      $pb.PbList<PresenceStatsResult>();
   @$core.pragma('dart2js:noInline')
   static PresenceStatsResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PresenceStatsResult>(create);
@@ -3182,7 +3232,7 @@ class StreamPosition extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StreamPosition clone() => deepCopy();
+  StreamPosition clone() => StreamPosition()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   StreamPosition copyWith(void Function(StreamPosition) updates) =>
       super.copyWith((message) => updates(message as StreamPosition))
@@ -3195,6 +3245,8 @@ class StreamPosition extends $pb.GeneratedMessage {
   static StreamPosition create() => StreamPosition._();
   @$core.override
   StreamPosition createEmptyInstance() => create();
+  static $pb.PbList<StreamPosition> createRepeated() =>
+      $pb.PbList<StreamPosition>();
   @$core.pragma('dart2js:noInline')
   static StreamPosition getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<StreamPosition>(create);
@@ -3249,14 +3301,14 @@ class HistoryRequest extends $pb.GeneratedMessage {
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'channel')
-    ..aI(7, _omitFieldNames ? '' : 'limit')
+    ..a<$core.int>(7, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.O3)
     ..aOM<StreamPosition>(8, _omitFieldNames ? '' : 'since',
         subBuilder: StreamPosition.create)
     ..aOB(9, _omitFieldNames ? '' : 'reverse')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  HistoryRequest clone() => deepCopy();
+  HistoryRequest clone() => HistoryRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   HistoryRequest copyWith(void Function(HistoryRequest) updates) =>
       super.copyWith((message) => updates(message as HistoryRequest))
@@ -3269,6 +3321,8 @@ class HistoryRequest extends $pb.GeneratedMessage {
   static HistoryRequest create() => HistoryRequest._();
   @$core.override
   HistoryRequest createEmptyInstance() => create();
+  static $pb.PbList<HistoryRequest> createRepeated() =>
+      $pb.PbList<HistoryRequest>();
   @$core.pragma('dart2js:noInline')
   static HistoryRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<HistoryRequest>(create);
@@ -3340,7 +3394,8 @@ class HistoryResult extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
       createEmptyInstance: create)
-    ..pPM<Publication>(1, _omitFieldNames ? '' : 'publications',
+    ..pc<Publication>(
+        1, _omitFieldNames ? '' : 'publications', $pb.PbFieldType.PM,
         subBuilder: Publication.create)
     ..aOS(2, _omitFieldNames ? '' : 'epoch')
     ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU6,
@@ -3348,7 +3403,7 @@ class HistoryResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  HistoryResult clone() => deepCopy();
+  HistoryResult clone() => HistoryResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   HistoryResult copyWith(void Function(HistoryResult) updates) =>
       super.copyWith((message) => updates(message as HistoryResult))
@@ -3361,6 +3416,8 @@ class HistoryResult extends $pb.GeneratedMessage {
   static HistoryResult create() => HistoryResult._();
   @$core.override
   HistoryResult createEmptyInstance() => create();
+  static $pb.PbList<HistoryResult> createRepeated() =>
+      $pb.PbList<HistoryResult>();
   @$core.pragma('dart2js:noInline')
   static HistoryResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<HistoryResult>(create);
@@ -3408,7 +3465,7 @@ class PingRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PingRequest clone() => deepCopy();
+  PingRequest clone() => PingRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PingRequest copyWith(void Function(PingRequest) updates) =>
       super.copyWith((message) => updates(message as PingRequest))
@@ -3421,6 +3478,7 @@ class PingRequest extends $pb.GeneratedMessage {
   static PingRequest create() => PingRequest._();
   @$core.override
   PingRequest createEmptyInstance() => create();
+  static $pb.PbList<PingRequest> createRepeated() => $pb.PbList<PingRequest>();
   @$core.pragma('dart2js:noInline')
   static PingRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PingRequest>(create);
@@ -3447,7 +3505,7 @@ class PingResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  PingResult clone() => deepCopy();
+  PingResult clone() => PingResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   PingResult copyWith(void Function(PingResult) updates) =>
       super.copyWith((message) => updates(message as PingResult)) as PingResult;
@@ -3459,6 +3517,7 @@ class PingResult extends $pb.GeneratedMessage {
   static PingResult create() => PingResult._();
   @$core.override
   PingResult createEmptyInstance() => create();
+  static $pb.PbList<PingResult> createRepeated() => $pb.PbList<PingResult>();
   @$core.pragma('dart2js:noInline')
   static PingResult getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<PingResult>(create);
@@ -3496,7 +3555,7 @@ class RPCRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RPCRequest clone() => deepCopy();
+  RPCRequest clone() => RPCRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RPCRequest copyWith(void Function(RPCRequest) updates) =>
       super.copyWith((message) => updates(message as RPCRequest)) as RPCRequest;
@@ -3508,6 +3567,7 @@ class RPCRequest extends $pb.GeneratedMessage {
   static RPCRequest create() => RPCRequest._();
   @$core.override
   RPCRequest createEmptyInstance() => create();
+  static $pb.PbList<RPCRequest> createRepeated() => $pb.PbList<RPCRequest>();
   @$core.pragma('dart2js:noInline')
   static RPCRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<RPCRequest>(create);
@@ -3560,7 +3620,7 @@ class RPCResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RPCResult clone() => deepCopy();
+  RPCResult clone() => RPCResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RPCResult copyWith(void Function(RPCResult) updates) =>
       super.copyWith((message) => updates(message as RPCResult)) as RPCResult;
@@ -3572,6 +3632,7 @@ class RPCResult extends $pb.GeneratedMessage {
   static RPCResult create() => RPCResult._();
   @$core.override
   RPCResult createEmptyInstance() => create();
+  static $pb.PbList<RPCResult> createRepeated() => $pb.PbList<RPCResult>();
   @$core.pragma('dart2js:noInline')
   static RPCResult getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RPCResult>(create);
@@ -3615,7 +3676,7 @@ class SendRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SendRequest clone() => deepCopy();
+  SendRequest clone() => SendRequest()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   SendRequest copyWith(void Function(SendRequest) updates) =>
       super.copyWith((message) => updates(message as SendRequest))
@@ -3628,6 +3689,7 @@ class SendRequest extends $pb.GeneratedMessage {
   static SendRequest create() => SendRequest._();
   @$core.override
   SendRequest createEmptyInstance() => create();
+  static $pb.PbList<SendRequest> createRepeated() => $pb.PbList<SendRequest>();
   @$core.pragma('dart2js:noInline')
   static SendRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<SendRequest>(create);
@@ -3681,12 +3743,12 @@ class FilterNode extends $pb.GeneratedMessage {
     ..aOS(3, _omitFieldNames ? '' : 'cmp')
     ..aOS(4, _omitFieldNames ? '' : 'val')
     ..pPS(5, _omitFieldNames ? '' : 'vals')
-    ..pPM<FilterNode>(6, _omitFieldNames ? '' : 'nodes',
+    ..pc<FilterNode>(6, _omitFieldNames ? '' : 'nodes', $pb.PbFieldType.PM,
         subBuilder: FilterNode.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  FilterNode clone() => deepCopy();
+  FilterNode clone() => FilterNode()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   FilterNode copyWith(void Function(FilterNode) updates) =>
       super.copyWith((message) => updates(message as FilterNode)) as FilterNode;
@@ -3698,6 +3760,7 @@ class FilterNode extends $pb.GeneratedMessage {
   static FilterNode create() => FilterNode._();
   @$core.override
   FilterNode createEmptyInstance() => create();
+  static $pb.PbList<FilterNode> createRepeated() => $pb.PbList<FilterNode>();
   @$core.pragma('dart2js:noInline')
   static FilterNode getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<FilterNode>(create);
