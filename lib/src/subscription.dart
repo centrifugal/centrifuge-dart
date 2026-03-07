@@ -17,6 +17,8 @@ enum SubscriptionState { unsubscribed, subscribing, subscribed }
 abstract class Subscription {
   String get channel;
 
+  SubscriptionState get state;
+
   Stream<SubscribingEvent> get subscribing;
   Stream<SubscribedEvent> get subscribed;
   Stream<UnsubscribedEvent> get unsubscribed;
@@ -68,6 +70,7 @@ class SubscriptionImpl implements Subscription {
     }
   }
 
+  @override
   var state = SubscriptionState.unsubscribed;
 
   @override

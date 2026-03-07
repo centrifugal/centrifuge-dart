@@ -24,6 +24,20 @@ When a mobile application goes to the background there are OS-specific limitatio
 
 See also [PlugFox/spinify](https://github.com/PlugFox/spinify) for an alternative Dart (Flutter) real-time client SDK implementation.
 
+## Run tests locally
+
+Start test Centrifugo server:
+
+```
+docker compose up
+```
+
+Then run tests:
+
+```
+dart run test --reporter expanded
+```
+
 ## Instructions for maintainers/contributors
 
 ### How to update protobuf definitions
