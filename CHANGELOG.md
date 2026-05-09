@@ -1,3 +1,16 @@
+## [0.19.0]
+
+* Add `Client.close()` — disconnects and releases all client resources (closes every event stream and removes every subscription). The client is unusable after `close()`; subsequent public method calls throw `ClientClosedError`. Use `Client.disconnect()` for a temporary disconnect that keeps the client usable. [#106](https://github.com/centrifugal/centrifuge-dart/pull/106)
+* Multiple connection stability fixes, see [#106](https://github.com/centrifugal/centrifuge-dart/pull/106) for the full list. Highlights:
+  * `await client.disconnect()` now actually waits for transport teardown before resolving.
+  * Disconnect code `3014` (connection state invalidated) and unsubscribe code `2502` (subscription state invalidated) now correctly clear the relevant token and recovery state, forcing a fresh `getToken` on reconnect.
+  * WebSocket close code `1009` (message size limit) is now terminal (no auto-reconnect), matching the behavior in centrifuge-js.
+  * Cancelling a subscription while its `SubscribeRequest` is in flight now sends a cleanup `Unsubscribe` to the server, preventing a "ghost" server-side subscription that keeps pushing publications to the local sub.
+  * Concurrent `unsubscribe()`/disconnect during a subscribe round-trip can no longer flip the subscription state back to `Subscribed`.
+  * Several smaller correctness fixes around connect-mutex resets, async error handling, ping-reply decoding, and the `ClientDisconnectedError` thrown type.
+* Wire `ClientConfig.tlsSkipVerify` through to the WebSocket transport on VM/Flutter (`dart:io`) platforms — was a silent no-op before. Useful for `wss://` development against a self-signed cert. Web platforms ignore the flag, since the browser owns TLS validation. [#107](https://github.com/centrifugal/centrifuge-dart/pull/107)
+* Substantially expand the integration test suite: server-initiated reconnection scenarios, extended stream recovery edge cases, client/subscription lifecycle ordering, `getToken` retries, and several race-condition tests, all running against the docker-compose Centrifugo.
+
 ## [0.18.0]
 
 * Min SDK version is 3.7
