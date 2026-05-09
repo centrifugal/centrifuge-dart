@@ -46,6 +46,14 @@ class ClientConfig {
   /// translated to HTTP headers by Centrifugo in the proxy request to the backend.
   final Map<String, String> headers;
 
+  /// When true, skip TLS certificate verification on the WebSocket
+  /// upgrade request — useful for `wss://` development against a server
+  /// with a self-signed certificate.
+  ///
+  /// Only honored on VM/Flutter (`dart:io`) platforms; ignored in the
+  /// browser, where TLS validation is owned by the browser and cannot be
+  /// overridden from JavaScript. To trust a self-signed cert in the
+  /// browser, install it at the OS / browser level.
   final bool tlsSkipVerify;
   final Duration minReconnectDelay;
   final Duration maxReconnectDelay;
