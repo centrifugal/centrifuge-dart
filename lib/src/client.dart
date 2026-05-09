@@ -47,6 +47,12 @@ abstract class Client {
   ///
   Future<void> disconnect();
 
+  /// Close the client, disconnect from the server and release resources.
+  /// The client is unusable after this call — every subsequent method throws
+  /// [ClientClosedError]. Use [disconnect] for a temporary disconnect that
+  /// keeps the client usable.
+  Future<void> close();
+
   /// Set allows updating connection token.
   ///
   void setToken(String token);
@@ -133,6 +139,7 @@ class ClientImpl implements Client {
   int _pingInterval = 0;
   bool _sendPong = false;
   bool _inConnect = false;
+  bool _closed = false;
 
   @override
   State state = State.disconnected;
@@ -186,6 +193,7 @@ class ClientImpl implements Client {
 
   @override
   Future<void> connect() async {
+    _checkNotClosed();
     if (state == State.connected) {
       return;
     }
@@ -197,6 +205,12 @@ class ClientImpl implements Client {
     _connectingController.add(event);
     _reconnectAttempts = 0;
     await _connect();
+  }
+
+  void _checkNotClosed() {
+    if (_closed) {
+      throw ClientClosedError();
+    }
   }
 
   @override
@@ -211,13 +225,44 @@ class ClientImpl implements Client {
 
   @override
   Future<void> disconnect() async {
+    _checkNotClosed();
     _reconnectAttempts = 0;
     await _processDisconnect(
         code: disconnectedCodeDisconnectCalled, reason: 'disconnect called', reconnect: false);
   }
 
   @override
+  Future<void> close() async {
+    if (_closed) {
+      return;
+    }
+    _closed = true;
+    _reconnectAttempts = 0;
+    await _processDisconnect(
+        code: disconnectedCodeClientClosed, reason: 'client closed', reconnect: false);
+    for (final subscription in _subscriptions.values) {
+      subscription.close();
+    }
+    _subscriptions.clear();
+    _serverSubs.clear();
+    await Future.wait<void>([
+      _connectedController.close(),
+      _disconnectedController.close(),
+      _connectingController.close(),
+      _errorController.close(),
+      _messageController.close(),
+      _subscribedController.close(),
+      _subscribingController.close(),
+      _unsubscribedController.close(),
+      _publicationController.close(),
+      _joinController.close(),
+      _leaveController.close(),
+    ]);
+  }
+
+  @override
   Future<void> ready() {
+    _checkNotClosed();
     if (state == State.connected) {
       return Future.value();
     }
@@ -311,6 +356,7 @@ class ClientImpl implements Client {
 
   @override
   Subscription newSubscription(String channel, [SubscriptionConfig? config]) {
+    _checkNotClosed();
     if (_subscriptions.containsKey(channel)) {
       throw Exception("Subscription to a channel already exists in client's internal registry");
     }
@@ -336,6 +382,18 @@ class ClientImpl implements Client {
       {required int code, required String reason, required bool reconnect}) async {
     if (state == State.disconnected) {
       return;
+    }
+    if (code == 3014) {
+      // State invalidated: drop the connection token so the next connect
+      // calls getToken again, and reset all subscription state so each
+      // resubscribe starts from scratch. Centrifugo can deliver 3014 either
+      // as a protocol Disconnect push or as the raw WebSocket close code,
+      // so the handling lives here to cover both paths.
+      _token = '';
+      _refreshRequired = true;
+      for (final s in _subscriptions.values) {
+        s.invalidateState();
+      }
     }
     _reconnectTimer?.cancel();
     _refreshTimer?.cancel();
@@ -383,8 +441,9 @@ class ClientImpl implements Client {
     }
   }
 
-  void _failUnauthorized() {
-    _processDisconnect(code: disconnectedCodeUnauthorized, reason: 'unauthorized', reconnect: false);
+  Future<void> _failUnauthorized() async {
+    await _processDisconnect(
+        code: disconnectedCodeUnauthorized, reason: 'unauthorized', reconnect: false);
   }
 
   void _scheduleReconnect() {
@@ -406,7 +465,17 @@ class ClientImpl implements Client {
       return;
     }
     _inConnect = true;
+    try {
+      await _connectInner();
+    } finally {
+      // Safety net: _processDisconnect normally clears this earlier so user
+      // events fire with the mutex released, but ensure we never leave it
+      // latched on success or unexpected exceptions either.
+      _inConnect = false;
+    }
+  }
 
+  Future<void> _connectInner() async {
     if (_refreshRequired || (_token == '' && _config.getToken != null)) {
       final event = ConnectionTokenEvent();
       try {
@@ -415,13 +484,11 @@ class ClientImpl implements Client {
         _refreshRequired = false;
       } catch (ex) {
         if (ex is UnauthorizedException) {
-          _inConnect = false;
-          _failUnauthorized();
+          await _failUnauthorized();
           return;
         }
         final event = ErrorEvent(RefreshError(ex));
         _errorController.add(event);
-        _inConnect = false;
         if (state == State.connecting) {
           _scheduleReconnect();
         }
@@ -430,7 +497,6 @@ class ClientImpl implements Client {
     }
 
     if (state != State.connecting) {
-      _inConnect = false;
       return;
     }
 
@@ -461,12 +527,10 @@ class ClientImpl implements Client {
       if (state == State.connecting) {
         _scheduleReconnect();
       }
-      _inConnect = false;
       return;
     }
 
     if (state != State.connecting) {
-      _inConnect = false;
       await transport.close();
       return;
     }
@@ -504,7 +568,6 @@ class ClientImpl implements Client {
       );
 
       if (state != State.connecting) {
-        _inConnect = false;
         await transport.close();
         return;
       }
@@ -545,7 +608,6 @@ class ClientImpl implements Client {
       if (result.expires) {
         _refreshTimer = Timer(Duration(seconds: result.ttl), () {
           if (state != State.connected) {
-            _inConnect = false;
             return;
           }
           _refreshToken();
@@ -559,7 +621,6 @@ class ClientImpl implements Client {
       }
     } catch (err) {
       if (state != State.connecting) {
-        _inConnect = false;
         return;
       }
       final event = ErrorEvent(ConnectError(err));
@@ -569,27 +630,23 @@ class ClientImpl implements Client {
           // token expired.
           _refreshRequired = true;
           await transport.close();
-          _inConnect = false;
           return;
         } else if (!err.temporary) {
-          _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+          await _processDisconnect(code: err.code, reason: err.message, reconnect: false);
           await transport.close();
-          _inConnect = false;
           return;
         } else {
-          _processDisconnect(code: err.code, reason: err.message, reconnect: true);
+          await _processDisconnect(code: err.code, reason: err.message, reconnect: true);
           await transport.close();
-          _inConnect = false;
           return;
         }
       } else {
-        _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
+        await _processDisconnect(
+            code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
         await transport.close();
-        _inConnect = false;
         return;
       }
     }
-    _inConnect = false;
     if (state != State.connected) {
       await transport.close();
       return;
@@ -601,7 +658,7 @@ class ClientImpl implements Client {
       if (state != State.connected) {
         return;
       }
-      processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
+      await processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
     });
   }
 
@@ -618,7 +675,7 @@ class ClientImpl implements Client {
         return;
       }
       if (ex is UnauthorizedException) {
-        _failUnauthorized();
+        await _failUnauthorized();
         return;
       }
       final event = ErrorEvent(RefreshError(ex));
@@ -668,7 +725,7 @@ class ClientImpl implements Client {
           });
           return;
         }
-        _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+        await _processDisconnect(code: err.code, reason: err.message, reconnect: false);
         return;
       }
       _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
@@ -742,10 +799,10 @@ class ClientImpl implements Client {
     _messageController.add(event);
   }
 
-  void _handleDisconnect(protocol.Disconnect disconnect) {
+  Future<void> _handleDisconnect(protocol.Disconnect disconnect) async {
     final code = disconnect.code;
     final bool reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
-    _processDisconnect(code: disconnect.code, reason: disconnect.reason, reconnect: reconnect);
+    await _processDisconnect(code: disconnect.code, reason: disconnect.reason, reconnect: reconnect);
   }
 
   void _handleSubscribe(String channel, protocol.Subscribe subscribe) {
@@ -758,6 +815,14 @@ class ClientImpl implements Client {
   void _handleUnsubscribe(String channel, protocol.Unsubscribe unsubscribe) {
     final subscription = _subscriptions[channel];
     if (subscription != null) {
+      if (unsubscribe.code == 2502) {
+        // State invalidated for this subscription: drop sub-level token and
+        // recovery position so the resubscribe gets a fresh token and does
+        // a full re-sync from the current head.
+        subscription.invalidateState();
+        subscription.moveToSubscribing(unsubscribe.code, unsubscribe.reason);
+        return;
+      }
       if (unsubscribe.code < 2500) {
         subscription.moveToUnsubscribed(unsubscribe.code, unsubscribe.reason, false);
       } else {
@@ -806,6 +871,9 @@ class ClientImpl implements Client {
     } else if (push.hasMessage()) {
       _handleMessage(push.message);
     } else if (push.hasDisconnect()) {
+      // Fire-and-forget: state changes inside _processDisconnect happen
+      // synchronously; only transport.close() runs detached. The websocket
+      // onDone callback that follows the server-initiated close is idempotent.
       _handleDisconnect(push.disconnect);
     }
   }
@@ -844,12 +912,13 @@ class ClientImpl implements Client {
   }
 
   @internal
-  void processDisconnect({required int code, required String reason, required bool reconnect}) async {
+  Future<void> processDisconnect(
+      {required int code, required String reason, required bool reconnect}) {
     return _processDisconnect(code: code, reason: reason, reconnect: reconnect);
   }
 
   @internal
-  void closeTransport() async => await _transport?.close();
+  Future<void> closeTransport() async => await _transport?.close();
 }
 
 final _random = new Random();
