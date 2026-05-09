@@ -20,10 +20,12 @@ class TransportConfig {
   TransportConfig({
     this.headers = const <String, dynamic>{},
     this.timeout = const Duration(seconds: 5),
+    this.tlsSkipVerify = false,
   });
 
   final Map<String, dynamic> headers;
   final Duration timeout;
+  final bool tlsSkipVerify;
 }
 
 Transport protobufTransportBuilder({
@@ -39,6 +41,7 @@ Transport protobufTransportBuilder({
         Uri.parse(url),
         protocols: ['centrifuge-protobuf'],
         headers: config.headers,
+        tlsSkipVerify: config.tlsSkipVerify,
       );
       await channel.ready;
       return channel;

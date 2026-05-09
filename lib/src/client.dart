@@ -500,8 +500,12 @@ class ClientImpl implements Client {
       return;
     }
 
-    final transport =
-        _transportBuilder(url: _url, config: TransportConfig(headers: _headers, timeout: _config.timeout));
+    final transport = _transportBuilder(
+        url: _url,
+        config: TransportConfig(
+            headers: _headers,
+            timeout: _config.timeout,
+            tlsSkipVerify: _config.tlsSkipVerify));
 
     try {
       await transport.open(_onPush, onError: (dynamic error) {
