@@ -56,6 +56,10 @@ class SubscriptionImpl implements Subscription {
   bool _joinLeave = false;
   bool _deltaNegotiated = false;
   List<int>? _prevData;
+  // True while a SubscribeRequest is on the wire awaiting a reply. Used by
+  // moveToUnsubscribed to decide whether the server-side subscription needs
+  // an explicit cleanup UnsubscribeRequest if the user cancels mid-flight.
+  bool _inflight = false;
 
   SubscriptionImpl(this.channel, this._client, this._config) {
     _token = _config.token;
@@ -141,6 +145,20 @@ class SubscriptionImpl implements Subscription {
     _subscribingController.close();
   }
 
+  /// Drop all per-subscription state that depends on the server having a
+  /// matching session: token, recovery position, and delta baseline. The
+  /// next subscribe will re-fetch a fresh token and do a full re-sync.
+  /// Used when the server signals state invalidation (e.g. unsubscribe code
+  /// 2502 for this channel, or disconnect code 3014 at the connection level).
+  @internal
+  void invalidateState() {
+    _token = '';
+    _offset = null;
+    _epoch = null;
+    _recover = false;
+    _prevData = null;
+  }
+
   @internal
   Future<void> moveToUnsubscribed(int code, String reason, bool sendUnsubscribe) async {
     if (state == SubscriptionState.unsubscribed) {
@@ -148,19 +166,39 @@ class SubscriptionImpl implements Subscription {
     }
     _resubscribeTimer?.cancel();
     final prevState = state;
+    final wasInflight = _inflight;
+    _inflight = false;
     state = SubscriptionState.unsubscribed;
     _errorReadyFutures(SubscriptionUnsubscribedError());
     if (prevState == SubscriptionState.subscribed) {
       _clearSubscribedState();
     }
-    if (sendUnsubscribe && prevState == SubscriptionState.subscribed && _client.state == State.connected) {
+    // Send a cleanup Unsubscribe to the server when:
+    //   - we were Subscribed (the normal case), or
+    //   - we were Subscribing AND a SubscribeRequest is currently in flight,
+    //     because the server may already have created (or be about to create)
+    //     a subscription from that request and would otherwise keep pushing
+    //     publications to a sub that the client has cancelled.
+    final shouldSend = sendUnsubscribe &&
+        _client.state == State.connected &&
+        (prevState == SubscriptionState.subscribed ||
+            (prevState == SubscriptionState.subscribing && wasInflight));
+    if (shouldSend) {
       try {
         await _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel);
-      } on Exception {
-        _client.processDisconnect(
-            code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
-        _client.closeTransport();
-        return;
+      } catch (_) {
+        // Sub was Subscribed and the cleanup Unsubscribe failed — connection
+        // and server-side state may have diverged, so trigger a reconnect to
+        // resync. For the inflight-cancel case (was Subscribing) we let it
+        // slide: if the server-side sub was created at all, the server will
+        // tear it down on the next disconnect or treat any stray pubs as
+        // unknown channels.
+        if (prevState == SubscriptionState.subscribed) {
+          await _client.processDisconnect(
+              code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
+          await _client.closeTransport();
+          return;
+        }
       }
     }
     _addUnsubscribe(UnsubscribedEvent(code, reason));
@@ -329,7 +367,20 @@ class SubscriptionImpl implements Subscription {
       request.positioned = _positioned;
       request.recoverable = _recoverable;
       request.joinLeave = _joinLeave;
-      final result = await _client.sendSubscribe(request);
+      _inflight = true;
+      final protocol.SubscribeResult result;
+      try {
+        result = await _client.sendSubscribe(request);
+      } finally {
+        _inflight = false;
+      }
+      if (state != SubscriptionState.subscribing || _client.state != State.connected) {
+        // Concurrent unsubscribe / disconnect happened while we were awaiting
+        // the subscribe reply. moveToUnsubscribed already sent a cleanup
+        // Unsubscribe to the server (it saw _inflight=true), so the server
+        // won't keep this sub around. Drop the result on the floor.
+        return;
+      }
       if (result.recoverable) {
         _recover = true;
         _epoch = result.epoch;
@@ -355,9 +406,9 @@ class SubscriptionImpl implements Subscription {
         }
       }
     } on TimeoutException {
-      _client.processDisconnect(
+      await _client.processDisconnect(
           code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
-      _client.closeTransport();
+      await _client.closeTransport();
       return;
     } catch (err) {
       if (state != SubscriptionState.subscribing || _client.state != State.connected) {

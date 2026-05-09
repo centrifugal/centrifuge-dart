@@ -18,6 +18,13 @@ class ClientDisconnectedError {
   }
 }
 
+class ClientClosedError {
+  @override
+  String toString() {
+    return 'Client closed';
+  }
+}
+
 class SubscriptionUnsubscribedError {
   @override
   String toString() {

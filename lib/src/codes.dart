@@ -2,6 +2,7 @@ const disconnectedCodeDisconnectCalled = 0;
 const disconnectedCodeUnauthorized = 1;
 const disconnectCodeBadProtocol = 2;
 const disconnectCodeMessageSizeLimit = 3;
+const disconnectedCodeClientClosed = 4;
 
 const connectingCodeConnectCalled = 0;
 const connectingCodeTransportClosed = 1;

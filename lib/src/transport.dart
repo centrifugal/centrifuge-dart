@@ -109,7 +109,7 @@ class Transport implements GeneratedMessageSender {
         result.mergeFromMessage(reply.publish);
         return result;
       } else if (reply.hasPing()) {
-        result.mergeFromMessage(reply.publish);
+        result.mergeFromMessage(reply.ping);
         return result;
       } else if (reply.hasUnsubscribe()) {
         result.mergeFromMessage(reply.unsubscribe);
@@ -147,7 +147,7 @@ class Transport implements GeneratedMessageSender {
     Req request,
   ) async {
     if (_socket == null) {
-      throw centrifuge.ClientDisconnectedError;
+      throw centrifuge.ClientDisconnectedError();
     }
     final command = _createCommand(
       request,
@@ -205,7 +205,7 @@ class Transport implements GeneratedMessageSender {
     final completer = Completer<Reply>.sync();
 
     if (_socket == null) {
-      throw centrifuge.ClientDisconnectedError;
+      throw centrifuge.ClientDisconnectedError();
     }
 
     _completers[command.id] = completer;
@@ -220,7 +220,7 @@ class Transport implements GeneratedMessageSender {
   void Function() _onDone(void Function(int, String, bool)? onDone) {
     return () {
       _completers.forEach((key, value) {
-        _completers[key]?.completeError(centrifuge.ClientDisconnectedError);
+        _completers[key]?.completeError(centrifuge.ClientDisconnectedError());
       });
       _completers = <int, Completer<GeneratedMessage>>{};
       int code = connectingCodeTransportClosed;
@@ -236,6 +236,7 @@ class Transport implements GeneratedMessageSender {
           if (code == 1009) {
             code = disconnectCodeMessageSizeLimit;
             reason = "message size limit exceeded";
+            reconnect = false;
           } else {
             // We expose codes defined by Centrifuge protocol, hiding
             // details about transport-specific error codes. We may have extra
