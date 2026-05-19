@@ -1,3 +1,17 @@
+## [0.19.1]
+
+* More connection and subscription stability fixes [#109](https://github.com/centrifugal/centrifuge-dart/pull/109):
+  * Fix `Client.send()` to use `SendRequest` instead of the deprecated `Message` type so async messages reach the server again.
+  * Server-initiated unsubscribes that move the subscription to `subscribing` (codes 2500/3007 and other temporary codes) now trigger an immediate resubscribe instead of waiting for a reconnect that may never come.
+  * Subscription resubscribe is now guarded against re-entry, and bails out cleanly if `unsubscribe()` or `disconnect()` arrives while `getToken` is awaiting.
+  * `Client.close()` and `Subscription.close()` no longer emit error/unsubscribed events after the resource is closed; pending `ready()` futures on a closed subscription are completed with `SubscriptionUnsubscribedError` and any timers are cancelled.
+  * `ClientDisconnectedError` thrown by an in-flight `ConnectRequest` no longer cancels the reconnect timer that the transport's `onDone` already scheduled (previously left the client stuck in `connecting`).
+  * Reply decoding errors are now routed through the transport's `onError` callback instead of crashing the socket listener.
+  * Errors thrown from the `getData` callback are caught: an error event is emitted and the transport is closed (instead of an unhandled async exception).
+  * `_refreshToken` no longer issues a `RefreshRequest` if the client is not connected anymore by the time the token callback resolves.
+  * `getToken` is no longer invoked when the user did not configure one (previous check could call a null callback in edge cases).
+  * `backoffDelay` returns `minDelay` when the computed range collapses to zero, avoiding `RangeError` from `Random.nextInt(0)`.
+
 ## [0.19.0]
 
 * Add `Client.close()` — disconnects and releases all client resources (closes every event stream and removes every subscription). The client is unusable after `close()`; subsequent public method calls throw `ClientClosedError`. Use `Client.disconnect()` for a temporary disconnect that keeps the client usable. [#106](https://github.com/centrifugal/centrifuge-dart/pull/106)
