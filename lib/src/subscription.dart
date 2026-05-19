@@ -60,6 +60,8 @@ class SubscriptionImpl implements Subscription {
   // moveToUnsubscribed to decide whether the server-side subscription needs
   // an explicit cleanup UnsubscribeRequest if the user cancels mid-flight.
   bool _inflight = false;
+  bool _resubscribing = false;
+  bool _closed = false;
 
   SubscriptionImpl(this.channel, this._client, this._config) {
     _token = _config.token;
@@ -116,6 +118,9 @@ class SubscriptionImpl implements Subscription {
 
   @override
   Future<void> subscribe() async {
+    if (_closed) {
+      throw ClientClosedError();
+    }
     if (state == SubscriptionState.subscribed) {
       return;
     }
@@ -136,6 +141,11 @@ class SubscriptionImpl implements Subscription {
 
   @internal
   void close() {
+    _closed = true;
+    _resubscribeTimer?.cancel();
+    _refreshTimer?.cancel();
+    _errorReadyFutures(SubscriptionUnsubscribedError());
+    state = SubscriptionState.unsubscribed;
     _publicationController.close();
     _joinController.close();
     _leaveController.close();
@@ -197,6 +207,7 @@ class SubscriptionImpl implements Subscription {
           await _client.processDisconnect(
               code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
           await _client.closeTransport();
+          _addUnsubscribe(UnsubscribedEvent(code, reason));
           return;
         }
       }
@@ -269,7 +280,9 @@ class SubscriptionImpl implements Subscription {
     _readyFutures.clear();
   }
 
-  void _addUnsubscribe(UnsubscribedEvent event) => _unsubscribedController.add(event);
+  void _addUnsubscribe(UnsubscribedEvent event) {
+    if (!_closed) _unsubscribedController.add(event);
+  }
 
   void _addSubscribing(SubscribingEvent event) => _subscribingController.add(event);
 
@@ -339,6 +352,8 @@ class SubscriptionImpl implements Subscription {
   }
 
   Future _resubscribe() async {
+    if (_resubscribing) return;
+    _resubscribing = true;
     try {
       var token = _token;
       if (token == '' && _config.getToken != null) {
@@ -349,6 +364,10 @@ class SubscriptionImpl implements Subscription {
           return;
         }
         _token = token;
+      }
+      if (state != SubscriptionState.subscribing || _client.state != State.connected) {
+        // unsubscribe() or disconnect() arrived during the getToken await.
+        return;
       }
       final request = protocol.SubscribeRequest()
         ..channel = channel
@@ -435,6 +454,8 @@ class SubscriptionImpl implements Subscription {
       }
       _scheduleResubscribe();
       return;
+    } finally {
+      _resubscribing = false;
     }
   }
 

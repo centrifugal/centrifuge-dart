@@ -68,9 +68,11 @@ class Transport implements GeneratedMessageSender {
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
+  Function? _onError;
 
   Future open(void onPush(Push push, bool isPing),
       {Function? onError, void onDone(int code, String reason, bool shouldReconnect)?}) async {
+    _onError = onError;
     final socket = await _socketBuilder();
     _socket = socket;
     socket.stream.listen(
@@ -254,7 +256,15 @@ class Transport implements GeneratedMessageSender {
 
   void Function(dynamic) _onData(void onPush(Push push, bool isPing)) {
     return (dynamic input) {
-      final List<Reply> replies = _replyDecoder.convert(input);
+      final List<Reply> replies;
+      try {
+        replies = _replyDecoder.convert(input);
+      } catch (e) {
+        if (_onError != null) {
+          _onError!(e);
+        }
+        return;
+      }
       replies.forEach((reply) {
         if (reply.id > 0) {
           _completers.remove(reply.id)?.complete(reply);
