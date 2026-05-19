@@ -342,7 +342,7 @@ class ClientImpl implements Client {
   @override
   Future<void> send(List<int> data) async {
     await ready().timeout(_config.timeout);
-    final request = protocol.Message()..data = data;
+    final request = protocol.SendRequest()..data = data;
     await _transport!.sendAsyncMessage(request);
   }
 
@@ -476,7 +476,7 @@ class ClientImpl implements Client {
   }
 
   Future<void> _connectInner() async {
-    if (_refreshRequired || (_token == '' && _config.getToken != null)) {
+    if (_config.getToken != null && (_refreshRequired || _token == '')) {
       final event = ConnectionTokenEvent();
       try {
         final String token = await _config.getToken!(event);
@@ -487,6 +487,7 @@ class ClientImpl implements Client {
           await _failUnauthorized();
           return;
         }
+        if (_closed) return;
         final event = ErrorEvent(RefreshError(ex));
         _errorController.add(event);
         if (state == State.connecting) {
@@ -509,13 +510,13 @@ class ClientImpl implements Client {
 
     try {
       await transport.open(_onPush, onError: (dynamic error) {
+        if (_closed) return;
         final event = ErrorEvent(TransportError(error));
         _errorController.add(event);
         if (state != State.connected) {
           return;
         }
         _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
-        transport.close();
       }, onDone: (code, reason, reconnect) {
         if (state == State.disconnected) {
           return;
@@ -526,6 +527,7 @@ class ClientImpl implements Client {
         }
       });
     } catch (ex) {
+      if (_closed) return;
       final event = ErrorEvent(TransportError(ex));
       _errorController.add(event);
       if (state == State.connecting) {
@@ -543,7 +545,21 @@ class ClientImpl implements Client {
     if (_token != '') {
       request.token = _token;
     }
-    final data = _config.getData != null ? await _config.getData!() : _data;
+    List<int>? data;
+    if (_config.getData != null) {
+      try {
+        data = await _config.getData!();
+      } catch (ex) {
+        if (!_closed) {
+          final event = ErrorEvent(TransportError(ex));
+          _errorController.add(event);
+        }
+        await transport.close();
+        return;
+      }
+    } else {
+      data = _data;
+    }
     if (data != null) {
       request.data = data;
     }
@@ -627,6 +643,18 @@ class ClientImpl implements Client {
       if (state != State.connecting) {
         return;
       }
+      if (err is ClientDisconnectedError) {
+        // Transport closed while the ConnectRequest was in flight. The
+        // transport's _onDone callback already called _processDisconnect +
+        // _scheduleReconnect (via Completer.sync(), _onDone runs its
+        // onDone!() call synchronously after completing our completer, so
+        // the reconnect timer is scheduled before this catch resumes). If
+        // we call _processDisconnect here it cancels that timer via
+        // _reconnectTimer?.cancel() without rescheduling, leaving the
+        // client stuck in connecting state. Return early and let the
+        // already-scheduled timer handle the reconnect.
+        return;
+      }
       final event = ErrorEvent(ConnectError(err));
       _errorController.add(event);
       if (err is Error) {
@@ -690,6 +718,10 @@ class ClientImpl implements Client {
         }
         _refreshToken();
       });
+      return;
+    }
+
+    if (state != State.connected) {
       return;
     }
 
@@ -825,12 +857,16 @@ class ClientImpl implements Client {
         // a full re-sync from the current head.
         subscription.invalidateState();
         subscription.moveToSubscribing(unsubscribe.code, unsubscribe.reason);
+        subscription.resubscribeOnConnect();
         return;
       }
       if (unsubscribe.code < 2500) {
         subscription.moveToUnsubscribed(unsubscribe.code, unsubscribe.reason, false);
       } else {
+        // Temporary server-side unsubscribe: client stays connected so we must
+        // trigger a resubscribe immediately rather than waiting for a reconnect.
         subscription.moveToSubscribing(unsubscribe.code, unsubscribe.reason);
+        subscription.resubscribeOnConnect();
       }
       return;
     }
@@ -934,6 +970,7 @@ Duration backoffDelay(int step, Duration minDelay, Duration maxDelay) {
     step = 31;
   } // Avoid RangeError.
   final val = min(maxDelay.inMilliseconds, minDelay.inMilliseconds * pow(2, step));
+  if (val.toInt() <= 0) return minDelay;
   final interval = _random.nextInt(val.toInt());
   final milliseconds = min(maxDelay.inMilliseconds, minDelay.inMilliseconds + interval);
   return Duration(milliseconds: milliseconds);

@@ -1093,6 +1093,99 @@ void main() {
       expect(client.state, centrifuge.State.disconnected);
       expect(() => client.connect(), throwsA(isA<centrifuge.ClientClosedError>()));
     });
+
+    test('close errors pending ready() futures instead of leaking them', () async {
+      // Don't connect — subscription stays in subscribing indefinitely so
+      // there is no race between "subscribe completes" and "close() fires".
+      final client = createClient();
+
+      final sub = client.newSubscription(uniqueChannel('default'));
+      await sub.subscribe(); // moves to subscribing; no request sent (client not connected)
+
+      // Attach listener before close() so the error is never unhandled.
+      final readyDone = expectLater(
+          sub.ready(), throwsA(isA<centrifuge.SubscriptionUnsubscribedError>()));
+
+      await client.close(); // subscription.close() must error the pending ready()
+      await readyDone;
+    });
+
+    test('removeSubscription after close does not throw StateError', () async {
+      final client = createClient();
+      await client.connect();
+
+      final sub = client.newSubscription(uniqueChannel('default'));
+      await sub.subscribe();
+      await client.close();
+
+      // Before the fix, subscription.close() left state=subscribing with closed
+      // stream controllers. removeSubscription then called moveToUnsubscribed,
+      // which tried to emit on a closed controller → unhandled StateError.
+      await expectLater(client.removeSubscription(sub), completes);
+    });
+
+    test('unsubscribe during getToken does not create a server-side subscription', () async {
+      final client = createClient();
+      await client.connect();
+
+      final channel = uniqueChannel('default');
+
+      // Block getToken until we explicitly release it so we can call
+      // unsubscribe() while the token fetch is in progress.
+      final tokenCompleter = Completer<String>();
+
+      final sub = client.newSubscription(
+          channel,
+          centrifuge.SubscriptionConfig(
+            getToken: (_) => tokenCompleter.future,
+          ));
+
+      final publications = <centrifuge.PublicationEvent>[];
+      sub.publication.listen((p) => publications.add(p));
+
+      // Start subscribing — will block inside getToken.
+      // ignore: unawaited_futures
+      sub.subscribe();
+
+      // Unsubscribe while getToken is still pending.
+      await sub.unsubscribe();
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+
+      // Release the token. Without the fix, _resubscribe() proceeds past the
+      // token block and sends a SubscribeRequest despite state=unsubscribed,
+      // leaving a server-side subscription that delivers publications.
+      tokenCompleter.complete('any-token');
+
+      // Give everything time to settle.
+      await Future<void>.delayed(Duration(milliseconds: 200));
+
+      // Publish to the channel from the server side.
+      await apiPublish(channel, {'msg': 'should-not-arrive'});
+      await Future<void>.delayed(Duration(milliseconds: 100));
+
+      // The subscription must still be unsubscribed and must not have received
+      // any publications from the spurious server-side subscription.
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+      expect(publications, isEmpty);
+
+      await client.close();
+    });
+
+    test('subscribe() on a closed subscription throws SubscriptionUnsubscribedError',
+        () async {
+      final client = createClient();
+      await client.connect();
+
+      final sub = client.newSubscription(uniqueChannel('default'));
+      await sub.subscribe();
+      await client.close();
+
+      // After close(), the subscription is closed. subscribe() must throw a
+      // meaningful error rather than a StateError on a closed stream controller.
+      expect(
+          sub.subscribe(),
+          throwsA(isA<centrifuge.ClientClosedError>()));
+    });
   });
 
   group('Stream recovery (extended)', () {
@@ -1838,6 +1931,101 @@ void main() {
 
       await client.disconnect();
       expect(client.state, centrifuge.State.disconnected);
+    });
+  });
+
+  group('Reconnect reliability', () {
+    // connectAndCaptureId from the Server-initiated reconnection group is
+    // duplicated here because groups have independent scopes.
+    Future<String> connectAndCaptureId(centrifuge.Client client) async {
+      final completer = Completer<String>();
+      late StreamSubscription<centrifuge.ConnectedEvent> sub;
+      sub = client.connected.listen((e) {
+        if (!completer.isCompleted) completer.complete(e.client);
+        sub.cancel();
+      });
+      await client.connect();
+      return completer.future.timeout(const Duration(seconds: 5));
+    }
+
+    test(
+        'unsubscribed event fires even when connection drops during cleanup send',
+        () async {
+      // Regression test for: when sendUnsubscribe() throws because the
+      // transport closed mid-flight, moveToUnsubscribed must still emit
+      // UnsubscribedEvent. Previously the early return for the reconnect path
+      // skipped _addUnsubscribe, leaving the subscription silently dead.
+      //
+      // We race unsubscribe() against a server-initiated disconnect. In some
+      // runs the sendUnsubscribe reply arrives first (normal path); in others
+      // the connection drops before the reply (the previously broken path). In
+      // both cases UnsubscribedEvent must fire with code 0 and the subscription
+      // must stay unsubscribed after the client auto-reconnects.
+      final client = createClient(centrifuge.ClientConfig(
+        minReconnectDelay: const Duration(milliseconds: 50),
+      ));
+      final id = await connectAndCaptureId(client);
+
+      final ch = randomChannel('unsub-race');
+      final sub = client.newSubscription(ch);
+      await sub.subscribe();
+
+      final unsubFuture =
+          waitForEvent<centrifuge.UnsubscribedEvent>(sub.unsubscribed);
+      final reconnectedFuture =
+          waitForEvent<centrifuge.ConnectedEvent>(client.connected);
+
+      // Fire-and-forget unsubscribe then immediately drop the server
+      // connection. This races the sendUnsubscribe reply against the
+      // disconnect.
+      // ignore: unawaited_futures
+      sub.unsubscribe();
+      await apiDisconnectClient(id, code: 3001);
+
+      // UnsubscribedEvent must arrive regardless of which race path was taken.
+      final ctx =
+          await unsubFuture.timeout(const Duration(seconds: 5));
+      expect(ctx.code, 0); // unsubscribedCodeUnsubscribeCalled
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+
+      // Client must auto-reconnect (3001 is retryable).
+      await reconnectedFuture.timeout(const Duration(seconds: 5));
+      expect(client.state, centrifuge.State.connected);
+
+      // Subscription must NOT be auto-resubscribed — the user explicitly
+      // called unsubscribe(), so that intent must survive the reconnect.
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed,
+          reason: 'subscription must remain unsubscribed after reconnect');
+
+      await client.disconnect();
+    });
+
+    test('zero minReconnectDelay does not crash on retryable disconnect',
+        () async {
+      // Regression test for backoffDelay() panicking with RangeError when
+      // minReconnectDelay is Duration.zero: nextInt(0) is illegal. The guard
+      // added to backoffDelay() must return Duration.zero instead of throwing.
+      final client = centrifuge.createClient(
+        url,
+        centrifuge.ClientConfig(
+          minReconnectDelay: Duration.zero,
+          maxReconnectDelay: const Duration(milliseconds: 200),
+        ),
+      );
+      final id = await connectAndCaptureId(client);
+
+      final reconnected =
+          waitForEvent<centrifuge.ConnectedEvent>(client.connected);
+
+      // A retryable server disconnect triggers _scheduleReconnect →
+      // backoffDelay(0, Duration.zero, ...). Without the fix this panics.
+      await apiDisconnectClient(id, code: 3001);
+
+      await reconnected.timeout(const Duration(seconds: 5));
+      expect(client.state, centrifuge.State.connected);
+
+      await client.disconnect();
     });
   });
 }
