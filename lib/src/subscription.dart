@@ -355,6 +355,32 @@ class SubscriptionImpl implements Subscription {
     if (_resubscribing) return;
     _resubscribing = true;
     try {
+      // getState: ask the app for its current state position. Only called
+      // when we don't have a saved position (first subscribe or after a
+      // position reset due to unrecoverable position error 112). On normal
+      // reconnects with a valid saved position we skip getState and let the
+      // server try recovery — getState is only called again if recovery fails.
+      if (_config.getState != null && _offset == null) {
+        final StreamPosition position;
+        try {
+          position = await _config.getState!();
+        } catch (err) {
+          if (state != SubscriptionState.subscribing || _client.state != State.connected) {
+            return;
+          }
+          final event = SubscriptionErrorEvent(SubscriptionGetStateError(err));
+          _errorController.add(event);
+          _scheduleResubscribe();
+          return;
+        }
+        if (state != SubscriptionState.subscribing || _client.state != State.connected) {
+          // unsubscribe() or disconnect() arrived during the getState await.
+          return;
+        }
+        _offset = position.offset;
+        _epoch = position.epoch;
+        _recover = true;
+      }
       var token = _token;
       if (token == '' && _config.getToken != null) {
         final event = SubscriptionTokenEvent(channel);
@@ -386,6 +412,12 @@ class SubscriptionImpl implements Subscription {
       request.positioned = _positioned;
       request.recoverable = _recoverable;
       request.joinLeave = _joinLeave;
+      if (_config.getState != null) {
+        // Ask the server to reject the subscribe with error 112 when recovery
+        // from the provided position is impossible, instead of returning
+        // recovered=false — so we can call getState again to reload state.
+        request.flag = $fixnum.Int64(subscriptionFlagRejectUnrecovered);
+      }
       _inflight = true;
       final protocol.SubscribeResult result;
       try {
@@ -435,6 +467,16 @@ class SubscriptionImpl implements Subscription {
       }
       if (err is UnauthorizedException) {
         _failUnauthorized();
+        return;
+      }
+      if (err is Error && err.code == errorCodeUnrecoverablePosition && _config.getState != null) {
+        // Unrecoverable position with getState: reset position so the next
+        // subscribe attempt calls getState() to reload app state from scratch.
+        _offset = null;
+        _epoch = null;
+        _recover = false;
+        _prevData = null;
+        _scheduleResubscribe();
         return;
       }
       final event = SubscriptionErrorEvent(SubscriptionSubscribeError(err));

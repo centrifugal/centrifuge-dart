@@ -16,3 +16,10 @@ const subscribingCodeTransportClosed = 1;
 const unsubscribedCodeUnsubscribeCalled = 0;
 const unsubscribedCodeUnauthorized = 1;
 const unsubscribedCodeClientClosed = 2;
+
+// Subscription feature flags — bitmask sent in SubscribeRequest.flag.
+const subscriptionFlagRejectUnrecovered = 2;
+
+// Server error code returned when recovery from the provided position is
+// impossible (only sent when subscriptionFlagRejectUnrecovered was requested).
+const errorCodeUnrecoverablePosition = 112;

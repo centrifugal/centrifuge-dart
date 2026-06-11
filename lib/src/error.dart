@@ -76,6 +76,17 @@ class SubscriptionSubscribeError {
   }
 }
 
+class SubscriptionGetStateError {
+  final dynamic error;
+
+  SubscriptionGetStateError(this.error);
+
+  @override
+  String toString() {
+    return 'Subscription getState error: $error';
+  }
+}
+
 class SubscriptionRefreshError {
   final dynamic error;
 

@@ -1,3 +1,7 @@
+## [0.20.0]
+
+* Add `SubscriptionConfig.getState` callback support (requires Centrifugo >= 6.8.0), mirroring the same option in centrifuge-js. The callback lets the application load its state from its own source of truth and return the corresponding stream position — the SDK then subscribes with recovery from that position, so no publications are lost between the state read and the subscribe. The callback is invoked on initial subscribe (when there is no saved position) and again when the server reports an unrecoverable position (error 112 — the SDK requests this behavior via the `reject_unrecovered` subscribe flag). It is NOT called on reconnects where server-side recovery succeeds. Errors thrown from the callback emit a subscription error event with the new `SubscriptionGetStateError` type and are retried with backoff.
+
 ## [0.19.1]
 
 * More connection and subscription stability fixes [#109](https://github.com/centrifugal/centrifuge-dart/pull/109):
