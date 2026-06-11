@@ -373,13 +373,19 @@ class SubscriptionImpl implements Subscription {
           _scheduleResubscribe();
           return;
         }
-        if (state != SubscriptionState.subscribing || _client.state != State.connected) {
-          // unsubscribe() or disconnect() arrived during the getState await.
+        if (state != SubscriptionState.subscribing) {
+          // unsubscribe() arrived during the getState await.
           return;
         }
         _offset = position.offset;
         _epoch = position.epoch;
         _recover = true;
+        if (_client.state != State.connected) {
+          // disconnect() arrived during the getState await. Keep the loaded
+          // position (matches centrifuge-js/-go): the resubscribe on reconnect
+          // recovers from it instead of calling getState again.
+          return;
+        }
       }
       var token = _token;
       if (token == '' && _config.getToken != null) {
