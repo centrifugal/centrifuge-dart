@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
+import 'package:fixnum/fixnum.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
@@ -72,6 +73,28 @@ Future<void> apiDisconnectClient(String clientId, {int? code, String? reason}) {
 /// Force-unsubscribe a client from a single channel without disconnecting it.
 Future<void> apiUnsubscribeClient(String clientId, String channel) {
   return apiPost('unsubscribe', {'client': clientId, 'channel': channel});
+}
+
+/// Read the current stream top position of a channel via the server API.
+Future<centrifuge.StreamPosition> apiHistory(String channel) async {
+  final resp = await http.post(
+    Uri.parse('$apiBase/history'),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': apiKey,
+    },
+    body: jsonEncode({'channel': channel, 'limit': 0}),
+  );
+  if (resp.statusCode != 200) {
+    throw Exception('history failed: ${resp.statusCode} ${resp.body}');
+  }
+  final decoded = jsonDecode(resp.body) as Map<String, dynamic>;
+  if (decoded.containsKey('error')) {
+    throw Exception('history error: ${decoded['error']}');
+  }
+  final result = decoded['result'] as Map<String, dynamic>;
+  return centrifuge.StreamPosition(
+      Int64(result['offset'] as int? ?? 0), result['epoch'] as String? ?? '');
 }
 
 centrifuge.Client createClient([centrifuge.ClientConfig? config]) {
@@ -2024,6 +2047,294 @@ void main() {
 
       await reconnected.timeout(const Duration(seconds: 5));
       expect(client.state, centrifuge.State.connected);
+
+      await client.disconnect();
+    });
+  });
+
+  group('Stream getState', () {
+    test('getState is called on initial subscribe and position is used for recovery',
+        () async {
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('recovery');
+      var getStateCalls = 0;
+
+      // Publish 3 messages BEFORE subscribing.
+      await apiPublish(ch, {'i': 1});
+      await apiPublish(ch, {'i': 2});
+      await apiPublish(ch, {'i': 3});
+
+      // getState returns position 0 — recovery delivers all 3 publications.
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(getState: () async {
+            getStateCalls++;
+            return centrifuge.StreamPosition(Int64(0), '');
+          }));
+
+      final subscribedFuture =
+          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final recoveredPubs =
+          collectEvents<centrifuge.PublicationEvent>(sub.publication, 3);
+
+      await sub.subscribe();
+
+      await subscribedFuture;
+      expect(getStateCalls, 1);
+
+      final pubs = await recoveredPubs;
+      expect(jsonDecode(utf8.decode(pubs[0].data)), {'i': 1});
+      expect(jsonDecode(utf8.decode(pubs[1].data)), {'i': 2});
+      expect(jsonDecode(utf8.decode(pubs[2].data)), {'i': 3});
+
+      await client.disconnect();
+    });
+
+    test('getState is NOT called on reconnect when recovery succeeds',
+        () async {
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('recovery');
+      var getStateCalls = 0;
+
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(getState: () async {
+            getStateCalls++;
+            return centrifuge.StreamPosition(Int64(0), '');
+          }));
+
+      final subscribedFuture =
+          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      await sub.subscribe();
+      await subscribedFuture;
+      expect(getStateCalls, 1); // Called on initial subscribe.
+
+      // Disconnect, publish while away, reconnect — SDK has a saved position
+      // and recovery succeeds, so getState must NOT be called again.
+      await client.disconnect();
+
+      await apiPublish(ch, {'i': 1});
+      await apiPublish(ch, {'i': 2});
+
+      final resubFuture =
+          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final recoveredPubs =
+          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+
+      await client.connect();
+
+      final resubCtx = await resubFuture;
+      expect(resubCtx.recovered, true);
+      await recoveredPubs;
+
+      expect(getStateCalls, 1,
+          reason: 'getState must not be called when recovery succeeds');
+
+      await client.disconnect();
+    });
+
+    test('getState error triggers resubscribe with error event', () async {
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('recovery');
+      var getStateCalls = 0;
+
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(
+              minResubscribeDelay: const Duration(milliseconds: 100),
+              maxResubscribeDelay: const Duration(milliseconds: 100),
+              getState: () async {
+                getStateCalls++;
+                if (getStateCalls == 1) {
+                  throw Exception('simulated DB failure');
+                }
+                // Second call succeeds.
+                return centrifuge.StreamPosition(Int64(0), '');
+              }));
+
+      final errors = <centrifuge.SubscriptionErrorEvent>[];
+      final errSubscription = sub.error.listen(errors.add);
+      addTearDown(() => errSubscription.cancel());
+
+      final subscribedFuture =
+          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+
+      await sub.subscribe();
+
+      // First getState fails → error emitted → resubscribe scheduled with
+      // backoff. Second getState succeeds → subscribe completes.
+      await subscribedFuture;
+
+      expect(getStateCalls, greaterThanOrEqualTo(2));
+      expect(errors.length, greaterThanOrEqualTo(1));
+      expect(errors[0].error, isA<centrifuge.SubscriptionGetStateError>());
+      expect(errors[0].error.toString(), contains('simulated DB failure'));
+
+      await client.disconnect();
+    });
+
+    test('getState persistent failure keeps retrying without unsubscribing',
+        () async {
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('recovery');
+      var getStateCalls = 0;
+
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(
+              minResubscribeDelay: const Duration(milliseconds: 50),
+              maxResubscribeDelay: const Duration(milliseconds: 50),
+              getState: () async {
+                getStateCalls++;
+                throw Exception('always fails');
+              }));
+
+      await sub.subscribe();
+
+      // Wait for several retry cycles.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+
+      // Should have retried multiple times while staying in subscribing state.
+      expect(getStateCalls, greaterThan(2));
+      expect(sub.state, centrifuge.SubscriptionState.subscribing);
+
+      await sub.unsubscribe();
+      await client.disconnect();
+    });
+
+    test('unsubscribe during getState await cancels the subscribe', () async {
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('recovery');
+      var getStateCalls = 0;
+
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(getState: () async {
+            getStateCalls++;
+            await Future<void>.delayed(const Duration(milliseconds: 300));
+            return centrifuge.StreamPosition(Int64(0), '');
+          }));
+
+      // ignore: unawaited_futures
+      sub.subscribe().catchError((_) {});
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      // getState is in flight now — cancel the subscription under it.
+      await sub.unsubscribe();
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+
+      // Let the pending getState resolve — it must not resurrect the
+      // subscription or send a subscribe command.
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+      expect(getStateCalls, 1);
+
+      await client.disconnect();
+    });
+
+    test('getState with real position recovers missed publications', () async {
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('recovery');
+
+      // First, subscribe normally to get a valid epoch.
+      final tempSub = client.newSubscription(ch);
+      final tempSubscribed =
+          waitForEvent<centrifuge.SubscribedEvent>(tempSub.subscribed);
+      await tempSub.subscribe();
+      final epoch = (await tempSubscribed).streamPosition?.epoch ?? '';
+      await client.removeSubscription(tempSub);
+
+      // Publish 2 messages.
+      await apiPublish(ch, {'i': 1});
+      await apiPublish(ch, {'i': 2});
+
+      // Subscribe with getState returning the position BEFORE the 2 messages.
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(getState: () async {
+            return centrifuge.StreamPosition(Int64(0), epoch);
+          }));
+
+      final recoveredPubs =
+          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+      await sub.subscribe();
+
+      final pubs = await recoveredPubs;
+      expect(jsonDecode(utf8.decode(pubs[0].data)), {'i': 1});
+      expect(jsonDecode(utf8.decode(pubs[1].data)), {'i': 2});
+
+      await client.disconnect();
+    });
+
+    test('getState is called again when recovery fails (unrecoverable position)',
+        () async {
+      // Uses "smallhistory" namespace with history_size=2. After publishing
+      // enough to evict old entries, reconnecting from an old position
+      // triggers error 112 (unrecoverable position) because the subscribe
+      // request carries the reject_unrecovered flag. The SDK must then call
+      // getState again to reload app state instead of delivering
+      // recovered=false on an active subscription.
+      final client = createClient();
+      await client.connect();
+
+      final ch = uniqueChannel('smallhistory');
+      var getStateCalls = 0;
+
+      // Simulate a real app: getState reads current stream position from
+      // the backend.
+      final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(
+              minResubscribeDelay: const Duration(milliseconds: 100),
+              maxResubscribeDelay: const Duration(milliseconds: 100),
+              getState: () async {
+                getStateCalls++;
+                return apiHistory(ch);
+              }));
+
+      final subscribedFuture =
+          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      await sub.subscribe();
+      await subscribedFuture;
+      expect(getStateCalls, 1);
+
+      // Disconnect, then publish enough messages to push the stream beyond
+      // recovery (history_size=2, so 5 messages evict old entries).
+      await client.disconnect();
+
+      for (var i = 0; i < 5; i++) {
+        await apiPublish(ch, {'i': i});
+      }
+
+      // Reconnect — SDK tries to recover from the old position, server
+      // returns error 112, SDK resets position and calls getState again.
+      final resubFuture =
+          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+
+      await client.connect();
+
+      await resubFuture;
+      expect(getStateCalls, 2,
+          reason: 'getState must be called again after unrecoverable position');
+
+      // Verify live delivery works after the getState re-sync.
+      final livePubFuture =
+          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      await apiPublish(ch, {'live': true});
+      final live = await livePubFuture;
+      expect(jsonDecode(utf8.decode(live.data)), {'live': true});
 
       await client.disconnect();
     });
