@@ -9,6 +9,7 @@ import 'client.dart';
 import 'codes.dart';
 import 'error.dart';
 import 'events.dart';
+import 'filter.dart';
 import 'proto/client.pb.dart' as protocol;
 import 'subscription_config.dart';
 
@@ -32,6 +33,11 @@ abstract class Subscription {
   Future<void> subscribe();
   Future<void> unsubscribe();
 
+  /// Sets the server-side publication tags filter. Applied on the next
+  /// subscribe attempt, not the current one. Pass null to clear it. Cannot be
+  /// combined with delta compression. Build with the [Filter] helpers.
+  void setTagsFilter(FilterNode? tagsFilter);
+
   Future<PublishResult> publish(List<int> data);
   Future<PresenceResult> presence();
   Future<PresenceStatsResult> presenceStats();
@@ -45,6 +51,7 @@ abstract class Subscription {
 class SubscriptionImpl implements Subscription {
   String _token = '';
   List<int>? _data;
+  FilterNode? _tagsFilter;
   Timer? _refreshTimer;
   Timer? _resubscribeTimer;
   int _resubscribeAttempts = 0;
@@ -69,6 +76,7 @@ class SubscriptionImpl implements Subscription {
   SubscriptionImpl(this.channel, this._client, this._config) {
     _token = _config.token;
     _data = _config.data;
+    _tagsFilter = _config.tagsFilter;
     _positioned = _config.positioned;
     _recoverable = _config.recoverable;
     _joinLeave = _config.joinLeave;
@@ -140,6 +148,14 @@ class SubscriptionImpl implements Subscription {
   @override
   Future<void> unsubscribe() async {
     return moveToUnsubscribed(unsubscribedCodeUnsubscribeCalled, 'unsubscribe called', true);
+  }
+
+  @override
+  void setTagsFilter(FilterNode? tagsFilter) {
+    if (tagsFilter != null && _config.delta == DeltaType.fossil) {
+      throw ArgumentError('cannot use delta and tagsFilter together');
+    }
+    _tagsFilter = tagsFilter;
   }
 
   @internal
@@ -432,6 +448,9 @@ class SubscriptionImpl implements Subscription {
       }
       if (_config.delta == DeltaType.fossil) {
         request.delta = "fossil";
+      }
+      if (_tagsFilter != null) {
+        request.tf = _tagsFilter!.proto;
       }
       request.positioned = _positioned;
       request.recoverable = _recoverable;
