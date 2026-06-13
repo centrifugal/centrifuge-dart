@@ -1,4 +1,5 @@
 import 'events.dart';
+import 'filter.dart';
 
 /// Enum for supported delta encoding algorithms.
 enum DeltaType {
@@ -18,7 +19,10 @@ class SubscriptionConfig {
       this.minResubscribeDelay = const Duration(milliseconds: 500),
       this.maxResubscribeDelay = const Duration(milliseconds: 20000),
       this.delta = DeltaType.none,
-      this.getState});
+      this.tagsFilter,
+      this.getState})
+      : assert(tagsFilter == null || delta == DeltaType.none,
+            'cannot use delta and tagsFilter together');
 
   String token;
   final SubscriptionTokenCallback? getToken;
@@ -30,6 +34,12 @@ class SubscriptionConfig {
   final Duration minResubscribeDelay;
   final Duration maxResubscribeDelay;
   final DeltaType delta;
+
+  /// Server-side publication filter based on publication tags. When set, the
+  /// server delivers only publications whose tags match the filter. Must be
+  /// enabled for the namespace on the server (`allow_tags_filter`) and cannot
+  /// be combined with [delta]. Build with the [Filter] helpers.
+  final FilterNode? tagsFilter;
 
   /// Called to load the app's current state and stream position.
   /// Requires Centrifugo >= 6.8.0.
