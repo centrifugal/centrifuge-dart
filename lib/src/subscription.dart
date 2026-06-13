@@ -56,6 +56,9 @@ class SubscriptionImpl implements Subscription {
   bool _joinLeave = false;
   bool _deltaNegotiated = false;
   List<int>? _prevData;
+  // Numeric channel ID assigned by the server when channel compaction is
+  // negotiated. Pushes then carry this ID instead of the channel name.
+  int _pushId = 0;
   // True while a SubscribeRequest is on the wire awaiting a reply. Used by
   // moveToUnsubscribed to decide whether the server-side subscription needs
   // an explicit cleanup UnsubscribeRequest if the user cancels mid-flight.
@@ -142,6 +145,7 @@ class SubscriptionImpl implements Subscription {
   @internal
   void close() {
     _closed = true;
+    _setPushId(0);
     _resubscribeTimer?.cancel();
     _refreshTimer?.cancel();
     _errorReadyFutures(SubscriptionUnsubscribedError());
@@ -167,6 +171,7 @@ class SubscriptionImpl implements Subscription {
     _epoch = null;
     _recover = false;
     _prevData = null;
+    _setPushId(0);
   }
 
   @internal
@@ -179,6 +184,7 @@ class SubscriptionImpl implements Subscription {
     final wasInflight = _inflight;
     _inflight = false;
     state = SubscriptionState.unsubscribed;
+    _setPushId(0);
     _errorReadyFutures(SubscriptionUnsubscribedError());
     if (prevState == SubscriptionState.subscribed) {
       _clearSubscribedState();
@@ -282,6 +288,18 @@ class SubscriptionImpl implements Subscription {
 
   void _addUnsubscribe(UnsubscribedEvent event) {
     if (!_closed) _unsubscribedController.add(event);
+  }
+
+  /// Update the channel compaction ID registration in the client's push
+  /// routing registry. Pass 0 to clear (no compaction / sub gone).
+  ///
+  /// Always re-registers even when the ID is unchanged: the client drops the
+  /// whole registry on disconnect, and on reconnect the server commonly
+  /// assigns the same ID again — the registration must be restored.
+  void _setPushId(int id) {
+    if (id == 0 && _pushId == 0) return;
+    _client.updateSubscriptionPushId(this, _pushId, id);
+    _pushId = id;
   }
 
   void _addSubscribing(SubscribingEvent event) => _subscribingController.add(event);
@@ -418,12 +436,17 @@ class SubscriptionImpl implements Subscription {
       request.positioned = _positioned;
       request.recoverable = _recoverable;
       request.joinLeave = _joinLeave;
+      // Always offer channel compaction: when the server supports and allows
+      // it, the subscribe result carries a numeric channel ID and subsequent
+      // pushes use that ID instead of the string channel name.
+      var flag = subscriptionFlagChannelCompaction;
       if (_config.getState != null) {
         // Ask the server to reject the subscribe with error 112 when recovery
         // from the provided position is impossible, instead of returning
         // recovered=false — so we can call getState again to reload state.
-        request.flag = $fixnum.Int64(subscriptionFlagRejectUnrecovered);
+        flag |= subscriptionFlagRejectUnrecovered;
       }
+      request.flag = $fixnum.Int64(flag);
       _inflight = true;
       final protocol.SubscribeResult result;
       try {
@@ -444,6 +467,10 @@ class SubscriptionImpl implements Subscription {
         _offset = result.offset;
       }
       _deltaNegotiated = result.delta;
+      // Channel compaction: register the numeric channel ID assigned by the
+      // server (0 when not negotiated — also clears a stale ID from a
+      // previous subscribe session).
+      _setPushId(result.id.toInt());
       final event = SubscribedEvent.from(result);
       state = SubscriptionState.subscribed;
       _subscribedController.add(event);
