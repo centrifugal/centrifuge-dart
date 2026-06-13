@@ -117,6 +117,9 @@ class ClientImpl implements Client {
 
   final TransportBuilder _transportBuilder;
   final _subscriptions = <String, SubscriptionImpl>{};
+  // Channel compaction: numeric channel ID → subscription, used to route
+  // pushes that carry an ID instead of the string channel name.
+  final _subscriptionsById = <int, SubscriptionImpl>{};
   final _serverSubs = <String, ServerSubscription>{};
 
   Transport? _transport;
@@ -244,6 +247,7 @@ class ClientImpl implements Client {
       subscription.close();
     }
     _subscriptions.clear();
+    _subscriptionsById.clear();
     _serverSubs.clear();
     await Future.wait<void>([
       _connectedController.close(),
@@ -403,6 +407,9 @@ class ClientImpl implements Client {
 
     if (state == State.connected) {
       _client = null;
+      // Channel compaction IDs are scoped to a server session — drop the
+      // routing registry; each resubscribe re-registers a fresh ID.
+      _subscriptionsById.clear();
       _subscriptions.values
           .forEach((s) => s.moveToSubscribing(subscribingCodeTransportClosed, "transport closed"));
 
@@ -787,8 +794,18 @@ class ClientImpl implements Client {
     _readyFutures.clear();
   }
 
-  void _handlePub(String channel, protocol.Publication pub) {
-    final subscription = _subscriptions[channel];
+  /// Resolve a client-side subscription for a push: by numeric channel ID
+  /// when channel compaction is in use (the push then has no channel name),
+  /// by channel name otherwise.
+  SubscriptionImpl? _subscriptionForPush(String channel, int id) {
+    if (id > 0) {
+      return _subscriptionsById[id];
+    }
+    return _subscriptions[channel];
+  }
+
+  void _handlePub(String channel, protocol.Publication pub, int id) {
+    final subscription = _subscriptionForPush(channel, id);
     if (subscription != null) {
       subscription.handlePublication(pub);
       return;
@@ -804,8 +821,8 @@ class ClientImpl implements Client {
     }
   }
 
-  void _handleJoin(String channel, protocol.Join join) {
-    final subscription = _subscriptions[channel];
+  void _handleJoin(String channel, protocol.Join join, int id) {
+    final subscription = _subscriptionForPush(channel, id);
     if (subscription != null) {
       subscription.handleJoin(join);
       return;
@@ -817,8 +834,8 @@ class ClientImpl implements Client {
     }
   }
 
-  void _handleLeave(String channel, protocol.Leave leave) {
-    final subscription = _subscriptions[channel];
+  void _handleLeave(String channel, protocol.Leave leave, int id) {
+    final subscription = _subscriptionForPush(channel, id);
     if (subscription != null) {
       subscription.handleLeave(leave);
       return;
@@ -899,11 +916,11 @@ class ClientImpl implements Client {
       return;
     }
     if (push.hasPub()) {
-      _handlePub(push.channel, push.pub);
+      _handlePub(push.channel, push.pub, push.id.toInt());
     } else if (push.hasJoin()) {
-      _handleJoin(push.channel, push.join);
+      _handleJoin(push.channel, push.join, push.id.toInt());
     } else if (push.hasLeave()) {
-      _handleLeave(push.channel, push.leave);
+      _handleLeave(push.channel, push.leave, push.id.toInt());
     } else if (push.hasSubscribe()) {
       _handleSubscribe(push.channel, push.subscribe);
     } else if (push.hasUnsubscribe()) {
@@ -915,6 +932,19 @@ class ClientImpl implements Client {
       // synchronously; only transport.close() runs detached. The websocket
       // onDone callback that follows the server-initiated close is idempotent.
       _handleDisconnect(push.disconnect);
+    }
+  }
+
+  /// Update the channel compaction registry for [subscription]: remove the
+  /// old numeric ID mapping (if it still points to this subscription) and
+  /// register the new one. Either ID may be 0 meaning "no mapping".
+  @internal
+  void updateSubscriptionPushId(SubscriptionImpl subscription, int oldId, int newId) {
+    if (oldId > 0 && identical(_subscriptionsById[oldId], subscription)) {
+      _subscriptionsById.remove(oldId);
+    }
+    if (newId > 0) {
+      _subscriptionsById[newId] = subscription;
     }
   }
 

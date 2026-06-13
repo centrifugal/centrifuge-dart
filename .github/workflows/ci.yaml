@@ -27,7 +27,7 @@ jobs:
           - sdk: beta
             protobuf: "6.0.0"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: dart-lang/setup-dart@v1
         with:

@@ -18,6 +18,12 @@ const unsubscribedCodeUnauthorized = 1;
 const unsubscribedCodeClientClosed = 2;
 
 // Subscription feature flags — bitmask sent in SubscribeRequest.flag.
+//
+// channelCompaction asks the server to replace the string channel name with a
+// short numeric ID in subscription pushes (bandwidth optimization). Safe to
+// request unconditionally: servers that don't support or don't allow it simply
+// ignore the bit and keep sending the full channel name.
+const subscriptionFlagChannelCompaction = 1;
 const subscriptionFlagRejectUnrecovered = 2;
 
 // Server error code returned when recovery from the provided position is
