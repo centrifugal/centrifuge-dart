@@ -180,12 +180,20 @@ class SubscriptionImpl implements Subscription {
   /// next subscribe will re-fetch a fresh token and do a full re-sync.
   /// Used when the server signals state invalidation (e.g. unsubscribe code
   /// 2502 for this channel, or disconnect code 3014 at the connection level).
+  ///
+  /// Clears the token, fossil delta base and channel-compaction ID, and resets
+  /// the recovery position to a sentinel epoch ("_") the server can never match
+  /// (offset 0). The recover flag is left untouched, so a recoverable
+  /// subscription resubscribes with wasRecovering=true, recovered=false —
+  /// letting the app reload via its existing recovery-failure path instead of
+  /// treating it as a brand-new first subscribe — while a non-recoverable
+  /// subscription just resubscribes (the sentinel is not sent). The real
+  /// epoch/offset are adopted from the subscribe reply.
   @internal
   void invalidateState() {
     _token = '';
-    _offset = null;
-    _epoch = null;
-    _recover = false;
+    _offset = $fixnum.Int64(0);
+    _epoch = '_';
     _prevData = null;
     _setPushId(0);
   }
