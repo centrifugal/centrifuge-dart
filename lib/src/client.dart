@@ -816,7 +816,6 @@ class ClientImpl implements Client {
       _publicationController.add(event);
       if (serverSubscription.recoverable && pub.offset > 0) {
         serverSubscription.offset = pub.offset;
-        _serverSubs[channel] = serverSubscription; // TODO: necessary to assign explicitly?
       }
     }
   }
