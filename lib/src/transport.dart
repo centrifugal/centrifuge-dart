@@ -3,7 +3,15 @@ import 'dart:async';
 import 'package:protobuf/protobuf.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'channel.dart' if (dart.library.html) 'channel_html.dart';
+// `dart.library.html` is declared for dart2js web builds but NOT for
+// dart2wasm ones, since Flutter Web's wasm target doesn't provide `dart:html`
+// (it uses `dart:js_interop` instead). That made this conditional import
+// fall through to `channel.dart` (`dart:io`'s `IOWebSocketChannel`) on
+// dart2wasm builds, which never connects in a browser context. Using
+// `dart.library.js_interop` correctly resolves to `channel_html.dart` on
+// both dart2js and dart2wasm, while still resolving to `channel.dart` on
+// native (VM) targets, since `dart.library.js_interop` is web-only.
+import 'channel.dart' if (dart.library.js_interop) 'channel_html.dart';
 import 'codec.dart';
 import 'codes.dart';
 import 'error.dart' as centrifuge;
