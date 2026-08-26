@@ -135,5 +135,16 @@ void main() {
       await sub.subscribe();
       expect(server.lastSubscribe!.hasTf(), isFalse);
     });
+
+    test('setTagsFilter throws when subscription uses delta compression', () async {
+      final sub = client.newSubscription(
+        'market:stocks',
+        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+      );
+      expect(
+        () => sub.setTagsFilter(centrifuge.Filter.eq('ticker', 'AAPL')),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 }
