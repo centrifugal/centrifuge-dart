@@ -81,7 +81,7 @@ class MessageEvent {
 
   @override
   String toString() {
-    return 'MessageEvent{data: ${utf8.decode(data, allowMalformed: true)}';
+    return 'MessageEvent{data: ${utf8.decode(data, allowMalformed: true)}}';
   }
 }
 
