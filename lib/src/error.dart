@@ -105,6 +105,6 @@ class UnauthorizedException implements Exception {
 
   @override
   String toString() {
-    return 'UnauthorizedException';
+    return 'UnauthorizedException: $message';
   }
 }
