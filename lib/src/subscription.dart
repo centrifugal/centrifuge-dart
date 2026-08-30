@@ -329,6 +329,9 @@ class SubscriptionImpl implements Subscription {
   void _addSubscribing(SubscribingEvent event) => _subscribingController.add(event);
 
   void _refreshToken() async {
+    if (_config.getToken == null) {
+      return;
+    }
     try {
       final event = SubscriptionTokenEvent(channel);
       final String token = await _config.getToken!(event);
