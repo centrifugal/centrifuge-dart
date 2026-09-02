@@ -5,6 +5,7 @@ import 'package:centrifuge/centrifuge.dart';
 import 'package:centrifuge/src/codes.dart';
 import 'package:centrifuge/src/server_subscription.dart';
 import 'package:centrifuge/src/transport.dart';
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:meta/meta.dart';
 
 import 'platform/vm.dart' if (dart.library.js_interop) 'platform/js.dart';
@@ -397,6 +398,15 @@ class ClientImpl implements Client {
       _refreshRequired = true;
       for (final s in _subscriptions.values) {
         s.invalidateState();
+      }
+      // Server-side subscriptions aren't tracked by SubscriptionImpl, but their
+      // cached recovery position must be invalidated too - otherwise the next
+      // connect request keeps asking the server to recover from the now-stale
+      // pre-invalidation offset/epoch, defeating the point of state invalidation.
+      // The recoverable flag is left untouched, matching invalidateState() above.
+      for (final s in _serverSubs.values) {
+        s.offset = $fixnum.Int64(0);
+        s.epoch = '_';
       }
     }
     _reconnectTimer?.cancel();
