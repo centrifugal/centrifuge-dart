@@ -715,10 +715,10 @@ class ClientImpl implements Client {
     if (_config.getToken == null) {
       return;
     }
+    final String token;
     try {
       final event = ConnectionTokenEvent();
-      final String token = await _config.getToken!(event);
-      _token = token;
+      token = await _config.getToken!(event);
     } catch (ex) {
       if (state != State.connected) {
         return;
@@ -741,12 +741,17 @@ class ClientImpl implements Client {
     if (state != State.connected) {
       return;
     }
-
-    final request = protocol.RefreshRequest();
-
-    if (_token != '') {
-      request.token = _token;
+    if (token == '') {
+      // An empty token from getToken during refresh means the user is not
+      // authenticated anymore, so disconnect instead of sending a token-less
+      // RefreshRequest. Note this only applies to refresh - an empty token on
+      // the initial connect still means "connect as anonymous".
+      await _failUnauthorized();
+      return;
     }
+    _token = token;
+
+    final request = protocol.RefreshRequest()..token = _token;
 
     try {
       final result = await _transport!.sendMessage(

@@ -332,10 +332,10 @@ class SubscriptionImpl implements Subscription {
     if (_config.getToken == null) {
       return;
     }
+    final String token;
     try {
       final event = SubscriptionTokenEvent(channel);
-      final String token = await _config.getToken!(event);
-      _token = token;
+      token = await _config.getToken!(event);
     } catch (ex) {
       if (state != SubscriptionState.subscribed) {
         return;
@@ -354,6 +354,20 @@ class SubscriptionImpl implements Subscription {
       });
       return;
     }
+
+    if (state != SubscriptionState.subscribed) {
+      // unsubscribe() or a disconnect arrived while getToken was in flight.
+      return;
+    }
+    if (token == '') {
+      // Documented contract: an empty token means the user has no permission
+      // to stay in the channel anymore, so unsubscribe instead of sending a
+      // token-less SubRefreshRequest. The stored token is deliberately kept
+      // untouched - the subscription is going away.
+      _failUnauthorized();
+      return;
+    }
+    _token = token;
 
     try {
       final request = protocol.SubRefreshRequest()
