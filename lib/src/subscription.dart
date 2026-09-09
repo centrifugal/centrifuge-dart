@@ -637,6 +637,14 @@ class SubscriptionImpl implements Subscription {
       return;
     }
     _clearSubscribedState();
+    // Channel compaction: the numeric channel ID is scoped to the server-side
+    // subscription that just went away, so drop it here too — not only in
+    // moveToUnsubscribed. Matters for a temporary server-initiated unsubscribe
+    // (code >= 2500), where the connection stays up and the ID registry is not
+    // cleared: without this, a push carrying the freed ID would still be routed
+    // to this subscription while it is only Subscribing. The next subscribe
+    // reply re-establishes the ID (the server may reuse the same one).
+    _setPushId(0);
     state = SubscriptionState.subscribing;
     final event = SubscribingEvent(code, reason);
     _addSubscribing(event);
