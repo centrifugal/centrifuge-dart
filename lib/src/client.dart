@@ -482,13 +482,19 @@ class ClientImpl implements Client {
       return;
     }
     _inConnect = true;
+    var unauthorized = false;
     try {
       await _connectInner();
+    } on UnauthorizedException {
+      unauthorized = true;
     } finally {
-      // Safety net: _processDisconnect normally clears this earlier so user
-      // events fire with the mutex released, but ensure we never leave it
-      // latched on success or unexpected exceptions either.
       _inConnect = false;
+    }
+    if (unauthorized) {
+      // Disconnect only once _inConnect is released: the disconnected event
+      // is delivered synchronously, and a connect() call from its listener
+      // would otherwise be dropped, leaving the client stuck in connecting.
+      await _failUnauthorized();
     }
   }
 
@@ -501,8 +507,8 @@ class ClientImpl implements Client {
         _refreshRequired = false;
       } catch (ex) {
         if (ex is UnauthorizedException) {
-          await _failUnauthorized();
-          return;
+          // Handled by _connect, after the connect mutex is released.
+          rethrow;
         }
         if (_closed) return;
         final event = ErrorEvent(RefreshError(ex));
