@@ -524,11 +524,25 @@ class SubscriptionImpl implements Subscription {
       _inflight = true;
       final protocol.SubscribeResult result;
       try {
-        result = await _client.sendSubscribe(request);
-      } finally {
-        if (attemptId == _subscribeAttemptId) {
-          _inflight = false;
+        try {
+          result = await _client.sendSubscribe(request);
+        } finally {
+          if (attemptId == _subscribeAttemptId) {
+            _inflight = false;
+          }
         }
+      } on TimeoutException {
+        // Only a timed out subscribe reply means the connection is stuck. A
+        // TimeoutException thrown by a user callback (e.g. getToken wrapping
+        // an HTTP request in .timeout()) is handled as a regular subscription
+        // error below instead of reconnecting the whole client.
+        if (!_isActiveAttempt(attemptId)) {
+          return;
+        }
+        await _client.processDisconnect(
+            code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
+        await _client.closeTransport();
+        return;
       }
       if (!_isActiveAttempt(attemptId)) {
         // Concurrent unsubscribe / disconnect happened while we were awaiting
@@ -571,14 +585,6 @@ class SubscriptionImpl implements Subscription {
         }
         handlePublication(pub);
       }
-    } on TimeoutException {
-      if (!_isActiveAttempt(attemptId)) {
-        return;
-      }
-      await _client.processDisconnect(
-          code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
-      await _client.closeTransport();
-      return;
     } catch (err) {
       if (!_isActiveAttempt(attemptId)) {
         return;
