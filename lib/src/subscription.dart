@@ -668,10 +668,12 @@ class SubscriptionImpl implements Subscription {
       }
       _prevData = event.data;
     }
-    _publicationController.add(event);
+    // Before the event, so a subscribe from its listener recovers after this
+    // publication.
     if (pub.offset > 0) {
       _offset = pub.offset;
     }
+    _publicationController.add(event);
   }
 
   @internal

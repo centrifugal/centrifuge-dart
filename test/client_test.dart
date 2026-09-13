@@ -2876,6 +2876,100 @@ void main() {
       expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
     });
 
+    test('recovered publications not delivered after unsubscribe() from a subscribed listener are recovered again',
+        () async {
+      server.onSubscribe = (channel, req) {
+        final result = protocol.SubscribeResult()
+          ..recoverable = true
+          ..epoch = 'e'
+          ..wasRecovering = true
+          ..recovered = true;
+        // Like Centrifugo: publications after the requested position with the
+        // requested offset, or the stream top without publications.
+        for (var offset = req.offset.toInt() + 1; offset <= 3; offset++) {
+          result.publications.add(publication(offset));
+        }
+        result.offset = result.publications.isEmpty ? Int64(3) : req.offset;
+        return result;
+      };
+      await client.connect();
+      final sub = client.newSubscription(
+          'news', centrifuge.SubscriptionConfig(since: centrifuge.StreamPosition(Int64(0), 'e')));
+      final publications = <String>[];
+      sub.publication.listen((event) => publications.add(utf8.decode(event.data)));
+
+      onFirst(sub.subscribed, () => sub.unsubscribe());
+      await sub.subscribe();
+      await sub.subscribe();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(publications, ['1', '2', '3']);
+      await sub.unsubscribe();
+      await sub.subscribe();
+      expect(server.lastSubscribe!.offset, Int64(3));
+    });
+
+    test('subscribe() from a publication listener recovers after that publication', () async {
+      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
+        ..recoverable = true
+        ..epoch = 'e'
+        ..offset = Int64(5);
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      onFirst(sub.publication, () {
+        sub.unsubscribe();
+        sub.subscribe();
+      });
+      server.sendPush(protocol.Push()
+        ..channel = 'news'
+        ..pub = publication(6));
+
+      await waitUntil(() => server.received.where((cmd) => cmd.hasSubscribe()).length == 2);
+      expect(server.lastSubscribe!.offset, Int64(6));
+    });
+
+    test('server-side subscription publications not delivered after disconnect() from its listener are recovered again',
+        () async {
+      var top = 0;
+      server.onCommand = (cmd) {
+        if (!cmd.hasConnect()) return null;
+        final subscribeResult = protocol.SubscribeResult()
+          ..recoverable = true
+          ..epoch = 'e';
+        // Like Centrifugo: publications after the requested position with the
+        // requested offset, or the stream top without publications.
+        final recovery = cmd.connect.subs['news'];
+        if (recovery != null) {
+          for (var offset = recovery.offset.toInt() + 1; offset <= top; offset++) {
+            subscribeResult.publications.add(publication(offset));
+          }
+        }
+        subscribeResult.offset = subscribeResult.publications.isEmpty ? Int64(top) : recovery!.offset;
+        final result = protocol.ConnectResult()..client = 'fake-client';
+        result.subs['news'] = subscribeResult;
+        return protocol.Reply()
+          ..id = cmd.id
+          ..connect = result;
+      };
+      final publications = <String>[];
+      client.publication.listen((event) => publications.add(utf8.decode(event.data)));
+      await client.connect();
+      await client.disconnect();
+      top = 2;
+
+      onFirst(client.subscribed, () => client.disconnect());
+      await client.connect();
+      await client.connect();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(publications, ['1', '2']);
+      await client.disconnect();
+      await client.connect();
+      expect(server.received.where((cmd) => cmd.hasConnect()).last.connect.subs['news']!.offset, Int64(2));
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
