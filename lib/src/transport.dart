@@ -50,6 +50,7 @@ Transport protobufTransportBuilder({
         protocols: ['centrifuge-protobuf'],
         headers: config.headers,
         tlsSkipVerify: config.tlsSkipVerify,
+        connectTimeout: config.timeout.inMicroseconds > 0 ? config.timeout : null,
       );
       await channel.ready;
       return channel;
