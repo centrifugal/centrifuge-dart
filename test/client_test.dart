@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
+import 'package:centrifuge/src/codec.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
+import 'package:centrifuge/src/transport.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
@@ -2946,6 +2948,62 @@ void main() {
           server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
       expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['static', 'static']);
       expect(errors.map((e) => e.error), isNot(contains(isA<centrifuge.ConfigurationError>())));
+    });
+  });
+
+  group('Calls', () {
+    test('calls racing disconnect() fail with ClientDisconnectedError', () async {
+      final server = FakeCentrifugoServer();
+      await server.start();
+      final client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+      addTearDown(() async {
+        await client.close();
+        await server.stop();
+      });
+
+      final calls = <String, Future<Object?> Function()>{
+        'publish': () => client.publish('news', [1]),
+        'rpc': () => client.rpc('method', [1]),
+        'history': () => client.history('news'),
+        'presence': () => client.presence('news'),
+        'presenceStats': () => client.presenceStats('news'),
+        'send': () => client.send([1]),
+      };
+      for (final call in calls.entries) {
+        await client.connect();
+        final result = expectLater(
+            call.value(), throwsA(isA<centrifuge.ClientDisconnectedError>()),
+            reason: call.key);
+        await client.disconnect();
+        await result;
+      }
+    });
+
+    test('a reply received by the time the call timeout fires completes the call', () async {
+      final incoming = StreamController<dynamic>(sync: true);
+      addTearDown(incoming.close);
+      final transport = Transport(
+        () async => FakeWebSocketChannel(incoming.stream),
+        TransportConfig(timeout: const Duration(milliseconds: 100)),
+        ProtobufCommandEncoder(),
+        ProtobufReplyDecoder(),
+      );
+      await transport.open((push, isPing) {}, onDone: (code, reason, reconnect) {});
+
+      final result =
+          transport.sendMessage(protocol.PublishRequest()..channel = 'news', protocol.PublishResult());
+      // Due at the same time as the call timeout and run right after it, like
+      // data read from the socket after a suspended process resumes and runs
+      // its overdue timers first.
+      Timer(const Duration(milliseconds: 100), () {
+        incoming.add(encodeReplies([
+          protocol.Reply()
+            ..id = 1
+            ..publish = protocol.PublishResult()
+        ]));
+      });
+
+      await expectLater(result, completes);
     });
   });
 }

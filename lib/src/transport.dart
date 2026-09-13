@@ -121,56 +121,45 @@ class Transport implements GeneratedMessageSender {
       request,
       false,
     );
-    try {
-      var fut = _sendCommand(command);
-      if (_config.timeout.inMicroseconds > 0) {
-        fut = fut.timeout(_config.timeout);
-      }
-      final reply = await fut;
-      if (reply.hasError()) {
-        throw centrifuge.Error.custom(reply.error.code, reply.error.message, reply.error.temporary);
-      }
-      if (reply.hasConnect()) {
-        result.mergeFromMessage(reply.connect);
-        return result;
-      } else if (reply.hasSubscribe()) {
-        result.mergeFromMessage(reply.subscribe);
-        return result;
-      } else if (reply.hasPublish()) {
-        result.mergeFromMessage(reply.publish);
-        return result;
-      } else if (reply.hasPing()) {
-        result.mergeFromMessage(reply.ping);
-        return result;
-      } else if (reply.hasUnsubscribe()) {
-        result.mergeFromMessage(reply.unsubscribe);
-        return result;
-      } else if (reply.hasPresence()) {
-        result.mergeFromMessage(reply.presence);
-        return result;
-      } else if (reply.hasPresenceStats()) {
-        result.mergeFromMessage(reply.presenceStats);
-        return result;
-      } else if (reply.hasHistory()) {
-        result.mergeFromMessage(reply.history);
-        return result;
-      } else if (reply.hasRpc()) {
-        result.mergeFromMessage(reply.rpc);
-        return result;
-      } else if (reply.hasRefresh()) {
-        result.mergeFromMessage(reply.refresh);
-        return result;
-      } else if (reply.hasSubRefresh()) {
-        result.mergeFromMessage(reply.subRefresh);
-        return result;
-      }
-      throw ArgumentError("unknown reply type " + reply.toString());
-    } on TimeoutException {
-      if (command.id > 0) {
-        _completers.remove(command.id);
-      }
-      rethrow;
+    final reply = await _sendCommand(command);
+    if (reply.hasError()) {
+      throw centrifuge.Error.custom(reply.error.code, reply.error.message, reply.error.temporary);
     }
+    if (reply.hasConnect()) {
+      result.mergeFromMessage(reply.connect);
+      return result;
+    } else if (reply.hasSubscribe()) {
+      result.mergeFromMessage(reply.subscribe);
+      return result;
+    } else if (reply.hasPublish()) {
+      result.mergeFromMessage(reply.publish);
+      return result;
+    } else if (reply.hasPing()) {
+      result.mergeFromMessage(reply.ping);
+      return result;
+    } else if (reply.hasUnsubscribe()) {
+      result.mergeFromMessage(reply.unsubscribe);
+      return result;
+    } else if (reply.hasPresence()) {
+      result.mergeFromMessage(reply.presence);
+      return result;
+    } else if (reply.hasPresenceStats()) {
+      result.mergeFromMessage(reply.presenceStats);
+      return result;
+    } else if (reply.hasHistory()) {
+      result.mergeFromMessage(reply.history);
+      return result;
+    } else if (reply.hasRpc()) {
+      result.mergeFromMessage(reply.rpc);
+      return result;
+    } else if (reply.hasRefresh()) {
+      result.mergeFromMessage(reply.refresh);
+      return result;
+    } else if (reply.hasSubRefresh()) {
+      result.mergeFromMessage(reply.subRefresh);
+      return result;
+    }
+    throw ArgumentError("unknown reply type " + reply.toString());
   }
 
   @override
@@ -245,6 +234,22 @@ class Transport implements GeneratedMessageSender {
     final data = _commandEncoder.convert(command);
 
     _socket!.sendData(data);
+
+    if (_config.timeout.inMicroseconds > 0) {
+      final timer = Timer(_config.timeout, () {
+        // The reply may have been received already but not processed yet, e.g.
+        // when a suspended process resumes and this overdue timer runs before
+        // the data waiting in the socket. Let that data be processed first.
+        Timer.run(() {
+          if (identical(_completers[command.id], completer)) {
+            _completers.remove(command.id);
+            // Same exception as Future.timeout used to throw here.
+            completer.completeError(TimeoutException('Future not completed', _config.timeout));
+          }
+        });
+      });
+      completer.future.then((_) => timer.cancel(), onError: (_) => timer.cancel());
+    }
 
     return completer.future;
   }
