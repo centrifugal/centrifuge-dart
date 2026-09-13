@@ -12,7 +12,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// server with a self-signed cert. Has no effect for `ws://` URLs.
 ///
 /// A handshake that doesn't complete within [connectTimeout] is aborted, and
-/// its socket closed.
+/// its socket closed, unless [HttpOverrides] are in effect.
 WebSocketChannel connect(
   Uri uri, {
   Iterable<String>? protocols,
@@ -20,6 +20,20 @@ WebSocketChannel connect(
   bool tlsSkipVerify = false,
   Duration? connectTimeout,
 }) {
+  if (HttpOverrides.current != null) {
+    // The client from the app's HttpOverrides may be one the app shares: it's
+    // used as before, and not closed, so a handshake can't be aborted.
+    HttpClient? customClient;
+    if (tlsSkipVerify) {
+      customClient = HttpClient()..badCertificateCallback = (_, __, ___) => true;
+    }
+    return IOWebSocketChannel.connect(
+      uri,
+      protocols: protocols,
+      headers: headers,
+      customClient: customClient,
+    );
+  }
   // A client of its own, so that an unfinished handshake can be aborted.
   final client = HttpClient()..userAgent = WebSocket.userAgent;
   if (tlsSkipVerify) {

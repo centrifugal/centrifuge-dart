@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show HttpClient, HttpOverrides, HttpServer, SecurityContext;
 import 'dart:math';
 import 'dart:mirrors';
 
@@ -169,6 +170,17 @@ int readyWaiters(Object clientOrSubscription) {
   final mirror = reflect(clientOrSubscription);
   final library = mirror.type.owner as LibraryMirror;
   return (mirror.getField(MirrorSystem.getSymbol('_readyFutures', library)).reflectee as List).length;
+}
+
+/// HttpOverrides returning one HttpClient for all requests, like an app that
+/// shares its own client.
+class SharedHttpClientOverrides extends HttpOverrides {
+  HttpClient? _client;
+
+  HttpClient get client => _client ?? createHttpClient(null);
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) => _client ??= super.createHttpClient(context);
 }
 
 /// Runs [action] once, synchronously inside the first event of [stream].
@@ -2420,6 +2432,26 @@ void main() {
       await waitUntil(() => server.handshakeRequests >= 4);
       // At most the attempt in progress and the one just aborted.
       expect(server.heldHandshakes, lessThanOrEqualTo(2));
+    });
+
+    test('an HttpClient shared through HttpOverrides still works after connecting', () async {
+      final httpServer = await HttpServer.bind('localhost', 0);
+      httpServer.listen((request) => request.response.close());
+      final overrides = SharedHttpClientOverrides();
+      addTearDown(() async {
+        overrides.client.close(force: true);
+        await httpServer.close(force: true);
+      });
+
+      await HttpOverrides.runWithHttpOverrides(() async {
+        client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+        await client.connect();
+      }, overrides);
+
+      final request = await overrides.client.getUrl(Uri.parse('http://localhost:${httpServer.port}/'));
+      final response = await request.close();
+      await response.drain<void>();
+      expect(response.statusCode, 200);
     });
 
     test('connect after disconnect during a pending attempt uses the new token', () async {
