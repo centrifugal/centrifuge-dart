@@ -4,6 +4,70 @@ import 'dart:io';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:fixnum/fixnum.dart';
 import 'package:protobuf/protobuf.dart' as pb;
+import 'package:stream_channel/stream_channel.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+/// A WebSocketChannel without a network, for tests that drive a Transport
+/// directly: messages from [stream] are received, sent data is kept in [sent].
+class FakeWebSocketChannel with StreamChannelMixin implements WebSocketChannel {
+  FakeWebSocketChannel(this.stream);
+
+  final sent = <dynamic>[];
+
+  @override
+  final Stream<dynamic> stream;
+
+  @override
+  late final WebSocketSink sink = _FakeWebSocketSink(sent);
+
+  @override
+  String? get protocol => 'centrifuge-protobuf';
+
+  @override
+  int? get closeCode => null;
+
+  @override
+  String? get closeReason => null;
+
+  @override
+  Future<void> get ready => Future.value();
+}
+
+class _FakeWebSocketSink implements WebSocketSink {
+  _FakeWebSocketSink(this.sent);
+
+  final List<dynamic> sent;
+  final _done = Completer<void>();
+
+  @override
+  void add(dynamic data) => sent.add(data);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {}
+
+  @override
+  Future addStream(Stream stream) => stream.forEach(sent.add);
+
+  @override
+  Future close([int? closeCode, String? closeReason]) async {
+    if (!_done.isCompleted) _done.complete();
+  }
+
+  @override
+  Future get done => _done.future;
+}
+
+/// Encodes replies the way the server frames them in one WebSocket message.
+List<int> encodeReplies(List<protocol.Reply> replies) {
+  final writer = pb.CodedBufferWriter();
+  for (final reply in replies) {
+    final replyData = reply.writeToBuffer();
+    writer
+      ..writeInt32NoTag(replyData.length)
+      ..writeRawBytes(replyData);
+  }
+  return writer.toBuffer();
+}
 
 /// In-process Centrifugo fake server for tests, speaking the protobuf protocol
 /// over a WebSocket. It is intentionally protocol-level and generic: it provides

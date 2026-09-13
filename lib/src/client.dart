@@ -289,13 +289,23 @@ class ClientImpl implements Client {
     return completer.future;
   }
 
+  /// The transport after `await ready()`, which yields: a disconnect may have
+  /// happened in between.
+  Transport _connectedTransport() {
+    final transport = _transport;
+    if (transport == null) {
+      throw ClientDisconnectedError();
+    }
+    return transport;
+  }
+
   @override
   Future<PublishResult> publish(String channel, List<int> data) async {
     await ready().timeout(_config.timeout);
     final request = protocol.PublishRequest()
       ..channel = channel
       ..data = data;
-    final result = await _transport!.sendMessage(
+    final result = await _connectedTransport().sendMessage(
       request,
       protocol.PublishResult(),
     );
@@ -308,7 +318,7 @@ class ClientImpl implements Client {
     final request = protocol.RPCRequest();
     request.method = method;
     request.data = data;
-    final result = await _transport!.sendMessage(request, protocol.RPCResult());
+    final result = await _connectedTransport().sendMessage(request, protocol.RPCResult());
     return RPCResult.from(result);
   }
 
@@ -325,7 +335,7 @@ class ClientImpl implements Client {
       sp.epoch = since.epoch;
       request.since = sp;
     }
-    final result = await _transport!.sendMessage(
+    final result = await _connectedTransport().sendMessage(
       request,
       protocol.HistoryResult(),
     );
@@ -336,7 +346,7 @@ class ClientImpl implements Client {
   Future<PresenceResult> presence(String channel) async {
     await ready().timeout(_config.timeout);
     final request = protocol.PresenceRequest()..channel = channel;
-    final result = await _transport!.sendMessage(
+    final result = await _connectedTransport().sendMessage(
       request,
       protocol.PresenceResult(),
     );
@@ -347,7 +357,7 @@ class ClientImpl implements Client {
   Future<PresenceStatsResult> presenceStats(String channel) async {
     await ready().timeout(_config.timeout);
     final request = protocol.PresenceStatsRequest()..channel = channel;
-    final result = await _transport!.sendMessage(
+    final result = await _connectedTransport().sendMessage(
       request,
       protocol.PresenceStatsResult(),
     );
@@ -358,7 +368,7 @@ class ClientImpl implements Client {
   Future<void> send(List<int> data) async {
     await ready().timeout(_config.timeout);
     final request = protocol.SendRequest()..data = data;
-    await _transport!.sendAsyncMessage(request);
+    await _connectedTransport().sendAsyncMessage(request);
   }
 
   @override
@@ -801,7 +811,7 @@ class ClientImpl implements Client {
     final request = protocol.RefreshRequest()..token = _token;
 
     try {
-      final result = await _transport!.sendMessage(
+      final result = await _connectedTransport().sendMessage(
         request,
         protocol.RefreshResult(),
       );
@@ -1018,7 +1028,7 @@ class ClientImpl implements Client {
     if (_transport == null) {
       throw ClientDisconnectedError();
     }
-    return await _transport!.sendMessage(
+    return await _connectedTransport().sendMessage(
       request,
       protocol.UnsubscribeResult(),
     );
@@ -1029,7 +1039,7 @@ class ClientImpl implements Client {
     if (_transport == null) {
       throw ClientDisconnectedError();
     }
-    return await _transport!.sendMessage(
+    return await _connectedTransport().sendMessage(
       request,
       protocol.SubscribeResult(),
     );
@@ -1040,7 +1050,7 @@ class ClientImpl implements Client {
     if (_transport == null) {
       throw ClientDisconnectedError();
     }
-    return await _transport!.sendMessage(
+    return await _connectedTransport().sendMessage(
       request,
       protocol.SubRefreshResult(),
     );
