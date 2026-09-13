@@ -87,7 +87,7 @@ class FakeCentrifugoServer {
       _socket = socket;
       _connections.add(socket);
       _openConnections.add(socket);
-      socket.listen((dynamic data) => _onData(data as List<int>),
+      socket.listen((dynamic data) => _onData(socket, data as List<int>),
           onDone: () => _openConnections.remove(socket));
     });
   }
@@ -106,16 +106,16 @@ class FakeCentrifugoServer {
     await _socket?.close();
   }
 
-  void _onData(List<int> data) {
+  void _onData(WebSocket socket, List<int> data) {
     final reader = pb.CodedBufferReader(data);
     while (!reader.isAtEnd()) {
       final cmd = protocol.Command();
       reader.readMessage(cmd, pb.ExtensionRegistry.EMPTY);
-      _dispatch(cmd);
+      _dispatch(socket, cmd);
     }
   }
 
-  void _dispatch(protocol.Command cmd) {
+  void _dispatch(WebSocket socket, protocol.Command cmd) {
     received.add(cmd);
 
     if (holdReply != null && holdReply!(cmd)) {
@@ -125,29 +125,51 @@ class FakeCentrifugoServer {
     if (onCommand != null) {
       final reply = onCommand!(cmd);
       if (reply != null) {
-        sendReply(reply);
+        _reply(socket, reply);
         return;
       }
     }
 
     if (cmd.hasConnect()) {
-      sendReply(protocol.Reply()
-        ..id = cmd.id
-        ..connect = connectResult);
+      _reply(
+          socket,
+          protocol.Reply()
+            ..id = cmd.id
+            ..connect = connectResult);
     } else if (cmd.hasSubscribe()) {
       final result = onSubscribe != null
           ? onSubscribe!(cmd.subscribe.channel, cmd.subscribe)
           : protocol.SubscribeResult();
-      sendReply(protocol.Reply()
-        ..id = cmd.id
-        ..subscribe = result);
+      _reply(
+          socket,
+          protocol.Reply()
+            ..id = cmd.id
+            ..subscribe = result);
     } else if (cmd.hasUnsubscribe()) {
-      sendReply(protocol.Reply()
-        ..id = cmd.id
-        ..unsubscribe = protocol.UnsubscribeResult());
+      _reply(
+          socket,
+          protocol.Reply()
+            ..id = cmd.id
+            ..unsubscribe = protocol.UnsubscribeResult());
     } else if (cmd.id != 0) {
       // Reply to anything else with an empty result to avoid client timeouts.
-      sendReply(protocol.Reply()..id = cmd.id);
+      _reply(socket, protocol.Reply()..id = cmd.id);
+    }
+  }
+
+  /// Replies on the connection the command came from. A command can still
+  /// arrive on a connection that closeConnection() already closed: its reply
+  /// is dropped, as a real server's would be.
+  void _reply(WebSocket socket, protocol.Reply reply) {
+    final replyData = reply.writeToBuffer();
+    final framed = (pb.CodedBufferWriter()
+          ..writeInt32NoTag(replyData.length)
+          ..writeRawBytes(replyData))
+        .toBuffer();
+    try {
+      socket.add(framed);
+    } on StateError {
+      // Connection already closed.
     }
   }
 
