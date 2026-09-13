@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
+import 'package:centrifuge/src/client.dart' show ClientImpl;
 import 'package:centrifuge/src/codec.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:centrifuge/src/transport.dart';
@@ -3059,6 +3060,67 @@ void main() {
       expect(event.reason, startsWith('exception during message handling'));
       expect(uncaught, hasLength(1));
       expect(client.state, centrifuge.State.disconnected);
+    });
+  });
+
+  group('Slow transport close', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    centrifuge.ClientConfig fastConfig(Duration timeout) => centrifuge.ClientConfig(
+          timeout: timeout,
+          minReconnectDelay: const Duration(milliseconds: 20),
+          maxReconnectDelay: const Duration(milliseconds: 100),
+        );
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('a subscribe pending when the connection is lost neither holds up nor tears down the next connection',
+        () async {
+      var subscribes = 0;
+      server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
+      client = ClientImpl(server.url, fastConfig(const Duration(seconds: 1)),
+          slowCloseTransportBuilder(const Duration(seconds: 2)));
+      final connecting = <centrifuge.ConnectingEvent>[];
+      client.connecting.listen(connecting.add);
+      await client.connect();
+      final sub = client.newSubscription('news');
+      unawaited(sub.subscribe());
+      await waitUntil(() => subscribes == 1);
+
+      // E.g. an app reconnecting on a network change.
+      unawaited(client.disconnect());
+      unawaited(client.connect());
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed,
+          timeout: const Duration(milliseconds: 500));
+      // Past the call timeout of the subscribe sent on the lost connection.
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      expect(client.state, centrifuge.State.connected);
+      expect(server.handshakeRequests, 2);
+      expect(connecting.map((event) => event.code), isNot(contains(3)));
+    });
+
+    test('a subscribe timeout resubscribes on the next connection before the old one closes', () async {
+      var subscribes = 0;
+      server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
+      client = ClientImpl(server.url, fastConfig(const Duration(milliseconds: 300)),
+          slowCloseTransportBuilder(const Duration(seconds: 2)));
+      await client.connect();
+      final sub = client.newSubscription('news');
+      unawaited(sub.subscribe());
+
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed,
+          timeout: const Duration(milliseconds: 500));
     });
   });
 }

@@ -579,6 +579,9 @@ class SubscriptionImpl implements Subscription {
       if (!_isActiveAttempt(attemptId)) {
         return;
       }
+      // The request is abandoned with its connection: the next connection
+      // subscribes again instead of waiting for this attempt to end.
+      _subscribeAttemptId++;
       await _client.processDisconnect(
           code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
       await _client.closeTransport();
@@ -687,6 +690,18 @@ class SubscriptionImpl implements Subscription {
       return;
     }
     _resubscribe();
+  }
+
+  /// Moves to subscribing when the client's connection is lost.
+  @internal
+  void moveToSubscribingOnDisconnect() {
+    if (state == SubscriptionState.subscribing && _inflight) {
+      // The pending subscribe request went away with its connection: its
+      // attempt must not act on the next connection, which subscribes again.
+      _subscribeAttemptId++;
+      _inflight = false;
+    }
+    moveToSubscribing(subscribingCodeTransportClosed, "transport closed");
   }
 
   @internal
