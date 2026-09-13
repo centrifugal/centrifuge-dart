@@ -3006,4 +3006,43 @@ void main() {
       await expectLater(result, completes);
     });
   });
+
+  group('Message handling', () {
+    test('an exception while handling a push is reported and stops the client with badProtocol',
+        () async {
+      final server = FakeCentrifugoServer();
+      await server.start();
+      server.onSubscribe = (channel, req) => protocol.SubscribeResult()..delta = true;
+      late centrifuge.Client client;
+      addTearDown(() async {
+        await client.close();
+        await server.stop();
+      });
+      final uncaught = <Object>[];
+      final disconnected = Completer<centrifuge.DisconnectedEvent>();
+
+      await runZonedGuarded(() async {
+        client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+        client.disconnected.listen((event) {
+          if (!disconnected.isCompleted) disconnected.complete(event);
+        });
+        await client.connect();
+        final sub = client.newSubscription(
+            'news', centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
+        await sub.subscribe();
+        // A delta publication without a previous publication to apply it to.
+        server.sendPush(protocol.Push()
+          ..channel = 'news'
+          ..pub = (protocol.Publication()
+            ..data = utf8.encode('delta')
+            ..delta = true));
+      }, (error, stackTrace) => uncaught.add(error));
+
+      final event = await disconnected.future.timeout(const Duration(seconds: 3));
+      expect(event.code, 2);
+      expect(event.reason, startsWith('exception during message handling'));
+      expect(uncaught, hasLength(1));
+      expect(client.state, centrifuge.State.disconnected);
+    });
+  });
 }
