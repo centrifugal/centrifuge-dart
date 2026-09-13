@@ -560,6 +560,8 @@ class ClientImpl implements Client {
         if (!_isActiveAttempt(attemptId)) return;
         final event = ErrorEvent(RefreshError(ex));
         _errorController.add(event);
+        // Not after an error listener disconnected or started a new attempt.
+        if (!_isActiveAttempt(attemptId)) return;
         _scheduleReconnect();
         return;
       }
@@ -614,6 +616,7 @@ class ClientImpl implements Client {
       _connectingTransport = null;
       final event = ErrorEvent(TransportError(ex));
       _errorController.add(event);
+      if (!_isActiveAttempt(attemptId)) return;
       _scheduleReconnect();
       return;
     }
@@ -638,6 +641,10 @@ class ClientImpl implements Client {
         }
         final event = ErrorEvent(TransportError(ex));
         _errorController.add(event);
+        if (!_isActiveAttempt(attemptId)) {
+          await transport.close();
+          return;
+        }
         await _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
         return;
       }
@@ -706,11 +713,12 @@ class ClientImpl implements Client {
 
       final event = ConnectedEvent.from(result);
       _connectedController.add(event);
-      _completeReadyFutures();
       if (attemptId != _connectAttemptId) {
-        // A connected listener disconnected.
+        // A connected listener disconnected, which failed the ready futures:
+        // those added since wait for a new attempt.
         return;
       }
+      _completeReadyFutures();
 
       // Listeners may disconnect: the rest of this reply must not be delivered
       // after that.
@@ -757,13 +765,18 @@ class ClientImpl implements Client {
         // runs before or after this catch.
         return;
       }
+      if (err is Error && err.code == 109) {
+        // Token expired: set before the error event, so a connect() from its
+        // listener gets a new token.
+        _refreshRequired = true;
+      }
       final event = ErrorEvent(ConnectError(err));
       _errorController.add(event);
+      if (!_isActiveAttempt(attemptId)) {
+        // An error listener disconnected or started a new attempt.
+        return;
+      }
       if (err is Error) {
-        if (err.code == 109) {
-          // token expired.
-          _refreshRequired = true;
-        }
         await _processDisconnect(
             code: err.code, reason: err.message, reconnect: err.code == 109 || err.temporary);
         return;
@@ -809,6 +822,9 @@ class ClientImpl implements Client {
       }
       final event = ErrorEvent(RefreshError(ex));
       _errorController.add(event);
+      if (!isCurrentConnection()) {
+        return;
+      }
       _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
         if (state != State.connected) {
           return;
@@ -856,6 +872,9 @@ class ClientImpl implements Client {
       }
       final event = ErrorEvent(RefreshError(err));
       _errorController.add(event);
+      if (!isCurrentConnection()) {
+        return;
+      }
       if (err is Error) {
         if (err.temporary) {
           _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
