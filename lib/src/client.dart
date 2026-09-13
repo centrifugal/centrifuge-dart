@@ -8,6 +8,7 @@ import 'package:centrifuge/src/transport.dart';
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:meta/meta.dart';
 
+import 'event_controller.dart';
 import 'platform/vm.dart' if (dart.library.js_interop) 'platform/js.dart';
 import 'proto/client.pb.dart' as protocol;
 import 'subscription.dart';
@@ -157,17 +158,17 @@ class ClientImpl implements Client {
 
   final _readyFutures = <Completer<void>>[];
 
-  final _connectedController = StreamController<ConnectedEvent>.broadcast(sync: true);
-  final _disconnectedController = StreamController<DisconnectedEvent>.broadcast(sync: true);
-  final _connectingController = StreamController<ConnectingEvent>.broadcast(sync: true);
-  final _errorController = StreamController<ErrorEvent>.broadcast(sync: true);
-  final _messageController = StreamController<MessageEvent>.broadcast(sync: true);
-  final _subscribedController = StreamController<ServerSubscribedEvent>.broadcast(sync: true);
-  final _subscribingController = StreamController<ServerSubscribingEvent>.broadcast(sync: true);
-  final _unsubscribedController = StreamController<ServerUnsubscribedEvent>.broadcast(sync: true);
-  final _publicationController = StreamController<ServerPublicationEvent>.broadcast(sync: true);
-  final _joinController = StreamController<ServerJoinEvent>.broadcast(sync: true);
-  final _leaveController = StreamController<ServerLeaveEvent>.broadcast(sync: true);
+  final _connectedController = EventController<ConnectedEvent>();
+  final _disconnectedController = EventController<DisconnectedEvent>();
+  final _connectingController = EventController<ConnectingEvent>();
+  final _errorController = EventController<ErrorEvent>();
+  final _messageController = EventController<MessageEvent>();
+  final _subscribedController = EventController<ServerSubscribedEvent>();
+  final _subscribingController = EventController<ServerSubscribingEvent>();
+  final _unsubscribedController = EventController<ServerUnsubscribedEvent>();
+  final _publicationController = EventController<ServerPublicationEvent>();
+  final _joinController = EventController<ServerJoinEvent>();
+  final _leaveController = EventController<ServerLeaveEvent>();
 
   @override
   Stream<ConnectedEvent> get connected => _connectedController.stream;
@@ -426,30 +427,28 @@ class ClientImpl implements Client {
     _pingTimer?.cancel();
 
     final prevState = state;
+    // Changed before any event: listeners see the new state, and a
+    // disconnect() or connect() they call acts on it.
+    state = reconnect ? State.connecting : State.disconnected;
 
-    if (state == State.connected) {
+    if (prevState == State.connected) {
       _client = null;
       // Channel compaction IDs are scoped to a server session — drop the
       // routing registry; each resubscribe re-registers a fresh ID.
       _subscriptionsById.clear();
-      _subscriptions.values
-          .forEach((s) => s.moveToSubscribing(subscribingCodeTransportClosed, "transport closed"));
-
-      _serverSubs.forEach((key, value) {
-        final event = ServerSubscribingEvent.from(key);
+      // Listeners may add or remove subscriptions: iterate over copies.
+      for (final s in _subscriptions.values.toList()) {
+        s.moveToSubscribing(subscribingCodeTransportClosed, "transport closed");
+      }
+      for (final channel in _serverSubs.keys.toList()) {
+        final event = ServerSubscribingEvent.from(channel);
         _subscribingController.add(event);
-      });
+      }
     }
 
-    if (reconnect) {
-      state = State.connecting;
-    } else {
-      state = State.disconnected;
-    }
-
-    final needEvent = prevState != state;
-
-    if (needEvent) {
+    // Skipped when a listener above already disconnected or started a new
+    // attempt, which emitted its own events.
+    if (attemptId == _connectAttemptId && prevState != state) {
       if (state == State.connecting) {
         final event = ConnectingEvent(code, reason);
         _connectingController.add(event);
@@ -641,9 +640,30 @@ class ClientImpl implements Client {
       state = State.connected;
       _client = result.client;
       _reconnectAttempts = 0;
+
+      // Timers are armed before the connected event, so a listener tearing
+      // the connection down cancels them.
+      if (result.expires) {
+        _refreshTimer = Timer(Duration(seconds: result.ttl), () {
+          if (state != State.connected) {
+            return;
+          }
+          _refreshToken();
+        });
+      }
+      _sendPong = result.pong;
+      if (result.ping > 0) {
+        _pingInterval = result.ping;
+        _setPingTimer();
+      }
+
       final event = ConnectedEvent.from(result);
       _connectedController.add(event);
       _completeReadyFutures();
+      if (attemptId != _connectAttemptId) {
+        // A connected listener disconnected.
+        return;
+      }
 
       result.subs.forEach((key, value) {
         _serverSubs[key] = ServerSubscription(key, value.recoverable, value.offset, value.epoch);
@@ -666,23 +686,8 @@ class ClientImpl implements Client {
       });
       _serverSubs.removeWhere((key, value) => !result.subs.containsKey(key));
 
-      for (SubscriptionImpl subscription in _subscriptions.values) {
+      for (final subscription in _subscriptions.values.toList()) {
         subscription.resubscribeOnConnect();
-      }
-
-      if (result.expires) {
-        _refreshTimer = Timer(Duration(seconds: result.ttl), () {
-          if (state != State.connected) {
-            return;
-          }
-          _refreshToken();
-        });
-      }
-
-      _sendPong = result.pong;
-      if (result.ping > 0) {
-        _pingInterval = result.ping;
-        _setPingTimer();
       }
     } catch (err) {
       if (!_isActiveAttempt(attemptId) || err is ClientDisconnectedError) {
