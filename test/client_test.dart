@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:mirrors';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
 import 'package:centrifuge/src/client.dart' show ClientImpl;
@@ -160,6 +161,14 @@ Future<void> waitUntil(bool Function() condition,
     }
     await Future<void>.delayed(const Duration(milliseconds: 10));
   }
+}
+
+/// The number of ready() waiters of a client or a subscription, kept in a
+/// private field.
+int readyWaiters(Object clientOrSubscription) {
+  final mirror = reflect(clientOrSubscription);
+  final library = mirror.type.owner as LibraryMirror;
+  return (mirror.getField(MirrorSystem.getSymbol('_readyFutures', library)).reflectee as List).length;
 }
 
 /// Runs [action] once, synchronously inside the first event of [stream].
@@ -3031,6 +3040,21 @@ void main() {
       expect(commands, ['subscribe', 'unsubscribe']);
     });
 
+    test('ready() does not complete when a subscribed listener disconnects the client', () async {
+      await client.connect();
+      final sub = client.newSubscription('news');
+      final subscribing = sub.subscribe();
+      var readyCompleted = false;
+      unawaited(sub.ready().then((_) => readyCompleted = true, onError: (Object _) => false));
+
+      onFirst(sub.subscribed, () => client.disconnect());
+      await subscribing;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(sub.state, centrifuge.SubscriptionState.subscribing);
+      expect(readyCompleted, isFalse);
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
@@ -3339,6 +3363,39 @@ void main() {
       expect(closed, isTrue);
       expect(await callError.future.timeout(const Duration(seconds: 1)),
           isA<centrifuge.ClientDisconnectedError>());
+    });
+
+    test('a call that times out waiting for the connection or the subscription stops waiting', () async {
+      final server = FakeCentrifugoServer();
+      await server.start();
+      server.holdHandshake = true;
+      final client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            timeout: const Duration(milliseconds: 100),
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 50),
+          ));
+      addTearDown(() async {
+        await client.close();
+        await server.stop();
+      });
+      unawaited(client.connect());
+      for (var i = 0; i < 3; i++) {
+        await expectLater(client.publish('news', [1]), throwsA(isA<TimeoutException>()));
+      }
+      expect(readyWaiters(client), 0);
+
+      server.holdHandshake = false;
+      await waitUntil(() => client.state == centrifuge.State.connected);
+      // Stays subscribing: getState never completes.
+      final sub = client.newSubscription(
+          'news', centrifuge.SubscriptionConfig(getState: () => Completer<centrifuge.StreamPosition>().future));
+      unawaited(sub.subscribe());
+      for (var i = 0; i < 3; i++) {
+        await expectLater(sub.publish([1]), throwsA(isA<TimeoutException>()));
+      }
+      expect(readyWaiters(sub), 0);
     });
   });
 
