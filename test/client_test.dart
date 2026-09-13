@@ -2808,6 +2808,21 @@ void main() {
       expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
     });
 
+    test('removeSubscription() with a subscription removed before leaves the newer one for its channel',
+        () async {
+      await client.connect();
+      final removed = client.newSubscription('news');
+      await client.removeSubscription(removed);
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      await client.removeSubscription(removed);
+
+      expect(client.getSubscription('news'), same(sub));
+      expect(sub.state, centrifuge.SubscriptionState.subscribed);
+      expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
+    });
+
     test('a server unsubscribe during a pending resubscribe is cleaned up on the server', () async {
       protocol.Command? heldSubscribe;
       var subscribes = 0;
