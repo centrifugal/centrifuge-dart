@@ -275,7 +275,11 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  Future<void> ready() {
+  Future<void> ready() => _waitReady();
+
+  /// [ready] for a call, with its [timeout]: a call that times out stops
+  /// waiting.
+  Future<void> _waitReady([Duration? timeout]) {
     if (state == SubscriptionState.subscribed) {
       return Future.value();
     }
@@ -284,30 +288,36 @@ class SubscriptionImpl implements Subscription {
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
-    return completer.future;
+    if (timeout == null) {
+      return completer.future;
+    }
+    return completer.future.timeout(timeout, onTimeout: () {
+      _readyFutures.remove(completer);
+      throw TimeoutException('Future not completed', timeout);
+    });
   }
 
   @override
   Future<PublishResult> publish(List<int> data) async {
-    await ready().timeout(_client.config.timeout);
+    await _waitReady(_client.config.timeout);
     return _client.publish(channel, data);
   }
 
   @override
   Future<HistoryResult> history({int limit = 0, StreamPosition? since, bool reverse = false}) async {
-    await ready().timeout(_client.config.timeout);
+    await _waitReady(_client.config.timeout);
     return _client.history(channel, limit: limit, since: since, reverse: reverse);
   }
 
   @override
   Future<PresenceResult> presence() async {
-    await ready().timeout(_client.config.timeout);
+    await _waitReady(_client.config.timeout);
     return _client.presence(channel);
   }
 
   @override
   Future<PresenceStatsResult> presenceStats() async {
-    await ready().timeout(_client.config.timeout);
+    await _waitReady(_client.config.timeout);
     return _client.presenceStats(channel);
   }
 
@@ -602,9 +612,15 @@ class SubscriptionImpl implements Subscription {
       }
       final event = SubscribedEvent.from(result);
       _subscribedController.add(event);
+      if (attemptId != _subscribeAttemptId || state != SubscriptionState.subscribed) {
+        // A subscribed listener tore the subscription down, which failed the
+        // ready futures or left them for the next subscribe, and recovered
+        // publications must not be delivered.
+        return;
+      }
       _completeReadyFutures();
-      // A subscribed or publication listener may have torn the subscription
-      // down: the rest of the recovered publications must not be delivered.
+      // A publication listener may tear the subscription down: the rest of
+      // the recovered publications must not be delivered.
       for (final pub in result.publications) {
         if (state != SubscriptionState.subscribed) {
           break;
