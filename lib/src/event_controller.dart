@@ -95,7 +95,8 @@ class _EventSubscription<T> implements StreamSubscription<T> {
 
   void _add(T event) {
     if (_finished) return;
-    if (_pauseCount > 0) {
+    // After resume(), events that arrived while paused are delivered first.
+    if (_pauseCount > 0 || _pending.isNotEmpty) {
       _pending.add(event);
       return;
     }
