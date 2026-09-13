@@ -2560,6 +2560,33 @@ void main() {
       expect(connecting, hasLength(2));
     });
 
+    test('events from listeners of different streams arrive in the order the state changed', () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final events = <String>[];
+      client.connecting.listen((_) => events.add('connecting ${client.state.name}'));
+      client.connected.listen((_) => events.add('connected ${client.state.name}'));
+      client.disconnected.listen((_) => events.add('disconnected ${client.state.name}'));
+
+      onFirst(client.disconnected, () {
+        onFirst(client.connecting, () {
+          client.disconnect();
+          client.connect();
+        });
+        client.connect();
+      });
+      await client.disconnect();
+      await waitUntil(() => client.state == centrifuge.State.connected);
+
+      expect(events, [
+        'disconnected disconnected',
+        'connecting connecting',
+        'disconnected disconnected',
+        'connecting connecting',
+        'connected connected',
+      ]);
+    });
+
     test('disconnect() and connect() from a connected listener leave one refresh chain', () async {
       server.connectResult = protocol.ConnectResult()
         ..client = 'fake-client'
