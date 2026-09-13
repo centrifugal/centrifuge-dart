@@ -189,8 +189,10 @@ class SubscriptionImpl implements Subscription {
   /// 2502 for this channel, or disconnect code 3014 at the connection level).
   ///
   /// Clears the token, fossil delta base and channel-compaction ID, and resets
-  /// the recovery position to a sentinel epoch ("_") the server can never match
-  /// (offset 0). The recover flag is left untouched, so a recoverable
+  /// a recovery position the subscription has to a sentinel epoch ("_") the
+  /// server can never match (offset 0); a subscription without a position
+  /// still calls getState on its next subscribe. The recover flag is left
+  /// untouched, so a recoverable
   /// subscription resubscribes with wasRecovering=true, recovered=false —
   /// letting the app reload via its existing recovery-failure path instead of
   /// treating it as a brand-new first subscribe — while a non-recoverable
@@ -199,8 +201,10 @@ class SubscriptionImpl implements Subscription {
   @internal
   void invalidateState() {
     _token = '';
-    _offset = $fixnum.Int64(0);
-    _epoch = '_';
+    if (_offset != null) {
+      _offset = $fixnum.Int64(0);
+      _epoch = '_';
+    }
     _prevData = null;
     _setPushId(0);
   }
