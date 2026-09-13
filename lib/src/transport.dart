@@ -260,13 +260,6 @@ class Transport implements GeneratedMessageSender {
   void Function() _onDone(void Function(int, String, bool)? onDone) {
     return () {
       _done = true;
-      // Failed calls resume synchronously, and code they run may send new
-      // commands, which now fail: complete a detached map.
-      final completers = _completers;
-      _completers = <int, Completer<GeneratedMessage>>{};
-      for (final completer in completers.values) {
-        completer.completeError(centrifuge.ClientDisconnectedError());
-      }
       int code = connectingCodeTransportClosed;
       String reason = "transport closed";
       bool reconnect = true;
@@ -289,7 +282,16 @@ class Transport implements GeneratedMessageSender {
           }
         }
       }
+      // The close is handled before the pending calls fail, so code handling
+      // their failure doesn't take the connection as still open.
       onDone!(code, reason, reconnect);
+      // Failed calls resume synchronously, and code they run may send new
+      // commands, which now fail: complete a detached map.
+      final completers = _completers;
+      _completers = <int, Completer<GeneratedMessage>>{};
+      for (final completer in completers.values) {
+        completer.completeError(centrifuge.ClientDisconnectedError());
+      }
     };
   }
 

@@ -2724,27 +2724,6 @@ void main() {
 
       await expectLater(call, completes);
     });
-
-    test('a command sent by a listener while calls fail on a closed connection does not stop reconnecting',
-        () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final a = client.newSubscription('a');
-      await a.subscribe();
-      server.holdReply = (cmd) => cmd.hasSubscribe() && cmd.subscribe.channel == 'b';
-      final b = client.newSubscription('b');
-      unawaited(b.subscribe());
-      await waitUntil(
-          () => server.received.any((cmd) => cmd.hasSubscribe() && cmd.subscribe.channel == 'b'));
-
-      // The pending subscribe of b fails when the connection closes, and its
-      // error listener sends an unsubscribe for a.
-      onFirst(b.error, () => a.unsubscribe());
-      server.holdReply = null;
-      await server.closeConnection();
-
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
-    });
   });
 
   group('Subscription teardown', () {
@@ -3124,6 +3103,37 @@ void main() {
 
       await expectLater(result, completes);
     });
+
+    test('a call made while calls fail on a closed connection fails, and the close is reported', () async {
+      final incoming = StreamController<dynamic>(sync: true);
+      final transport = Transport(
+        () async => FakeWebSocketChannel(incoming.stream),
+        TransportConfig(),
+        ProtobufCommandEncoder(),
+        ProtobufReplyDecoder(),
+      );
+      var closed = false;
+      await transport.open((push, isPing) {}, onDone: (code, reason, reconnect) => closed = true);
+
+      final callError = Completer<Object>();
+      final pending =
+          transport.sendMessage(protocol.PublishRequest()..channel = 'a', protocol.PublishResult());
+      // Runs synchronously when the pending call fails.
+      unawaited(pending.catchError((Object _) {
+        unawaited(transport
+            .sendMessage(protocol.PublishRequest()..channel = 'b', protocol.PublishResult())
+            .catchError((Object error) {
+          callError.complete(error);
+          return protocol.PublishResult();
+        }));
+        return protocol.PublishResult();
+      }));
+      await incoming.close();
+
+      expect(closed, isTrue);
+      expect(await callError.future.timeout(const Duration(seconds: 1)),
+          isA<centrifuge.ClientDisconnectedError>());
+    });
   });
 
   group('Message handling', () {
@@ -3241,6 +3251,86 @@ void main() {
       expect(server.openConnections, 1);
       expect(server.handshakeRequests, 2);
       expect(client.state, centrifuge.State.connected);
+    });
+  });
+
+  group('Connection closed with pending calls', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    centrifuge.ClientConfig fastConfig({centrifuge.ConnectionTokenCallback? getToken}) =>
+        centrifuge.ClientConfig(
+          token: getToken == null ? '' : 'token',
+          getToken: getToken,
+          minReconnectDelay: const Duration(milliseconds: 20),
+          maxReconnectDelay: const Duration(milliseconds: 100),
+        );
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('a close code without reconnect is applied while a cleanup unsubscribe is pending', () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      final events = <String>[];
+      client.connecting.listen((event) => events.add('connecting ${event.code}'));
+      client.disconnected.listen((event) => events.add('disconnected ${event.code}'));
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+      server.holdReply = (cmd) => cmd.hasUnsubscribe();
+      unawaited(sub.unsubscribe());
+      await waitUntil(() => server.received.any((cmd) => cmd.hasUnsubscribe()));
+
+      await server.closeConnection(3501, 'bad request');
+      await waitUntil(() => client.state == centrifuge.State.disconnected);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(events, ['connecting 0', 'disconnected 3501']);
+      expect(server.handshakeRequests, 1);
+    });
+
+    test('a subscribe failing on a closed connection reports no error', () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      server.holdReply = (cmd) => cmd.hasSubscribe();
+      final sub = client.newSubscription('news');
+      final errors = <centrifuge.SubscriptionErrorEvent>[];
+      sub.error.listen(errors.add);
+      unawaited(sub.subscribe());
+      await waitUntil(() => server.received.any((cmd) => cmd.hasSubscribe()));
+
+      server.holdReply = null;
+      await server.closeConnection();
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      expect(errors, isEmpty);
+    });
+
+    test('a token refresh failing on a closed connection reports no error', () async {
+      server.connectResult = protocol.ConnectResult()
+        ..client = 'fake-client'
+        ..expires = true
+        ..ttl = 1;
+      server.holdReply = (cmd) => cmd.hasRefresh();
+      client = centrifuge.createClient(server.url, fastConfig(getToken: (_) async => 'token'));
+      final errors = <centrifuge.ErrorEvent>[];
+      client.error.listen(errors.add);
+      await client.connect();
+      await waitUntil(() => server.received.any((cmd) => cmd.hasRefresh()));
+
+      server.holdReply = null;
+      server.connectResult = protocol.ConnectResult()..client = 'fake-client';
+      await server.closeConnection();
+
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+      expect(errors, isEmpty);
     });
   });
 }
