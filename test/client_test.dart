@@ -159,6 +159,15 @@ Future<void> waitUntil(bool Function() condition,
   }
 }
 
+/// Runs [action] once, synchronously inside the first event of [stream].
+void onFirst<T>(Stream<T> stream, void Function() action) {
+  late StreamSubscription<T> subscription;
+  subscription = stream.listen((_) {
+    subscription.cancel();
+    action();
+  });
+}
+
 void main() {
   group('Client', () {
     test('client starts in disconnected state', () {
@@ -2477,15 +2486,6 @@ void main() {
           maxReconnectDelay: const Duration(milliseconds: 100),
         );
 
-    // Runs [action] once, synchronously inside the first event of [stream].
-    void onFirst<T>(Stream<T> stream, void Function() action) {
-      late StreamSubscription<T> subscription;
-      subscription = stream.listen((_) {
-        subscription.cancel();
-        action();
-      });
-    }
-
     setUp(() async {
       server = FakeCentrifugoServer();
       await server.start();
@@ -2639,6 +2639,164 @@ void main() {
 
       await Future<void>.delayed(const Duration(milliseconds: 1500));
       expect(getTokenCalls, 1);
+    });
+  });
+
+  group('Subscription teardown', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    protocol.Publication publication(int offset) => protocol.Publication()
+      ..data = utf8.encode('$offset')
+      ..offset = Int64(offset);
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('subscribe() after unsubscribe() during a pending subscribe subscribes again on the server',
+        () async {
+      protocol.Command? heldSubscribe;
+      server.holdReply = (cmd) {
+        if (cmd.hasSubscribe() && heldSubscribe == null) {
+          heldSubscribe = cmd;
+          return true;
+        }
+        return false;
+      };
+      await client.connect();
+      final sub = client.newSubscription('news');
+      unawaited(sub.subscribe());
+      await waitUntil(() => heldSubscribe != null);
+
+      await sub.unsubscribe();
+      unawaited(sub.subscribe());
+      server.sendReply(protocol.Reply()
+        ..id = heldSubscribe!.id
+        ..subscribe = protocol.SubscribeResult());
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      final commands = server.received
+          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+      expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
+    });
+
+    test('unsubscribe() emits unsubscribed at once and drops pushes sent before the server handles it',
+        () async {
+      server.holdReply = (cmd) => cmd.hasUnsubscribe();
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+      final events = <String>[];
+      sub.publication.listen((_) => events.add('publication'));
+      sub.join.listen((_) => events.add('join'));
+      sub.unsubscribed.listen((_) => events.add('unsubscribed'));
+
+      unawaited(sub.unsubscribe());
+      server.publish(channel: 'news', data: utf8.encode('1'));
+      server.join(channel: 'news', client: 'other');
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(events, ['unsubscribed']);
+    });
+
+    test('a server unsubscribe during a pending resubscribe is cleaned up on the server', () async {
+      protocol.Command? heldSubscribe;
+      var subscribes = 0;
+      server.holdReply = (cmd) {
+        if (cmd.hasSubscribe() && ++subscribes == 2) {
+          heldSubscribe = cmd;
+          return true;
+        }
+        return false;
+      };
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      await sub.unsubscribe();
+      unawaited(sub.subscribe());
+      await waitUntil(() => heldSubscribe != null);
+      // The server unsubscribes the channel while the new subscribe is pending:
+      // the push may refer to the previous subscription, and the server can
+      // still create one from the pending request.
+      server.unsubscribe('news', 2000, 'server unsubscribe');
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.unsubscribed);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      final commands = server.received
+          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+      expect(commands, ['subscribe', 'unsubscribe', 'subscribe', 'unsubscribe']);
+    });
+
+    test('recovered publications are not delivered after unsubscribe() from a subscribed listener',
+        () async {
+      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
+        ..recoverable = true
+        ..epoch = 'e'
+        ..offset = Int64(3)
+        ..wasRecovering = true
+        ..recovered = true
+        ..publications.addAll([publication(1), publication(2), publication(3)]);
+      await client.connect();
+      final sub = client.newSubscription(
+          'news', centrifuge.SubscriptionConfig(since: centrifuge.StreamPosition(Int64(0), 'e')));
+      final publications = <centrifuge.PublicationEvent>[];
+      sub.publication.listen(publications.add);
+
+      onFirst(sub.subscribed, () => sub.unsubscribe());
+      await sub.subscribe();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(publications, isEmpty);
+      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+    });
+
+    test('the rest of a message is not delivered after disconnect() from a publication listener',
+        () async {
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+      final publications = <centrifuge.PublicationEvent>[];
+      onFirst(sub.publication, () => client.disconnect());
+      sub.publication.listen(publications.add);
+
+      protocol.Reply push(int offset) => protocol.Reply()
+        ..push = (protocol.Push()
+          ..channel = 'news'
+          ..pub = publication(offset));
+      server.sendFrame([push(1), push(2), push(3)]);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(publications, hasLength(1));
+    });
+
+    test('server-side subscription publications are not delivered after disconnect() from its listener',
+        () async {
+      server.connectResult = protocol.ConnectResult()..client = 'fake-client';
+      server.connectResult.subs['news'] = protocol.SubscribeResult()
+        ..recoverable = true
+        ..epoch = 'e'
+        ..offset = Int64(2)
+        ..publications.addAll([publication(1), publication(2)]);
+      final publications = <centrifuge.ServerPublicationEvent>[];
+      client.publication.listen(publications.add);
+
+      onFirst(client.subscribed, () => client.disconnect());
+      await client.connect();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(publications, isEmpty);
+      expect(client.state, centrifuge.State.disconnected);
     });
   });
 }
