@@ -17,6 +17,8 @@ class EventController<T> {
 
   Stream<T> get stream => _EventStream<T>(this);
 
+  bool get isClosed => _closed;
+
   void add(T event) {
     if (_closed) {
       throw StateError('Cannot add new events after calling close');
