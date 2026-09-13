@@ -221,14 +221,15 @@ class SubscriptionImpl implements Subscription {
       _clearSubscribedState();
     }
     // Send a cleanup Unsubscribe to the server when:
-    //   - we were Subscribed (the normal case), or
+    //   - we were Subscribed and the unsubscribe is not the server's own, or
     //   - we were Subscribing AND a SubscribeRequest is currently in flight,
     //     because the server may already have created (or be about to create)
     //     a subscription from that request and would otherwise keep pushing
-    //     publications to a sub that the client has cancelled.
-    final shouldSend = sendUnsubscribe &&
-        _client.state == State.connected &&
-        (prevState == SubscriptionState.subscribed ||
+    //     publications to a sub that the client has cancelled. This includes a
+    //     server unsubscribe push: it may refer to the previous server-side
+    //     subscription, not to the one the in-flight request creates.
+    final shouldSend = _client.state == State.connected &&
+        ((sendUnsubscribe && prevState == SubscriptionState.subscribed) ||
             (prevState == SubscriptionState.subscribing && wasInflight));
     // Emitted before the cleanup Unsubscribe is awaited, like the state change:
     // publications arriving meanwhile are already dropped.

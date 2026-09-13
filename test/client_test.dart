@@ -2708,6 +2708,36 @@ void main() {
       expect(events, ['unsubscribed']);
     });
 
+    test('a server unsubscribe during a pending resubscribe is cleaned up on the server', () async {
+      protocol.Command? heldSubscribe;
+      var subscribes = 0;
+      server.holdReply = (cmd) {
+        if (cmd.hasSubscribe() && ++subscribes == 2) {
+          heldSubscribe = cmd;
+          return true;
+        }
+        return false;
+      };
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      await sub.unsubscribe();
+      unawaited(sub.subscribe());
+      await waitUntil(() => heldSubscribe != null);
+      // The server unsubscribes the channel while the new subscribe is pending:
+      // the push may refer to the previous subscription, and the server can
+      // still create one from the pending request.
+      server.unsubscribe('news', 2000, 'server unsubscribe');
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.unsubscribed);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      final commands = server.received
+          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+      expect(commands, ['subscribe', 'unsubscribe', 'subscribe', 'unsubscribe']);
+    });
+
     test('recovered publications are not delivered after unsubscribe() from a subscribed listener',
         () async {
       server.onSubscribe = (channel, req) => protocol.SubscribeResult()
