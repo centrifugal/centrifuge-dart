@@ -366,6 +366,10 @@ class SubscriptionImpl implements Subscription {
       }
       final event = SubscriptionErrorEvent(SubscriptionRefreshError(ex));
       _errorController.add(event);
+      // Not after an error listener unsubscribed or disconnected.
+      if (!isCurrentSubscription()) {
+        return;
+      }
       _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
         if (state != SubscriptionState.subscribed) {
           return;
@@ -411,6 +415,9 @@ class SubscriptionImpl implements Subscription {
       }
       final event = SubscriptionErrorEvent(SubscriptionRefreshError(err));
       _errorController.add(event);
+      if (!isCurrentSubscription()) {
+        return;
+      }
       if (err is Error) {
         if (err.temporary) {
           _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
@@ -458,6 +465,9 @@ class SubscriptionImpl implements Subscription {
           }
           final event = SubscriptionErrorEvent(SubscriptionGetStateError(err));
           _errorController.add(event);
+          if (!_isActiveAttempt(attemptId)) {
+            return;
+          }
           _scheduleResubscribe();
           return;
         }
@@ -602,20 +612,20 @@ class SubscriptionImpl implements Subscription {
         _scheduleResubscribe();
         return;
       }
+      if (err is Error && err.code == 109) {
+        // Token expired: cleared before the error event, so a subscribe() from
+        // its listener gets a new token.
+        _token = '';
+      }
       final event = SubscriptionErrorEvent(SubscriptionSubscribeError(err));
       _errorController.add(event);
-      if (err is Error) {
-        if (err.code == 109 || err.temporary) {
-          if (err.code == 109) {
-            // Token expired error.
-            _token = '';
-          }
-          _scheduleResubscribe();
-          return;
-        } else {
-          moveToUnsubscribed(err.code, err.message, false);
-          return;
-        }
+      if (!_isActiveAttempt(attemptId)) {
+        // An error listener unsubscribed or disconnected.
+        return;
+      }
+      if (err is Error && err.code != 109 && !err.temporary) {
+        moveToUnsubscribed(err.code, err.message, false);
+        return;
       }
       _scheduleResubscribe();
       return;
