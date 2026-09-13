@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'client.dart';
 import 'codes.dart';
 import 'error.dart';
+import 'event_controller.dart';
 import 'events.dart';
 import 'filter.dart';
 import 'proto/client.pb.dart' as protocol;
@@ -96,13 +97,13 @@ class SubscriptionImpl implements Subscription {
   final ClientImpl _client;
   final SubscriptionConfig _config;
 
-  final _publicationController = StreamController<PublicationEvent>.broadcast(sync: true);
-  final _joinController = StreamController<JoinEvent>.broadcast(sync: true);
-  final _leaveController = StreamController<LeaveEvent>.broadcast(sync: true);
-  final _subscribingController = StreamController<SubscribingEvent>.broadcast(sync: true);
-  final _subscribedController = StreamController<SubscribedEvent>.broadcast(sync: true);
-  final _unsubscribedController = StreamController<UnsubscribedEvent>.broadcast(sync: true);
-  final _errorController = StreamController<SubscriptionErrorEvent>.broadcast(sync: true);
+  final _publicationController = EventController<PublicationEvent>();
+  final _joinController = EventController<JoinEvent>();
+  final _leaveController = EventController<LeaveEvent>();
+  final _subscribingController = EventController<SubscribingEvent>();
+  final _subscribedController = EventController<SubscribedEvent>();
+  final _unsubscribedController = EventController<UnsubscribedEvent>();
+  final _errorController = EventController<SubscriptionErrorEvent>();
 
   final _readyFutures = <Completer<void>>[];
 
@@ -515,11 +516,10 @@ class SubscriptionImpl implements Subscription {
       // server (0 when not negotiated — also clears a stale ID from a
       // previous subscribe session).
       _setPushId(result.id.toInt());
-      final event = SubscribedEvent.from(result);
       state = SubscriptionState.subscribed;
-      _subscribedController.add(event);
-      _completeReadyFutures();
       _resubscribeAttempts = 0;
+      // Armed before the subscribed event, so a listener tearing the
+      // subscription down cancels it.
       if (result.expires) {
         _refreshTimer = Timer(Duration(seconds: result.ttl), () {
           if (state != SubscriptionState.subscribed) {
@@ -528,6 +528,9 @@ class SubscriptionImpl implements Subscription {
           _refreshToken();
         });
       }
+      final event = SubscribedEvent.from(result);
+      _subscribedController.add(event);
+      _completeReadyFutures();
       if (result.publications.isNotEmpty) {
         for (protocol.Publication pub in result.publications) {
           handlePublication(pub);

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
+import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
 import 'package:fixnum/fixnum.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
@@ -145,6 +146,17 @@ Future<List<T>> collectEvents<T>(Stream<T> stream, int count,
     }
   });
   return completer.future;
+}
+
+Future<void> waitUntil(bool Function() condition,
+    {Duration timeout = const Duration(seconds: 5)}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (!condition()) {
+    if (DateTime.now().isAfter(deadline)) {
+      throw TimeoutException('condition not met', timeout);
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
 }
 
 void main() {
@@ -2346,17 +2358,6 @@ void main() {
     late FakeCentrifugoServer server;
     late centrifuge.Client client;
 
-    Future<void> waitUntil(bool Function() condition,
-        {Duration timeout = const Duration(seconds: 5)}) async {
-      final deadline = DateTime.now().add(timeout);
-      while (!condition()) {
-        if (DateTime.now().isAfter(deadline)) {
-          throw TimeoutException('condition not met', timeout);
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-      }
-    }
-
     setUp(() async {
       server = FakeCentrifugoServer();
       await server.start();
@@ -2460,6 +2461,157 @@ void main() {
       firstGetData.complete(null);
 
       await waitUntil(() => client.state == centrifuge.State.connected);
+    });
+  });
+
+  group('Teardown from event handlers', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    centrifuge.ClientConfig fastConfig({String token = '', centrifuge.ConnectionTokenCallback? getToken}) =>
+        centrifuge.ClientConfig(
+          token: token,
+          getToken: getToken,
+          timeout: const Duration(seconds: 1),
+          minReconnectDelay: const Duration(milliseconds: 20),
+          maxReconnectDelay: const Duration(milliseconds: 100),
+        );
+
+    // Runs [action] once, synchronously inside the first event of [stream].
+    void onFirst<T>(Stream<T> stream, void Function() action) {
+      late StreamSubscription<T> subscription;
+      subscription = stream.listen((_) {
+        subscription.cancel();
+        action();
+      });
+    }
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('disconnect() from a subscribing listener during disconnect() emits one disconnected event',
+        () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+      final disconnects = <centrifuge.DisconnectedEvent>[];
+      final disconnectedSubscription = client.disconnected.listen(disconnects.add);
+      addTearDown(() => disconnectedSubscription.cancel());
+
+      onFirst(sub.subscribing, () => client.disconnect());
+      await client.disconnect();
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(disconnects, hasLength(1));
+      expect(client.state, centrifuge.State.disconnected);
+    });
+
+    test('disconnect() from a subscribing listener during a server close is not overridden', () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      onFirst(sub.subscribing, () => client.disconnect());
+      await server.closeConnection();
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      expect(client.state, centrifuge.State.disconnected);
+      expect(server.handshakeRequests, 1);
+    });
+
+    test('newSubscription() from a subscribing listener during a server close still reconnects',
+        () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final sub = client.newSubscription('a');
+      client.newSubscription('b');
+      await sub.subscribe();
+
+      onFirst(sub.subscribing, () => client.newSubscription('c'));
+      await server.closeConnection();
+
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+    });
+
+    test('disconnect() and connect() from a connecting listener do not throw', () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      final connecting = <centrifuge.ConnectingEvent>[];
+      final connectingSubscription = client.connecting.listen(connecting.add);
+      addTearDown(() => connectingSubscription.cancel());
+      Object? thrown;
+
+      onFirst(client.connecting, () {
+        client.disconnect();
+        client.connect().catchError((Object e) => thrown = e);
+      });
+      await client.connect();
+
+      await waitUntil(() => client.state == centrifuge.State.connected);
+      expect(thrown, isNull);
+      expect(connecting, hasLength(2));
+    });
+
+    test('disconnect() and connect() from a connected listener leave one refresh chain', () async {
+      server.connectResult = protocol.ConnectResult()
+        ..client = 'fake-client'
+        ..expires = true
+        ..ttl = 1;
+      var getTokenCalls = 0;
+      client = centrifuge.createClient(
+          server.url,
+          fastConfig(
+              token: 'token',
+              getToken: (_) async {
+                getTokenCalls++;
+                return 'token';
+              }));
+
+      onFirst(client.connected, () {
+        client.disconnect();
+        client.connect();
+      });
+      await client.connect();
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      expect(getTokenCalls, 1);
+    });
+
+    test('disconnect() and connect() from a subscribed listener leave one subscription refresh chain',
+        () async {
+      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
+        ..expires = true
+        ..ttl = 1;
+      var getTokenCalls = 0;
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+              token: 'token',
+              getToken: (_) async {
+                getTokenCalls++;
+                return 'token';
+              }));
+
+      onFirst(sub.subscribed, () {
+        client.disconnect();
+        client.connect();
+      });
+      await sub.subscribe();
+      await waitUntil(() => server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      expect(getTokenCalls, 1);
     });
   });
 }
