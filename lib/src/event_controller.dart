@@ -1,6 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
 
+// What a subscription of a stream controller returns from cancel() when there
+// is nothing to wait for. Stream.first, firstWhere and similar complete right
+// away, inside the event, only when cancel() returns this very future, so code
+// awaiting them can still listen to the events that follow in the same reply.
+final Future<void> _nothingToCancel = StreamController<void>.broadcast().stream.listen(null).cancel();
+
 /// A synchronous broadcast event controller that allows nested events.
 ///
 /// Like `StreamController.broadcast(sync: true)`, events are delivered
@@ -15,7 +21,10 @@ class EventController<T> {
   final _subscriptions = <_EventSubscription<T>>[];
   bool _closed = false;
 
-  Stream<T> get stream => _EventStream<T>(this);
+  /// The same stream on every call, so it compares equal like the stream of a
+  /// stream controller: e.g. a Flutter StreamBuilder given it again on rebuild
+  /// keeps its subscription.
+  late final Stream<T> stream = _EventStream<T>(this);
 
   bool get isClosed => _closed;
 
@@ -165,7 +174,7 @@ class _EventSubscription<T> implements StreamSubscription<T> {
       _pending.clear();
       _controller._subscriptions.remove(this);
     }
-    return Future.value();
+    return _nothingToCancel;
   }
 
   @override

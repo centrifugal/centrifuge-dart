@@ -3635,4 +3635,40 @@ void main() {
       expect(connecting.map((event) => event.code), [0]);
     });
   });
+
+  group('Event streams', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('a stream getter returns an equal stream on every call', () {
+      final sub = client.newSubscription('news');
+
+      expect(client.connected, client.connected);
+      expect(sub.publication, sub.publication);
+    });
+
+    test('a listener added after awaiting connected.first gets the rest of the connect reply', () async {
+      server.connectResult = protocol.ConnectResult()..client = 'fake-client';
+      server.connectResult.subs['news'] = protocol.SubscribeResult();
+      final channels = <String>[];
+
+      unawaited(client.connect());
+      await client.connected.first;
+      client.subscribed.listen((event) => channels.add(event.channel));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(channels, ['news']);
+    });
+  });
 }
