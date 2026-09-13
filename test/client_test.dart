@@ -3499,4 +3499,43 @@ void main() {
       expect(errors, isEmpty);
     });
   });
+
+  group('Pings', () {
+    test('a ping received by the time the ping timer fires keeps the connection', () async {
+      final incoming = StreamController<dynamic>(sync: true);
+      addTearDown(incoming.close);
+      FakeWebSocketChannel? channel;
+      final client = ClientImpl(
+          'ws://localhost',
+          centrifuge.ClientConfig(maxServerPingDelay: const Duration(milliseconds: 100)),
+          ({required String url, required TransportConfig config}) => Transport(
+                () async => channel = FakeWebSocketChannel(incoming.stream),
+                config,
+                ProtobufCommandEncoder(),
+                ProtobufReplyDecoder(),
+              ));
+      addTearDown(client.close);
+      final connecting = <centrifuge.ConnectingEvent>[];
+      client.connecting.listen(connecting.add);
+      unawaited(client.connect());
+      await waitUntil(() => channel?.sent.isNotEmpty ?? false);
+      incoming.add(encodeReplies([
+        protocol.Reply()
+          ..id = 1
+          ..connect = (protocol.ConnectResult()
+            ..client = 'fake-client'
+            ..ping = 1)
+      ]));
+      expect(client.state, centrifuge.State.connected);
+
+      // Due at the same time as the ping timer and run right after it, like
+      // data read after a suspended process resumes and runs its overdue
+      // timers first.
+      Timer(const Duration(milliseconds: 1100), () => incoming.add(encodeReplies([protocol.Reply()])));
+      await Future<void>.delayed(const Duration(milliseconds: 1300));
+
+      expect(client.state, centrifuge.State.connected);
+      expect(connecting.map((event) => event.code), [0]);
+    });
+  });
 }

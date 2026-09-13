@@ -801,12 +801,20 @@ class ClientImpl implements Client {
   }
 
   void _setPingTimer() {
-    _pingTimer = Timer(Duration(seconds: _pingInterval) + _config.maxServerPingDelay, () async {
-      if (state != State.connected) {
-        return;
-      }
-      await processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
+    late final Timer timer;
+    timer = Timer(Duration(seconds: _pingInterval) + _config.maxServerPingDelay, () {
+      // A ping may have been received but not processed yet, e.g. when a
+      // suspended process resumes and runs this overdue timer before the data
+      // waiting in the socket. Let that data be processed first.
+      Timer.run(() async {
+        // A ping processed meanwhile armed a new timer.
+        if (!identical(_pingTimer, timer) || state != State.connected) {
+          return;
+        }
+        await processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
+      });
     });
+    _pingTimer = timer;
   }
 
   void _refreshToken() async {
