@@ -22,13 +22,17 @@ import 'package:protobuf/protobuf.dart' as pb;
 ///   - Push to a subscription:           server.publish(id: 42, data: bytes);  // by numeric id (compaction)
 ///                                       server.publish(channel: 'news', data: bytes); // by channel name
 ///   - Fully control any command reply:  server.onCommand = (cmd) => cmd.hasRpc() ? (Reply()..id = cmd.id ..error = (Error()..code=1)) : null;
+///   - Leave a command unanswered:       server.holdReply = (cmd) => cmd.hasConnect();
+///   - Never answer the WS handshake:    server.holdHandshake = true;
 ///   - Send anything the protocol allows: server.sendReply(Reply()..push = (Push()..disconnect = (Disconnect()..code = 3000)));
 ///   - Drive a reconnect:                server.closeConnection();
 ///   - Assert on what the client sent:   server.received / server.lastSubscribe
+///   - Assert on connections:            server.handshakeRequests / server.openConnections
 class FakeCentrifugoServer {
   HttpServer? _httpServer;
   WebSocket? _socket;
   final _connections = <WebSocket>[];
+  final _openConnections = <WebSocket>{};
 
   /// All commands received from the client, in order.
   final List<protocol.Command> received = <protocol.Command>[];
@@ -42,6 +46,20 @@ class FakeCentrifugoServer {
   /// Full override for any command — return a Reply to send, or null to fall
   /// through to default handling.
   protocol.Reply? Function(protocol.Command cmd)? onCommand;
+
+  /// Return true to leave a command unanswered (reply later with [sendReply],
+  /// or never).
+  bool Function(protocol.Command cmd)? holdReply;
+
+  /// When true, new WebSocket upgrade requests are never answered, like a
+  /// server that accepts TCP connections but never completes the handshake.
+  bool holdHandshake = false;
+
+  /// Number of WebSocket upgrade requests received, including held ones.
+  int handshakeRequests = 0;
+
+  /// Number of client connections that are still open.
+  int get openConnections => _openConnections.length;
 
   /// Customize the subscribe result per channel (default: empty result).
   protocol.SubscribeResult Function(String channel, protocol.SubscribeRequest req)? onSubscribe;
@@ -59,11 +77,18 @@ class FakeCentrifugoServer {
   Future<void> start() async {
     _httpServer = await HttpServer.bind('localhost', 0);
     _httpServer!.listen((HttpRequest request) async {
+      handshakeRequests++;
+      if (holdHandshake) {
+        // Left pending until the server stops.
+        return;
+      }
       final socket = await WebSocketTransformer.upgrade(request,
           protocolSelector: (_) => 'centrifuge-protobuf');
       _socket = socket;
       _connections.add(socket);
-      socket.listen((dynamic data) => _onData(data as List<int>));
+      _openConnections.add(socket);
+      socket.listen((dynamic data) => _onData(data as List<int>),
+          onDone: () => _openConnections.remove(socket));
     });
   }
 
@@ -92,6 +117,10 @@ class FakeCentrifugoServer {
 
   void _dispatch(protocol.Command cmd) {
     received.add(cmd);
+
+    if (holdReply != null && holdReply!(cmd)) {
+      return;
+    }
 
     if (onCommand != null) {
       final reply = onCommand!(cmd);

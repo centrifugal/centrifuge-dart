@@ -77,11 +77,29 @@ class Transport implements GeneratedMessageSender {
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
   Function? _onError;
+  bool _closed = false;
 
   Future open(void onPush(Push push, bool isPing),
       {Function? onError, void onDone(int code, String reason, bool shouldReconnect)?}) async {
     _onError = onError;
-    final socket = await _socketBuilder();
+    final socketFuture = _socketBuilder();
+    final WebSocketChannel socket;
+    try {
+      // A server that accepts the TCP connection but never answers the upgrade
+      // would otherwise keep the connect attempt waiting forever.
+      socket = _config.timeout.inMicroseconds > 0
+          ? await socketFuture.timeout(_config.timeout)
+          : await socketFuture;
+    } on TimeoutException {
+      // Close the socket if it still connects later.
+      unawaited(socketFuture.then((socket) => socket.sink.close(), onError: (_) {}));
+      rethrow;
+    }
+    if (_closed) {
+      // close() was called while the socket was still connecting.
+      unawaited(socket.sink.close().catchError((_) {}));
+      throw centrifuge.ClientDisconnectedError();
+    }
     _socket = socket;
     socket.stream.listen(
       _onData(onPush),
@@ -171,6 +189,7 @@ class Transport implements GeneratedMessageSender {
   }
 
   Future? close() {
+    _closed = true;
     return _socket?.sink.close();
   }
 
