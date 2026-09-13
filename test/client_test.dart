@@ -2991,6 +2991,26 @@ void main() {
       expect(server.received.where((cmd) => cmd.hasConnect()).last.connect.subs['news']!.offset, Int64(2));
     });
 
+    test('a subscription without a position still calls getState after state invalidation', () async {
+      await client.connect();
+      var getStateCalls = 0;
+      final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(getState: () async {
+            getStateCalls++;
+            return centrifuge.StreamPosition(Int64(10), 'e');
+          }));
+      server.disconnect(3014, 'state invalidated');
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+
+      await sub.subscribe();
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      expect(getStateCalls, 1);
+      expect(server.lastSubscribe!.recover, isTrue);
+      expect(server.lastSubscribe!.offset, Int64(10));
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
