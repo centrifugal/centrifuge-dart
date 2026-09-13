@@ -213,9 +213,15 @@ class ClientImpl implements Client {
       return ready();
     }
     state = State.connecting;
+    _reconnectAttempts = 0;
+    final attemptId = _connectAttemptId;
     final event = ConnectingEvent(connectingCodeConnectCalled, 'connect called');
     _connectingController.add(event);
-    _reconnectAttempts = 0;
+    if (attemptId != _connectAttemptId) {
+      // A connecting listener disconnected, and may have started an attempt of
+      // its own.
+      return;
+    }
     await _connect();
   }
 
