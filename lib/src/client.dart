@@ -491,6 +491,19 @@ class ClientImpl implements Client {
     await connectingTransport?.close();
   }
 
+  // An exception while handling a push, e.g. a delta publication that can't be
+  // applied, may have left the client or the application state inconsistent.
+  // The error is reported as uncaught, as before, and the client stops in a
+  // state the application can see: it disconnects without reconnecting, so no
+  // later message is processed.
+  void _pushFailed(Object error, StackTrace stackTrace) {
+    Zone.current.handleUncaughtError(error, stackTrace);
+    _processDisconnect(
+        code: disconnectCodeBadProtocol,
+        reason: 'exception during message handling: $error',
+        reconnect: false);
+  }
+
   Future<void> _failUnauthorized() async {
     await _processDisconnect(
         code: disconnectedCodeUnauthorized, reason: 'unauthorized', reconnect: false);
@@ -572,7 +585,17 @@ class ClientImpl implements Client {
     _connectingTransport = transport;
 
     try {
-      await transport.open(_onPush, onError: (dynamic error) {
+      await transport.open((push, isPing) {
+        if (attemptId != _connectAttemptId) {
+          // The rest of a message after its transport was torn down.
+          return;
+        }
+        try {
+          _onPush(push, isPing);
+        } catch (error, stackTrace) {
+          _pushFailed(error, stackTrace);
+        }
+      }, onError: (dynamic error) {
         if (attemptId != _connectAttemptId) return;
         final event = ErrorEvent(TransportError(error));
         _errorController.add(event);
