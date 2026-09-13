@@ -78,6 +78,8 @@ class Transport implements GeneratedMessageSender {
   final TransportConfig _config;
   Function? _onError;
   bool _closed = false;
+  // The socket stream ended.
+  bool _done = false;
 
   Future open(void onPush(Push push, bool isPing),
       {Function? onError, void onDone(int code, String reason, bool shouldReconnect)?}) async {
@@ -166,7 +168,7 @@ class Transport implements GeneratedMessageSender {
   Future<void> sendAsyncMessage<Req extends GeneratedMessage>(
     Req request,
   ) async {
-    if (_socket == null) {
+    if (_socket == null || _done) {
       throw centrifuge.ClientDisconnectedError();
     }
     final command = _createCommand(
@@ -225,7 +227,7 @@ class Transport implements GeneratedMessageSender {
   Future<Reply> _sendCommand(Command command) {
     final completer = Completer<Reply>.sync();
 
-    if (_socket == null) {
+    if (_socket == null || _done) {
       throw centrifuge.ClientDisconnectedError();
     }
 
@@ -256,10 +258,14 @@ class Transport implements GeneratedMessageSender {
 
   void Function() _onDone(void Function(int, String, bool)? onDone) {
     return () {
-      _completers.forEach((key, value) {
-        _completers[key]?.completeError(centrifuge.ClientDisconnectedError());
-      });
+      _done = true;
+      // Failed calls resume synchronously, and code they run may send new
+      // commands, which now fail: complete a detached map.
+      final completers = _completers;
       _completers = <int, Completer<GeneratedMessage>>{};
+      for (final completer in completers.values) {
+        completer.completeError(centrifuge.ClientDisconnectedError());
+      }
       int code = connectingCodeTransportClosed;
       String reason = "transport closed";
       bool reconnect = true;
