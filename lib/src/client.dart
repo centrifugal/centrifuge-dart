@@ -106,7 +106,8 @@ abstract class Client {
   ///
   Future<void> removeSubscription(Subscription subscription);
 
-  /// Get map wirth all registered client-side subscriptions.
+  /// Get an unmodifiable copy of the map with all registered client-side
+  /// subscriptions.
   Map<String, Subscription> subscriptions();
 }
 
@@ -260,7 +261,9 @@ class ClientImpl implements Client {
     _reconnectAttempts = 0;
     await _processDisconnect(
         code: disconnectedCodeClientClosed, reason: 'client closed', reconnect: false);
-    for (final subscription in _subscriptions.values) {
+    // A copy: an onDone handler of a subscription stream may remove its
+    // subscription.
+    for (final subscription in _subscriptions.values.toList()) {
       subscription.close();
     }
     _subscriptions.clear();
@@ -421,7 +424,8 @@ class ClientImpl implements Client {
 
   @override
   Map<String, Subscription> subscriptions() {
-    return _subscriptions;
+    // A copy: code iterating over it may remove subscriptions.
+    return Map.unmodifiable(_subscriptions);
   }
 
   Future<void> _processDisconnect(
