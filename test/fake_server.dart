@@ -185,6 +185,18 @@ class FakeCentrifugoServer {
     _socket!.add(framed);
   }
 
+  /// Send several replies in one WebSocket message, as a server batches them.
+  void sendFrame(List<protocol.Reply> replies) {
+    final writer = pb.CodedBufferWriter();
+    for (final reply in replies) {
+      final replyData = reply.writeToBuffer();
+      writer
+        ..writeInt32NoTag(replyData.length)
+        ..writeRawBytes(replyData);
+    }
+    _socket!.add(writer.toBuffer());
+  }
+
   /// Send a raw push (wrapped in a reply).
   void sendPush(protocol.Push push) => sendReply(protocol.Reply()..push = push);
 

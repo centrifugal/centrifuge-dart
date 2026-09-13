@@ -665,26 +665,39 @@ class ClientImpl implements Client {
         return;
       }
 
-      result.subs.forEach((key, value) {
+      // Listeners may disconnect: the rest of this reply must not be delivered
+      // after that.
+      for (final entry in result.subs.entries) {
+        final key = entry.key;
+        final value = entry.value;
         _serverSubs[key] = ServerSubscription(key, value.recoverable, value.offset, value.epoch);
         final event = ServerSubscribedEvent.fromSubscribeResult(key, value);
         _subscribedController.add(event);
-        value.publications.forEach((element) {
-          final event = ServerPublicationEvent.from(key, element);
-          _publicationController.add(event);
-          if (_serverSubs[key]!.recoverable && element.offset > 0) {
-            _serverSubs[key]!.offset = element.offset;
+        for (final pub in value.publications) {
+          if (attemptId != _connectAttemptId) {
+            return;
           }
-        });
-      });
+          final event = ServerPublicationEvent.from(key, pub);
+          _publicationController.add(event);
+          if (_serverSubs[key]!.recoverable && pub.offset > 0) {
+            _serverSubs[key]!.offset = pub.offset;
+          }
+        }
+        if (attemptId != _connectAttemptId) {
+          return;
+        }
+      }
 
-      _serverSubs.forEach((key, value) {
+      for (final key in _serverSubs.keys.toList()) {
         if (!result.subs.containsKey(key)) {
+          _serverSubs.remove(key);
           final event = ServerUnsubscribedEvent.from(key);
           _unsubscribedController.add(event);
+          if (attemptId != _connectAttemptId) {
+            return;
+          }
         }
-      });
-      _serverSubs.removeWhere((key, value) => !result.subs.containsKey(key));
+      }
 
       for (final subscription in _subscriptions.values.toList()) {
         subscription.resubscribeOnConnect();
@@ -842,7 +855,8 @@ class ClientImpl implements Client {
       return;
     }
     final serverSubscription = _serverSubs[channel];
-    if (serverSubscription != null) {
+    // Not after a listener disconnected earlier in the same message.
+    if (serverSubscription != null && state == State.connected) {
       final event = ServerPublicationEvent.from(channel, pub);
       _publicationController.add(event);
       if (serverSubscription.recoverable && pub.offset > 0) {
@@ -858,7 +872,7 @@ class ClientImpl implements Client {
       return;
     }
     final serverSubscription = _serverSubs[channel];
-    if (serverSubscription != null) {
+    if (serverSubscription != null && state == State.connected) {
       final event = ServerJoinEvent.from(channel, join.info);
       _joinController.add(event);
     }
@@ -871,7 +885,7 @@ class ClientImpl implements Client {
       return;
     }
     final serverSubscription = _serverSubs[channel];
-    if (serverSubscription != null) {
+    if (serverSubscription != null && state == State.connected) {
       final event = ServerLeaveEvent.from(channel, leave.info);
       _leaveController.add(event);
     }
