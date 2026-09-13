@@ -228,6 +228,8 @@ class ClientImpl implements Client {
   @override
   void setToken(String token) {
     _token = token;
+    // Replaces a token that expired or was invalidated.
+    _refreshRequired = false;
   }
 
   @override
@@ -406,9 +408,13 @@ class ClientImpl implements Client {
       // calls getToken again, and reset all subscription state so each
       // resubscribe starts from scratch. Centrifugo can deliver 3014 either
       // as a protocol Disconnect push or as the raw WebSocket close code,
-      // so the handling lives here to cover both paths.
-      _token = '';
-      _refreshRequired = true;
+      // so the handling lives here to cover both paths. Without getToken there
+      // is no new token to get: the client reconnects with the token it has
+      // (or anonymously), and the server rejects it if it's no longer valid.
+      if (_config.getToken != null) {
+        _token = '';
+        _refreshRequired = true;
+      }
       for (final s in _subscriptions.values) {
         s.invalidateState();
       }
@@ -510,6 +516,14 @@ class ClientImpl implements Client {
   bool _isActiveAttempt(int attemptId) => attemptId == _connectAttemptId && state == State.connecting;
 
   Future<void> _connectInner(int attemptId) async {
+    if (_refreshRequired && _config.getToken == null) {
+      // The token expired or was invalidated, and there is no way to get a
+      // new one: retrying with it would fail forever.
+      final event = ErrorEvent(
+          ConfigurationError('token expired but no getToken function set in the configuration'));
+      _errorController.add(event);
+      throw UnauthorizedException();
+    }
     if (_config.getToken != null && (_refreshRequired || _token == '')) {
       final event = ConnectionTokenEvent();
       final String token;
@@ -744,12 +758,16 @@ class ClientImpl implements Client {
     if (_config.getToken == null) {
       return;
     }
+    // A refresh belongs to the connection it started on: after a reconnect,
+    // the new connection runs its own refresh chain.
+    final attemptId = _connectAttemptId;
+    bool isCurrentConnection() => attemptId == _connectAttemptId && state == State.connected;
     final String token;
     try {
       final event = ConnectionTokenEvent();
       token = await _config.getToken!(event);
     } catch (ex) {
-      if (state != State.connected) {
+      if (!isCurrentConnection()) {
         return;
       }
       if (ex is UnauthorizedException) {
@@ -767,7 +785,7 @@ class ClientImpl implements Client {
       return;
     }
 
-    if (state != State.connected) {
+    if (!isCurrentConnection()) {
       return;
     }
     if (token == '') {
@@ -787,6 +805,9 @@ class ClientImpl implements Client {
         request,
         protocol.RefreshResult(),
       );
+      if (!isCurrentConnection()) {
+        return;
+      }
 
       if (result.expires) {
         _refreshTimer = Timer(Duration(seconds: result.ttl), () {
@@ -797,7 +818,7 @@ class ClientImpl implements Client {
         });
       }
     } catch (err) {
-      if (state != State.connected) {
+      if (!isCurrentConnection()) {
         return;
       }
       final event = ErrorEvent(RefreshError(err));

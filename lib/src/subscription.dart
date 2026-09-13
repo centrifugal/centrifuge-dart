@@ -71,9 +71,10 @@ class SubscriptionImpl implements Subscription {
   // moveToUnsubscribed to decide whether the server-side subscription needs
   // an explicit cleanup UnsubscribeRequest if the user cancels mid-flight.
   bool _inflight = false;
-  // Identifies the current subscribe attempt. Bumped by unsubscribe, so an
-  // attempt still waiting for getState, getToken or its subscribe reply stops
-  // instead of subscribing after it.
+  // Identifies the current subscribe attempt and subscribed session. Bumped by
+  // unsubscribe and when leaving subscribed, so an attempt still waiting for
+  // getState, getToken or its subscribe reply, or a token refresh in flight,
+  // stops instead of acting on a newer session.
   int _subscribeAttemptId = 0;
   // The attempt in progress, so a second one isn't started for the same id.
   int? _runningAttemptId;
@@ -303,6 +304,7 @@ class SubscriptionImpl implements Subscription {
   }
 
   void _clearSubscribedState() {
+    _subscribeAttemptId++;
     _refreshTimer?.cancel();
   }
 
@@ -342,12 +344,17 @@ class SubscriptionImpl implements Subscription {
     if (_config.getToken == null) {
       return;
     }
+    // A refresh belongs to the subscribed session it started in: after a
+    // resubscribe, the new session runs its own refresh chain.
+    final attemptId = _subscribeAttemptId;
+    bool isCurrentSubscription() =>
+        attemptId == _subscribeAttemptId && state == SubscriptionState.subscribed;
     final String token;
     try {
       final event = SubscriptionTokenEvent(channel);
       token = await _config.getToken!(event);
     } catch (ex) {
-      if (state != SubscriptionState.subscribed) {
+      if (!isCurrentSubscription()) {
         return;
       }
       if (ex is UnauthorizedException) {
@@ -365,7 +372,7 @@ class SubscriptionImpl implements Subscription {
       return;
     }
 
-    if (state != SubscriptionState.subscribed) {
+    if (!isCurrentSubscription()) {
       // unsubscribe() or a disconnect arrived while getToken was in flight.
       return;
     }
@@ -384,6 +391,9 @@ class SubscriptionImpl implements Subscription {
         ..channel = channel
         ..token = _token;
       final result = await _client.sendSubRefresh(request);
+      if (!isCurrentSubscription()) {
+        return;
+      }
       if (result.expires) {
         _refreshTimer = Timer(Duration(seconds: result.ttl), () {
           if (state != SubscriptionState.subscribed) {
@@ -393,7 +403,7 @@ class SubscriptionImpl implements Subscription {
         });
       }
     } catch (err) {
-      if (state != SubscriptionState.subscribed) {
+      if (!isCurrentSubscription()) {
         return;
       }
       final event = SubscriptionErrorEvent(SubscriptionRefreshError(err));

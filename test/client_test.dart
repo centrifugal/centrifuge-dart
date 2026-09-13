@@ -2799,4 +2799,153 @@ void main() {
       expect(client.state, centrifuge.State.disconnected);
     });
   });
+
+  group('Token refresh', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    Iterable<protocol.Command> commands(bool Function(protocol.Command) test) =>
+        server.received.where(test);
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('a refresh started before a reconnect does not continue on the new connection', () async {
+      server.connectResult = protocol.ConnectResult()
+        ..client = 'fake-client'
+        ..expires = true
+        ..ttl = 1;
+      server.onCommand = (cmd) => cmd.hasRefresh()
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..refresh = (protocol.RefreshResult()
+              ..expires = true
+              ..ttl = 1))
+          : null;
+      final slowToken = Completer<String>();
+      var getTokenCalls = 0;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            token: 'token',
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+            getToken: (_) {
+              getTokenCalls++;
+              return getTokenCalls == 1 ? slowToken.future : Future.value('token');
+            },
+          ));
+      await client.connect();
+      await waitUntil(() => getTokenCalls == 1);
+
+      await server.closeConnection();
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+      final refreshes = commands((cmd) => cmd.hasRefresh()).length;
+      slowToken.complete('token');
+      // Well before the new connection's own refresh, due 1s after it connected.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      expect(commands((cmd) => cmd.hasRefresh()), hasLength(refreshes));
+    });
+
+    test('a subscription refresh started before a resubscribe does not continue', () async {
+      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
+        ..expires = true
+        ..ttl = 1;
+      server.onCommand = (cmd) => cmd.hasSubRefresh()
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..subRefresh = (protocol.SubRefreshResult()
+              ..expires = true
+              ..ttl = 1))
+          : null;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      await client.connect();
+      final slowToken = Completer<String>();
+      var getTokenCalls = 0;
+      final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+              token: 'token',
+              getToken: (_) {
+                getTokenCalls++;
+                return getTokenCalls == 1 ? slowToken.future : Future.value('token');
+              }));
+      await sub.subscribe();
+      await waitUntil(() => getTokenCalls == 1);
+
+      await server.closeConnection();
+      await waitUntil(() =>
+          server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+      final refreshes = commands((cmd) => cmd.hasSubRefresh()).length;
+      slowToken.complete('token');
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      expect(commands((cmd) => cmd.hasSubRefresh()), hasLength(refreshes));
+    });
+
+    test('an expired static token without getToken stops with a configuration error', () async {
+      server.onCommand = (cmd) => cmd.hasConnect()
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..error = (protocol.Error()
+              ..code = 109
+              ..message = 'token expired'))
+          : null;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            token: 'expired',
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      final errors = <centrifuge.ErrorEvent>[];
+      client.error.listen(errors.add);
+      final disconnected = client.disconnected.first;
+      unawaited(client.connect());
+
+      final event = await disconnected.timeout(const Duration(seconds: 3));
+      expect(event.code, 1);
+      expect(commands((cmd) => cmd.hasConnect()), hasLength(1));
+      expect(errors.map((e) => e.error), contains(isA<centrifuge.ConfigurationError>()));
+
+      // A new token set by the app is used.
+      server.onCommand = null;
+      client.setToken('fresh');
+      await client.connect();
+      expect(client.state, centrifuge.State.connected);
+      expect(commands((cmd) => cmd.hasConnect()).last.connect.token, 'fresh');
+    });
+
+    test('state invalidation without getToken reconnects with the token the client has', () async {
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            token: 'static',
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      final errors = <centrifuge.ErrorEvent>[];
+      client.error.listen(errors.add);
+      await client.connect();
+      server.disconnect(3014, 'state invalidated');
+
+      await waitUntil(() =>
+          server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+      expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['static', 'static']);
+      expect(errors.map((e) => e.error), isNot(contains(isA<centrifuge.ConfigurationError>())));
+    });
+  });
 }

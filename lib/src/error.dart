@@ -98,6 +98,17 @@ class SubscriptionRefreshError {
   }
 }
 
+class ConfigurationError {
+  final String message;
+
+  ConfigurationError(this.message);
+
+  @override
+  String toString() {
+    return 'Configuration error: $message';
+  }
+}
+
 class UnauthorizedException implements Exception {
   final String message;
 
