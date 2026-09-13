@@ -538,6 +538,18 @@ class SubscriptionImpl implements Subscription {
       final protocol.SubscribeResult result;
       try {
         result = await _client.sendSubscribe(request);
+      } on TimeoutException {
+        if (!_isActiveAttempt(attemptId)) {
+          return;
+        }
+        // The server didn't reply: the request is abandoned with its
+        // connection, and the next connection subscribes again instead of
+        // waiting for this attempt to end.
+        _inflight = false;
+        _subscribeAttemptId++;
+        await _client.processDisconnect(
+            code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
+        return;
       } finally {
         if (attemptId == _subscribeAttemptId) {
           _inflight = false;
@@ -584,16 +596,6 @@ class SubscriptionImpl implements Subscription {
         }
         handlePublication(pub);
       }
-    } on TimeoutException {
-      if (!_isActiveAttempt(attemptId)) {
-        return;
-      }
-      // The request is abandoned with its connection: the next connection
-      // subscribes again instead of waiting for this attempt to end.
-      _subscribeAttemptId++;
-      await _client.processDisconnect(
-          code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
-      return;
     } catch (err) {
       if (!_isActiveAttempt(attemptId)) {
         return;

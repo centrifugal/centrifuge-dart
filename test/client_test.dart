@@ -3105,6 +3105,42 @@ void main() {
       expect(commands((cmd) => cmd.hasSubRefresh()), hasLength(refreshes));
     });
 
+    test('a subscription getToken that times out retries the subscription without reconnecting', () async {
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      final connecting = <centrifuge.ConnectingEvent>[];
+      client.connecting.listen(connecting.add);
+      await client.connect();
+      var getTokenCalls = 0;
+      final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+            minResubscribeDelay: const Duration(milliseconds: 20),
+            maxResubscribeDelay: const Duration(milliseconds: 100),
+            getToken: (_) async {
+              getTokenCalls++;
+              if (getTokenCalls == 1) {
+                // Like an HTTP request with a timeout.
+                throw TimeoutException('token request timed out');
+              }
+              return 'token';
+            },
+          ));
+      final errors = <centrifuge.SubscriptionErrorEvent>[];
+      sub.error.listen(errors.add);
+
+      await sub.subscribe();
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      expect(server.handshakeRequests, 1);
+      expect(connecting.map((event) => event.code), [0]);
+      expect(errors, hasLength(1));
+    });
+
     test('an expired static token without getToken stops with a configuration error', () async {
       server.onCommand = (cmd) => cmd.hasConnect()
           ? (protocol.Reply()
