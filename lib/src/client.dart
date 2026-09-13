@@ -408,9 +408,10 @@ class ClientImpl implements Client {
       // calls getToken again, and reset all subscription state so each
       // resubscribe starts from scratch. Centrifugo can deliver 3014 either
       // as a protocol Disconnect push or as the raw WebSocket close code,
-      // so the handling lives here to cover both paths. A client without a
-      // token and getToken stays anonymous.
-      if (_token != '' || _config.getToken != null) {
+      // so the handling lives here to cover both paths. Without getToken there
+      // is no new token to get: the client reconnects with the token it has
+      // (or anonymously), and the server rejects it if it's no longer valid.
+      if (_config.getToken != null) {
         _token = '';
         _refreshRequired = true;
       }

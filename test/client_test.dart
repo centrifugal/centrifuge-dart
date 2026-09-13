@@ -2929,8 +2929,7 @@ void main() {
       expect(commands((cmd) => cmd.hasConnect()).last.connect.token, 'fresh');
     });
 
-    test('state invalidation of a static token without getToken stops with a configuration error',
-        () async {
+    test('state invalidation without getToken reconnects with the token the client has', () async {
       client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
@@ -2938,13 +2937,15 @@ void main() {
             minReconnectDelay: const Duration(milliseconds: 20),
             maxReconnectDelay: const Duration(milliseconds: 100),
           ));
+      final errors = <centrifuge.ErrorEvent>[];
+      client.error.listen(errors.add);
       await client.connect();
-      final disconnected = client.disconnected.first;
       server.disconnect(3014, 'state invalidated');
 
-      final event = await disconnected.timeout(const Duration(seconds: 3));
-      expect(event.code, 1);
-      expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['static']);
+      await waitUntil(() =>
+          server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+      expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['static', 'static']);
+      expect(errors.map((e) => e.error), isNot(contains(isA<centrifuge.ConfigurationError>())));
     });
   });
 }
