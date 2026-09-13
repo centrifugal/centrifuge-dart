@@ -7,7 +7,9 @@ import 'package:fixnum/fixnum.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
-const url = 'ws://localhost:8000/connection/websocket';
+import 'fake_server.dart';
+
+const url ='ws://localhost:8000/connection/websocket';
 const apiBase = 'http://localhost:8000/api';
 const apiKey = 'test-api-key';
 
@@ -2337,6 +2339,127 @@ void main() {
       expect(jsonDecode(utf8.decode(live.data)), {'live': true});
 
       await client.disconnect();
+    });
+  });
+
+  group('Connect attempts', () {
+    late FakeCentrifugoServer server;
+    late centrifuge.Client client;
+
+    Future<void> waitUntil(bool Function() condition,
+        {Duration timeout = const Duration(seconds: 5)}) async {
+      final deadline = DateTime.now().add(timeout);
+      while (!condition()) {
+        if (DateTime.now().isAfter(deadline)) {
+          throw TimeoutException('condition not met', timeout);
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    }
+
+    setUp(() async {
+      server = FakeCentrifugoServer();
+      await server.start();
+    });
+
+    tearDown(() async {
+      await client.close();
+      await server.stop();
+    });
+
+    test('an unanswered websocket handshake times out and the client keeps reconnecting',
+        () async {
+      server.holdHandshake = true;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            timeout: const Duration(milliseconds: 300),
+            minReconnectDelay: const Duration(milliseconds: 50),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      unawaited(client.connect());
+
+      await waitUntil(() => server.handshakeRequests >= 2);
+      server.holdHandshake = false;
+      await waitUntil(() => client.state == centrifuge.State.connected);
+    });
+
+    test('connect after disconnect during a pending attempt uses the new token', () async {
+      final firstGetData = Completer<List<int>?>();
+      var getDataCalls = 0;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            token: 'token-a',
+            getData: () {
+              getDataCalls++;
+              return getDataCalls == 1 ? firstGetData.future : Future<List<int>?>.value(null);
+            },
+          ));
+      unawaited(client.connect());
+      await waitUntil(() => getDataCalls == 1);
+
+      await client.disconnect();
+      client.setToken('token-b');
+      final connected = client.connected.first;
+      unawaited(client.connect());
+      firstGetData.complete(null);
+      await connected.timeout(const Duration(seconds: 5));
+
+      final tokens =
+          server.received.where((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token);
+      expect(tokens, ['token-b']);
+    });
+
+    test('disconnect closes the transport of a pending attempt', () async {
+      var holdConnect = true;
+      server.holdReply = (cmd) => cmd.hasConnect() && holdConnect;
+      client = centrifuge.createClient(
+          server.url, centrifuge.ClientConfig(timeout: const Duration(seconds: 1)));
+      final errors = <centrifuge.ErrorEvent>[];
+      final errorSubscription = client.error.listen(errors.add);
+      addTearDown(() => errorSubscription.cancel());
+
+      unawaited(client.connect());
+      await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+      expect(server.openConnections, 1);
+
+      await client.disconnect();
+      await waitUntil(() => server.openConnections == 0, timeout: const Duration(milliseconds: 500));
+
+      holdConnect = false;
+      await client.connect().timeout(const Duration(milliseconds: 500));
+      expect(client.state, centrifuge.State.connected);
+
+      // The abandoned attempt must not report its connect timeout later.
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      expect(errors, isEmpty);
+      expect(client.state, centrifuge.State.connected);
+    });
+
+    test('transport closed while getData is pending still reconnects', () async {
+      final firstGetData = Completer<List<int>?>();
+      var getDataCalls = 0;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            timeout: const Duration(milliseconds: 500),
+            minReconnectDelay: const Duration(milliseconds: 50),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+            getData: () {
+              getDataCalls++;
+              return getDataCalls == 1 ? firstGetData.future : Future<List<int>?>.value(null);
+            },
+          ));
+      unawaited(client.connect());
+      await waitUntil(() => getDataCalls == 1 && server.openConnections == 1);
+
+      await server.closeConnection();
+      // Let the reconnect scheduled by the close fire while getData is pending.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      firstGetData.complete(null);
+
+      await waitUntil(() => client.state == centrifuge.State.connected);
     });
   });
 }

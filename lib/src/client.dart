@@ -142,7 +142,14 @@ class ClientImpl implements Client {
   int _reconnectAttempts = 0;
   int _pingInterval = 0;
   bool _sendPong = false;
-  bool _inConnect = false;
+  // Identifies the current connect attempt. Bumped when an attempt starts and
+  // on every disconnect, so a superseded attempt stops at its next await
+  // instead of acting on a newer session, and the callbacks of a torn down
+  // transport are ignored.
+  int _connectAttemptId = 0;
+  // Transport of the attempt in progress, until it becomes _transport, so a
+  // disconnect can close it too.
+  Transport? _connectingTransport;
   bool _closed = false;
 
   @override
@@ -388,6 +395,11 @@ class ClientImpl implements Client {
     if (state == State.disconnected) {
       return;
     }
+    final attemptId = ++_connectAttemptId;
+    // Captured before any event: a listener may start a new attempt, whose
+    // transport must stay open.
+    final transport = _transport;
+    final connectingTransport = _connectingTransport;
     if (code == 3014) {
       // State invalidated: drop the connection token so the next connect
       // calls getToken again, and reset all subscription state so each
@@ -449,13 +461,19 @@ class ClientImpl implements Client {
 
     if (state == State.disconnected) {
       _errorReadyFutures(ClientDisconnectedError());
+    } else if (state == State.connecting && attemptId == _connectAttemptId) {
+      // Skipped when a listener above already started a new attempt.
+      _scheduleReconnect();
     }
 
-    if (_transport != null) {
-      final transport = _transport;
+    if (identical(_transport, transport)) {
       _transport = null;
-      await transport?.close();
     }
+    if (identical(_connectingTransport, connectingTransport)) {
+      _connectingTransport = null;
+    }
+    await transport?.close();
+    await connectingTransport?.close();
   }
 
   Future<void> _failUnauthorized() async {
@@ -478,49 +496,47 @@ class ClientImpl implements Client {
     if (state != State.connecting) {
       return;
     }
-    if (_inConnect) {
-      return;
-    }
-    _inConnect = true;
-    var unauthorized = false;
+    // A new attempt supersedes one still in progress, which stops at its next
+    // await (see _isActiveAttempt).
+    final attemptId = ++_connectAttemptId;
     try {
-      await _connectInner();
+      await _connectInner(attemptId);
     } on UnauthorizedException {
-      unauthorized = true;
-    } finally {
-      _inConnect = false;
-    }
-    if (unauthorized) {
-      // Disconnect only once _inConnect is released: the disconnected event
-      // is delivered synchronously, and a connect() call from its listener
-      // would otherwise be dropped, leaving the client stuck in connecting.
-      await _failUnauthorized();
+      if (_isActiveAttempt(attemptId)) {
+        await _failUnauthorized();
+      }
     }
   }
 
-  Future<void> _connectInner() async {
+  bool _isActiveAttempt(int attemptId) => attemptId == _connectAttemptId && state == State.connecting;
+
+  Future<void> _connectInner(int attemptId) async {
     if (_config.getToken != null && (_refreshRequired || _token == '')) {
       final event = ConnectionTokenEvent();
+      final String token;
       try {
-        final String token = await _config.getToken!(event);
-        _token = token;
-        _refreshRequired = false;
+        token = await _config.getToken!(event);
       } catch (ex) {
         if (ex is UnauthorizedException) {
-          // Handled by _connect, after the connect mutex is released.
+          // Handled by _connect.
           rethrow;
         }
-        if (_closed) return;
+        if (!_isActiveAttempt(attemptId)) return;
         final event = ErrorEvent(RefreshError(ex));
         _errorController.add(event);
-        if (state == State.connecting) {
-          _scheduleReconnect();
-        }
+        _scheduleReconnect();
         return;
       }
+      if (!_isActiveAttempt(attemptId)) {
+        // Superseded while getToken was in flight: this token must not
+        // overwrite one set for a newer attempt.
+        return;
+      }
+      _token = token;
+      _refreshRequired = false;
     }
 
-    if (state != State.connecting) {
+    if (!_isActiveAttempt(attemptId)) {
       return;
     }
 
@@ -530,10 +546,11 @@ class ClientImpl implements Client {
             headers: _headers,
             timeout: _config.timeout,
             tlsSkipVerify: _config.tlsSkipVerify));
+    _connectingTransport = transport;
 
     try {
       await transport.open(_onPush, onError: (dynamic error) {
-        if (_closed) return;
+        if (attemptId != _connectAttemptId) return;
         final event = ErrorEvent(TransportError(error));
         _errorController.add(event);
         if (state != State.connected) {
@@ -541,25 +558,21 @@ class ClientImpl implements Client {
         }
         _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
       }, onDone: (code, reason, reconnect) {
-        if (state == State.disconnected) {
-          return;
-        }
+        // Ignore the close of a transport that was already torn down or whose
+        // attempt was superseded.
+        if (attemptId != _connectAttemptId) return;
         _processDisconnect(code: code, reason: reason, reconnect: reconnect);
-        if (state == State.connecting) {
-          _scheduleReconnect();
-        }
       });
     } catch (ex) {
-      if (_closed) return;
+      if (!_isActiveAttempt(attemptId)) return;
+      _connectingTransport = null;
       final event = ErrorEvent(TransportError(ex));
       _errorController.add(event);
-      if (state == State.connecting) {
-        _scheduleReconnect();
-      }
+      _scheduleReconnect();
       return;
     }
 
-    if (state != State.connecting) {
+    if (!_isActiveAttempt(attemptId)) {
       await transport.close();
       return;
     }
@@ -573,10 +586,18 @@ class ClientImpl implements Client {
       try {
         data = await _config.getData!();
       } catch (ex) {
-        if (!_closed) {
-          final event = ErrorEvent(TransportError(ex));
-          _errorController.add(event);
+        if (!_isActiveAttempt(attemptId)) {
+          await transport.close();
+          return;
         }
+        final event = ErrorEvent(TransportError(ex));
+        _errorController.add(event);
+        await _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
+        return;
+      }
+      if (!_isActiveAttempt(attemptId)) {
+        // Superseded while getData was in flight, e.g. the transport closed
+        // and its reconnect is already scheduled.
         await transport.close();
         return;
       }
@@ -610,11 +631,12 @@ class ClientImpl implements Client {
         protocol.ConnectResult(),
       );
 
-      if (state != State.connecting) {
+      if (!_isActiveAttempt(attemptId)) {
         await transport.close();
         return;
       }
 
+      _connectingTransport = null;
       _transport = transport;
       state = State.connected;
       _client = result.client;
@@ -663,19 +685,11 @@ class ClientImpl implements Client {
         _setPingTimer();
       }
     } catch (err) {
-      if (state != State.connecting) {
-        return;
-      }
-      if (err is ClientDisconnectedError) {
-        // Transport closed while the ConnectRequest was in flight. The
-        // transport's _onDone callback already called _processDisconnect +
-        // _scheduleReconnect (via Completer.sync(), _onDone runs its
-        // onDone!() call synchronously after completing our completer, so
-        // the reconnect timer is scheduled before this catch resumes). If
-        // we call _processDisconnect here it cancels that timer via
-        // _reconnectTimer?.cancel() without rescheduling, leaving the
-        // client stuck in connecting state. Return early and let the
-        // already-scheduled timer handle the reconnect.
+      if (!_isActiveAttempt(attemptId) || err is ClientDisconnectedError) {
+        // Superseded by a disconnect, or the transport closed while the
+        // connect command was in flight: the transport's onDone handles that
+        // with the server's close code (e.g. 3500 invalid token), whether it
+        // runs before or after this catch.
         return;
       }
       final event = ErrorEvent(ConnectError(err));
@@ -684,23 +698,14 @@ class ClientImpl implements Client {
         if (err.code == 109) {
           // token expired.
           _refreshRequired = true;
-          await transport.close();
-          return;
-        } else if (!err.temporary) {
-          await _processDisconnect(code: err.code, reason: err.message, reconnect: false);
-          await transport.close();
-          return;
-        } else {
-          await _processDisconnect(code: err.code, reason: err.message, reconnect: true);
-          await transport.close();
-          return;
         }
-      } else {
         await _processDisconnect(
-            code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
-        await transport.close();
+            code: err.code, reason: err.message, reconnect: err.code == 109 || err.temporary);
         return;
       }
+      await _processDisconnect(
+          code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
+      return;
     }
     if (state != State.connected) {
       await transport.close();
