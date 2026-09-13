@@ -3127,6 +3127,31 @@ void main() {
       expect([aDone, bDone, clientDone], [true, true, true]);
     });
 
+    test('a static subscription token is kept after state invalidation', () async {
+      // Like a channel that requires a subscription token.
+      server.onCommand = (cmd) => cmd.hasSubscribe() && cmd.subscribe.token != 'static'
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..error = (protocol.Error()
+              ..code = 103
+              ..message = 'permission denied'))
+          : null;
+      await client.connect();
+      final sub = client.newSubscription('news', centrifuge.SubscriptionConfig(token: 'static'));
+      await sub.subscribe();
+
+      server.unsubscribe('news', 2502, 'state invalidated');
+      await waitUntil(() =>
+          server.received.where((cmd) => cmd.hasSubscribe()).length == 2 &&
+          sub.state == centrifuge.SubscriptionState.subscribed);
+      server.disconnect(3014, 'state invalidated');
+      await waitUntil(
+          () => server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+
+      expect(server.received.where((cmd) => cmd.hasSubscribe()).map((cmd) => cmd.subscribe.token),
+          ['static', 'static', 'static']);
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
