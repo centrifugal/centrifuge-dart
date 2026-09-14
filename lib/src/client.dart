@@ -43,6 +43,8 @@ abstract class Client {
 
   /// Connect to the server.
   ///
+  /// Throws [ConfigurationError], without changing the state, if the endpoint
+  /// isn't a ws:// or wss:// URL.
   Future<void> connect();
 
   /// Disconnect from the server.
@@ -212,6 +214,12 @@ class ClientImpl implements Client {
     }
     if (state == State.connecting) {
       return ready();
+    }
+    // An endpoint no retry can fix: fail before the state changes, so the
+    // client stays disconnected and no token or data is loaded.
+    final endpoint = Uri.tryParse(_url);
+    if (endpoint == null || (endpoint.scheme != 'ws' && endpoint.scheme != 'wss') || endpoint.host.isEmpty) {
+      throw ConfigurationError('endpoint must be a ws:// or wss:// URL, got "$_url"');
     }
     state = State.connecting;
     _reconnectAttempts = 0;
