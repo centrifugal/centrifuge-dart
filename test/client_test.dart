@@ -1179,6 +1179,24 @@ void main() {
       await readyDone;
     });
 
+    test('ready() reports a failure through its future instead of throwing', () async {
+      final client = createClient();
+      final sub = client.newSubscription(uniqueChannel('default'));
+      final errors = <Object>[];
+
+      unawaited(client.ready().catchError((Object error) => errors.add(error)));
+      unawaited(sub.ready().catchError((Object error) => errors.add(error)));
+      await client.close();
+      unawaited(client.ready().catchError((Object error) => errors.add(error)));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(errors, [
+        isA<centrifuge.ClientDisconnectedError>(),
+        isA<centrifuge.SubscriptionUnsubscribedError>(),
+        isA<centrifuge.ClientClosedError>(),
+      ]);
+    });
+
     test('removeSubscription after close does not throw StateError', () async {
       final client = createClient();
       await client.connect();
