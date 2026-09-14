@@ -21,29 +21,6 @@ Client createClient(String url, [ClientConfig? config]) => ClientImpl(
       protobufTransportBuilder,
     );
 
-/// Why [url] can't be a websocket endpoint, or null if it can.
-///
-/// The VM opens ws:// and wss:// URLs only. Browsers also take http:// and
-/// https:// URLs and URLs relative to the page, and resolve them to a websocket
-/// URL.
-@visibleForTesting
-String? endpointError(String url, {bool web = isWeb}) {
-  final endpoint = Uri.tryParse(url);
-  if (endpoint == null) {
-    return 'endpoint must be a valid URL, got "$url"';
-  }
-  if (web && !endpoint.hasScheme) {
-    return null;
-  }
-  final schemes = web ? const ['ws', 'wss', 'http', 'https'] : const ['ws', 'wss'];
-  if (!schemes.contains(endpoint.scheme) || endpoint.host.isEmpty) {
-    return web
-        ? 'endpoint must be a ws://, wss://, http:// or https:// URL, or relative to the page, got "$url"'
-        : 'endpoint must be a ws:// or wss:// URL, got "$url"';
-  }
-  return null;
-}
-
 abstract class Client {
   Stream<ConnectingEvent> get connecting;
   Stream<ConnectedEvent> get connected;
