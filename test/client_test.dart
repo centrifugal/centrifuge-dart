@@ -642,6 +642,44 @@ void main() {
       await client.disconnect();
     });
 
+    test('stream delta: publications after a subscribe that recovered nothing are decoded', () async {
+      // Needs Centrifugo 6.9.6 (centrifugal/centrifuge#629): before it, the
+      // first publication after such a subscribe was a delta against data the
+      // client never received, and the client disconnected with badProtocol.
+      final ch = uniqueChannel('delta');
+      const text = 'a publication long enough for the server to send the next one as a fossil delta';
+      await apiPublish(ch, {'step': 1, 'value': text});
+
+      // The stream top, from a subscription that received nothing yet.
+      final first = createClient();
+      await first.connect();
+      final firstSub = first.newSubscription(
+          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
+      final firstSubscribed = waitForEvent<centrifuge.SubscribedEvent>(firstSub.subscribed);
+      await firstSub.subscribe();
+      final top = (await firstSubscribed).streamPosition!;
+      await first.disconnect();
+
+      // Subscribing from the top recovers no publications.
+      final client = createClient();
+      await client.connect();
+      final sub = client.newSubscription(
+          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil, since: top));
+      final subscribed = waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final pubs = collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+      await sub.subscribe();
+      expect((await subscribed).recovered, true);
+
+      await apiPublish(ch, {'step': 2, 'value': '$text!'});
+      await apiPublish(ch, {'step': 3, 'value': '$text!!'});
+      final received = await pubs;
+      expect(jsonDecode(utf8.decode(received[0].data)), {'step': 2, 'value': '$text!'});
+      expect(jsonDecode(utf8.decode(received[1].data)), {'step': 3, 'value': '$text!!'});
+      expect(client.state, centrifuge.State.connected);
+
+      await client.disconnect();
+    });
+
     test('stream delta: recovery after unsubscribe/resubscribe', () async {
       final client = createClient();
       await client.connect();
