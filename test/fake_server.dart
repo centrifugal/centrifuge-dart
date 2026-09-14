@@ -355,6 +355,9 @@ class FakeCentrifugoServer {
     _socket!.add(writer.toBuffer());
   }
 
+  /// Send bytes as they are, e.g. data that isn't the protocol.
+  void sendBytes(List<int> bytes) => _socket!.add(bytes);
+
   /// Send a raw push (wrapped in a reply).
   void sendPush(protocol.Push push) => sendReply(protocol.Reply()..push = push);
 
