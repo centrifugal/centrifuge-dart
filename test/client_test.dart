@@ -2433,6 +2433,23 @@ void main() {
       expect(server.heldHandshakes, lessThanOrEqualTo(2));
     });
 
+    test('disconnect() and close() abort an unanswered websocket handshake', () async {
+      server.holdHandshake = true;
+      // Without a timeout only disconnect() and close() can stop the handshake.
+      client = centrifuge.createClient(server.url, centrifuge.ClientConfig(timeout: Duration.zero));
+
+      unawaited(client.connect());
+      await waitUntil(() => server.heldHandshakes == 1);
+      await client.disconnect();
+      await waitUntil(() => server.heldHandshakes == 0, timeout: const Duration(milliseconds: 500));
+
+      unawaited(client.connect());
+      await waitUntil(() => server.heldHandshakes == 1);
+      await client.close();
+      await waitUntil(() => server.heldHandshakes == 0, timeout: const Duration(milliseconds: 500));
+      expect(server.handshakeRequests, 2);
+    });
+
     test('an HttpClient shared through HttpOverrides still works after connecting', () async {
       final httpServer = await HttpServer.bind('localhost', 0);
       httpServer.listen((request) => request.response.close());

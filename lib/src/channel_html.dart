@@ -11,19 +11,23 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// and cannot be overridden from JavaScript. To use a self-signed cert in
 /// the browser, trust it at the OS / browser level.
 ///
-/// A handshake that doesn't complete within [connectTimeout] is aborted.
+/// A handshake that doesn't complete within [connectTimeout], or is still in
+/// progress when [abort] completes, is aborted.
 WebSocketChannel connect(
   Uri uri, {
   Iterable<String>? protocols,
   Map<String, dynamic>? headers,
   bool tlsSkipVerify = false,
   Duration? connectTimeout,
+  Future<void>? abort,
 }) {
   final channel = HtmlWebSocketChannel.connect(
     uri,
     protocols: protocols,
     binaryType: BinaryType.list,
   );
+  // The transport completes it only while the handshake is in progress.
+  abort?.then((_) => channel.innerWebSocket.close());
   if (connectTimeout != null) {
     // Closing a websocket that is still connecting fails the connection. A
     // browser opens one websocket to a server at a time, so a handshake left
