@@ -638,9 +638,11 @@ class ClientImpl implements Client {
         if (attemptId != _connectAttemptId) return;
         final event = ErrorEvent(TransportError(error));
         _errorController.add(event);
-        if (state != State.connected) {
-          return;
-        }
+        // Not after an error listener disconnected or started a new attempt.
+        if (attemptId != _connectAttemptId) return;
+        // The connection can't be trusted after data that isn't the protocol,
+        // also while connecting: close it and reconnect now rather than after
+        // the connect timeout.
         _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
       }, onDone: (code, reason, reconnect) {
         // Ignore the close of a transport that was already torn down or whose

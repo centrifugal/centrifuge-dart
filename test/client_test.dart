@@ -2493,6 +2493,76 @@ void main() {
       expect(getTokenCalls, 0);
     });
 
+    test('data that is not the protocol while connecting reconnects without waiting for the connect timeout', () async {
+      var connects = 0;
+      server.holdReply = (cmd) => cmd.hasConnect() && ++connects == 1;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            timeout: const Duration(seconds: 5),
+            minReconnectDelay: const Duration(milliseconds: 50),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      final errors = <centrifuge.ErrorEvent>[];
+      final errorSubscription = client.error.listen(errors.add);
+      addTearDown(() => errorSubscription.cancel());
+
+      unawaited(client.connect());
+      await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+      server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
+
+      await waitUntil(() => client.state == centrifuge.State.connected, timeout: const Duration(seconds: 2));
+      expect(server.handshakeRequests, 2);
+      await waitUntil(() => server.openConnections == 1, timeout: const Duration(milliseconds: 500));
+      expect(errors, hasLength(1));
+      expect(errors.single.error, isA<centrifuge.TransportError>());
+    });
+
+    test('a connect reply after data that is not the protocol is not used', () async {
+      var connects = 0;
+      server.holdReply = (cmd) => cmd.hasConnect() && ++connects == 1;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            timeout: const Duration(seconds: 5),
+            minReconnectDelay: const Duration(milliseconds: 50),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+
+      unawaited(client.connect());
+      await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+      final connect = server.received.firstWhere((cmd) => cmd.hasConnect());
+      server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
+      server.sendReply(protocol.Reply()
+        ..id = connect.id
+        ..connect = server.connectResult);
+
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected,
+          timeout: const Duration(seconds: 2));
+      await waitUntil(() => server.openConnections == 1, timeout: const Duration(milliseconds: 500));
+      expect(client.state, centrifuge.State.connected);
+    });
+
+    test('data that is not the protocol while connected reconnects', () async {
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            minReconnectDelay: const Duration(milliseconds: 50),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      final connected = <centrifuge.ConnectedEvent>[];
+      final connectedSubscription = client.connected.listen(connected.add);
+      addTearDown(() => connectedSubscription.cancel());
+
+      await client.connect();
+      await waitUntil(() => connected.length == 1);
+      server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
+
+      await waitUntil(() => connected.length == 2, timeout: const Duration(seconds: 2));
+      expect(server.handshakeRequests, 2);
+      await waitUntil(() => server.openConnections == 1, timeout: const Duration(milliseconds: 500));
+    });
+
     test('connect after disconnect during a pending attempt uses the new token', () async {
       final firstGetData = Completer<List<int>?>();
       var getDataCalls = 0;
