@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show HttpClient, HttpOverrides, HttpServer, SecurityContext;
+import 'dart:io' show HttpClient, HttpOverrides, HttpServer, SecurityContext, WebSocket;
 import 'dart:math';
 import 'dart:mirrors';
 
 import 'package:centrifuge/centrifuge.dart' as centrifuge;
+import 'package:centrifuge/src/channel.dart' show handshakeWithTimeout;
 import 'package:centrifuge/src/client.dart' show ClientImpl;
 import 'package:centrifuge/src/codec.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
@@ -2452,6 +2453,23 @@ void main() {
       final response = await request.close();
       await response.drain<void>();
       expect(response.statusCode, 200);
+    });
+
+    test('a websocket whose handshake completes after its timeout is closed', () async {
+      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+      final handshake = Completer<WebSocket>();
+      var aborted = false;
+
+      final connecting = handshakeWithTimeout(handshake.future, const Duration(milliseconds: 50),
+          abort: () => aborted = true);
+      await expectLater(connecting, throwsA(isA<TimeoutException>()));
+      // The handshake completes anyway, too late to be aborted.
+      final webSocket = await WebSocket.connect(server.url, protocols: ['centrifuge-protobuf']);
+      await waitUntil(() => server.openConnections == 1);
+      handshake.complete(webSocket);
+
+      await waitUntil(() => server.openConnections == 0);
+      expect(aborted, isTrue);
     });
 
     test('connect after disconnect during a pending attempt uses the new token', () async {
