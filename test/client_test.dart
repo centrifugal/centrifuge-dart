@@ -3184,6 +3184,32 @@ void main() {
       expect(unsubscribed, isEmpty);
     });
 
+    test('disconnect() or close() from an unsubscribed listener reports no uncaught error', () async {
+      final teardowns = <Future<void> Function(centrifuge.Client)>[
+        (client) => client.disconnect(),
+        (client) => client.close(),
+      ];
+      for (final teardown in teardowns) {
+        final uncaught = <Object>[];
+        final torndown = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+        addTearDown(torndown.close);
+        await runZonedGuarded(() async {
+          await torndown.connect();
+          final sub = torndown.newSubscription('news');
+          await sub.subscribe();
+          // Not from the subscribe reply's data callback: like a user action.
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          onFirst(sub.unsubscribed, () => teardown(torndown));
+          await sub.unsubscribe();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }, (error, stackTrace) => uncaught.add(error));
+
+        expect(uncaught, isEmpty);
+        expect(torndown.state, centrifuge.State.disconnected);
+      }
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
