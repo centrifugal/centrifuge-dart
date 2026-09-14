@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show HttpClient, HttpOverrides, HttpServer, SecurityContext, WebSocket;
+import 'dart:io' show HttpClient, HttpOverrides, HttpServer, SecurityContext, WebSocket, sleep;
 import 'dart:math';
 import 'dart:mirrors';
 
@@ -4080,11 +4080,13 @@ void main() {
       ]));
       expect(client.state, centrifuge.State.connected);
 
-      // Due at the same time as the ping timer and run right after it, like
-      // data read after a suspended process resumes and runs its overdue
-      // timers first.
-      Timer(const Duration(milliseconds: 1100), () => incoming.add(encodeReplies([protocol.Reply()])));
-      await Future<void>.delayed(const Duration(milliseconds: 1300));
+      // Like a suspended process: the event loop is blocked past the ping
+      // timer's deadline (1100ms) and the ping's (1200ms), so on resume the
+      // ping timer runs first, then the ping. Blocking makes that order hold
+      // under CPU load, unless the ping is scheduled 100ms late.
+      Timer(const Duration(milliseconds: 1200), () => incoming.add(encodeReplies([protocol.Reply()])));
+      Timer(const Duration(milliseconds: 1000), () => sleep(const Duration(milliseconds: 500)));
+      await Future<void>.delayed(const Duration(milliseconds: 1800));
 
       expect(client.state, centrifuge.State.connected);
       expect(connecting.map((event) => event.code), [0]);
