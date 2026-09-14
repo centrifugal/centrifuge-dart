@@ -830,9 +830,9 @@ class ClientImpl implements Client {
     } catch (err) {
       if (!_isActiveAttempt(attemptId) || err is ClientDisconnectedError) {
         // Superseded by a disconnect, or the transport closed while the
-        // connect command was in flight: the transport's onDone handles that
-        // with the server's close code (e.g. 3500 invalid token), whether it
-        // runs before or after this catch.
+        // connect command was in flight: the transport's onDone, which runs
+        // before pending commands fail, handled that with the server's close
+        // code (e.g. 3500 invalid token).
         return;
       }
       if (err is Error && err.code == 109) {
