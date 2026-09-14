@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -46,13 +47,24 @@ WebSocketChannel connect(
     customClient: client,
   );
   if (connectTimeout != null) {
-    webSocket = webSocket.timeout(connectTimeout, onTimeout: () {
-      client.close(force: true);
-      throw TimeoutException('WebSocket handshake not completed', connectTimeout);
-    });
+    webSocket = handshakeWithTimeout(webSocket, connectTimeout, abort: () => client.close(force: true));
   }
   // The connected socket is detached from the client, which is no longer used.
   return IOWebSocketChannel(webSocket.whenComplete(client.close));
+}
+
+/// [handshake] with a [timeout]. When it times out, [abort] stops it, and a
+/// WebSocket it still completes with, too late to be aborted, is closed.
+@visibleForTesting
+Future<WebSocket> handshakeWithTimeout(Future<WebSocket> handshake, Duration timeout,
+    {required void Function() abort}) {
+  return handshake.timeout(timeout, onTimeout: () {
+    abort();
+    // Future.timeout drops a value that comes after the timeout: the handshake
+    // may complete right now, after the client let go of its socket.
+    handshake.then((webSocket) => webSocket.close().catchError((Object _) {}), onError: (Object _) {});
+    throw TimeoutException('WebSocket handshake not completed', timeout);
+  });
 }
 
 /// Extends the web socket channel
