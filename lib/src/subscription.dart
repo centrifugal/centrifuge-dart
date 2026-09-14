@@ -294,7 +294,9 @@ class SubscriptionImpl implements Subscription {
       return Future.value();
     }
     if (state != SubscriptionState.subscribing) {
-      throw SubscriptionUnsubscribedError();
+      // Returned, not thrown, so it also reaches a caller that handles the
+      // future with catchError.
+      return Future.error(SubscriptionUnsubscribedError());
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
