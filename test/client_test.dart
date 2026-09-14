@@ -3354,6 +3354,31 @@ void main() {
       }
     });
 
+    test('a repeated connect() or subscribe() that is not awaited reports no uncaught error', () async {
+      final uncaught = <Object>[];
+      var holdConnect = true;
+      server.holdReply = (cmd) => (cmd.hasConnect() && holdConnect) || cmd.hasSubscribe();
+      final repeated = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+      addTearDown(repeated.close);
+      await runZonedGuarded(() async {
+        unawaited(repeated.connect());
+        unawaited(repeated.connect());
+        await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+        await repeated.disconnect();
+
+        holdConnect = false;
+        await repeated.connect();
+        final sub = repeated.newSubscription('news');
+        unawaited(sub.subscribe());
+        unawaited(sub.subscribe());
+        await waitUntil(() => server.received.any((cmd) => cmd.hasSubscribe()));
+        await sub.unsubscribe();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }, (error, stackTrace) => uncaught.add(error));
+
+      expect(uncaught, isEmpty);
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();

@@ -143,7 +143,11 @@ class SubscriptionImpl implements Subscription {
       return;
     }
     if (state == SubscriptionState.subscribing) {
-      return ready();
+      // Waits for the subscribe in progress, but like the call that started it
+      // doesn't fail if the subscription is unsubscribed instead: an app
+      // calling subscribe() again without awaiting it would get an uncaught
+      // error.
+      return _waitReady().catchError((Object _) {});
     }
     _resubscribeAttempts = 0;
     state = SubscriptionState.subscribing;
