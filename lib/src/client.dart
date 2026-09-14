@@ -235,8 +235,11 @@ class ClientImpl implements Client {
   @override
   void setToken(String token) {
     _token = token;
-    // Replaces a token that expired or was invalidated.
-    _refreshRequired = false;
+    if (_config.getToken == null) {
+      // The only way to replace a token that expired or was invalidated. With
+      // getToken, a new token is still requested: the one set may be stale.
+      _refreshRequired = false;
+    }
   }
 
   @override

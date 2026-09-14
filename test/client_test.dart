@@ -3337,6 +3337,37 @@ void main() {
       expect(errors, hasLength(1));
     });
 
+    test('setToken() after an expired token still gets a new token from getToken', () async {
+      var connects = 0;
+      server.onCommand = (cmd) => cmd.hasConnect() && ++connects == 1
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..error = (protocol.Error()
+              ..code = 109
+              ..message = 'token expired'))
+          : null;
+      var getTokenCalls = 0;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            token: 'stale',
+            minReconnectDelay: const Duration(milliseconds: 20),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+            getToken: (_) async {
+              getTokenCalls++;
+              return 'fresh';
+            },
+          ));
+      // E.g. an app putting back the token it has cached.
+      onFirst(client.error, () => client.setToken('stale'));
+
+      unawaited(client.connect());
+
+      await waitUntil(() => client.state == centrifuge.State.connected);
+      expect(getTokenCalls, 1);
+      expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['stale', 'fresh']);
+    });
+
     test('an expired static token without getToken stops with a configuration error', () async {
       server.onCommand = (cmd) => cmd.hasConnect()
           ? (protocol.Reply()
