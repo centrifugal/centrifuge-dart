@@ -294,7 +294,8 @@ class SubscriptionImpl implements Subscription {
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
-    if (timeout == null) {
+    // A zero timeout means no timeout, as for the transport.
+    if (timeout == null || timeout <= Duration.zero) {
       return completer.future;
     }
     return completer.future.timeout(timeout, onTimeout: () {

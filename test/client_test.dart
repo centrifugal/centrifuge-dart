@@ -3557,6 +3557,46 @@ void main() {
       }
       expect(readyWaiters(sub), 0);
     });
+
+    test('with a zero timeout, calls wait for the connection and the subscription', () async {
+      final server = FakeCentrifugoServer();
+      await server.start();
+      protocol.Command? heldConnect;
+      server.holdReply = (cmd) {
+        if (cmd.hasConnect() && heldConnect == null) {
+          heldConnect = cmd;
+          return true;
+        }
+        return false;
+      };
+      server.onCommand = (cmd) => cmd.hasPublish()
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..publish = protocol.PublishResult())
+          : null;
+      final client = centrifuge.createClient(server.url, centrifuge.ClientConfig(timeout: Duration.zero));
+      addTearDown(() async {
+        await client.close();
+        await server.stop();
+      });
+
+      unawaited(client.connect());
+      await waitUntil(() => heldConnect != null);
+      final clientPublish = client.publish('news', [1]);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      server.sendReply(protocol.Reply()
+        ..id = heldConnect!.id
+        ..connect = (protocol.ConnectResult()..client = 'fake-client'));
+      await expectLater(clientPublish, completes);
+
+      final state = Completer<centrifuge.StreamPosition>();
+      final sub = client.newSubscription('news', centrifuge.SubscriptionConfig(getState: () => state.future));
+      unawaited(sub.subscribe());
+      final subPublish = sub.publish([1]);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      state.complete(centrifuge.StreamPosition(Int64(0), 'e'));
+      await expectLater(subPublish, completes);
+    });
   });
 
   group('Message handling', () {
