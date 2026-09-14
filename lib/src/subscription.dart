@@ -257,6 +257,10 @@ class SubscriptionImpl implements Subscription {
     // reaches the server after it.
     final unsubscribeResult =
         shouldSend ? _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel) : null;
+    // Its failure is handled below, after the event. A listener that
+    // disconnects the client fails it before then, which must not be reported
+    // as an uncaught error.
+    unsubscribeResult?.ignore();
     // Emitted before the cleanup Unsubscribe is awaited, like the state change:
     // publications arriving meanwhile are already dropped.
     _addUnsubscribe(UnsubscribedEvent(code, reason));
