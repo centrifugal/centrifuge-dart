@@ -237,7 +237,10 @@ class ClientImpl implements Client {
       return;
     }
     if (state == State.connecting) {
-      return ready();
+      // Waits for the attempt in progress, but like the call that started it
+      // doesn't fail if the client disconnects instead: an app calling
+      // connect() again without awaiting it would get an uncaught error.
+      return _waitReady().catchError((Object _) {});
     }
     // An endpoint no retry can fix: fail before the state changes, so the
     // client stays disconnected and no token or data is loaded.
