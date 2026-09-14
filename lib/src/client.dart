@@ -1021,6 +1021,14 @@ class ClientImpl implements Client {
   void _handleUnsubscribe(String channel, protocol.Unsubscribe unsubscribe) {
     final subscription = _subscriptions[channel];
     if (subscription != null) {
+      if (subscription.state != SubscriptionState.subscribed) {
+        // It ends a previous subscription, e.g. one that raced unsubscribe()
+        // and subscribe(): the server sends the push also for a channel the
+        // connection isn't subscribed to, and unsubscribes a subscription in
+        // progress only after replying to its subscribe. It must neither end
+        // nor invalidate a subscribe in progress.
+        return;
+      }
       if (unsubscribe.code == 2502) {
         // State invalidated for this subscription: drop sub-level token and
         // recovery position so the resubscribe gets a fresh token and does

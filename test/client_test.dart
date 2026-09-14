@@ -2885,7 +2885,7 @@ void main() {
       expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
     });
 
-    test('a server unsubscribe during a pending resubscribe is cleaned up on the server', () async {
+    test('a server unsubscribe push during a pending resubscribe does not end it', () async {
       protocol.Command? heldSubscribe;
       var subscribes = 0;
       server.holdReply = (cmd) {
@@ -2902,17 +2902,19 @@ void main() {
       await sub.unsubscribe();
       unawaited(sub.subscribe());
       await waitUntil(() => heldSubscribe != null);
-      // The server unsubscribes the channel while the new subscribe is pending:
-      // the push may refer to the previous subscription, and the server can
-      // still create one from the pending request.
+      // The push ends the previous subscription: the server unsubscribes a
+      // subscription in progress only after replying to its subscribe.
       server.unsubscribe('news', 2000, 'server unsubscribe');
-
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.unsubscribed);
       await Future<void>.delayed(const Duration(milliseconds: 100));
+      server.sendReply(protocol.Reply()
+        ..id = heldSubscribe!.id
+        ..subscribe = protocol.SubscribeResult());
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
       final commands = server.received
           .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
           .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
-      expect(commands, ['subscribe', 'unsubscribe', 'subscribe', 'unsubscribe']);
+      expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
     });
 
     test('recovered publications are not delivered after unsubscribe() from a subscribed listener',
@@ -3164,6 +3166,22 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
       expect(events, unorderedEquals(['subscribed', 'unsubscribed 0']));
+    });
+
+    test('a server unsubscribe push while waiting for getState does not end the subscribe', () async {
+      await client.connect();
+      final state = Completer<centrifuge.StreamPosition>();
+      final sub = client.newSubscription('news', centrifuge.SubscriptionConfig(getState: () => state.future));
+      final unsubscribed = <centrifuge.UnsubscribedEvent>[];
+      sub.unsubscribed.listen(unsubscribed.add);
+      unawaited(sub.subscribe());
+
+      server.unsubscribe('news', 2000, 'server unsubscribe');
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      state.complete(centrifuge.StreamPosition(Int64(0), 'e'));
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      expect(unsubscribed, isEmpty);
     });
 
     test('the rest of a message is not delivered after disconnect() from a publication listener',
