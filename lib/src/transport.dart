@@ -42,6 +42,7 @@ Transport protobufTransportBuilder({
 }) {
   final replyDecoder = ProtobufReplyDecoder();
   final commandEncoder = ProtobufCommandEncoder();
+  final abort = Completer<void>();
 
   final transport = Transport(
     () async {
@@ -51,6 +52,7 @@ Transport protobufTransportBuilder({
         headers: config.headers,
         tlsSkipVerify: config.tlsSkipVerify,
         connectTimeout: config.timeout.inMicroseconds > 0 ? config.timeout : null,
+        abort: abort.future,
       );
       await channel.ready;
       return channel;
@@ -58,6 +60,9 @@ Transport protobufTransportBuilder({
     config,
     commandEncoder,
     replyDecoder,
+    abortOpen: () {
+      if (!abort.isCompleted) abort.complete();
+    },
   );
 
   return transport;
@@ -70,9 +75,13 @@ abstract class GeneratedMessageSender {
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder);
+  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder,
+      {void Function()? abortOpen})
+      : _abortOpen = abortOpen;
 
   final WebSocketBuilder _socketBuilder;
+  // Stops the websocket handshake that open() waits for.
+  final void Function()? _abortOpen;
   WebSocketChannel? _socket;
   final CommandEncoder _commandEncoder;
   final ReplyDecoder _replyDecoder;
@@ -182,6 +191,11 @@ class Transport implements GeneratedMessageSender {
 
   Future? close() {
     _closed = true;
+    if (_socket == null) {
+      // Still opening: stop the handshake, or its socket stays open until the
+      // timeout, or for good without one.
+      _abortOpen?.call();
+    }
     return _socket?.sink.close();
   }
 
