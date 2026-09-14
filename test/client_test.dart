@@ -3152,6 +3152,20 @@ void main() {
           ['static', 'static', 'static']);
     });
 
+    test('listeners after one that removes the subscription still get its event', () async {
+      await client.connect();
+      final sub = client.newSubscription('news');
+      final events = <String>[];
+      onFirst(sub.subscribed, () => client.removeSubscription(sub));
+      sub.subscribed.listen((_) => events.add('subscribed'));
+      sub.unsubscribed.listen((event) => events.add('unsubscribed ${event.code}'));
+
+      await sub.subscribe();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(events, unorderedEquals(['subscribed', 'unsubscribed 0']));
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
