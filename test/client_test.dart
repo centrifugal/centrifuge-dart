@@ -203,15 +203,13 @@ void main() {
       expect(client.state, centrifuge.State.disconnected);
     });
 
-    test('connect emits error event when url invalid', () async {
+    test('connect throws when url invalid', () async {
       final client = centrifuge.createClient(
         "invalid",
         centrifuge.ClientConfig(data: utf8.encode('test connect data')),
       );
-      final errorFinish = client.error.first;
-      client.connect();
-      final event = await errorFinish;
-      expect(event.error.toString().contains('Unsupported URL scheme'), true);
+      await expectLater(client.connect(), throwsA(isA<centrifuge.ConfigurationError>()));
+      expect(client.state, centrifuge.State.disconnected);
     });
 
     test('invalid token - disconnect code received', () async {
@@ -2470,6 +2468,29 @@ void main() {
 
       await waitUntil(() => server.openConnections == 0);
       expect(aborted, isTrue);
+    });
+
+    test('connect() with an endpoint that is not a websocket URL throws and stays disconnected', () async {
+      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+      var getTokenCalls = 0;
+      final errors = <centrifuge.ErrorEvent>[];
+      for (final endpoint in ['http://localhost/connection/websocket', 'localhost/connection/websocket', 'ws://[bad', 'ws://']) {
+        final invalid = centrifuge.createClient(
+            endpoint,
+            centrifuge.ClientConfig(getToken: (_) async {
+              getTokenCalls++;
+              return 'token';
+            }));
+        addTearDown(invalid.close);
+        invalid.error.listen(errors.add);
+
+        await expectLater(invalid.connect(), throwsA(isA<centrifuge.ConfigurationError>()), reason: endpoint);
+        expect(invalid.state, centrifuge.State.disconnected, reason: endpoint);
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(errors, isEmpty);
+      expect(getTokenCalls, 0);
     });
 
     test('connect after disconnect during a pending attempt uses the new token', () async {
