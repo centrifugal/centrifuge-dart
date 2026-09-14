@@ -293,6 +293,9 @@ class Transport implements GeneratedMessageSender {
             // details about transport-specific error codes. We may have extra
             // optional transportCode field in the future.
             code = connectingCodeTransportClosed;
+            // Also the reason: a browser reports an empty one for a dropped
+            // connection.
+            reason = "transport closed";
           }
         }
       }
