@@ -106,6 +106,7 @@ message Publication {
   bool delta = 8;  // When set indicates that data in Publication is a delta from previous data.
   int64 time = 9;  // Optional time of publication as Unix timestamp milliseconds.
   string channel = 10; // Optional channel name if Publication relates to wildcard subscription.
+  string epoch = 14; // Optional epoch.
 }
 
 // Join to channel.

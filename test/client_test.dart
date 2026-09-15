@@ -3161,6 +3161,52 @@ void main() {
       expect(server.lastSubscribe!.offset, Int64(3));
     });
 
+    // A subscribe reply has no epoch when the channel had no stream yet: the
+    // server sends the epoch with the first publication and checks it on
+    // recovery.
+    test('a subscription recovers with the epoch of its first publication', () async {
+      server.onSubscribe = (channel, req) => protocol.SubscribeResult()..recoverable = true;
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      final published = sub.publication.take(2).toList();
+      server.sendPush(protocol.Push()
+        ..channel = 'news'
+        ..pub = (publication(1)..epoch = 'e1'));
+      server.sendPush(protocol.Push()
+        ..channel = 'news'
+        ..pub = publication(2));
+      await published;
+
+      await sub.unsubscribe();
+      await sub.subscribe();
+      final request = server.lastSubscribe!;
+      expect(request.recover, isTrue);
+      expect(request.offset, Int64(2));
+      expect(request.epoch, 'e1');
+    });
+
+    test('a server-side subscription recovers with the epoch of its first publication', () async {
+      server.connectResult.subs['news'] = protocol.SubscribeResult()..recoverable = true;
+      final subscribed = client.subscribed.first;
+      final published = client.publication.first;
+      await client.connect();
+      await subscribed;
+
+      server.sendPush(protocol.Push()
+        ..channel = 'news'
+        ..pub = (publication(1)..epoch = 'e1'));
+      await published;
+
+      await client.disconnect();
+      await client.connect();
+      final request = server.received.lastWhere((cmd) => cmd.hasConnect()).connect.subs['news']!;
+      expect(request.recover, isTrue);
+      expect(request.offset, Int64(1));
+      expect(request.epoch, 'e1');
+    });
+
     test('subscribe() from a publication listener recovers after that publication', () async {
       server.onSubscribe = (channel, req) => protocol.SubscribeResult()
         ..recoverable = true
