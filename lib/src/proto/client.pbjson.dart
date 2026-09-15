@@ -451,6 +451,7 @@ const Publication$json = {
     {'1': 'delta', '3': 8, '4': 1, '5': 8, '10': 'delta'},
     {'1': 'time', '3': 9, '4': 1, '5': 3, '10': 'time'},
     {'1': 'channel', '3': 10, '4': 1, '5': 9, '10': 'channel'},
+    {'1': 'epoch', '3': 14, '4': 1, '5': 9, '10': 'epoch'},
   ],
   '3': [Publication_TagsEntry$json],
   '9': [
@@ -476,9 +477,9 @@ final $typed_data.Uint8List publicationDescriptor = $convert.base64Decode(
     'lmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkNsaWVudEluZm9SBGluZm8SFgoGb2Zmc2V0GAYg'
     'ASgEUgZvZmZzZXQSSgoEdGFncxgHIAMoCzI2LmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG'
     '9jb2wuUHVibGljYXRpb24uVGFnc0VudHJ5UgR0YWdzEhQKBWRlbHRhGAggASgIUgVkZWx0YRIS'
-    'CgR0aW1lGAkgASgDUgR0aW1lEhgKB2NoYW5uZWwYCiABKAlSB2NoYW5uZWwaNwoJVGFnc0VudH'
-    'J5EhAKA2tleRgBIAEoCVIDa2V5EhQKBXZhbHVlGAIgASgJUgV2YWx1ZToCOAFKBAgBEAJKBAgC'
-    'EANKBAgDEAQ=');
+    'CgR0aW1lGAkgASgDUgR0aW1lEhgKB2NoYW5uZWwYCiABKAlSB2NoYW5uZWwSFAoFZXBvY2gYDi'
+    'ABKAlSBWVwb2NoGjcKCVRhZ3NFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1ZRgCIAEo'
+    'CVIFdmFsdWU6AjgBSgQIARACSgQIAhADSgQIAxAE');
 
 @$core.Deprecated('Use joinDescriptor instead')
 const Join$json = {

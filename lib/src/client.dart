@@ -781,8 +781,14 @@ class ClientImpl implements Client {
           }
           final event = ServerPublicationEvent.from(key, pub);
           _publicationController.add(event);
-          if (_serverSubs[key]!.recoverable && pub.offset > 0) {
-            _serverSubs[key]!.offset = pub.offset;
+          final serverSubscription = _serverSubs[key]!;
+          if (serverSubscription.recoverable) {
+            if (pub.offset > 0) {
+              serverSubscription.offset = pub.offset;
+            }
+            if (pub.epoch.isNotEmpty) {
+              serverSubscription.epoch = pub.epoch;
+            }
           }
         }
         if (attemptId != _connectAttemptId) {
@@ -987,8 +993,15 @@ class ClientImpl implements Client {
     if (serverSubscription != null && state == State.connected) {
       final event = ServerPublicationEvent.from(channel, pub);
       _publicationController.add(event);
-      if (serverSubscription.recoverable && pub.offset > 0) {
-        serverSubscription.offset = pub.offset;
+      if (serverSubscription.recoverable) {
+        if (pub.offset > 0) {
+          serverSubscription.offset = pub.offset;
+        }
+        // The epoch of a channel that had no stream at subscribe time comes
+        // with its first publication.
+        if (pub.epoch.isNotEmpty) {
+          serverSubscription.epoch = pub.epoch;
+        }
       }
     }
   }
