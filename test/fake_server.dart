@@ -179,6 +179,10 @@ class FakeCentrifugoServer {
   final _heldHandshakes = <Socket>{};
 
   /// All commands received from the client, in order.
+  ///
+  /// Kept until the server stops, like the connections it accepted. A test or
+  /// program running many cycles against one server should clear it between
+  /// them, or the growth looks like a leak in the client.
   final List<protocol.Command> received = <protocol.Command>[];
 
   /// connect reply fields. Override to set expires/ttl/data/etc.
