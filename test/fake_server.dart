@@ -260,8 +260,8 @@ class FakeCentrifugoServer {
 
   /// Close the active connection from the server side, triggering the client's
   /// automatic reconnect.
-  Future<void> closeConnection() async {
-    await _socket?.close();
+  Future<void> closeConnection([int? code, String? reason]) async {
+    await _socket?.close(code, reason);
   }
 
   void _onData(WebSocket socket, List<int> data) {
