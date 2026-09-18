@@ -2708,6 +2708,27 @@ void main() {
 
       await expectLater(call, completes);
     });
+
+    test('a command sent by a listener while calls fail on a closed connection does not stop reconnecting',
+        () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final a = client.newSubscription('a');
+      await a.subscribe();
+      server.holdReply = (cmd) => cmd.hasSubscribe() && cmd.subscribe.channel == 'b';
+      final b = client.newSubscription('b');
+      unawaited(b.subscribe());
+      await waitUntil(
+          () => server.received.any((cmd) => cmd.hasSubscribe() && cmd.subscribe.channel == 'b'));
+
+      // The pending subscribe of b fails when the connection closes, and its
+      // error listener sends an unsubscribe for a.
+      onFirst(b.error, () => a.unsubscribe());
+      server.holdReply = null;
+      await server.closeConnection();
+
+      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+    });
   });
 
   group('Subscription teardown', () {
