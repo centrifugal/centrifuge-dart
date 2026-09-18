@@ -325,12 +325,16 @@ class ClientImpl implements Client {
   /// [ready] for a call, with its [timeout]: a call that times out stops
   /// waiting.
   Future<void> _waitReady([Duration? timeout]) {
-    _checkNotClosed();
+    // Failures are returned, not thrown, so they also reach a caller that
+    // handles the future with catchError.
+    if (_closed) {
+      return Future.error(ClientClosedError());
+    }
     if (state == State.connected) {
       return Future.value();
     }
     if (state == State.disconnected) {
-      throw ClientDisconnectedError();
+      return Future.error(ClientDisconnectedError());
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
