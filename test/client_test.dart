@@ -2579,6 +2579,27 @@ void main() {
       expect(connecting, hasLength(2));
     });
 
+    test('disconnect() and connect() from a connecting listener start one connect attempt', () async {
+      var getTokenCalls = 0;
+      client = centrifuge.createClient(
+          server.url,
+          fastConfig(getToken: (_) async {
+            getTokenCalls++;
+            return 'token';
+          }));
+
+      onFirst(client.connecting, () {
+        client.disconnect();
+        client.connect();
+      });
+      await client.connect();
+
+      await waitUntil(() => client.state == centrifuge.State.connected);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(getTokenCalls, 1);
+      expect(server.handshakeRequests, 1);
+    });
+
     test('events from listeners of different streams arrive in the order the state changed', () async {
       client = centrifuge.createClient(server.url, fastConfig());
       await client.connect();
