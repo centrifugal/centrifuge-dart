@@ -1084,9 +1084,6 @@ class ClientImpl implements Client {
       {required int code, required String reason, required bool reconnect}) {
     return _processDisconnect(code: code, reason: reason, reconnect: reconnect);
   }
-
-  @internal
-  Future<void> closeTransport() async => await _transport?.close();
 }
 
 final _random = new Random();

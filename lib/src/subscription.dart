@@ -255,7 +255,6 @@ class SubscriptionImpl implements Subscription {
       if (prevState == SubscriptionState.subscribed && _client.state == State.connected) {
         await _client.processDisconnect(
             code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
-        await _client.closeTransport();
       }
     }
   }
@@ -584,7 +583,6 @@ class SubscriptionImpl implements Subscription {
       _subscribeAttemptId++;
       await _client.processDisconnect(
           code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
-      await _client.closeTransport();
       return;
     } catch (err) {
       if (!_isActiveAttempt(attemptId)) {

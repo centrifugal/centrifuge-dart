@@ -3122,5 +3122,23 @@ void main() {
       await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed,
           timeout: const Duration(milliseconds: 500));
     });
+
+    test('a subscribe timeout does not close the connection that replaced the timed out one', () async {
+      var subscribes = 0;
+      server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
+      client = ClientImpl(server.url, fastConfig(const Duration(milliseconds: 300)),
+          slowCloseTransportBuilder(const Duration(seconds: 1)));
+      await client.connect();
+      final sub = client.newSubscription('news');
+      unawaited(sub.subscribe());
+      await waitUntil(
+          () => server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+
+      // Past the close of the timed out connection.
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      expect(server.openConnections, 1);
+      expect(server.handshakeRequests, 2);
+      expect(client.state, centrifuge.State.connected);
+    });
   });
 }
