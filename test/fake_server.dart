@@ -176,6 +176,7 @@ class FakeCentrifugoServer {
   WebSocket? _socket;
   final _connections = <WebSocket>[];
   final _openConnections = <WebSocket>{};
+  final _heldHandshakes = <Socket>{};
 
   /// All commands received from the client, in order.
   final List<protocol.Command> received = <protocol.Command>[];
@@ -204,6 +205,10 @@ class FakeCentrifugoServer {
   /// Number of client connections that are still open.
   int get openConnections => _openConnections.length;
 
+  /// Number of connections of handshakes left unanswered that the client
+  /// hasn't closed.
+  int get heldHandshakes => _heldHandshakes.length;
+
   /// Customize the subscribe result per channel (default: empty result).
   protocol.SubscribeResult Function(String channel, protocol.SubscribeRequest req)? onSubscribe;
 
@@ -222,7 +227,14 @@ class FakeCentrifugoServer {
     _httpServer!.listen((HttpRequest request) async {
       handshakeRequests++;
       if (holdHandshake) {
-        // Left pending until the server stops.
+        // Left pending until the client closes the connection or the server
+        // stops.
+        final socket = await request.response.detachSocket(writeHeaders: false);
+        _heldHandshakes.add(socket);
+        socket.listen((_) {}, onDone: () {
+          _heldHandshakes.remove(socket);
+          socket.destroy();
+        }, onError: (_) => _heldHandshakes.remove(socket));
         return;
       }
       final socket = await WebSocketTransformer.upgrade(request,
@@ -239,6 +251,9 @@ class FakeCentrifugoServer {
   Future<void> stop() async {
     for (final socket in _connections) {
       await socket.close();
+    }
+    for (final socket in _heldHandshakes.toList()) {
+      socket.destroy();
     }
     await _httpServer?.close(force: true);
   }

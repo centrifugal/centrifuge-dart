@@ -2397,6 +2397,22 @@ void main() {
       await waitUntil(() => client.state == centrifuge.State.connected);
     });
 
+    test('an unanswered websocket handshake is aborted when it times out', () async {
+      server.holdHandshake = true;
+      client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(
+            timeout: const Duration(milliseconds: 200),
+            minReconnectDelay: const Duration(milliseconds: 50),
+            maxReconnectDelay: const Duration(milliseconds: 100),
+          ));
+      unawaited(client.connect());
+
+      await waitUntil(() => server.handshakeRequests >= 4);
+      // At most the attempt in progress and the one just aborted.
+      expect(server.heldHandshakes, lessThanOrEqualTo(2));
+    });
+
     test('connect after disconnect during a pending attempt uses the new token', () async {
       final firstGetData = Completer<List<int>?>();
       var getDataCalls = 0;
