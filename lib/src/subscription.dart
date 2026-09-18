@@ -169,11 +169,12 @@ class SubscriptionImpl implements Subscription {
   /// can't be subscribed again meanwhile, even from its unsubscribed listener,
   /// which would leave a subscription on the server.
   @internal
-  Future<void> remove() {
+  Future<void> remove() async {
     _closed = true;
-    final unsubscribed = unsubscribe();
+    await unsubscribe();
+    // Not from inside an event: the listeners after one that removes the
+    // subscription still get that event.
     close();
-    return unsubscribed;
   }
 
   @internal
