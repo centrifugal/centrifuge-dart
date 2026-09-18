@@ -2643,6 +2643,71 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 1500));
       expect(getTokenCalls, 1);
     });
+
+    test('disconnect() and connect() from an error listener after a rejected connect connect again',
+        () async {
+      var connects = 0;
+      server.onCommand = (cmd) => cmd.hasConnect() && ++connects == 1
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..error = (protocol.Error()
+              ..code = 101
+              ..message = 'unauthorized'))
+          : null;
+      client = centrifuge.createClient(server.url, fastConfig());
+
+      onFirst(client.error, () {
+        client.disconnect();
+        client.connect();
+      });
+      unawaited(client.connect());
+
+      await waitUntil(() => client.state == centrifuge.State.connected);
+      expect(connects, 2);
+    });
+
+    test('unsubscribe() and subscribe() from an error listener after a rejected subscribe subscribe again',
+        () async {
+      var subscribes = 0;
+      server.onCommand = (cmd) => cmd.hasSubscribe() && ++subscribes == 1
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..error = (protocol.Error()
+              ..code = 103
+              ..message = 'permission denied'))
+          : null;
+      client = centrifuge.createClient(server.url, fastConfig());
+      await client.connect();
+      final sub = client.newSubscription('news');
+
+      onFirst(sub.error, () {
+        sub.unsubscribe();
+        sub.subscribe();
+      });
+      unawaited(sub.subscribe());
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
+    });
+
+    test('a call from a connected listener that reconnects waits for the new connection', () async {
+      server.onCommand = (cmd) => cmd.hasRpc()
+          ? (protocol.Reply()
+            ..id = cmd.id
+            ..rpc = protocol.RPCResult())
+          : null;
+      client = centrifuge.createClient(server.url, fastConfig());
+      late Future<Object?> call;
+
+      onFirst(client.connected, () {
+        client.disconnect();
+        client.connect();
+        call = client.rpc('method', [1]);
+      });
+      await client.connect();
+
+      await expectLater(call, completes);
+    });
   });
 
   group('Subscription teardown', () {
