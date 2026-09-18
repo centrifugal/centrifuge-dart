@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:centrifuge/src/channel.dart';
+import 'package:centrifuge/src/codec.dart';
 import 'package:centrifuge/src/proto/client.pb.dart' as protocol;
+import 'package:centrifuge/src/transport.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:protobuf/protobuf.dart' as pb;
 import 'package:stream_channel/stream_channel.dart';
@@ -67,6 +70,82 @@ List<int> encodeReplies(List<protocol.Reply> replies) {
       ..writeRawBytes(replyData);
   }
   return writer.toBuffer();
+}
+
+/// Builds client transports whose close is slow, like a browser waiting for
+/// the close handshake on a lost network: the future returned by close() and
+/// the end of the stream come [closeDelay] after close() is called.
+TransportBuilder slowCloseTransportBuilder(Duration closeDelay) =>
+    ({required String url, required TransportConfig config}) => Transport(
+          () async {
+            final channel = connect(Uri.parse(url), protocols: ['centrifuge-protobuf']);
+            await channel.ready;
+            return _SlowCloseWebSocketChannel(channel, closeDelay);
+          },
+          config,
+          ProtobufCommandEncoder(),
+          ProtobufReplyDecoder(),
+        );
+
+class _SlowCloseWebSocketChannel with StreamChannelMixin implements WebSocketChannel {
+  _SlowCloseWebSocketChannel(this._inner, this._closeDelay) {
+    _inner.stream.listen(_incoming.add, onError: _incoming.addError, onDone: () {
+      if (_closing) {
+        Timer(_closeDelay, _incoming.close);
+      } else {
+        _incoming.close();
+      }
+    });
+  }
+
+  final WebSocketChannel _inner;
+  final Duration _closeDelay;
+  final _incoming = StreamController<dynamic>();
+  bool _closing = false;
+
+  @override
+  Stream<dynamic> get stream => _incoming.stream;
+
+  @override
+  late final WebSocketSink sink = _SlowCloseWebSocketSink(this);
+
+  @override
+  String? get protocol => _inner.protocol;
+
+  @override
+  int? get closeCode => _inner.closeCode;
+
+  @override
+  String? get closeReason => _inner.closeReason;
+
+  @override
+  Future<void> get ready => _inner.ready;
+}
+
+class _SlowCloseWebSocketSink implements WebSocketSink {
+  _SlowCloseWebSocketSink(this._channel);
+
+  final _SlowCloseWebSocketChannel _channel;
+
+  @override
+  void add(dynamic data) => _channel._inner.sink.add(data);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) =>
+      _channel._inner.sink.addError(error, stackTrace);
+
+  @override
+  Future addStream(Stream stream) => _channel._inner.sink.addStream(stream);
+
+  @override
+  Future close([int? closeCode, String? closeReason]) async {
+    _channel._closing = true;
+    unawaited(_channel._inner.sink.close(closeCode, closeReason));
+    await Future<void>.delayed(_channel._closeDelay);
+  }
+
+  @override
+  Future get done => _channel._inner.sink.done;
 }
 
 /// In-process Centrifugo fake server for tests, speaking the protobuf protocol

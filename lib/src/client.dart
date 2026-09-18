@@ -454,7 +454,7 @@ class ClientImpl implements Client {
       _subscriptionsById.clear();
       // Listeners may add or remove subscriptions: iterate over copies.
       for (final s in _subscriptions.values.toList()) {
-        s.moveToSubscribing(subscribingCodeTransportClosed, "transport closed");
+        s.moveToSubscribingOnDisconnect();
       }
       for (final channel in _serverSubs.keys.toList()) {
         final event = ServerSubscribingEvent.from(channel);
