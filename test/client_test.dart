@@ -3055,6 +3055,46 @@ void main() {
       expect(readyCompleted, isFalse);
     });
 
+    test('subscriptions can be removed in a loop over subscriptions()', () async {
+      await client.connect();
+      for (final channel in ['a', 'b', 'c']) {
+        await client.newSubscription(channel).subscribe();
+      }
+
+      for (final sub in client.subscriptions().values) {
+        unawaited(client.removeSubscription(sub));
+      }
+      for (final channel in ['d', 'e']) {
+        await client.newSubscription(channel).subscribe();
+      }
+      for (final sub in client.subscriptions().values) {
+        await client.removeSubscription(sub);
+      }
+
+      expect(client.subscriptions(), isEmpty);
+    });
+
+    test('close() closes all streams when an onDone handler removes its subscription', () async {
+      await client.connect();
+      final a = client.newSubscription('a');
+      final b = client.newSubscription('b');
+      await a.subscribe();
+      await b.subscribe();
+      var aDone = false;
+      var bDone = false;
+      var clientDone = false;
+      a.publication.listen(null, onDone: () {
+        aDone = true;
+        client.removeSubscription(a);
+      });
+      b.publication.listen(null, onDone: () => bDone = true);
+      client.connected.listen(null, onDone: () => clientDone = true);
+
+      await client.close();
+
+      expect([aDone, bDone, clientDone], [true, true, true]);
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
