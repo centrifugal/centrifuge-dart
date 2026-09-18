@@ -1,6 +1,6 @@
 services:
   centrifugo:
-    image: centrifugo/centrifugo:v6.9.5
+    image: centrifugo/centrifugo:v6.9.6
     command:
       - centrifugo
     ports:
