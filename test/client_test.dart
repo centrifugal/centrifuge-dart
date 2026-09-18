@@ -2710,6 +2710,22 @@ void main() {
       expect(events, ['unsubscribed']);
     });
 
+    test('subscribe() from an unsubscribed listener reaches the server after the cleanup unsubscribe',
+        () async {
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+
+      onFirst(sub.unsubscribed, () => sub.subscribe());
+      await sub.unsubscribe();
+
+      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
+      final commands = server.received
+          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+      expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
+    });
+
     test('a server unsubscribe during a pending resubscribe is cleaned up on the server', () async {
       protocol.Command? heldSubscribe;
       var subscribes = 0;

@@ -232,14 +232,18 @@ class SubscriptionImpl implements Subscription {
     final shouldSend = _client.state == State.connected &&
         ((sendUnsubscribe && prevState == SubscriptionState.subscribed) ||
             (prevState == SubscriptionState.subscribing && wasInflight));
+    // Written before the unsubscribed event, so a subscribe() from a listener
+    // reaches the server after it.
+    final unsubscribeResult =
+        shouldSend ? _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel) : null;
     // Emitted before the cleanup Unsubscribe is awaited, like the state change:
     // publications arriving meanwhile are already dropped.
     _addUnsubscribe(UnsubscribedEvent(code, reason));
-    if (!shouldSend) {
+    if (unsubscribeResult == null) {
       return;
     }
     try {
-      await _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel);
+      await unsubscribeResult;
     } catch (_) {
       // Sub was Subscribed and the cleanup Unsubscribe failed — connection
       // and server-side state may have diverged, so trigger a reconnect to
