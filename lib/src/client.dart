@@ -282,7 +282,11 @@ class ClientImpl implements Client {
   }
 
   @override
-  Future<void> ready() {
+  Future<void> ready() => _waitReady();
+
+  /// [ready] for a call, with its [timeout]: a call that times out stops
+  /// waiting.
+  Future<void> _waitReady([Duration? timeout]) {
     _checkNotClosed();
     if (state == State.connected) {
       return Future.value();
@@ -292,7 +296,13 @@ class ClientImpl implements Client {
     }
     final completer = new Completer<void>();
     _readyFutures.add(completer);
-    return completer.future;
+    if (timeout == null) {
+      return completer.future;
+    }
+    return completer.future.timeout(timeout, onTimeout: () {
+      _readyFutures.remove(completer);
+      throw TimeoutException('Future not completed', timeout);
+    });
   }
 
   /// The transport after `await ready()`, which yields: a disconnect may have
@@ -307,7 +317,7 @@ class ClientImpl implements Client {
 
   @override
   Future<PublishResult> publish(String channel, List<int> data) async {
-    await ready().timeout(_config.timeout);
+    await _waitReady(_config.timeout);
     final request = protocol.PublishRequest()
       ..channel = channel
       ..data = data;
@@ -320,7 +330,7 @@ class ClientImpl implements Client {
 
   @override
   Future<RPCResult> rpc(String method, List<int> data) async {
-    await ready().timeout(_config.timeout);
+    await _waitReady(_config.timeout);
     final request = protocol.RPCRequest();
     request.method = method;
     request.data = data;
@@ -331,7 +341,7 @@ class ClientImpl implements Client {
   @override
   Future<HistoryResult> history(String channel,
       {int limit = 0, StreamPosition? since, bool reverse = false}) async {
-    await ready().timeout(_config.timeout);
+    await _waitReady(_config.timeout);
     final request = protocol.HistoryRequest()..channel = channel;
     request.limit = limit;
     request.reverse = reverse;
@@ -350,7 +360,7 @@ class ClientImpl implements Client {
 
   @override
   Future<PresenceResult> presence(String channel) async {
-    await ready().timeout(_config.timeout);
+    await _waitReady(_config.timeout);
     final request = protocol.PresenceRequest()..channel = channel;
     final result = await _connectedTransport().sendMessage(
       request,
@@ -361,7 +371,7 @@ class ClientImpl implements Client {
 
   @override
   Future<PresenceStatsResult> presenceStats(String channel) async {
-    await ready().timeout(_config.timeout);
+    await _waitReady(_config.timeout);
     final request = protocol.PresenceStatsRequest()..channel = channel;
     final result = await _connectedTransport().sendMessage(
       request,
@@ -372,7 +382,7 @@ class ClientImpl implements Client {
 
   @override
   Future<void> send(List<int> data) async {
-    await ready().timeout(_config.timeout);
+    await _waitReady(_config.timeout);
     final request = protocol.SendRequest()..data = data;
     await _connectedTransport().sendAsyncMessage(request);
   }
