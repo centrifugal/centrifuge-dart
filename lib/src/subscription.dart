@@ -165,6 +165,17 @@ class SubscriptionImpl implements Subscription {
     _tagsFilter = tagsFilter;
   }
 
+  /// Unsubscribes and closes the subscription removed from the client. It
+  /// can't be subscribed again meanwhile, even from its unsubscribed listener,
+  /// which would leave a subscription on the server.
+  @internal
+  Future<void> remove() {
+    _closed = true;
+    final unsubscribed = unsubscribe();
+    close();
+    return unsubscribed;
+  }
+
   @internal
   void close() {
     _closed = true;
@@ -330,7 +341,7 @@ class SubscriptionImpl implements Subscription {
   }
 
   void _addUnsubscribe(UnsubscribedEvent event) {
-    if (!_closed) _unsubscribedController.add(event);
+    if (!_unsubscribedController.isClosed) _unsubscribedController.add(event);
   }
 
   /// Update the channel compaction ID registration in the client's push

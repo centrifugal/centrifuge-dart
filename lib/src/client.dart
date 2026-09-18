@@ -399,12 +399,14 @@ class ClientImpl implements Client {
   @override
   Future<void> removeSubscription(Subscription subscription) async {
     final String channel = subscription.channel;
-    await subscription.unsubscribe();
     // A subscription removed before may have been replaced by a newer one for
     // its channel, which must stay.
-    if (identical(_subscriptions[channel], subscription)) {
-      _subscriptions.remove(channel)!.close();
+    if (!identical(_subscriptions[channel], subscription)) {
+      return;
     }
+    // Unregistered at once: a new subscription to the channel can be created
+    // while the cleanup Unsubscribe is pending, and is sent after it.
+    await _subscriptions.remove(channel)!.remove();
   }
 
   @override

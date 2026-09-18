@@ -3011,6 +3011,26 @@ void main() {
       expect(server.lastSubscribe!.offset, Int64(10));
     });
 
+    test('a subscription being removed can not be subscribed again', () async {
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+      Object? listenerError;
+      onFirst(sub.unsubscribed, () => sub.subscribe().catchError((Object error) => listenerError = error));
+
+      final removing = client.removeSubscription(sub);
+      await expectLater(sub.subscribe(), throwsA(isA<centrifuge.ClientClosedError>()));
+      await removing;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(listenerError, isA<centrifuge.ClientClosedError>());
+      expect(client.getSubscription('news'), isNull);
+      final commands = server.received
+          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+      expect(commands, ['subscribe', 'unsubscribe']);
+    });
+
     test('the rest of a message is not delivered after disconnect() from a publication listener',
         () async {
       await client.connect();
