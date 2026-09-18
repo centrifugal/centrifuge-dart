@@ -2509,7 +2509,13 @@ void main() {
       client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
       var getTokenCalls = 0;
       final errors = <centrifuge.ErrorEvent>[];
-      for (final endpoint in ['http://localhost/connection/websocket', 'localhost/connection/websocket', 'ws://[bad', 'ws://']) {
+      for (final endpoint in [
+        'http://localhost/connection/websocket',
+        'localhost/connection/websocket',
+        'ws://[bad',
+        'ws://',
+        'ws://localhost:99999/connection/websocket',
+      ]) {
         final invalid = centrifuge.createClient(
             endpoint,
             centrifuge.ClientConfig(getToken: (_) async {
