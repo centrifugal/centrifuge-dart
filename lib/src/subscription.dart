@@ -199,7 +199,8 @@ class SubscriptionImpl implements Subscription {
   /// Used when the server signals state invalidation (e.g. unsubscribe code
   /// 2502 for this channel, or disconnect code 3014 at the connection level).
   ///
-  /// Clears the token, fossil delta base and channel-compaction ID, and resets
+  /// Clears the token when getToken can provide a new one, the fossil delta
+  /// base and channel-compaction ID, and resets
   /// a recovery position the subscription has to a sentinel epoch ("_") the
   /// server can never match (offset 0); a subscription without a position
   /// still calls getState on its next subscribe. The recover flag is left
@@ -211,7 +212,11 @@ class SubscriptionImpl implements Subscription {
   /// epoch/offset are adopted from the subscribe reply.
   @internal
   void invalidateState() {
-    _token = '';
+    // Without getToken there is no new token to get: the subscription keeps
+    // the one it has, and the server rejects it if it's no longer valid.
+    if (_config.getToken != null) {
+      _token = '';
+    }
     if (_offset != null) {
       _offset = $fixnum.Int64(0);
       _epoch = '_';
