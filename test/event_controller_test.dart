@@ -40,5 +40,26 @@ void main() {
 
       expect(events, [1, 2]);
     });
+
+    test('stream is the same stream on every call', () {
+      final controller = EventController<int>();
+
+      expect(controller.stream, same(controller.stream));
+    });
+
+    test('code awaiting stream.first resumes inside the event', () async {
+      final controller = EventController<int>();
+      final log = <String>[];
+      unawaited(() async {
+        await controller.stream.first;
+        log.add('resumed');
+      }());
+
+      controller.add(1);
+      log.add('after add');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(log, ['resumed', 'after add']);
+    });
   });
 }
