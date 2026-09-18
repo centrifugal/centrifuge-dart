@@ -3960,6 +3960,22 @@ void main() {
       expect(server.handshakeRequests, 1);
     });
 
+    test('a close code below 3000 is reported as transport closed', () async {
+      client = centrifuge.createClient(server.url, fastConfig());
+      final events = <String>[];
+      client.connecting.listen((event) => events.add('${event.code} ${event.reason}'));
+      await client.connect();
+
+      await server.closeConnection(1000, 'bye');
+      await waitUntil(() => events.length == 2 && client.state == centrifuge.State.connected);
+      // No close code: a browser reports a dropped connection with an empty
+      // reason, too.
+      await server.closeConnection();
+      await waitUntil(() => events.length == 3 && client.state == centrifuge.State.connected);
+
+      expect(events, ['0 connect called', '1 transport closed', '1 transport closed']);
+    });
+
     test('a subscribe failing on a closed connection reports no error', () async {
       client = centrifuge.createClient(server.url, fastConfig());
       await client.connect();
