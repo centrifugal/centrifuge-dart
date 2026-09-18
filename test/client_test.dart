@@ -1106,8 +1106,8 @@ void main() {
     });
 
     test('reconnect from inside disconnected handler succeeds', () async {
-      // Triggers the _inConnect / state interaction: a sync stream listener
-      // calling connect() while still inside _processDisconnect.
+      // A sync stream listener calling connect() while still inside
+      // _processDisconnect.
       final client = createClient();
       await client.connect();
 
@@ -1827,7 +1827,7 @@ void main() {
     test('repeated server disconnects: client remains stable', () async {
       // Stress test: many server-initiated retryable disconnects in a row
       // must leave the client+subscription in a healthy state without state
-      // drift, leaked timers or stuck _inConnect.
+      // drift, leaked timers or a stuck connect attempt.
       final client = createClient();
       final ch = randomChannel('reconn');
       final sub = client.newSubscription(ch);
