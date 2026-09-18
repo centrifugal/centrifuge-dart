@@ -975,6 +975,7 @@ class Publication extends $pb.GeneratedMessage {
     $core.bool? delta,
     $fixnum.Int64? time,
     $core.String? channel,
+    $core.String? epoch,
   }) {
     final result = create();
     if (data != null) result.data = data;
@@ -984,6 +985,7 @@ class Publication extends $pb.GeneratedMessage {
     if (delta != null) result.delta = delta;
     if (time != null) result.time = time;
     if (channel != null) result.channel = channel;
+    if (epoch != null) result.epoch = epoch;
     return result;
   }
 
@@ -1015,6 +1017,7 @@ class Publication extends $pb.GeneratedMessage {
     ..aOB(8, _omitFieldNames ? '' : 'delta')
     ..aInt64(9, _omitFieldNames ? '' : 'time')
     ..aOS(10, _omitFieldNames ? '' : 'channel')
+    ..aOS(14, _omitFieldNames ? '' : 'epoch')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1094,6 +1097,15 @@ class Publication extends $pb.GeneratedMessage {
   $core.bool hasChannel() => $_has(6);
   @$pb.TagNumber(10)
   void clearChannel() => $_clearField(10);
+
+  @$pb.TagNumber(14)
+  $core.String get epoch => $_getSZ(7);
+  @$pb.TagNumber(14)
+  set epoch($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(14)
+  $core.bool hasEpoch() => $_has(7);
+  @$pb.TagNumber(14)
+  void clearEpoch() => $_clearField(14);
 }
 
 /// Join to channel.

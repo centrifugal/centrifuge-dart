@@ -723,6 +723,12 @@ class SubscriptionImpl implements Subscription {
     if (pub.offset > 0) {
       _offset = pub.offset;
     }
+    // A subscribe reply has no epoch when the channel had no stream yet: the
+    // server then sends the epoch with the first publication and uses it to
+    // check a later recovery.
+    if (pub.epoch.isNotEmpty) {
+      _epoch = pub.epoch;
+    }
     _publicationController.add(event);
   }
 
