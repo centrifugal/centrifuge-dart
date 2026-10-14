@@ -103,13 +103,13 @@ class SubscriptionImpl implements Subscription {
   final ClientImpl _client;
   final SubscriptionConfig _config;
 
-  final _publicationController = EventController<PublicationEvent>();
-  final _joinController = EventController<JoinEvent>();
-  final _leaveController = EventController<LeaveEvent>();
-  final _subscribingController = EventController<SubscribingEvent>();
-  final _subscribedController = EventController<SubscribedEvent>();
-  final _unsubscribedController = EventController<UnsubscribedEvent>();
-  final _errorController = EventController<SubscriptionErrorEvent>();
+  late final _publicationController = EventController<PublicationEvent>(onListenerError: _client.handlerFailed);
+  late final _joinController = EventController<JoinEvent>(onListenerError: _client.handlerFailed);
+  late final _leaveController = EventController<LeaveEvent>(onListenerError: _client.handlerFailed);
+  late final _subscribingController = EventController<SubscribingEvent>(onListenerError: _client.handlerFailed);
+  late final _subscribedController = EventController<SubscribedEvent>(onListenerError: _client.handlerFailed);
+  late final _unsubscribedController = EventController<UnsubscribedEvent>(onListenerError: _client.handlerFailed);
+  late final _errorController = EventController<SubscriptionErrorEvent>(onListenerError: _client.handlerFailed);
 
   final _readyFutures = <Completer<void>>[];
 
@@ -720,6 +720,8 @@ class SubscriptionImpl implements Subscription {
     }
     // Before the event, so a subscribe from its listener recovers after this
     // publication.
+    final previousOffset = _offset;
+    final previousEpoch = _epoch;
     if (pub.offset > 0) {
       _offset = pub.offset;
     }
@@ -729,7 +731,13 @@ class SubscriptionImpl implements Subscription {
     if (pub.epoch.isNotEmpty) {
       _epoch = pub.epoch;
     }
-    _publicationController.add(event);
+    if (!_publicationController.add(event)) {
+      // A publication whose listener threw isn't delivered: the position goes
+      // back before it, so the next recovery delivers it again. The client
+      // stopped.
+      _offset = previousOffset;
+      _epoch = previousEpoch;
+    }
   }
 
   @internal

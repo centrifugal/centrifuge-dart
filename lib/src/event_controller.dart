@@ -11,13 +11,19 @@ final Future<void> _nothingToCancel = StreamController<void>.broadcast().stream.
 ///
 /// Like `StreamController.broadcast(sync: true)`, events are delivered
 /// synchronously to every listener, in the zone the listener was registered
-/// in, and an exception thrown by a listener is reported to that zone without
-/// affecting other listeners. Unlike it, an event added while an event is being
+/// in, and an exception thrown by a listener is reported to that zone. Then the
+/// listeners after it don't get the event, and [onListenerError] is called: the
+/// client stops (see ClientImpl.handlerFailed). Unlike it, an event added while an event is being
 /// delivered (e.g. a `connecting` listener calls `disconnect()` and then
 /// `connect()`) is delivered right away, like a nested call, instead of throwing
 /// StateError. Events therefore reach listeners in the order the state changed,
 /// and the state a listener reads matches its event.
 class EventController<T> {
+  EventController({this.onListenerError});
+
+  /// Called with the exception a listener threw, after it was reported.
+  final void Function(Object error)? onListenerError;
+
   final _subscriptions = <_EventSubscription<T>>[];
   bool _closed = false;
 
@@ -28,14 +34,21 @@ class EventController<T> {
 
   bool get isClosed => _closed;
 
-  void add(T event) {
+  /// Delivers [event] to the listeners. Returns false when one threw: the
+  /// listeners after it don't get the event.
+  bool add(T event) {
     if (_closed) {
       throw StateError('Cannot add new events after calling close');
     }
     // A copy: listeners may listen or cancel while the event is delivered.
     for (final subscription in List.of(_subscriptions)) {
-      subscription._add(event);
+      if (!subscription._add(event)) return false;
     }
+    return true;
+  }
+
+  void _listenerFailed(Object error) {
+    onListenerError?.call(error);
   }
 
   Future<void> close() {
@@ -104,20 +117,29 @@ class _EventSubscription<T> implements StreamSubscription<T> {
     _onDone = handleDone == null ? null : _zone.registerCallback<void>(handleDone);
   }
 
-  void _add(T event) {
-    if (_finished) return;
+  /// Returns false when the listener threw.
+  bool _add(T event) {
+    if (_finished) return true;
     // After resume(), events that arrived while paused are delivered first.
     if (_pauseCount > 0 || _pending.isNotEmpty) {
       _pending.add(event);
-      return;
+      return true;
     }
-    _deliver(event);
+    return _deliver(event);
   }
 
-  void _deliver(T event) {
+  bool _deliver(T event) {
     final handler = _onData;
-    if (handler != null) {
-      _zone.runUnaryGuarded(handler, event);
+    if (handler == null) return true;
+    try {
+      _zone.runUnary(handler, event);
+      return true;
+    } catch (error, stackTrace) {
+      // Reported to the listener's zone, as runUnaryGuarded does: an uncaught
+      // error there. Then the owner stops.
+      _zone.handleUncaughtError(error, stackTrace);
+      _controller._listenerFailed(error);
+      return false;
     }
   }
 

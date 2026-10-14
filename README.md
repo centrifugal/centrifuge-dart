@@ -20,6 +20,15 @@ Note that custom WebSocket connection Upgrade headers are sent natively on platf
 
 When a mobile application goes to the background there are OS-specific limitations for established persistent connections - which can be silently closed shortly. Thus in most cases you need to disconnect from a server when app moves to the background and connect again when app goes to the foreground.
 
+## Errors in event listeners
+
+Event listeners should not throw: catch errors in your listeners. The SDK can't know what a throwing listener left undone, so it fails loudly instead of going on as if nothing happened:
+
+* the error is reported to the zone the listener was registered in, as an uncaught error;
+* the client disconnects with code `2` (bad protocol) and the reason `exception in event handler: <error>`, and doesn't reconnect – call `connect()` to start again;
+* the listeners after the failing one don't get that event; the SDK's own work completes as if the listener had returned;
+* a publication whose listener threw is not counted as delivered: after `connect()`, a recoverable subscription receives it again.
+
 ## Alternative SDK
 
 See also [PlugFox/spinify](https://github.com/PlugFox/spinify) for an alternative Dart (Flutter) real-time client SDK implementation.
