@@ -103,13 +103,13 @@ class SubscriptionImpl implements Subscription {
   final ClientImpl _client;
   final SubscriptionConfig _config;
 
-  final _publicationController = EventController<PublicationEvent>();
-  final _joinController = EventController<JoinEvent>();
-  final _leaveController = EventController<LeaveEvent>();
-  final _subscribingController = EventController<SubscribingEvent>();
-  final _subscribedController = EventController<SubscribedEvent>();
-  final _unsubscribedController = EventController<UnsubscribedEvent>();
-  final _errorController = EventController<SubscriptionErrorEvent>();
+  late final _publicationController = EventController<PublicationEvent>(onListenerError: _client.handlerFailed);
+  late final _joinController = EventController<JoinEvent>(onListenerError: _client.handlerFailed);
+  late final _leaveController = EventController<LeaveEvent>(onListenerError: _client.handlerFailed);
+  late final _subscribingController = EventController<SubscribingEvent>(onListenerError: _client.handlerFailed);
+  late final _subscribedController = EventController<SubscribedEvent>(onListenerError: _client.handlerFailed);
+  late final _unsubscribedController = EventController<UnsubscribedEvent>(onListenerError: _client.handlerFailed);
+  late final _errorController = EventController<SubscriptionErrorEvent>(onListenerError: _client.handlerFailed);
 
   final _readyFutures = <Completer<void>>[];
 
@@ -259,6 +259,7 @@ class SubscriptionImpl implements Subscription {
             (prevState == SubscriptionState.subscribing && wasInflight));
     // Written before the unsubscribed event, so a subscribe() from a listener
     // reaches the server after it.
+    final connection = _client.connectionId;
     final unsubscribeResult =
         shouldSend ? _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel) : null;
     // Its failure is handled below, after the event. A listener that
@@ -274,14 +275,13 @@ class SubscriptionImpl implements Subscription {
     try {
       await unsubscribeResult;
     } catch (_) {
-      // Sub was Subscribed and the cleanup Unsubscribe failed — connection
-      // and server-side state may have diverged, so trigger a reconnect to
-      // resync. For the inflight-cancel case (was Subscribing) we let it
-      // slide: if the server-side sub was created at all, the server will
-      // tear it down on the next disconnect or treat any stray pubs as
-      // unknown channels. No reconnect either when the client already
-      // disconnected, which ended the server-side subscription.
-      if (prevState == SubscriptionState.subscribed && _client.state == State.connected) {
+      // The cleanup Unsubscribe failed: the server may keep the subscription,
+      // the one subscribed or the one an in-flight subscribe created, and push
+      // its publications for as long as the connection lasts. Reconnect to
+      // resync, as centrifuge-js does. Not when the connection it was sent on
+      // ended meanwhile, which ended the server-side subscription too: a newer
+      // connection must not be torn down.
+      if (_client.state == State.connected && _client.connectionId == connection) {
         await _client.processDisconnect(
             code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
       }
@@ -638,11 +638,17 @@ class SubscriptionImpl implements Subscription {
       _completeReadyFutures();
       // A publication listener may tear the subscription down: the rest of
       // the recovered publications must not be delivered.
+      // One that can't be decoded stops the client, as a pushed one does.
       for (final pub in result.publications) {
         if (state != SubscriptionState.subscribed) {
           break;
         }
-        handlePublication(pub);
+        try {
+          handlePublication(pub);
+        } catch (error, stackTrace) {
+          _client.pushFailed(error, stackTrace);
+          return;
+        }
       }
     } catch (err) {
       if (!_isActiveAttempt(attemptId)) {
@@ -713,13 +719,19 @@ class SubscriptionImpl implements Subscription {
     var event = PublicationEvent.from(pub);
     if (_deltaNegotiated) {
       if (pub.delta) {
-        final newData = applyDelta(Uint8List.fromList(_prevData!), Uint8List.fromList(pub.data));
+        final prevData = _prevData;
+        if (prevData == null) {
+          throw StateError('delta publication without a base');
+        }
+        final newData = applyDelta(Uint8List.fromList(prevData), Uint8List.fromList(pub.data));
         event = event.copyWith(data: newData);
       }
       _prevData = event.data;
     }
     // Before the event, so a subscribe from its listener recovers after this
     // publication.
+    final previousOffset = _offset;
+    final previousEpoch = _epoch;
     if (pub.offset > 0) {
       _offset = pub.offset;
     }
@@ -729,7 +741,13 @@ class SubscriptionImpl implements Subscription {
     if (pub.epoch.isNotEmpty) {
       _epoch = pub.epoch;
     }
-    _publicationController.add(event);
+    if (!_publicationController.add(event)) {
+      // A publication whose listener threw isn't delivered: the position goes
+      // back before it, so the next recovery delivers it again. The client
+      // stopped.
+      _offset = previousOffset;
+      _epoch = previousEpoch;
+    }
   }
 
   @internal

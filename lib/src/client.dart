@@ -162,17 +162,17 @@ class ClientImpl implements Client {
 
   final _readyFutures = <Completer<void>>[];
 
-  final _connectedController = EventController<ConnectedEvent>();
-  final _disconnectedController = EventController<DisconnectedEvent>();
-  final _connectingController = EventController<ConnectingEvent>();
-  final _errorController = EventController<ErrorEvent>();
-  final _messageController = EventController<MessageEvent>();
-  final _subscribedController = EventController<ServerSubscribedEvent>();
-  final _subscribingController = EventController<ServerSubscribingEvent>();
-  final _unsubscribedController = EventController<ServerUnsubscribedEvent>();
-  final _publicationController = EventController<ServerPublicationEvent>();
-  final _joinController = EventController<ServerJoinEvent>();
-  final _leaveController = EventController<ServerLeaveEvent>();
+  late final _connectedController = EventController<ConnectedEvent>(onListenerError: handlerFailed);
+  late final _disconnectedController = EventController<DisconnectedEvent>(onListenerError: handlerFailed);
+  late final _connectingController = EventController<ConnectingEvent>(onListenerError: handlerFailed);
+  late final _errorController = EventController<ErrorEvent>(onListenerError: handlerFailed);
+  late final _messageController = EventController<MessageEvent>(onListenerError: handlerFailed);
+  late final _subscribedController = EventController<ServerSubscribedEvent>(onListenerError: handlerFailed);
+  late final _subscribingController = EventController<ServerSubscribingEvent>(onListenerError: handlerFailed);
+  late final _unsubscribedController = EventController<ServerUnsubscribedEvent>(onListenerError: handlerFailed);
+  late final _publicationController = EventController<ServerPublicationEvent>(onListenerError: handlerFailed);
+  late final _joinController = EventController<ServerJoinEvent>(onListenerError: handlerFailed);
+  late final _leaveController = EventController<ServerLeaveEvent>(onListenerError: handlerFailed);
 
   @override
   Stream<ConnectedEvent> get connected => _connectedController.stream;
@@ -780,7 +780,9 @@ class ClientImpl implements Client {
             return;
           }
           final event = ServerPublicationEvent.from(key, pub);
-          _publicationController.add(event);
+          // A publication whose listener threw isn't delivered: the position
+          // stays before it, and the client stopped.
+          if (!_publicationController.add(event)) return;
           final serverSubscription = _serverSubs[key]!;
           if (serverSubscription.recoverable) {
             if (pub.offset > 0) {
@@ -992,7 +994,9 @@ class ClientImpl implements Client {
     // Not after a listener disconnected earlier in the same message.
     if (serverSubscription != null && state == State.connected) {
       final event = ServerPublicationEvent.from(channel, pub);
-      _publicationController.add(event);
+      // A publication whose listener threw isn't delivered: the position stays
+      // before it, and the client stopped.
+      if (!_publicationController.add(event)) return;
       if (serverSubscription.recoverable) {
         if (pub.offset > 0) {
           serverSubscription.offset = pub.offset;
@@ -1140,6 +1144,36 @@ class ClientImpl implements Client {
       _subscriptionsById[newId] = subscription;
     }
   }
+
+  int _handlerFailures = 0;
+
+  /// A server message that can't be handled, e.g. a publication that fails to
+  /// decode: the client stops with badProtocol and doesn't reconnect.
+  @internal
+  void pushFailed(Object error, StackTrace stackTrace) => _pushFailed(error, stackTrace);
+
+  /// The number of exceptions escaped from event listeners (see [handlerFailed]).
+  @internal
+  int get handlerFailures => _handlerFailures;
+
+  /// An exception escaping an application event listener (already reported to
+  /// the listener's zone). The SDK can't know what the listener left undone, so
+  /// it fails loudly instead of going on as if nothing happened: the client
+  /// disconnects with badProtocol and doesn't reconnect, as centrifuge-js does.
+  /// Its own processing goes on as if the listener had returned, as for a
+  /// listener calling disconnect(), so no state change is left half done.
+  @internal
+  void handlerFailed(Object error) {
+    _handlerFailures++;
+    if (state == State.disconnected) return;
+    unawaited(_processDisconnect(
+        code: disconnectCodeBadProtocol, reason: 'exception in event handler: $error', reconnect: false));
+  }
+
+  /// Identifies the current connection or connect attempt: it changes when an
+  /// attempt starts and on every disconnect.
+  @internal
+  int get connectionId => _connectAttemptId;
 
   @internal
   Future<protocol.UnsubscribeResult> sendUnsubscribe(protocol.UnsubscribeRequest request) async {
