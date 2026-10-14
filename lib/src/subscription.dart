@@ -638,11 +638,17 @@ class SubscriptionImpl implements Subscription {
       _completeReadyFutures();
       // A publication listener may tear the subscription down: the rest of
       // the recovered publications must not be delivered.
+      // One that can't be decoded stops the client, as a pushed one does.
       for (final pub in result.publications) {
         if (state != SubscriptionState.subscribed) {
           break;
         }
-        handlePublication(pub);
+        try {
+          handlePublication(pub);
+        } catch (error, stackTrace) {
+          _client.pushFailed(error, stackTrace);
+          return;
+        }
       }
     } catch (err) {
       if (!_isActiveAttempt(attemptId)) {
@@ -713,7 +719,11 @@ class SubscriptionImpl implements Subscription {
     var event = PublicationEvent.from(pub);
     if (_deltaNegotiated) {
       if (pub.delta) {
-        final newData = applyDelta(Uint8List.fromList(_prevData!), Uint8List.fromList(pub.data));
+        final prevData = _prevData;
+        if (prevData == null) {
+          throw StateError('delta publication without a base');
+        }
+        final newData = applyDelta(Uint8List.fromList(prevData), Uint8List.fromList(pub.data));
         event = event.copyWith(data: newData);
       }
       _prevData = event.data;

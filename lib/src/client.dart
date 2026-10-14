@@ -1147,6 +1147,11 @@ class ClientImpl implements Client {
 
   int _handlerFailures = 0;
 
+  /// A server message that can't be handled, e.g. a publication that fails to
+  /// decode: the client stops with badProtocol and doesn't reconnect.
+  @internal
+  void pushFailed(Object error, StackTrace stackTrace) => _pushFailed(error, stackTrace);
+
   /// The number of exceptions escaped from event listeners (see [handlerFailed]).
   @internal
   int get handlerFailures => _handlerFailures;
