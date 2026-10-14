@@ -3765,9 +3765,8 @@ void main() {
 
       final result =
           transport.sendMessage(protocol.PublishRequest()..channel = 'news', protocol.PublishResult());
-      // Due at the same time as the call timeout and run right after it, like
-      // data read from the socket after a suspended process resumes and runs
-      // its overdue timers first.
+      // Due right after the call timeout, like data read from the socket after
+      // a suspended process resumes and runs its overdue timers first.
       Timer(const Duration(milliseconds: 100), () {
         incoming.add(encodeReplies([
           protocol.Reply()
@@ -3775,6 +3774,12 @@ void main() {
             ..publish = protocol.PublishResult()
         ]));
       });
+      // The suspension: both timers are overdue when the event loop runs
+      // again, so they run together. Otherwise this one would be due a little
+      // after the timeout, and on a slow machine after the timeout's own
+      // follow-up too.
+      final suspended = Stopwatch()..start();
+      while (suspended.elapsedMilliseconds < 150) {}
 
       await expectLater(result, completes);
     });
