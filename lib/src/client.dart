@@ -1141,6 +1141,11 @@ class ClientImpl implements Client {
     }
   }
 
+  /// Identifies the current connection or connect attempt: it changes when an
+  /// attempt starts and on every disconnect.
+  @internal
+  int get connectionId => _connectAttemptId;
+
   @internal
   Future<protocol.UnsubscribeResult> sendUnsubscribe(protocol.UnsubscribeRequest request) async {
     if (_transport == null) {

@@ -259,6 +259,7 @@ class SubscriptionImpl implements Subscription {
             (prevState == SubscriptionState.subscribing && wasInflight));
     // Written before the unsubscribed event, so a subscribe() from a listener
     // reaches the server after it.
+    final connection = _client.connectionId;
     final unsubscribeResult =
         shouldSend ? _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel) : null;
     // Its failure is handled below, after the event. A listener that
@@ -274,14 +275,13 @@ class SubscriptionImpl implements Subscription {
     try {
       await unsubscribeResult;
     } catch (_) {
-      // Sub was Subscribed and the cleanup Unsubscribe failed — connection
-      // and server-side state may have diverged, so trigger a reconnect to
-      // resync. For the inflight-cancel case (was Subscribing) we let it
-      // slide: if the server-side sub was created at all, the server will
-      // tear it down on the next disconnect or treat any stray pubs as
-      // unknown channels. No reconnect either when the client already
-      // disconnected, which ended the server-side subscription.
-      if (prevState == SubscriptionState.subscribed && _client.state == State.connected) {
+      // The cleanup Unsubscribe failed: the server may keep the subscription,
+      // the one subscribed or the one an in-flight subscribe created, and push
+      // its publications for as long as the connection lasts. Reconnect to
+      // resync, as centrifuge-js does. Not when the connection it was sent on
+      // ended meanwhile, which ended the server-side subscription too: a newer
+      // connection must not be torn down.
+      if (_client.state == State.connected && _client.connectionId == connection) {
         await _client.processDisconnect(
             code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
       }
