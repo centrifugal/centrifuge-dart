@@ -45,7 +45,8 @@ class Reader {
 
   String getChar() => String.fromCharCode(getByte());
 
-  static const List<int> _zValue = <int>[ /* same mapping as before */
+  static const List<int> _zValue = <int>[
+    /* same mapping as before */
     // 0..47
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -95,7 +96,7 @@ int checksum(Uint8List data) {
 
   // Unrolled loops for speed
   while (n >= 16) {
-    sum0 = (sum0 + data[z    ]) & 0xFFFFFFFF;
+    sum0 = (sum0 + data[z]) & 0xFFFFFFFF;
     sum1 = (sum1 + data[z + 1]) & 0xFFFFFFFF;
     sum2 = (sum2 + data[z + 2]) & 0xFFFFFFFF;
     sum3 = (sum3 + data[z + 3]) & 0xFFFFFFFF;
@@ -115,7 +116,7 @@ int checksum(Uint8List data) {
     n -= 16;
   }
   while (n >= 4) {
-    sum0 = (sum0 + data[z    ]) & 0xFFFFFFFF;
+    sum0 = (sum0 + data[z]) & 0xFFFFFFFF;
     sum1 = (sum1 + data[z + 1]) & 0xFFFFFFFF;
     sum2 = (sum2 + data[z + 2]) & 0xFFFFFFFF;
     sum3 = (sum3 + data[z + 3]) & 0xFFFFFFFF;
@@ -124,13 +125,16 @@ int checksum(Uint8List data) {
   }
 
   // Combine the four partial sums
-  var result = (((sum3 + ((sum2 << 8) & 0xFFFFFFFF)) & 0xFFFFFFFF)
-      + ((sum1 << 16) & 0xFFFFFFFF)) & 0xFFFFFFFF;
+  var result =
+      (((sum3 + ((sum2 << 8) & 0xFFFFFFFF)) & 0xFFFFFFFF) +
+          ((sum1 << 16) & 0xFFFFFFFF)) &
+      0xFFFFFFFF;
   result = (result + ((sum0 << 24) & 0xFFFFFFFF)) & 0xFFFFFFFF;
 
   // Handle any remaining bytes (n < 4)
   for (var i = 0; i < n; i++) {
-    result = (result + ((data[z + i] << ((3 - i) * 8)) & 0xFFFFFFFF)) & 0xFFFFFFFF;
+    result =
+        (result + ((data[z + i] << ((3 - i) * 8)) & 0xFFFFFFFF)) & 0xFFFFFFFF;
   }
 
   return result;
@@ -172,7 +176,9 @@ Uint8List applyDelta(Uint8List source, Uint8List delta) {
       case ':':
         total += cnt;
         if (total > limit) {
-          throw StateError('insert command gives an output larger than predicted');
+          throw StateError(
+            'insert command gives an output larger than predicted',
+          );
         }
         if (cnt > delta.length - reader._pos) {
           throw StateError('insert count exceeds size of delta');

@@ -2,27 +2,26 @@ import 'events.dart';
 import 'filter.dart';
 
 /// Enum for supported delta encoding algorithms.
-enum DeltaType {
-  none,
-  fossil,
-}
+enum DeltaType { none, fossil }
 
 class SubscriptionConfig {
-  SubscriptionConfig(
-      {this.token = '',
-      this.getToken,
-      this.data,
-      this.since,
-      this.positioned = false,
-      this.recoverable = false,
-      this.joinLeave = false,
-      this.minResubscribeDelay = const Duration(milliseconds: 500),
-      this.maxResubscribeDelay = const Duration(milliseconds: 20000),
-      this.delta = DeltaType.none,
-      this.tagsFilter,
-      this.getState})
-      : assert(tagsFilter == null || delta == DeltaType.none,
-            'cannot use delta and tagsFilter together');
+  SubscriptionConfig({
+    this.token = '',
+    this.getToken,
+    this.data,
+    this.since,
+    this.positioned = false,
+    this.recoverable = false,
+    this.joinLeave = false,
+    this.minResubscribeDelay = const Duration(milliseconds: 500),
+    this.maxResubscribeDelay = const Duration(milliseconds: 20000),
+    this.delta = DeltaType.none,
+    this.tagsFilter,
+    this.getState,
+  }) : assert(
+         tagsFilter == null || delta == DeltaType.none,
+         'cannot use delta and tagsFilter together',
+       );
 
   String token;
   final SubscriptionTokenCallback? getToken;
@@ -73,5 +72,6 @@ class SubscriptionConfig {
   final SubscriptionGetStateCallback? getState;
 }
 
-typedef SubscriptionTokenCallback = Future<String> Function(SubscriptionTokenEvent);
+typedef SubscriptionTokenCallback =
+    Future<String> Function(SubscriptionTokenEvent);
 typedef SubscriptionGetStateCallback = Future<StreamPosition> Function();

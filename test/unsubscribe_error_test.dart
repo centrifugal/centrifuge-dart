@@ -40,50 +40,62 @@ void main() {
     return events;
   }
 
-  test('a failed cleanup unsubscribe of a subscribe in flight reconnects', () async {
-    await client.connect();
-    final connecting = await connectingEvents();
-    // The subscribe reply never comes; the cleanup unsubscribe fails.
-    server.holdReply = (cmd) => cmd.hasSubscribe();
-    server.onCommand =
-        (cmd) =>
-            cmd.hasUnsubscribe()
-                ? (protocol.Reply()
-                  ..id = cmd.id
-                  ..error =
-                      (protocol.Error()
-                        ..code = 100
-                        ..message = 'internal'
-                        ..temporary = true))
-                : null;
+  test(
+    'a failed cleanup unsubscribe of a subscribe in flight reconnects',
+    () async {
+      await client.connect();
+      final connecting = await connectingEvents();
+      // The subscribe reply never comes; the cleanup unsubscribe fails.
+      server.holdReply = (cmd) => cmd.hasSubscribe();
+      server.onCommand =
+          (cmd) =>
+              cmd.hasUnsubscribe()
+                  ? (protocol.Reply()
+                    ..id = cmd.id
+                    ..error =
+                        (protocol.Error()
+                          ..code = 100
+                          ..message = 'internal'
+                          ..temporary = true))
+                  : null;
 
-    final sub = client.newSubscription('news');
-    unawaited(sub.subscribe());
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    expect(server.received.where((cmd) => cmd.hasSubscribe()), hasLength(1));
-    await sub.unsubscribe();
-    await Future<void>.delayed(const Duration(milliseconds: 200));
+      final sub = client.newSubscription('news');
+      unawaited(sub.subscribe());
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(server.received.where((cmd) => cmd.hasSubscribe()), hasLength(1));
+      await sub.unsubscribe();
+      await Future<void>.delayed(const Duration(milliseconds: 200));
 
-    expect(server.received.where((cmd) => cmd.hasUnsubscribe()), hasLength(1));
-    expect(connecting.map((e) => e.code), contains(4)); // connectingCodeUnsubscribeError
-    expect(client.state, centrifuge.State.connected);
-  });
+      expect(
+        server.received.where((cmd) => cmd.hasUnsubscribe()),
+        hasLength(1),
+      );
+      expect(
+        connecting.map((e) => e.code),
+        contains(4),
+      ); // connectingCodeUnsubscribeError
+      expect(client.state, centrifuge.State.connected);
+    },
+  );
 
-  test('a cleanup unsubscribe failing after its connection ended does not reconnect again', () async {
-    await client.connect();
-    final sub = client.newSubscription('news');
-    await sub.subscribe();
-    // The unsubscribe reply never comes: the connection closes first, which
-    // fails the pending unsubscribe.
-    server.holdReply = (cmd) => cmd.hasUnsubscribe();
-    final connecting = await connectingEvents();
-    unawaited(sub.unsubscribe());
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    server.holdReply = null;
-    server.closeConnection();
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+  test(
+    'a cleanup unsubscribe failing after its connection ended does not reconnect again',
+    () async {
+      await client.connect();
+      final sub = client.newSubscription('news');
+      await sub.subscribe();
+      // The unsubscribe reply never comes: the connection closes first, which
+      // fails the pending unsubscribe.
+      server.holdReply = (cmd) => cmd.hasUnsubscribe();
+      final connecting = await connectingEvents();
+      unawaited(sub.unsubscribe());
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      server.holdReply = null;
+      server.closeConnection();
+      await Future<void>.delayed(const Duration(milliseconds: 300));
 
-    expect(client.state, centrifuge.State.connected);
-    expect(connecting.map((e) => e.code), [1]); // only the transport close
-  });
+      expect(client.state, centrifuge.State.connected);
+      expect(connecting.map((e) => e.code), [1]); // only the transport close
+    },
+  );
 }

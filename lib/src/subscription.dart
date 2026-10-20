@@ -42,7 +42,11 @@ abstract class Subscription {
   Future<PublishResult> publish(List<int> data);
   Future<PresenceResult> presence();
   Future<PresenceStatsResult> presenceStats();
-  Future<HistoryResult> history({int limit = 0, StreamPosition? since, bool reverse = false});
+  Future<HistoryResult> history({
+    int limit = 0,
+    StreamPosition? since,
+    bool reverse = false,
+  });
 
   /// Ready resolves when subscription successfully subscribed.
   /// Throws exceptions if called not in subscribing or subscribed state.
@@ -103,13 +107,27 @@ class SubscriptionImpl implements Subscription {
   final ClientImpl _client;
   final SubscriptionConfig _config;
 
-  late final _publicationController = EventController<PublicationEvent>(onListenerError: _client.handlerFailed);
-  late final _joinController = EventController<JoinEvent>(onListenerError: _client.handlerFailed);
-  late final _leaveController = EventController<LeaveEvent>(onListenerError: _client.handlerFailed);
-  late final _subscribingController = EventController<SubscribingEvent>(onListenerError: _client.handlerFailed);
-  late final _subscribedController = EventController<SubscribedEvent>(onListenerError: _client.handlerFailed);
-  late final _unsubscribedController = EventController<UnsubscribedEvent>(onListenerError: _client.handlerFailed);
-  late final _errorController = EventController<SubscriptionErrorEvent>(onListenerError: _client.handlerFailed);
+  late final _publicationController = EventController<PublicationEvent>(
+    onListenerError: _client.handlerFailed,
+  );
+  late final _joinController = EventController<JoinEvent>(
+    onListenerError: _client.handlerFailed,
+  );
+  late final _leaveController = EventController<LeaveEvent>(
+    onListenerError: _client.handlerFailed,
+  );
+  late final _subscribingController = EventController<SubscribingEvent>(
+    onListenerError: _client.handlerFailed,
+  );
+  late final _subscribedController = EventController<SubscribedEvent>(
+    onListenerError: _client.handlerFailed,
+  );
+  late final _unsubscribedController = EventController<UnsubscribedEvent>(
+    onListenerError: _client.handlerFailed,
+  );
+  late final _errorController = EventController<SubscriptionErrorEvent>(
+    onListenerError: _client.handlerFailed,
+  );
 
   final _readyFutures = <Completer<void>>[];
 
@@ -151,14 +169,21 @@ class SubscriptionImpl implements Subscription {
     }
     _resubscribeAttempts = 0;
     state = SubscriptionState.subscribing;
-    final event = SubscribingEvent(subscribingCodeSubscribeCalled, 'subscribe called');
+    final event = SubscribingEvent(
+      subscribingCodeSubscribeCalled,
+      'subscribe called',
+    );
     _subscribingController.add(event);
     await _subscribe();
   }
 
   @override
   Future<void> unsubscribe() async {
-    return moveToUnsubscribed(unsubscribedCodeUnsubscribeCalled, 'unsubscribe called', true);
+    return moveToUnsubscribed(
+      unsubscribedCodeUnsubscribeCalled,
+      'unsubscribe called',
+      true,
+    );
   }
 
   @override
@@ -231,7 +256,11 @@ class SubscriptionImpl implements Subscription {
   }
 
   @internal
-  Future<void> moveToUnsubscribed(int code, String reason, bool sendUnsubscribe) async {
+  Future<void> moveToUnsubscribed(
+    int code,
+    String reason,
+    bool sendUnsubscribe,
+  ) async {
     if (state == SubscriptionState.unsubscribed) {
       return;
     }
@@ -254,14 +283,19 @@ class SubscriptionImpl implements Subscription {
     //     publications to a sub that the client has cancelled. This includes a
     //     server unsubscribe push: it may refer to the previous server-side
     //     subscription, not to the one the in-flight request creates.
-    final shouldSend = _client.state == State.connected &&
+    final shouldSend =
+        _client.state == State.connected &&
         ((sendUnsubscribe && prevState == SubscriptionState.subscribed) ||
             (prevState == SubscriptionState.subscribing && wasInflight));
     // Written before the unsubscribed event, so a subscribe() from a listener
     // reaches the server after it.
     final connection = _client.connectionId;
     final unsubscribeResult =
-        shouldSend ? _client.sendUnsubscribe(protocol.UnsubscribeRequest()..channel = channel) : null;
+        shouldSend
+            ? _client.sendUnsubscribe(
+              protocol.UnsubscribeRequest()..channel = channel,
+            )
+            : null;
     // Its failure is handled below, after the event. A listener that
     // disconnects the client fails it before then, which must not be reported
     // as an uncaught error.
@@ -281,9 +315,13 @@ class SubscriptionImpl implements Subscription {
       // resync, as centrifuge-js does. Not when the connection it was sent on
       // ended meanwhile, which ended the server-side subscription too: a newer
       // connection must not be torn down.
-      if (_client.state == State.connected && _client.connectionId == connection) {
+      if (_client.state == State.connected &&
+          _client.connectionId == connection) {
         await _client.processDisconnect(
-            code: connectingCodeUnsubscribeError, reason: 'unsubscribe error', reconnect: true);
+          code: connectingCodeUnsubscribeError,
+          reason: 'unsubscribe error',
+          reconnect: true,
+        );
       }
     }
   }
@@ -302,16 +340,19 @@ class SubscriptionImpl implements Subscription {
       // future with catchError.
       return Future.error(SubscriptionUnsubscribedError());
     }
-    final completer = new Completer<void>();
+    final completer = Completer<void>();
     _readyFutures.add(completer);
     // A zero timeout means no timeout, as for the transport.
     if (timeout == null || timeout <= Duration.zero) {
       return completer.future;
     }
-    return completer.future.timeout(timeout, onTimeout: () {
-      _readyFutures.remove(completer);
-      throw TimeoutException('Future not completed', timeout);
-    });
+    return completer.future.timeout(
+      timeout,
+      onTimeout: () {
+        _readyFutures.remove(completer);
+        throw TimeoutException('Future not completed', timeout);
+      },
+    );
   }
 
   @override
@@ -321,9 +362,18 @@ class SubscriptionImpl implements Subscription {
   }
 
   @override
-  Future<HistoryResult> history({int limit = 0, StreamPosition? since, bool reverse = false}) async {
+  Future<HistoryResult> history({
+    int limit = 0,
+    StreamPosition? since,
+    bool reverse = false,
+  }) async {
     await _waitReady(_client.config.timeout);
-    return _client.history(channel, limit: limit, since: since, reverse: reverse);
+    return _client.history(
+      channel,
+      limit: limit,
+      since: since,
+      reverse: reverse,
+    );
   }
 
   @override
@@ -360,7 +410,7 @@ class SubscriptionImpl implements Subscription {
     _readyFutures.clear();
   }
 
-  void _errorReadyFutures(dynamic error) {
+  void _errorReadyFutures(Object error) {
     for (var i = 0; i < _readyFutures.length; i++) {
       _readyFutures[i].completeError(error);
     }
@@ -383,7 +433,8 @@ class SubscriptionImpl implements Subscription {
     _pushId = id;
   }
 
-  void _addSubscribing(SubscribingEvent event) => _subscribingController.add(event);
+  void _addSubscribing(SubscribingEvent event) =>
+      _subscribingController.add(event);
 
   void _refreshToken() async {
     if (_config.getToken == null) {
@@ -393,7 +444,8 @@ class SubscriptionImpl implements Subscription {
     // resubscribe, the new session runs its own refresh chain.
     final attemptId = _subscribeAttemptId;
     bool isCurrentSubscription() =>
-        attemptId == _subscribeAttemptId && state == SubscriptionState.subscribed;
+        attemptId == _subscribeAttemptId &&
+        state == SubscriptionState.subscribed;
     final String token;
     try {
       final event = SubscriptionTokenEvent(channel);
@@ -412,12 +464,15 @@ class SubscriptionImpl implements Subscription {
       if (!isCurrentSubscription()) {
         return;
       }
-      _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
-        if (state != SubscriptionState.subscribed) {
-          return;
-        }
-        _refreshToken();
-      });
+      _refreshTimer = Timer(
+        backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)),
+        () {
+          if (state != SubscriptionState.subscribed) {
+            return;
+          }
+          _refreshToken();
+        },
+      );
       return;
     }
 
@@ -436,9 +491,10 @@ class SubscriptionImpl implements Subscription {
     _token = token;
 
     try {
-      final request = protocol.SubRefreshRequest()
-        ..channel = channel
-        ..token = _token;
+      final request =
+          protocol.SubRefreshRequest()
+            ..channel = channel
+            ..token = _token;
       final result = await _client.sendSubRefresh(request);
       if (!isCurrentSubscription()) {
         return;
@@ -462,23 +518,29 @@ class SubscriptionImpl implements Subscription {
       }
       if (err is Error) {
         if (err.temporary) {
-          _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
-            if (state != SubscriptionState.subscribed) {
-              return;
-            }
-            _refreshToken();
-          });
+          _refreshTimer = Timer(
+            backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)),
+            () {
+              if (state != SubscriptionState.subscribed) {
+                return;
+              }
+              _refreshToken();
+            },
+          );
           return;
         }
         moveToUnsubscribed(err.code, err.message, true);
         return;
       }
-      _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
-        if (state != SubscriptionState.subscribed) {
-          return;
-        }
-        _refreshToken();
-      });
+      _refreshTimer = Timer(
+        backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)),
+        () {
+          if (state != SubscriptionState.subscribed) {
+            return;
+          }
+          _refreshToken();
+        },
+      );
     }
   }
 
@@ -487,7 +549,7 @@ class SubscriptionImpl implements Subscription {
       state == SubscriptionState.subscribing &&
       _client.state == State.connected;
 
-  Future _resubscribe() async {
+  Future<void> _resubscribe() async {
     if (_runningAttemptId == _subscribeAttemptId) return;
     final attemptId = _subscribeAttemptId;
     _runningAttemptId = attemptId;
@@ -513,7 +575,8 @@ class SubscriptionImpl implements Subscription {
           _scheduleResubscribe();
           return;
         }
-        if (attemptId != _subscribeAttemptId || state != SubscriptionState.subscribing) {
+        if (attemptId != _subscribeAttemptId ||
+            state != SubscriptionState.subscribing) {
           // unsubscribe() arrived during the getState await.
           return;
         }
@@ -531,7 +594,8 @@ class SubscriptionImpl implements Subscription {
       if (token == '' && _config.getToken != null) {
         final event = SubscriptionTokenEvent(channel);
         token = await _config.getToken!(event);
-        if (attemptId != _subscribeAttemptId || state != SubscriptionState.subscribing) {
+        if (attemptId != _subscribeAttemptId ||
+            state != SubscriptionState.subscribing) {
           // unsubscribe() arrived during the getToken await.
           return;
         }
@@ -545,11 +609,12 @@ class SubscriptionImpl implements Subscription {
         // disconnect() arrived during the getToken await.
         return;
       }
-      final request = protocol.SubscribeRequest()
-        ..channel = channel
-        ..token = token;
+      final request =
+          protocol.SubscribeRequest()
+            ..channel = channel
+            ..token = token;
       if (_data != null) {
-        request..data = _data!;
+        request.data = _data!;
       }
       if (_recover && _offset != null && _epoch != null) {
         request.recover = true;
@@ -590,7 +655,10 @@ class SubscriptionImpl implements Subscription {
         _inflight = false;
         _subscribeAttemptId++;
         await _client.processDisconnect(
-            code: connectingCodeSubscribeTimeout, reason: 'subscribe timeout', reconnect: true);
+          code: connectingCodeSubscribeTimeout,
+          reason: 'subscribe timeout',
+          reconnect: true,
+        );
         return;
       } finally {
         if (attemptId == _subscribeAttemptId) {
@@ -629,7 +697,8 @@ class SubscriptionImpl implements Subscription {
       }
       final event = SubscribedEvent.from(result);
       _subscribedController.add(event);
-      if (attemptId != _subscribeAttemptId || state != SubscriptionState.subscribed) {
+      if (attemptId != _subscribeAttemptId ||
+          state != SubscriptionState.subscribed) {
         // A subscribed listener tore the subscription down, which failed the
         // ready futures or left them for the next subscribe, and recovered
         // publications must not be delivered.
@@ -658,7 +727,9 @@ class SubscriptionImpl implements Subscription {
         _failUnauthorized();
         return;
       }
-      if (err is Error && err.code == errorCodeUnrecoverablePosition && _config.getState != null) {
+      if (err is Error &&
+          err.code == errorCodeUnrecoverablePosition &&
+          _config.getState != null) {
         // Unrecoverable position with getState: reset position so the next
         // subscribe attempt calls getState() to reload app state from scratch.
         _offset = null;
@@ -693,8 +764,11 @@ class SubscriptionImpl implements Subscription {
   }
 
   void _scheduleResubscribe() {
-    final Duration delay =
-        backoffDelay(_resubscribeAttempts, _config.minResubscribeDelay, _config.maxResubscribeDelay);
+    final Duration delay = backoffDelay(
+      _resubscribeAttempts,
+      _config.minResubscribeDelay,
+      _config.maxResubscribeDelay,
+    );
     _resubscribeTimer = Timer(delay, () {
       if (state != SubscriptionState.subscribing) {
         return;
@@ -723,7 +797,10 @@ class SubscriptionImpl implements Subscription {
         if (prevData == null) {
           throw StateError('delta publication without a base');
         }
-        final newData = applyDelta(Uint8List.fromList(prevData), Uint8List.fromList(pub.data));
+        final newData = applyDelta(
+          Uint8List.fromList(prevData),
+          Uint8List.fromList(pub.data),
+        );
         event = event.copyWith(data: newData);
       }
       _prevData = event.data;

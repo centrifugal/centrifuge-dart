@@ -41,52 +41,58 @@ void main() {
   Future<centrifuge.DisconnectedEvent> nextDisconnected() =>
       client.disconnected.first.timeout(const Duration(seconds: 3));
 
-  test('a connecting listener throwing inside connect() stops the client', () async {
-    final events = <String>[];
-    await guarded(() async {
-      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-      var calls = 0;
-      client.connecting.listen((_) {
-        if (++calls == 1) throw StateError('listener bug');
+  test(
+    'a connecting listener throwing inside connect() stops the client',
+    () async {
+      final events = <String>[];
+      await guarded(() async {
+        client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+        var calls = 0;
+        client.connecting.listen((_) {
+          if (++calls == 1) throw StateError('listener bug');
+        });
+        client.connecting.listen((_) => events.add('second listener'));
+        final disconnected = nextDisconnected();
+        unawaited(client.connect().catchError((_) {}));
+        final event = await disconnected;
+        expect(event.code, 2);
+        expect(event.reason, startsWith('exception in event handler'));
       });
-      client.connecting.listen((_) => events.add('second listener'));
-      final disconnected = nextDisconnected();
-      unawaited(client.connect().catchError((_) {}));
-      final event = await disconnected;
-      expect(event.code, 2);
-      expect(event.reason, startsWith('exception in event handler'));
-    });
-    expect(uncaught, hasLength(1));
-    // The listener after the failing one doesn't get the outdated event.
-    expect(events, isEmpty);
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    expect(client.state, centrifuge.State.disconnected);
-    expect(server.received.where((cmd) => cmd.hasConnect()), isEmpty);
+      expect(uncaught, hasLength(1));
+      // The listener after the failing one doesn't get the outdated event.
+      expect(events, isEmpty);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(client.state, centrifuge.State.disconnected);
+      expect(server.received.where((cmd) => cmd.hasConnect()), isEmpty);
 
-    await client.connect();
-    expect(client.state, centrifuge.State.connected);
-  });
-
-  test('a subscribing listener throwing inside subscribe() stops the client', () async {
-    client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-    late centrifuge.Subscription sub;
-    await guarded(() async {
       await client.connect();
-      sub = client.newSubscription('news');
-      var calls = 0;
-      sub.subscribing.listen((_) {
-        if (++calls == 1) throw StateError('listener bug');
+      expect(client.state, centrifuge.State.connected);
+    },
+  );
+
+  test(
+    'a subscribing listener throwing inside subscribe() stops the client',
+    () async {
+      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+      late centrifuge.Subscription sub;
+      await guarded(() async {
+        await client.connect();
+        sub = client.newSubscription('news');
+        var calls = 0;
+        sub.subscribing.listen((_) {
+          if (++calls == 1) throw StateError('listener bug');
+        });
+        final disconnected = nextDisconnected();
+        unawaited(sub.subscribe().catchError((_) {}));
+        expect((await disconnected).code, 2);
       });
-      final disconnected = nextDisconnected();
-      unawaited(sub.subscribe().catchError((_) {}));
-      expect((await disconnected).code, 2);
-    });
-    expect(uncaught, hasLength(1));
-    // The subscribe completed as far as it could: it waits for the connection.
-    expect(sub.state, centrifuge.SubscriptionState.subscribing);
-    await client.connect();
-    await sub.ready().timeout(const Duration(seconds: 3));
-  });
+      expect(uncaught, hasLength(1));
+      // The subscribe completed as far as it could: it waits for the connection.
+      expect(sub.state, centrifuge.SubscriptionState.subscribing);
+      await client.connect();
+      await sub.ready().timeout(const Duration(seconds: 3));
+    },
+  );
 
   test('a publication whose listener threw is recovered again', () async {
     server.onSubscribe =
@@ -101,7 +107,10 @@ void main() {
     late centrifuge.Subscription sub;
     await guarded(() async {
       await client.connect();
-      sub = client.newSubscription('news', centrifuge.SubscriptionConfig(recoverable: true));
+      sub = client.newSubscription(
+        'news',
+        centrifuge.SubscriptionConfig(recoverable: true),
+      );
       var calls = 0;
       sub.publication.listen((_) {
         if (++calls == 1) throw StateError('listener bug');

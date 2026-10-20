@@ -1,3 +1,112 @@
+## [0.21.0]
+
+A stability release. Connection, subscription and token handling were reviewed against a validation harness and against centrifuge-js. The harness covers seeded chaos against a fake server, a real Centrifugo behind fault-injecting proxies, and browsers under dart2js and dart2wasm. Most fixes cover races between reconnects, event listeners calling back into the client, teardown, token refresh, and browser behaviour. Every fix comes with a regression test.
+
+Centrifugo v6.9.6 or later is recommended; see "Server versions" below.
+
+### Behaviour changes to check when upgrading
+
+* **`connect()` validates the endpoint.** It throws the new `ConfigurationError`, without changing the client state, when the endpoint can't be opened as a websocket on the platform. Such endpoints used to be retried forever as transport errors, calling `getToken` and `getData` on every attempt.
+  * **VM:** the endpoint must be a `ws://` or `wss://` URL with a host and a valid port.
+  * **Browsers:** it's checked with the browser's own URL parser, as `new WebSocket()` does. `ws:`, `wss:`, `http:`, `https:` and page-relative URLs are accepted; a fragment is not.
+  * PRs: [#159](https://github.com/centrifugal/centrifuge-dart/pull/159), [#161](https://github.com/centrifugal/centrifuge-dart/pull/161), [#166](https://github.com/centrifugal/centrifuge-dart/pull/166).
+* **An expired connection token with no `getToken` stops the client.** The client emits a `ConfigurationError` error event and disconnects as unauthorized, as centrifuge-js does, instead of reconnecting with the expired token forever. Call `setToken()` with a new token, then `connect()`. With `getToken` configured, the next attempt still calls `getToken`, even after `setToken()`. PRs: [#129](https://github.com/centrifugal/centrifuge-dart/pull/129), [#154](https://github.com/centrifugal/centrifuge-dart/pull/154).
+* **An exception while handling a message from the server stops the client.** An example is a fossil delta publication without base data. The client disconnects with `badProtocol` and reason "exception during message handling: ...", without reconnecting, as centrifuge-js does. The exception is still reported as uncaught. Before, the rest of that websocket message was lost, including replies to pending calls, and the client went on. The same now applies to a publication recovered in a subscribe reply that fails to decode, e.g. a delta without base data: before, the error went unnoticed and the rest of the recovered publications were dropped. PRs: [#131](https://github.com/centrifugal/centrifuge-dart/pull/131), [#177](https://github.com/centrifugal/centrifuge-dart/pull/177).
+* **An exception thrown by an event listener stops the client.** The client disconnects with `badProtocol` and reason "exception in event handler: ...", without reconnecting, as centrifuge-js does; call `connect()` to start again. The exception is still reported as uncaught in the listener's zone. Listeners after the failing one don't get that event, and the SDK's own processing completes as if the listener had returned. A publication whose listener threw doesn't count as delivered, so after `connect()` a recoverable subscription receives it again. Before, the exception was reported and otherwise ignored, and the client went on. Catch errors in your listeners. PR: [#177](https://github.com/centrifugal/centrifuge-dart/pull/177).
+* **The websocket handshake is limited by `ClientConfig.timeout`** (10s by default). It's aborted on timeout, and on `disconnect()` or `close()` while in progress. Before, a server that accepted the connection but never answered the upgrade left the client connecting forever, and every attempt against it leaked its socket: two file descriptors per attempt, measured at 824 open descriptors after 400 attempts, until the process hit its limit and could no longer connect at all.
+  * **With `HttpOverrides` in effect,** the handshake uses the app's `HttpClient`, which is left open, so a timed-out handshake isn't aborted.
+  * PRs: [#126](https://github.com/centrifugal/centrifuge-dart/pull/126), [#139](https://github.com/centrifugal/centrifuge-dart/pull/139), [#151](https://github.com/centrifugal/centrifuge-dart/pull/151), [#158](https://github.com/centrifugal/centrifuge-dart/pull/158), [#162](https://github.com/centrifugal/centrifuge-dart/pull/162).
+* **`unsubscribed` is emitted when `unsubscribe()` is called,** before the server replies, instead of after the reply. The Unsubscribe command is sent before the event, so a `subscribe()` from its listener follows it. PRs: [#128](https://github.com/centrifugal/centrifuge-dart/pull/128), [#133](https://github.com/centrifugal/centrifuge-dart/pull/133).
+* **`removeSubscription()` unregisters the subscription at once.**
+  * A new subscription to the same channel can be created right away.
+  * `subscribe()` on the removed subscription throws `ClientClosedError`.
+  * Its streams close once the unsubscribe completes, so every listener still gets the current event.
+  * PRs: [#147](https://github.com/centrifugal/centrifuge-dart/pull/147), [#153](https://github.com/centrifugal/centrifuge-dart/pull/153).
+* **`subscriptions()` returns an unmodifiable copy** instead of the client's live registry. Code can remove subscriptions while iterating over it. PR: [#150](https://github.com/centrifugal/centrifuge-dart/pull/150).
+* **`ready()` returns a failed future instead of throwing synchronously** when the client is disconnected or closed, or the subscription is unsubscribed. `await ready()` inside `try` catches the error as before; `ready().catchError(...)` now gets it too. PR: [#163](https://github.com/centrifugal/centrifuge-dart/pull/163).
+* **A repeated `connect()` or `subscribe()` doesn't fail.** A second call while connecting or subscribing still waits for the attempt in progress. Like the first call, it now completes without an error if that attempt ends in a disconnect or unsubscribe, instead of leaving an uncaught error when not awaited. PR: [#164](https://github.com/centrifugal/centrifuge-dart/pull/164).
+* **A server unsubscribe push is ignored while a subscription is still subscribing,** as centrifuge-js does. The server sends it also for a channel the connection isn't subscribed to yet. PR: [#155](https://github.com/centrifugal/centrifuge-dart/pull/155).
+* **Nested events are delivered immediately.** An event emitted while a listener handles another one is delivered right away, still synchronously, instead of throwing `StateError: Cannot fire new event`. PR: [#127](https://github.com/centrifugal/centrifuge-dart/pull/127).
+* **Close reasons below 3000 are normalized.** A websocket close with a code below 3000, other than 1009, is reported as code 1 with reason "transport closed", as centrifuge-js does. It used to carry the socket's reason, which is empty in browsers for a dropped connection. PR: [#167](https://github.com/centrifugal/centrifuge-dart/pull/167).
+* **A zero `timeout` means no timeout** also for calls waiting for the client or a subscription to become ready; they used to fail at once. PR: [#156](https://github.com/centrifugal/centrifuge-dart/pull/156).
+* **A static token survives state invalidation.** After a 3014 disconnect or a 2502 unsubscribe, a connection or subscription token without `getToken` is kept, and the client reconnects or resubscribes with it. The server rejects it if it's no longer valid. PRs: [#129](https://github.com/centrifugal/centrifuge-dart/pull/129), [#152](https://github.com/centrifugal/centrifuge-dart/pull/152).
+
+### Connection fixes
+
+* **Superseded connect attempts:**
+  * `disconnect()`, `setToken()` and `connect()` during a pending attempt no longer connect with the old token.
+  * `connect()` after `disconnect()` is no longer dropped while the old attempt runs.
+  * `disconnect()` closes the pending attempt's transport.
+  * A transport closing while `getData` is awaited no longer loses its reconnect.
+  * PR: [#126](https://github.com/centrifugal/centrifuge-dart/pull/126).
+* **Listeners calling back into the client:**
+  * `disconnect()` or `connect()` from `connecting`, `connected`, `disconnected`, `subscribing` and `error` listeners leaves consistent state and one connection attempt, with no duplicate events, no `ConcurrentModificationError` and no leftover ping or refresh timers.
+  * A listener's reaction to a failed connect or subscribe is no longer undone by the failure handling that followed.
+  * PRs: [#127](https://github.com/centrifugal/centrifuge-dart/pull/127), [#137](https://github.com/centrifugal/centrifuge-dart/pull/137).
+* **`connect()` from a `disconnected` listener after `getToken` threw `UnauthorizedException`** no longer leaves the client connecting forever. PR: [#124](https://github.com/centrifugal/centrifuge-dart/pull/124).
+* **Closed connections:**
+  * A closed connection is processed before its pending calls fail, so a pending subscribe or refresh no longer emits an error event for a close the client recovers from on its own.
+  * A listener sending a command while those calls fail no longer leaves the client connected to a closed connection.
+  * PRs: [#138](https://github.com/centrifugal/centrifuge-dart/pull/138), [#140](https://github.com/centrifugal/centrifuge-dart/pull/140).
+* **Calls and timeouts:**
+  * A call racing `disconnect()` fails with `ClientDisconnectedError` instead of a null-check `TypeError`.
+  * When a suspended process resumes, replies and pings already received are processed before call timeouts and the ping timeout. That avoids failing a call the server handled, and "no ping" reconnects of healthy connections.
+  * Calls that time out waiting for `ready()` no longer leave waiters behind.
+  * PRs: [#130](https://github.com/centrifugal/centrifuge-dart/pull/130), [#145](https://github.com/centrifugal/centrifuge-dart/pull/145), [#148](https://github.com/centrifugal/centrifuge-dart/pull/148).
+* **Data that isn't the protocol while connecting** closes the connection and reconnects at once, instead of waiting for the connect timeout. PR: [#160](https://github.com/centrifugal/centrifuge-dart/pull/160).
+
+### Subscription and recovery fixes
+
+* **No deliveries after a teardown.** Publications, joins and leaves are no longer delivered, and the stored position no longer moves, after `unsubscribe()`, `disconnect()` or `removeSubscription()`. This covers:
+  * the rest of a message
+  * the rest of the recovered publications
+  * publications of server-side subscriptions from the connect reply
+  * PR: [#128](https://github.com/centrifugal/centrifuge-dart/pull/128).
+* **Ghost subscriptions:**
+  * A subscribe superseded by `unsubscribe()` can no longer mark the subscription subscribed, or leave a server-side subscription the client doesn't track.
+  * A subscribe pending when the connection is lost, e.g. in a browser whose network dropped, no longer blocks the next connection's resubscribe.
+  * When `unsubscribe()` during a subscribe in flight sends an Unsubscribe and it fails, the client reconnects, as after a failed Unsubscribe of a subscribed subscription and as in centrifuge-js. Before, the server could keep the subscription and push its publications until the connection ended. A failure arriving after that connection ended no longer reconnects the next one.
+  * PRs: [#128](https://github.com/centrifugal/centrifuge-dart/pull/128), [#134](https://github.com/centrifugal/centrifuge-dart/pull/134), [#177](https://github.com/centrifugal/centrifuge-dart/pull/177).
+* **Recovery without an epoch:** when a subscribe or connect reply had no epoch (a channel without a stream yet), subscriptions and server-side subscriptions recovered with an empty epoch, which skips the server's epoch check. The epoch sent with the channel's first publication is now used, as in centrifuge-js. The bundled protocol gains `Publication.epoch`. PR: [#170](https://github.com/centrifugal/centrifuge-dart/pull/170).
+* **`unsubscribe()` and `subscribe()` from a publication listener** no longer recover that publication again. PR: [#142](https://github.com/centrifugal/centrifuge-dart/pull/142).
+* **A subscription `getToken` that throws `TimeoutException`** is handled like other `getToken` errors instead of reconnecting the whole client. PR: [#143](https://github.com/centrifugal/centrifuge-dart/pull/143).
+* **State invalidation:**
+  * A `getState` subscription created before a 3014 still calls `getState` on its first subscribe.
+  * Server-side subscriptions no longer request recovery from their pre-invalidation position.
+  * PRs: [#121](https://github.com/centrifugal/centrifuge-dart/pull/121), [#146](https://github.com/centrifugal/centrifuge-dart/pull/146).
+* **`removeSubscription()` and subscribe:**
+  * Removing a subscription that was already removed no longer closes a newer subscription to the same channel.
+  * A subscription being removed can no longer subscribe again on the server.
+  * PRs: [#141](https://github.com/centrifugal/centrifuge-dart/pull/141), [#147](https://github.com/centrifugal/centrifuge-dart/pull/147).
+* **`ready()`** no longer resolves after a `subscribed` listener tore the subscription down. PR: [#148](https://github.com/centrifugal/centrifuge-dart/pull/148).
+* **Channel compaction:** a subscription moved back to subscribing by the server drops its channel compaction ID, so pushes for another channel reusing that ID aren't delivered to it. PR: [#123](https://github.com/centrifugal/centrifuge-dart/pull/123).
+
+### Token fixes
+
+* **Refresh chains:** a token refresh whose `getToken` resolves after a reconnect or resubscribe no longer starts a second refresh chain for the life of the connection or subscription. PR: [#129](https://github.com/centrifugal/centrifuge-dart/pull/129).
+* **Empty refresh token:** an empty token returned by `getToken` during a refresh means unauthorized, as documented and as in centrifuge-js. It disconnects the client, or unsubscribes the subscription, instead of sending a refresh without a token. PR: [#122](https://github.com/centrifugal/centrifuge-dart/pull/122).
+* **Static subscription token:** a subscription with a token but without `getToken` no longer fails into an endless retry loop when the server reports an expiry. PR: [#120](https://github.com/centrifugal/centrifuge-dart/pull/120).
+* **Expired token and error listeners:** an expired token is dropped before the error event, so `connect()` or `subscribe()` from its listener gets a new token. PR: [#137](https://github.com/centrifugal/centrifuge-dart/pull/137).
+
+### Other fixes
+
+* **`toString()`:** `UnauthorizedException.toString()` includes its message, and `MessageEvent.toString()` is well-formed. PRs: [#118](https://github.com/centrifugal/centrifuge-dart/pull/118), [#119](https://github.com/centrifugal/centrifuge-dart/pull/119).
+
+### Server versions
+
+Two Centrifugo bugs found during this validation are fixed in Centrifugo v6.9.6 ([centrifugal/centrifuge#629](https://github.com/centrifugal/centrifuge/pull/629) and [#627](https://github.com/centrifugal/centrifuge/pull/627)):
+* **Fossil delta after an empty recovery.** On older servers, a subscription with fossil delta that recovers no publications, for example one subscribing with `since` at the top of the stream, gets the next publication as a delta without base data. With this release the client then disconnects with `badProtocol`; earlier versions dropped every publication on the channel.
+* **Expired subscription token accepted on refresh.** On older servers a subscription refresh with an expired token was accepted, and the subscription then never expired. v6.9.6 disconnects with 3006, and the client reconnects and gets a new token.
+
+### Tests and CI
+
+* **Centrifugo version:** CI runs against Centrifugo v6.9.6, with a real-server test for the fossil delta fix. PR: [#168](https://github.com/centrifugal/centrifuge-dart/pull/168).
+* **Browser tests:** `test/web_endpoint_test.dart` runs in a browser: `dart test -p chrome test/web_endpoint_test.dart`, optionally with `--compiler dart2wasm`. CI runs it in Chrome under both compilers.
+* **Tooling:** the analyzer uses `package:lints` with strict casts and raw types, and covers the tests too. The code is formatted with `dart format`, and CI checks it. The unused `mockito` and `build_runner` dev dependencies and the old `tool/test.sh` are removed. `example/chat_app` is removed too: it depended on the discontinued `dash_chat` package and no longer built. The public API and the minimum Dart SDK (3.7) are unchanged.
+* **Flaky tests and comments:** a timing-sensitive ping test was made independent of CPU load, a call timeout race test was made deterministic, outdated comments were updated, and the fake test server now documents that it keeps every command it received. PRs: [#165](https://github.com/centrifugal/centrifuge-dart/pull/165), [#169](https://github.com/centrifugal/centrifuge-dart/pull/169), [#171](https://github.com/centrifugal/centrifuge-dart/pull/171), [#177](https://github.com/centrifugal/centrifuge-dart/pull/177).
+
+Some PRs in this release fix issues introduced by earlier PRs of the same release: [#135](https://github.com/centrifugal/centrifuge-dart/pull/135), [#136](https://github.com/centrifugal/centrifuge-dart/pull/136), [#144](https://github.com/centrifugal/centrifuge-dart/pull/144), [#149](https://github.com/centrifugal/centrifuge-dart/pull/149), [#157](https://github.com/centrifugal/centrifuge-dart/pull/157) and parts of the PRs above. They are not listed separately, since v0.20.1 was not affected.
+
 ## [0.20.1]
 
 * Fix `Transport` resolving to the `dart:io` (`IOWebSocketChannel`) implementation instead of the browser one (`HtmlWebSocketChannel`) when compiled with `dart2wasm`. The conditional import in `transport.dart` used to check `dart.library.html`, which is not declared under the wasm compile target — Flutter Web's wasm target has no `dart:html` and relies on `dart:js_interop` instead — so the WebSocket transport silently fell back to the VM implementation and never connected in the browser. Switched the check to `dart.library.js_interop`, which is declared for both `dart2js` and `dart2wasm` web builds while remaining unavailable on native (VM) targets, so native platforms keep using `dart:io` as before.

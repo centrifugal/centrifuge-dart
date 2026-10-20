@@ -12,59 +12,90 @@ import 'fake_server.dart';
 void main() {
   group('Filter builder', () {
     test('comparison leaf nodes', () {
-      expect(centrifuge.Filter.eq('ticker', 'AAPL').proto,
-          predicate<protocol.FilterNode>((n) => n.key == 'ticker' && n.cmp == 'eq' && n.val == 'AAPL'));
-      expect(centrifuge.Filter.neq('source', 'TEST').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'neq' && n.val == 'TEST'));
-      expect(centrifuge.Filter.exists('price').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'ex' && !n.hasVal()));
-      expect(centrifuge.Filter.notExists('internal_id').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'nex'));
-      expect(centrifuge.Filter.startsWith('ticker', 'AA').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'sw' && n.val == 'AA'));
-      expect(centrifuge.Filter.endsWith('source', 'DAQ').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'ew'));
-      expect(centrifuge.Filter.contains('category', 'ec').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'ct'));
-      expect(centrifuge.Filter.gt('price', '100').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'gt' && n.val == '100'));
-      expect(centrifuge.Filter.gte('volume', '1000').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'gte'));
-      expect(centrifuge.Filter.lt('price', '200').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'lt'));
-      expect(centrifuge.Filter.lte('volume', '1000').proto,
-          predicate<protocol.FilterNode>((n) => n.cmp == 'lte'));
+      expect(
+        centrifuge.Filter.eq('ticker', 'AAPL').proto,
+        predicate<protocol.FilterNode>(
+          (n) => n.key == 'ticker' && n.cmp == 'eq' && n.val == 'AAPL',
+        ),
+      );
+      expect(
+        centrifuge.Filter.neq('source', 'TEST').proto,
+        predicate<protocol.FilterNode>(
+          (n) => n.cmp == 'neq' && n.val == 'TEST',
+        ),
+      );
+      expect(
+        centrifuge.Filter.exists('price').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'ex' && !n.hasVal()),
+      );
+      expect(
+        centrifuge.Filter.notExists('internal_id').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'nex'),
+      );
+      expect(
+        centrifuge.Filter.startsWith('ticker', 'AA').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'sw' && n.val == 'AA'),
+      );
+      expect(
+        centrifuge.Filter.endsWith('source', 'DAQ').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'ew'),
+      );
+      expect(
+        centrifuge.Filter.contains('category', 'ec').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'ct'),
+      );
+      expect(
+        centrifuge.Filter.gt('price', '100').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'gt' && n.val == '100'),
+      );
+      expect(
+        centrifuge.Filter.gte('volume', '1000').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'gte'),
+      );
+      expect(
+        centrifuge.Filter.lt('price', '200').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'lt'),
+      );
+      expect(
+        centrifuge.Filter.lte('volume', '1000').proto,
+        predicate<protocol.FilterNode>((n) => n.cmp == 'lte'),
+      );
     });
 
     test('set membership nodes carry vals', () {
-      final inNode = centrifuge.Filter.inList('category', ['tech', 'finance']).proto;
+      final inNode =
+          centrifuge.Filter.inList('category', ['tech', 'finance']).proto;
       expect(inNode.cmp, 'in');
       expect(inNode.vals, ['tech', 'finance']);
 
-      final ninNode = centrifuge.Filter.notInList('ticker', ['MSFT', 'GOOGL']).proto;
+      final ninNode =
+          centrifuge.Filter.notInList('ticker', ['MSFT', 'GOOGL']).proto;
       expect(ninNode.cmp, 'nin');
       expect(ninNode.vals, ['MSFT', 'GOOGL']);
     });
 
     test('logical nodes nest children', () {
-      final filter = centrifuge.Filter.and([
-        centrifuge.Filter.eq('ticker', 'AAPL'),
-        centrifuge.Filter.gte('price', '100'),
-        centrifuge.Filter.inList('source', ['NASDAQ', 'NYSE']),
-      ]).proto;
+      final filter =
+          centrifuge.Filter.and([
+            centrifuge.Filter.eq('ticker', 'AAPL'),
+            centrifuge.Filter.gte('price', '100'),
+            centrifuge.Filter.inList('source', ['NASDAQ', 'NYSE']),
+          ]).proto;
       expect(filter.op, 'and');
       expect(filter.nodes, hasLength(3));
       expect(filter.nodes[0].key, 'ticker');
       expect(filter.nodes[2].cmp, 'in');
 
-      final orNode = centrifuge.Filter.or([
-        centrifuge.Filter.eq('ticker', 'MSFT'),
-        centrifuge.Filter.eq('category', 'tech'),
-      ]).proto;
+      final orNode =
+          centrifuge.Filter.or([
+            centrifuge.Filter.eq('ticker', 'MSFT'),
+            centrifuge.Filter.eq('category', 'tech'),
+          ]).proto;
       expect(orNode.op, 'or');
       expect(orNode.nodes, hasLength(2));
 
-      final notNode = centrifuge.Filter.not(centrifuge.Filter.eq('source', 'NYSE')).proto;
+      final notNode =
+          centrifuge.Filter.not(centrifuge.Filter.eq('source', 'NYSE')).proto;
       expect(notNode.op, 'not');
       expect(notNode.nodes, hasLength(1));
       expect(notNode.nodes.first.cmp, 'eq');
@@ -120,7 +151,10 @@ void main() {
 
     test('setTagsFilter applies on next subscribe', () async {
       await client.connect();
-      final sub = client.newSubscription('market:stocks', centrifuge.SubscriptionConfig());
+      final sub = client.newSubscription(
+        'market:stocks',
+        centrifuge.SubscriptionConfig(),
+      );
       sub.setTagsFilter(centrifuge.Filter.eq('ticker', 'BTC'));
       await sub.subscribe();
 
@@ -131,20 +165,26 @@ void main() {
 
     test('subscribe without filter sends no tf', () async {
       await client.connect();
-      final sub = client.newSubscription('market:stocks', centrifuge.SubscriptionConfig());
+      final sub = client.newSubscription(
+        'market:stocks',
+        centrifuge.SubscriptionConfig(),
+      );
       await sub.subscribe();
       expect(server.lastSubscribe!.hasTf(), isFalse);
     });
 
-    test('setTagsFilter throws when subscription uses delta compression', () async {
-      final sub = client.newSubscription(
-        'market:stocks',
-        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
-      );
-      expect(
-        () => sub.setTagsFilter(centrifuge.Filter.eq('ticker', 'AAPL')),
-        throwsA(isA<ArgumentError>()),
-      );
-    });
+    test(
+      'setTagsFilter throws when subscription uses delta compression',
+      () async {
+        final sub = client.newSubscription(
+          'market:stocks',
+          centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+        );
+        expect(
+          () => sub.setTagsFilter(centrifuge.Filter.eq('ticker', 'AAPL')),
+          throwsA(isA<ArgumentError>()),
+        );
+      },
+    );
   });
 }

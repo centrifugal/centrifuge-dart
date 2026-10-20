@@ -20,9 +20,11 @@ void main() {
     setUp(() async {
       server = FakeCentrifugoServer();
       await server.start();
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
-        ..expires = true
-        ..ttl = 1;
+      server.onSubscribe =
+          (channel, req) =>
+              protocol.SubscribeResult()
+                ..expires = true
+                ..ttl = 1;
       client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
     });
 
@@ -31,22 +33,25 @@ void main() {
       await server.stop();
     });
 
-    test('refresh timer does not crash or emit errors when getToken is unset', () async {
-      await client.connect();
+    test(
+      'refresh timer does not crash or emit errors when getToken is unset',
+      () async {
+        await client.connect();
 
-      final sub = client.newSubscription('news');
-      final errors = <centrifuge.SubscriptionErrorEvent>[];
-      final errorSubscription = sub.error.listen(errors.add);
-      addTearDown(() => errorSubscription.cancel());
+        final sub = client.newSubscription('news');
+        final errors = <centrifuge.SubscriptionErrorEvent>[];
+        final errorSubscription = sub.error.listen(errors.add);
+        addTearDown(() => errorSubscription.cancel());
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      // Wait past the 1-second TTL for the refresh timer to fire.
-      await Future<void>.delayed(const Duration(milliseconds: 1300));
+        // Wait past the 1-second TTL for the refresh timer to fire.
+        await Future<void>.delayed(const Duration(milliseconds: 1300));
 
-      expect(errors, isEmpty);
-      expect(sub.state, centrifuge.SubscriptionState.subscribed);
-      expect(server.received.any((cmd) => cmd.hasSubRefresh()), isFalse);
-    });
+        expect(errors, isEmpty);
+        expect(sub.state, centrifuge.SubscriptionState.subscribed);
+        expect(server.received.any((cmd) => cmd.hasSubRefresh()), isFalse);
+      },
+    );
   });
 }

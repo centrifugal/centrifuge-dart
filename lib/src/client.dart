@@ -15,11 +15,8 @@ import 'subscription.dart';
 
 enum State { disconnected, connecting, connected }
 
-Client createClient(String url, [ClientConfig? config]) => ClientImpl(
-      url,
-      config ?? ClientConfig(),
-      protobufTransportBuilder,
-    );
+Client createClient(String url, [ClientConfig? config]) =>
+    ClientImpl(url, config ?? ClientConfig(), protobufTransportBuilder);
 
 abstract class Client {
   Stream<ConnectingEvent> get connecting;
@@ -86,7 +83,12 @@ abstract class Client {
 
   /// Send History command.
   ///
-  Future<HistoryResult> history(String channel, {int limit = 0, StreamPosition? since, bool reverse = false});
+  Future<HistoryResult> history(
+    String channel, {
+    int limit = 0,
+    StreamPosition? since,
+    bool reverse = false,
+  });
 
   /// Send Presence command.
   ///
@@ -131,7 +133,7 @@ class ClientImpl implements Client {
   Transport? _transport;
 
   final String _url;
-  ClientConfig _config;
+  final ClientConfig _config;
   ClientConfig get config => _config;
 
   Map<String, String> _headers = {};
@@ -162,17 +164,39 @@ class ClientImpl implements Client {
 
   final _readyFutures = <Completer<void>>[];
 
-  late final _connectedController = EventController<ConnectedEvent>(onListenerError: handlerFailed);
-  late final _disconnectedController = EventController<DisconnectedEvent>(onListenerError: handlerFailed);
-  late final _connectingController = EventController<ConnectingEvent>(onListenerError: handlerFailed);
-  late final _errorController = EventController<ErrorEvent>(onListenerError: handlerFailed);
-  late final _messageController = EventController<MessageEvent>(onListenerError: handlerFailed);
-  late final _subscribedController = EventController<ServerSubscribedEvent>(onListenerError: handlerFailed);
-  late final _subscribingController = EventController<ServerSubscribingEvent>(onListenerError: handlerFailed);
-  late final _unsubscribedController = EventController<ServerUnsubscribedEvent>(onListenerError: handlerFailed);
-  late final _publicationController = EventController<ServerPublicationEvent>(onListenerError: handlerFailed);
-  late final _joinController = EventController<ServerJoinEvent>(onListenerError: handlerFailed);
-  late final _leaveController = EventController<ServerLeaveEvent>(onListenerError: handlerFailed);
+  late final _connectedController = EventController<ConnectedEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _disconnectedController = EventController<DisconnectedEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _connectingController = EventController<ConnectingEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _errorController = EventController<ErrorEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _messageController = EventController<MessageEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _subscribedController = EventController<ServerSubscribedEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _subscribingController = EventController<ServerSubscribingEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _unsubscribedController = EventController<ServerUnsubscribedEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _publicationController = EventController<ServerPublicationEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _joinController = EventController<ServerJoinEvent>(
+    onListenerError: handlerFailed,
+  );
+  late final _leaveController = EventController<ServerLeaveEvent>(
+    onListenerError: handlerFailed,
+  );
 
   @override
   Stream<ConnectedEvent> get connected => _connectedController.stream;
@@ -193,13 +217,16 @@ class ClientImpl implements Client {
   Stream<ServerSubscribedEvent> get subscribed => _subscribedController.stream;
 
   @override
-  Stream<ServerSubscribingEvent> get subscribing => _subscribingController.stream;
+  Stream<ServerSubscribingEvent> get subscribing =>
+      _subscribingController.stream;
 
   @override
-  Stream<ServerUnsubscribedEvent> get unsubscribed => _unsubscribedController.stream;
+  Stream<ServerUnsubscribedEvent> get unsubscribed =>
+      _unsubscribedController.stream;
 
   @override
-  Stream<ServerPublicationEvent> get publication => _publicationController.stream;
+  Stream<ServerPublicationEvent> get publication =>
+      _publicationController.stream;
 
   @override
   Stream<ServerJoinEvent> get join => _joinController.stream;
@@ -228,7 +255,10 @@ class ClientImpl implements Client {
     state = State.connecting;
     _reconnectAttempts = 0;
     final attemptId = _connectAttemptId;
-    final event = ConnectingEvent(connectingCodeConnectCalled, 'connect called');
+    final event = ConnectingEvent(
+      connectingCodeConnectCalled,
+      'connect called',
+    );
     _connectingController.add(event);
     if (attemptId != _connectAttemptId) {
       // A connecting listener disconnected, and may have started an attempt of
@@ -264,7 +294,10 @@ class ClientImpl implements Client {
     _checkNotClosed();
     _reconnectAttempts = 0;
     await _processDisconnect(
-        code: disconnectedCodeDisconnectCalled, reason: 'disconnect called', reconnect: false);
+      code: disconnectedCodeDisconnectCalled,
+      reason: 'disconnect called',
+      reconnect: false,
+    );
   }
 
   @override
@@ -275,7 +308,10 @@ class ClientImpl implements Client {
     _closed = true;
     _reconnectAttempts = 0;
     await _processDisconnect(
-        code: disconnectedCodeClientClosed, reason: 'client closed', reconnect: false);
+      code: disconnectedCodeClientClosed,
+      reason: 'client closed',
+      reconnect: false,
+    );
     // A copy: an onDone handler of a subscription stream may remove its
     // subscription.
     for (final subscription in _subscriptions.values.toList()) {
@@ -316,16 +352,19 @@ class ClientImpl implements Client {
     if (state == State.disconnected) {
       return Future.error(ClientDisconnectedError());
     }
-    final completer = new Completer<void>();
+    final completer = Completer<void>();
     _readyFutures.add(completer);
     // A zero timeout means no timeout, as for the transport.
     if (timeout == null || timeout <= Duration.zero) {
       return completer.future;
     }
-    return completer.future.timeout(timeout, onTimeout: () {
-      _readyFutures.remove(completer);
-      throw TimeoutException('Future not completed', timeout);
-    });
+    return completer.future.timeout(
+      timeout,
+      onTimeout: () {
+        _readyFutures.remove(completer);
+        throw TimeoutException('Future not completed', timeout);
+      },
+    );
   }
 
   /// The transport after `await ready()`, which yields: a disconnect may have
@@ -341,9 +380,10 @@ class ClientImpl implements Client {
   @override
   Future<PublishResult> publish(String channel, List<int> data) async {
     await _waitReady(_config.timeout);
-    final request = protocol.PublishRequest()
-      ..channel = channel
-      ..data = data;
+    final request =
+        protocol.PublishRequest()
+          ..channel = channel
+          ..data = data;
     final result = await _connectedTransport().sendMessage(
       request,
       protocol.PublishResult(),
@@ -357,13 +397,20 @@ class ClientImpl implements Client {
     final request = protocol.RPCRequest();
     request.method = method;
     request.data = data;
-    final result = await _connectedTransport().sendMessage(request, protocol.RPCResult());
+    final result = await _connectedTransport().sendMessage(
+      request,
+      protocol.RPCResult(),
+    );
     return RPCResult.from(result);
   }
 
   @override
-  Future<HistoryResult> history(String channel,
-      {int limit = 0, StreamPosition? since, bool reverse = false}) async {
+  Future<HistoryResult> history(
+    String channel, {
+    int limit = 0,
+    StreamPosition? since,
+    bool reverse = false,
+  }) async {
     await _waitReady(_config.timeout);
     final request = protocol.HistoryRequest()..channel = channel;
     request.limit = limit;
@@ -422,9 +469,15 @@ class ClientImpl implements Client {
   Subscription newSubscription(String channel, [SubscriptionConfig? config]) {
     _checkNotClosed();
     if (_subscriptions.containsKey(channel)) {
-      throw Exception("Subscription to a channel already exists in client's internal registry");
+      throw Exception(
+        "Subscription to a channel already exists in client's internal registry",
+      );
     }
-    final subscription = SubscriptionImpl(channel, this, config ?? SubscriptionConfig());
+    final subscription = SubscriptionImpl(
+      channel,
+      this,
+      config ?? SubscriptionConfig(),
+    );
     _subscriptions[channel] = subscription;
     return subscription;
   }
@@ -448,8 +501,11 @@ class ClientImpl implements Client {
     return Map.unmodifiable(_subscriptions);
   }
 
-  Future<void> _processDisconnect(
-      {required int code, required String reason, required bool reconnect}) async {
+  Future<void> _processDisconnect({
+    required int code,
+    required String reason,
+    required bool reconnect,
+  }) async {
     if (state == State.disconnected) {
       return;
     }
@@ -544,18 +600,26 @@ class ClientImpl implements Client {
   void _pushFailed(Object error, StackTrace stackTrace) {
     Zone.current.handleUncaughtError(error, stackTrace);
     _processDisconnect(
-        code: disconnectCodeBadProtocol,
-        reason: 'exception during message handling: $error',
-        reconnect: false);
+      code: disconnectCodeBadProtocol,
+      reason: 'exception during message handling: $error',
+      reconnect: false,
+    );
   }
 
   Future<void> _failUnauthorized() async {
     await _processDisconnect(
-        code: disconnectedCodeUnauthorized, reason: 'unauthorized', reconnect: false);
+      code: disconnectedCodeUnauthorized,
+      reason: 'unauthorized',
+      reconnect: false,
+    );
   }
 
   void _scheduleReconnect() {
-    final delay = backoffDelay(_reconnectAttempts, _config.minReconnectDelay, _config.maxReconnectDelay);
+    final delay = backoffDelay(
+      _reconnectAttempts,
+      _config.minReconnectDelay,
+      _config.maxReconnectDelay,
+    );
     _reconnectTimer = Timer(delay, () {
       if (state != State.connecting) {
         return;
@@ -581,14 +645,18 @@ class ClientImpl implements Client {
     }
   }
 
-  bool _isActiveAttempt(int attemptId) => attemptId == _connectAttemptId && state == State.connecting;
+  bool _isActiveAttempt(int attemptId) =>
+      attemptId == _connectAttemptId && state == State.connecting;
 
   Future<void> _connectInner(int attemptId) async {
     if (_refreshRequired && _config.getToken == null) {
       // The token expired or was invalidated, and there is no way to get a
       // new one: retrying with it would fail forever.
       final event = ErrorEvent(
-          ConfigurationError('token expired but no getToken function set in the configuration'));
+        ConfigurationError(
+          'token expired but no getToken function set in the configuration',
+        ),
+      );
       _errorController.add(event);
       throw UnauthorizedException();
     }
@@ -624,40 +692,50 @@ class ClientImpl implements Client {
     }
 
     final transport = _transportBuilder(
-        url: _url,
-        config: TransportConfig(
-            headers: _headers,
-            timeout: _config.timeout,
-            tlsSkipVerify: _config.tlsSkipVerify));
+      url: _url,
+      config: TransportConfig(
+        headers: _headers,
+        timeout: _config.timeout,
+        tlsSkipVerify: _config.tlsSkipVerify,
+      ),
+    );
     _connectingTransport = transport;
 
     try {
-      await transport.open((push, isPing) {
-        if (attemptId != _connectAttemptId) {
-          // The rest of a message after its transport was torn down.
-          return;
-        }
-        try {
-          _onPush(push, isPing);
-        } catch (error, stackTrace) {
-          _pushFailed(error, stackTrace);
-        }
-      }, onError: (dynamic error) {
-        if (attemptId != _connectAttemptId) return;
-        final event = ErrorEvent(TransportError(error));
-        _errorController.add(event);
-        // Not after an error listener disconnected or started a new attempt.
-        if (attemptId != _connectAttemptId) return;
-        // The connection can't be trusted after data that isn't the protocol,
-        // also while connecting: close it and reconnect now rather than after
-        // the connect timeout.
-        _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
-      }, onDone: (code, reason, reconnect) {
-        // Ignore the close of a transport that was already torn down or whose
-        // attempt was superseded.
-        if (attemptId != _connectAttemptId) return;
-        _processDisconnect(code: code, reason: reason, reconnect: reconnect);
-      });
+      await transport.open(
+        (push, isPing) {
+          if (attemptId != _connectAttemptId) {
+            // The rest of a message after its transport was torn down.
+            return;
+          }
+          try {
+            _onPush(push, isPing);
+          } catch (error, stackTrace) {
+            _pushFailed(error, stackTrace);
+          }
+        },
+        onError: (dynamic error) {
+          if (attemptId != _connectAttemptId) return;
+          final event = ErrorEvent(TransportError(error));
+          _errorController.add(event);
+          // Not after an error listener disconnected or started a new attempt.
+          if (attemptId != _connectAttemptId) return;
+          // The connection can't be trusted after data that isn't the protocol,
+          // also while connecting: close it and reconnect now rather than after
+          // the connect timeout.
+          _processDisconnect(
+            code: connectingCodeTransportClosed,
+            reason: "connection closed",
+            reconnect: true,
+          );
+        },
+        onDone: (code, reason, reconnect) {
+          // Ignore the close of a transport that was already torn down or whose
+          // attempt was superseded.
+          if (attemptId != _connectAttemptId) return;
+          _processDisconnect(code: code, reason: reason, reconnect: reconnect);
+        },
+      );
     } catch (ex) {
       if (!_isActiveAttempt(attemptId)) return;
       _connectingTransport = null;
@@ -692,7 +770,11 @@ class ClientImpl implements Client {
           await transport.close();
           return;
         }
-        await _processDisconnect(code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
+        await _processDisconnect(
+          code: connectingCodeTransportClosed,
+          reason: "connection closed",
+          reconnect: true,
+        );
         return;
       }
       if (!_isActiveAttempt(attemptId)) {
@@ -772,7 +854,12 @@ class ClientImpl implements Client {
       for (final entry in result.subs.entries) {
         final key = entry.key;
         final value = entry.value;
-        _serverSubs[key] = ServerSubscription(key, value.recoverable, value.offset, value.epoch);
+        _serverSubs[key] = ServerSubscription(
+          key,
+          value.recoverable,
+          value.offset,
+          value.epoch,
+        );
         final event = ServerSubscribedEvent.fromSubscribeResult(key, value);
         _subscribedController.add(event);
         for (final pub in value.publications) {
@@ -833,11 +920,17 @@ class ClientImpl implements Client {
       }
       if (err is Error) {
         await _processDisconnect(
-            code: err.code, reason: err.message, reconnect: err.code == 109 || err.temporary);
+          code: err.code,
+          reason: err.message,
+          reconnect: err.code == 109 || err.temporary,
+        );
         return;
       }
       await _processDisconnect(
-          code: connectingCodeTransportClosed, reason: "connection closed", reconnect: true);
+        code: connectingCodeTransportClosed,
+        reason: "connection closed",
+        reconnect: true,
+      );
       return;
     }
     if (state != State.connected) {
@@ -848,18 +941,25 @@ class ClientImpl implements Client {
 
   void _setPingTimer() {
     late final Timer timer;
-    timer = Timer(Duration(seconds: _pingInterval) + _config.maxServerPingDelay, () {
-      // A ping may have been received but not processed yet, e.g. when a
-      // suspended process resumes and runs this overdue timer before the data
-      // waiting in the socket. Let that data be processed first.
-      Timer.run(() async {
-        // A ping processed meanwhile armed a new timer.
-        if (!identical(_pingTimer, timer) || state != State.connected) {
-          return;
-        }
-        await processDisconnect(code: connectingCodeNoPing, reason: 'no ping', reconnect: true);
-      });
-    });
+    timer = Timer(
+      Duration(seconds: _pingInterval) + _config.maxServerPingDelay,
+      () {
+        // A ping may have been received but not processed yet, e.g. when a
+        // suspended process resumes and runs this overdue timer before the data
+        // waiting in the socket. Let that data be processed first.
+        Timer.run(() async {
+          // A ping processed meanwhile armed a new timer.
+          if (!identical(_pingTimer, timer) || state != State.connected) {
+            return;
+          }
+          await processDisconnect(
+            code: connectingCodeNoPing,
+            reason: 'no ping',
+            reconnect: true,
+          );
+        });
+      },
+    );
     _pingTimer = timer;
   }
 
@@ -870,7 +970,8 @@ class ClientImpl implements Client {
     // A refresh belongs to the connection it started on: after a reconnect,
     // the new connection runs its own refresh chain.
     final attemptId = _connectAttemptId;
-    bool isCurrentConnection() => attemptId == _connectAttemptId && state == State.connected;
+    bool isCurrentConnection() =>
+        attemptId == _connectAttemptId && state == State.connected;
     final String token;
     try {
       final event = ConnectionTokenEvent();
@@ -888,12 +989,15 @@ class ClientImpl implements Client {
       if (!isCurrentConnection()) {
         return;
       }
-      _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
-        if (state != State.connected) {
-          return;
-        }
-        _refreshToken();
-      });
+      _refreshTimer = Timer(
+        backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)),
+        () {
+          if (state != State.connected) {
+            return;
+          }
+          _refreshToken();
+        },
+      );
       return;
     }
 
@@ -940,23 +1044,33 @@ class ClientImpl implements Client {
       }
       if (err is Error) {
         if (err.temporary) {
-          _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
-            if (state != State.connected) {
-              return;
-            }
-            _refreshToken();
-          });
+          _refreshTimer = Timer(
+            backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)),
+            () {
+              if (state != State.connected) {
+                return;
+              }
+              _refreshToken();
+            },
+          );
           return;
         }
-        await _processDisconnect(code: err.code, reason: err.message, reconnect: false);
+        await _processDisconnect(
+          code: err.code,
+          reason: err.message,
+          reconnect: false,
+        );
         return;
       }
-      _refreshTimer = Timer(backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)), () {
-        if (state != State.connected) {
-          return;
-        }
-        _refreshToken();
-      });
+      _refreshTimer = Timer(
+        backoffDelay(0, Duration(seconds: 5), Duration(seconds: 10)),
+        () {
+          if (state != State.connected) {
+            return;
+          }
+          _refreshToken();
+        },
+      );
     }
   }
 
@@ -967,7 +1081,7 @@ class ClientImpl implements Client {
     _readyFutures.clear();
   }
 
-  void _errorReadyFutures(dynamic error) {
+  void _errorReadyFutures(Object error) {
     for (var i = 0; i < _readyFutures.length; i++) {
       _readyFutures[i].completeError(error);
     }
@@ -1043,14 +1157,27 @@ class ClientImpl implements Client {
 
   Future<void> _handleDisconnect(protocol.Disconnect disconnect) async {
     final code = disconnect.code;
-    final bool reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
-    await _processDisconnect(code: disconnect.code, reason: disconnect.reason, reconnect: reconnect);
+    final bool reconnect =
+        code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+    await _processDisconnect(
+      code: disconnect.code,
+      reason: disconnect.reason,
+      reconnect: reconnect,
+    );
   }
 
   void _handleSubscribe(String channel, protocol.Subscribe subscribe) {
-    final event = ServerSubscribedEvent.fromSubscribePush(channel, subscribe, false);
-    _serverSubs[channel] =
-        ServerSubscription.from(channel, subscribe.recoverable, subscribe.offset, subscribe.epoch);
+    final event = ServerSubscribedEvent.fromSubscribePush(
+      channel,
+      subscribe,
+      false,
+    );
+    _serverSubs[channel] = ServerSubscription.from(
+      channel,
+      subscribe.recoverable,
+      subscribe.offset,
+      subscribe.epoch,
+    );
     _subscribedController.add(event);
   }
 
@@ -1075,7 +1202,11 @@ class ClientImpl implements Client {
         return;
       }
       if (unsubscribe.code < 2500) {
-        subscription.moveToUnsubscribed(unsubscribe.code, unsubscribe.reason, false);
+        subscription.moveToUnsubscribed(
+          unsubscribe.code,
+          unsubscribe.reason,
+          false,
+        );
       } else {
         // Temporary server-side unsubscribe: client stays connected so we must
         // trigger a resubscribe immediately rather than waiting for a reconnect.
@@ -1098,9 +1229,7 @@ class ClientImpl implements Client {
 
     if (_sendPong) {
       try {
-        _transport?.sendAsyncMessage(
-          protocol.Command(),
-        );
+        _transport?.sendAsyncMessage(protocol.Command());
       } on ClientDisconnectedError {
         // No need to handle in a special way - pong can't be sent but connection is closed anyway.
       }
@@ -1136,7 +1265,11 @@ class ClientImpl implements Client {
   /// old numeric ID mapping (if it still points to this subscription) and
   /// register the new one. Either ID may be 0 meaning "no mapping".
   @internal
-  void updateSubscriptionPushId(SubscriptionImpl subscription, int oldId, int newId) {
+  void updateSubscriptionPushId(
+    SubscriptionImpl subscription,
+    int oldId,
+    int newId,
+  ) {
     if (oldId > 0 && identical(_subscriptionsById[oldId], subscription)) {
       _subscriptionsById.remove(oldId);
     }
@@ -1150,7 +1283,8 @@ class ClientImpl implements Client {
   /// A server message that can't be handled, e.g. a publication that fails to
   /// decode: the client stops with badProtocol and doesn't reconnect.
   @internal
-  void pushFailed(Object error, StackTrace stackTrace) => _pushFailed(error, stackTrace);
+  void pushFailed(Object error, StackTrace stackTrace) =>
+      _pushFailed(error, stackTrace);
 
   /// The number of exceptions escaped from event listeners (see [handlerFailed]).
   @internal
@@ -1166,8 +1300,13 @@ class ClientImpl implements Client {
   void handlerFailed(Object error) {
     _handlerFailures++;
     if (state == State.disconnected) return;
-    unawaited(_processDisconnect(
-        code: disconnectCodeBadProtocol, reason: 'exception in event handler: $error', reconnect: false));
+    unawaited(
+      _processDisconnect(
+        code: disconnectCodeBadProtocol,
+        reason: 'exception in event handler: $error',
+        reconnect: false,
+      ),
+    );
   }
 
   /// Identifies the current connection or connect attempt: it changes when an
@@ -1176,7 +1315,9 @@ class ClientImpl implements Client {
   int get connectionId => _connectAttemptId;
 
   @internal
-  Future<protocol.UnsubscribeResult> sendUnsubscribe(protocol.UnsubscribeRequest request) async {
+  Future<protocol.UnsubscribeResult> sendUnsubscribe(
+    protocol.UnsubscribeRequest request,
+  ) async {
     if (_transport == null) {
       throw ClientDisconnectedError();
     }
@@ -1187,7 +1328,9 @@ class ClientImpl implements Client {
   }
 
   @internal
-  Future<protocol.SubscribeResult> sendSubscribe(protocol.SubscribeRequest request) async {
+  Future<protocol.SubscribeResult> sendSubscribe(
+    protocol.SubscribeRequest request,
+  ) async {
     if (_transport == null) {
       throw ClientDisconnectedError();
     }
@@ -1198,7 +1341,9 @@ class ClientImpl implements Client {
   }
 
   @internal
-  Future<protocol.SubRefreshResult> sendSubRefresh(protocol.SubRefreshRequest request) async {
+  Future<protocol.SubRefreshResult> sendSubRefresh(
+    protocol.SubRefreshRequest request,
+  ) async {
     if (_transport == null) {
       throw ClientDisconnectedError();
     }
@@ -1209,13 +1354,16 @@ class ClientImpl implements Client {
   }
 
   @internal
-  Future<void> processDisconnect(
-      {required int code, required String reason, required bool reconnect}) {
+  Future<void> processDisconnect({
+    required int code,
+    required String reason,
+    required bool reconnect,
+  }) {
     return _processDisconnect(code: code, reason: reason, reconnect: reconnect);
   }
 }
 
-final _random = new Random();
+final _random = Random();
 
 Duration backoffDelay(int step, Duration minDelay, Duration maxDelay) {
   // Full jitter technique.
@@ -1223,9 +1371,15 @@ Duration backoffDelay(int step, Duration minDelay, Duration maxDelay) {
   if (step > 31) {
     step = 31;
   } // Avoid RangeError.
-  final val = min(maxDelay.inMilliseconds, minDelay.inMilliseconds * pow(2, step));
+  final val = min(
+    maxDelay.inMilliseconds,
+    minDelay.inMilliseconds * pow(2, step),
+  );
   if (val.toInt() <= 0) return minDelay;
   final interval = _random.nextInt(val.toInt());
-  final milliseconds = min(maxDelay.inMilliseconds, minDelay.inMilliseconds + interval);
+  final milliseconds = min(
+    maxDelay.inMilliseconds,
+    minDelay.inMilliseconds + interval,
+  );
   return Duration(milliseconds: milliseconds);
 }
