@@ -1,6 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show HttpClient, HttpOverrides, HttpServer, SecurityContext, WebSocket, sleep;
+import 'dart:io'
+    show
+        HttpClient,
+        HttpOverrides,
+        HttpServer,
+        SecurityContext,
+        WebSocket,
+        sleep;
 import 'dart:math';
 import 'dart:mirrors';
 
@@ -16,7 +23,7 @@ import 'package:test/test.dart';
 
 import 'fake_server.dart';
 
-const url ='ws://localhost:8000/connection/websocket';
+const url = 'ws://localhost:8000/connection/websocket';
 const apiBase = 'http://localhost:8000/api';
 const apiKey = 'test-api-key';
 
@@ -37,10 +44,7 @@ String randomChannel(String base) {
 Future<void> apiPublish(String channel, Map<String, dynamic> data) async {
   final resp = await http.post(
     Uri.parse('$apiBase/publish'),
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey,
-    },
+    headers: {'Content-Type': 'application/json', 'X-API-Key': apiKey},
     body: jsonEncode({'channel': channel, 'data': data}),
   );
   if (resp.statusCode != 200) {
@@ -51,10 +55,7 @@ Future<void> apiPublish(String channel, Map<String, dynamic> data) async {
 Future<void> apiPost(String path, Map<String, dynamic> body) async {
   final resp = await http.post(
     Uri.parse('$apiBase/$path'),
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey,
-    },
+    headers: {'Content-Type': 'application/json', 'X-API-Key': apiKey},
     body: jsonEncode(body),
   );
   if (resp.statusCode != 200) {
@@ -88,10 +89,7 @@ Future<void> apiUnsubscribeClient(String clientId, String channel) {
 Future<centrifuge.StreamPosition> apiHistory(String channel) async {
   final resp = await http.post(
     Uri.parse('$apiBase/history'),
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey,
-    },
+    headers: {'Content-Type': 'application/json', 'X-API-Key': apiKey},
     body: jsonEncode({'channel': channel, 'limit': 0}),
   );
   if (resp.statusCode != 200) {
@@ -103,14 +101,19 @@ Future<centrifuge.StreamPosition> apiHistory(String channel) async {
   }
   final result = decoded['result'] as Map<String, dynamic>;
   return centrifuge.StreamPosition(
-      Int64(result['offset'] as int? ?? 0), result['epoch'] as String? ?? '');
+    Int64(result['offset'] as int? ?? 0),
+    result['epoch'] as String? ?? '',
+  );
 }
 
 centrifuge.Client createClient([centrifuge.ClientConfig? config]) {
   return centrifuge.createClient(url, config ?? centrifuge.ClientConfig());
 }
 
-Future<T> waitForEvent<T>(Stream<T> stream, {Duration timeout = const Duration(seconds: 5)}) {
+Future<T> waitForEvent<T>(
+  Stream<T> stream, {
+  Duration timeout = const Duration(seconds: 5),
+}) {
   final completer = Completer<T>();
   late StreamSubscription<T> sub;
   final timer = Timer(timeout, () {
@@ -129,16 +132,22 @@ Future<T> waitForEvent<T>(Stream<T> stream, {Duration timeout = const Duration(s
   return completer.future;
 }
 
-Future<List<T>> collectEvents<T>(Stream<T> stream, int count,
-    {Duration timeout = const Duration(seconds: 5)}) {
+Future<List<T>> collectEvents<T>(
+  Stream<T> stream,
+  int count, {
+  Duration timeout = const Duration(seconds: 5),
+}) {
   final completer = Completer<List<T>>();
   final collected = <T>[];
   late StreamSubscription<T> sub;
   final timer = Timer(timeout, () {
     sub.cancel();
     if (!completer.isCompleted) {
-      completer.completeError(TimeoutException(
-          'timeout collecting $count events (got ${collected.length})'));
+      completer.completeError(
+        TimeoutException(
+          'timeout collecting $count events (got ${collected.length})',
+        ),
+      );
     }
   });
   sub = stream.listen((event) {
@@ -154,8 +163,10 @@ Future<List<T>> collectEvents<T>(Stream<T> stream, int count,
   return completer.future;
 }
 
-Future<void> waitUntil(bool Function() condition,
-    {Duration timeout = const Duration(seconds: 5)}) async {
+Future<void> waitUntil(
+  bool Function() condition, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
   final deadline = DateTime.now().add(timeout);
   while (!condition()) {
     if (DateTime.now().isAfter(deadline)) {
@@ -170,7 +181,11 @@ Future<void> waitUntil(bool Function() condition,
 int readyWaiters(Object clientOrSubscription) {
   final mirror = reflect(clientOrSubscription);
   final library = mirror.type.owner as LibraryMirror;
-  return (mirror.getField(MirrorSystem.getSymbol('_readyFutures', library)).reflectee as List).length;
+  return (mirror
+              .getField(MirrorSystem.getSymbol('_readyFutures', library))
+              .reflectee
+          as List)
+      .length;
 }
 
 /// HttpOverrides returning one HttpClient for all requests, like an app that
@@ -181,7 +196,8 @@ class SharedHttpClientOverrides extends HttpOverrides {
   HttpClient get client => _client ?? createHttpClient(null);
 
   @override
-  HttpClient createHttpClient(SecurityContext? context) => _client ??= super.createHttpClient(context);
+  HttpClient createHttpClient(SecurityContext? context) =>
+      _client ??= super.createHttpClient(context);
 }
 
 /// Runs [action] once, synchronously inside the first event of [stream].
@@ -198,7 +214,9 @@ void main() {
     test('client starts in disconnected state', () {
       final client = createClient(
         centrifuge.ClientConfig(
-            token: "test", data: utf8.encode('test connect data')),
+          token: "test",
+          data: utf8.encode('test connect data'),
+        ),
       );
       expect(client.state, centrifuge.State.disconnected);
     });
@@ -208,7 +226,10 @@ void main() {
         "invalid",
         centrifuge.ClientConfig(data: utf8.encode('test connect data')),
       );
-      await expectLater(client.connect(), throwsA(isA<centrifuge.ConfigurationError>()));
+      await expectLater(
+        client.connect(),
+        throwsA(isA<centrifuge.ConfigurationError>()),
+      );
       expect(client.state, centrifuge.State.disconnected);
     });
 
@@ -308,7 +329,9 @@ void main() {
       final channel = randomChannel('test');
       final sub = client.newSubscription(channel);
 
-      final pubFuture = waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      final pubFuture = waitForEvent<centrifuge.PublicationEvent>(
+        sub.publication,
+      );
       await sub.subscribe();
 
       final message = utf8.encode(jsonEncode({"my": "data"}));
@@ -343,10 +366,9 @@ void main() {
 
       final channel = randomChannel('some_channel');
       final s1 = client.newSubscription(
-          channel,
-          centrifuge.SubscriptionConfig(
-            delta: centrifuge.DeltaType.fossil,
-          ));
+        channel,
+        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+      );
 
       final received = <centrifuge.PublicationEvent>[];
       final sub = s1.publication.listen((event) {
@@ -418,63 +440,80 @@ void main() {
   });
 
   group('Recovery', () {
-    test('stream: recovery after disconnect delivers missed publications',
-        () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'stream: recovery after disconnect delivers missed publications',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('recovery');
-      final sub = client.newSubscription(ch);
+        final ch = uniqueChannel('recovery');
+        final sub = client.newSubscription(ch);
 
-      final firstPubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+        final firstPubFuture = waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      // Publish first message and confirm live delivery.
-      await apiPublish(ch, {'seq': 1, 'msg': 'before disconnect'});
-      final first = await firstPubFuture;
-      expect(jsonDecode(utf8.decode(first.data)),
-          {'seq': 1, 'msg': 'before disconnect'});
+        // Publish first message and confirm live delivery.
+        await apiPublish(ch, {'seq': 1, 'msg': 'before disconnect'});
+        final first = await firstPubFuture;
+        expect(jsonDecode(utf8.decode(first.data)), {
+          'seq': 1,
+          'msg': 'before disconnect',
+        });
 
-      // Disconnect.
-      await client.disconnect();
+        // Disconnect.
+        await client.disconnect();
 
-      // Publish while disconnected - these should be recovered.
-      await apiPublish(ch, {'seq': 2, 'msg': 'missed one'});
-      await apiPublish(ch, {'seq': 3, 'msg': 'missed two'});
-      await apiPublish(ch, {'seq': 4, 'msg': 'missed three'});
+        // Publish while disconnected - these should be recovered.
+        await apiPublish(ch, {'seq': 2, 'msg': 'missed one'});
+        await apiPublish(ch, {'seq': 3, 'msg': 'missed two'});
+        await apiPublish(ch, {'seq': 4, 'msg': 'missed three'});
 
-      // Set up listeners before reconnect.
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 3);
+        // Set up listeners before reconnect.
+        final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
+        final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+          sub.publication,
+          3,
+        );
 
-      await client.connect();
+        await client.connect();
 
-      final resubCtx = await resubFuture;
-      expect(resubCtx.recovered, true);
-      expect(resubCtx.wasRecovering, true);
+        final resubCtx = await resubFuture;
+        expect(resubCtx.recovered, true);
+        expect(resubCtx.wasRecovering, true);
 
-      final pubs = await recoveredPubs;
-      expect(jsonDecode(utf8.decode(pubs[0].data)),
-          {'seq': 2, 'msg': 'missed one'});
-      expect(jsonDecode(utf8.decode(pubs[1].data)),
-          {'seq': 3, 'msg': 'missed two'});
-      expect(jsonDecode(utf8.decode(pubs[2].data)),
-          {'seq': 4, 'msg': 'missed three'});
+        final pubs = await recoveredPubs;
+        expect(jsonDecode(utf8.decode(pubs[0].data)), {
+          'seq': 2,
+          'msg': 'missed one',
+        });
+        expect(jsonDecode(utf8.decode(pubs[1].data)), {
+          'seq': 3,
+          'msg': 'missed two',
+        });
+        expect(jsonDecode(utf8.decode(pubs[2].data)), {
+          'seq': 4,
+          'msg': 'missed three',
+        });
 
-      // Verify live delivery still works after recovery.
-      final livePubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
-      await apiPublish(ch, {'seq': 5, 'msg': 'after recovery'});
-      final live = await livePubFuture;
-      expect(jsonDecode(utf8.decode(live.data)),
-          {'seq': 5, 'msg': 'after recovery'});
+        // Verify live delivery still works after recovery.
+        final livePubFuture = waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
+        await apiPublish(ch, {'seq': 5, 'msg': 'after recovery'});
+        final live = await livePubFuture;
+        expect(jsonDecode(utf8.decode(live.data)), {
+          'seq': 5,
+          'msg': 'after recovery',
+        });
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
     test('stream: recovery after unsubscribe/resubscribe', () async {
       final client = createClient();
@@ -483,8 +522,9 @@ void main() {
       final ch = uniqueChannel('recovery');
       final sub = client.newSubscription(ch);
 
-      final firstPubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      final firstPubFuture = waitForEvent<centrifuge.PublicationEvent>(
+        sub.publication,
+      );
 
       await sub.subscribe();
 
@@ -498,10 +538,13 @@ void main() {
       await apiPublish(ch, {'seq': 2, 'msg': 'while away'});
       await apiPublish(ch, {'seq': 3, 'msg': 'still away'});
 
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+      final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
+      final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+        sub.publication,
+        2,
+      );
 
       await sub.subscribe();
 
@@ -509,59 +552,68 @@ void main() {
       expect(resubCtx.recovered, true);
 
       final pubs = await recoveredPubs;
-      expect(jsonDecode(utf8.decode(pubs[0].data)),
-          {'seq': 2, 'msg': 'while away'});
-      expect(jsonDecode(utf8.decode(pubs[1].data)),
-          {'seq': 3, 'msg': 'still away'});
+      expect(jsonDecode(utf8.decode(pubs[0].data)), {
+        'seq': 2,
+        'msg': 'while away',
+      });
+      expect(jsonDecode(utf8.decode(pubs[1].data)), {
+        'seq': 3,
+        'msg': 'still away',
+      });
 
       await client.disconnect();
     });
 
-    test('stream: unrecoverable position resubscribes without recovery',
-        () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'stream: unrecoverable position resubscribes without recovery',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('smallhistory');
-      final sub = client.newSubscription(ch);
+        final ch = uniqueChannel('smallhistory');
+        final sub = client.newSubscription(ch);
 
-      final firstPubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+        final firstPubFuture = waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      // Publish first message to establish position.
-      await apiPublish(ch, {'seq': 1});
-      await firstPubFuture;
+        // Publish first message to establish position.
+        await apiPublish(ch, {'seq': 1});
+        await firstPubFuture;
 
-      // Unsubscribe.
-      await sub.unsubscribe();
+        // Unsubscribe.
+        await sub.unsubscribe();
 
-      // Publish enough to overflow history (size=2).
-      await apiPublish(ch, {'seq': 2});
-      await apiPublish(ch, {'seq': 3});
-      await apiPublish(ch, {'seq': 4});
-      await apiPublish(ch, {'seq': 5});
+        // Publish enough to overflow history (size=2).
+        await apiPublish(ch, {'seq': 2});
+        await apiPublish(ch, {'seq': 3});
+        await apiPublish(ch, {'seq': 4});
+        await apiPublish(ch, {'seq': 5});
 
-      // Resubscribe - recovery should fail because position is lost.
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+        // Resubscribe - recovery should fail because position is lost.
+        final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      final resubCtx = await resubFuture;
-      expect(resubCtx.wasRecovering, true);
-      expect(resubCtx.recovered, false);
+        final resubCtx = await resubFuture;
+        expect(resubCtx.wasRecovering, true);
+        expect(resubCtx.recovered, false);
 
-      // Verify live delivery still works after failed recovery.
-      final livePubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
-      await apiPublish(ch, {'seq': 6});
-      final live = await livePubFuture;
-      expect(jsonDecode(utf8.decode(live.data)), {'seq': 6});
+        // Verify live delivery still works after failed recovery.
+        final livePubFuture = waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
+        await apiPublish(ch, {'seq': 6});
+        final live = await livePubFuture;
+        expect(jsonDecode(utf8.decode(live.data)), {'seq': 6});
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
   });
 
   group('Delta', () {
@@ -571,10 +623,14 @@ void main() {
 
       final ch = uniqueChannel('delta');
       final sub = client.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
+        ch,
+        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+      );
 
-      final pubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 3);
+      final pubs = collectEvents<centrifuge.PublicationEvent>(
+        sub.publication,
+        3,
+      );
 
       await sub.subscribe();
 
@@ -582,16 +638,24 @@ void main() {
       final payload = 'a' * 500;
       await apiPublish(ch, {'counter': 1, 'payload': payload});
       await apiPublish(ch, {'counter': 2, 'payload': payload});
-      await apiPublish(
-          ch, {'counter': 3, 'payload': '${payload.substring(0, 499)}b'});
+      await apiPublish(ch, {
+        'counter': 3,
+        'payload': '${payload.substring(0, 499)}b',
+      });
 
       final received = await pubs;
-      expect(jsonDecode(utf8.decode(received[0].data)),
-          {'counter': 1, 'payload': payload});
-      expect(jsonDecode(utf8.decode(received[1].data)),
-          {'counter': 2, 'payload': payload});
-      expect(jsonDecode(utf8.decode(received[2].data)),
-          {'counter': 3, 'payload': '${payload.substring(0, 499)}b'});
+      expect(jsonDecode(utf8.decode(received[0].data)), {
+        'counter': 1,
+        'payload': payload,
+      });
+      expect(jsonDecode(utf8.decode(received[1].data)), {
+        'counter': 2,
+        'payload': payload,
+      });
+      expect(jsonDecode(utf8.decode(received[2].data)), {
+        'counter': 3,
+        'payload': '${payload.substring(0, 499)}b',
+      });
 
       await client.disconnect();
     });
@@ -602,18 +666,23 @@ void main() {
 
       final ch = uniqueChannel('delta');
       final sub = client.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
+        ch,
+        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+      );
 
-      final firstPubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      final firstPubFuture = waitForEvent<centrifuge.PublicationEvent>(
+        sub.publication,
+      );
 
       await sub.subscribe();
 
       // Publish first message and wait to confirm live.
       await apiPublish(ch, {'step': 1, 'value': 'hello world'});
       final first = await firstPubFuture;
-      expect(jsonDecode(utf8.decode(first.data)),
-          {'step': 1, 'value': 'hello world'});
+      expect(jsonDecode(utf8.decode(first.data)), {
+        'step': 1,
+        'value': 'hello world',
+      });
 
       // Disconnect.
       await client.disconnect();
@@ -623,10 +692,13 @@ void main() {
       await apiPublish(ch, {'step': 3, 'value': 'hello earth!'});
 
       // Reconnect with recovery.
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+      final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
+      final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+        sub.publication,
+        2,
+      );
 
       await client.connect();
 
@@ -634,51 +706,79 @@ void main() {
       expect(resubCtx.recovered, true);
 
       final receivedPubs = await recoveredPubs;
-      expect(jsonDecode(utf8.decode(receivedPubs[0].data)),
-          {'step': 2, 'value': 'hello world!'});
-      expect(jsonDecode(utf8.decode(receivedPubs[1].data)),
-          {'step': 3, 'value': 'hello earth!'});
+      expect(jsonDecode(utf8.decode(receivedPubs[0].data)), {
+        'step': 2,
+        'value': 'hello world!',
+      });
+      expect(jsonDecode(utf8.decode(receivedPubs[1].data)), {
+        'step': 3,
+        'value': 'hello earth!',
+      });
 
       await client.disconnect();
     });
 
-    test('stream delta: publications after a subscribe that recovered nothing are decoded', () async {
-      // Needs Centrifugo 6.9.6 (centrifugal/centrifuge#629): before it, the
-      // first publication after such a subscribe was a delta against data the
-      // client never received, and the client disconnected with badProtocol.
-      final ch = uniqueChannel('delta');
-      const text = 'a publication long enough for the server to send the next one as a fossil delta';
-      await apiPublish(ch, {'step': 1, 'value': text});
+    test(
+      'stream delta: publications after a subscribe that recovered nothing are decoded',
+      () async {
+        // Needs Centrifugo 6.9.6 (centrifugal/centrifuge#629): before it, the
+        // first publication after such a subscribe was a delta against data the
+        // client never received, and the client disconnected with badProtocol.
+        final ch = uniqueChannel('delta');
+        const text =
+            'a publication long enough for the server to send the next one as a fossil delta';
+        await apiPublish(ch, {'step': 1, 'value': text});
 
-      // The stream top, from a subscription that received nothing yet.
-      final first = createClient();
-      await first.connect();
-      final firstSub = first.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
-      final firstSubscribed = waitForEvent<centrifuge.SubscribedEvent>(firstSub.subscribed);
-      await firstSub.subscribe();
-      final top = (await firstSubscribed).streamPosition!;
-      await first.disconnect();
+        // The stream top, from a subscription that received nothing yet.
+        final first = createClient();
+        await first.connect();
+        final firstSub = first.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+        );
+        final firstSubscribed = waitForEvent<centrifuge.SubscribedEvent>(
+          firstSub.subscribed,
+        );
+        await firstSub.subscribe();
+        final top = (await firstSubscribed).streamPosition!;
+        await first.disconnect();
 
-      // Subscribing from the top recovers no publications.
-      final client = createClient();
-      await client.connect();
-      final sub = client.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil, since: top));
-      final subscribed = waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final pubs = collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
-      await sub.subscribe();
-      expect((await subscribed).recovered, true);
+        // Subscribing from the top recovers no publications.
+        final client = createClient();
+        await client.connect();
+        final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(
+            delta: centrifuge.DeltaType.fossil,
+            since: top,
+          ),
+        );
+        final subscribed = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
+        final pubs = collectEvents<centrifuge.PublicationEvent>(
+          sub.publication,
+          2,
+        );
+        await sub.subscribe();
+        expect((await subscribed).recovered, true);
 
-      await apiPublish(ch, {'step': 2, 'value': '$text!'});
-      await apiPublish(ch, {'step': 3, 'value': '$text!!'});
-      final received = await pubs;
-      expect(jsonDecode(utf8.decode(received[0].data)), {'step': 2, 'value': '$text!'});
-      expect(jsonDecode(utf8.decode(received[1].data)), {'step': 3, 'value': '$text!!'});
-      expect(client.state, centrifuge.State.connected);
+        await apiPublish(ch, {'step': 2, 'value': '$text!'});
+        await apiPublish(ch, {'step': 3, 'value': '$text!!'});
+        final received = await pubs;
+        expect(jsonDecode(utf8.decode(received[0].data)), {
+          'step': 2,
+          'value': '$text!',
+        });
+        expect(jsonDecode(utf8.decode(received[1].data)), {
+          'step': 3,
+          'value': '$text!!',
+        });
+        expect(client.state, centrifuge.State.connected);
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
     test('stream delta: recovery after unsubscribe/resubscribe', () async {
       final client = createClient();
@@ -686,10 +786,13 @@ void main() {
 
       final ch = uniqueChannel('delta');
       final sub = client.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
+        ch,
+        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+      );
 
-      final firstPubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      final firstPubFuture = waitForEvent<centrifuge.PublicationEvent>(
+        sub.publication,
+      );
 
       await sub.subscribe();
 
@@ -700,13 +803,18 @@ void main() {
 
       // Publish while unsubscribed.
       await apiPublish(ch, {'n': 2, 'text': 'base message content updated'});
-      await apiPublish(
-          ch, {'n': 3, 'text': 'base message content updated again'});
+      await apiPublish(ch, {
+        'n': 3,
+        'text': 'base message content updated again',
+      });
 
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+      final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
+      final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+        sub.publication,
+        2,
+      );
 
       await sub.subscribe();
 
@@ -714,41 +822,55 @@ void main() {
       expect(resubCtx.recovered, true);
 
       final receivedPubs = await recoveredPubs;
-      expect(jsonDecode(utf8.decode(receivedPubs[0].data)),
-          {'n': 2, 'text': 'base message content updated'});
-      expect(jsonDecode(utf8.decode(receivedPubs[1].data)),
-          {'n': 3, 'text': 'base message content updated again'});
+      expect(jsonDecode(utf8.decode(receivedPubs[0].data)), {
+        'n': 2,
+        'text': 'base message content updated',
+      });
+      expect(jsonDecode(utf8.decode(receivedPubs[1].data)), {
+        'n': 3,
+        'text': 'base message content updated again',
+      });
 
       await client.disconnect();
     });
 
-    test('stream delta: many publications with small diffs', () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'stream delta: many publications with small diffs',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('delta');
-      final sub = client.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
+        final ch = uniqueChannel('delta');
+        final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+        );
 
-      const count = 10;
-      final allPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, count,
-              timeout: Duration(seconds: 15));
+        const count = 10;
+        final allPubs = collectEvents<centrifuge.PublicationEvent>(
+          sub.publication,
+          count,
+          timeout: Duration(seconds: 15),
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      for (var i = 0; i < count; i++) {
-        await apiPublish(ch, {'index': i, 'padding': 'x' * 500});
-      }
+        for (var i = 0; i < count; i++) {
+          await apiPublish(ch, {'index': i, 'padding': 'x' * 500});
+        }
 
-      final received = await allPubs;
-      for (var i = 0; i < count; i++) {
-        expect(jsonDecode(utf8.decode(received[i].data)),
-            {'index': i, 'padding': 'x' * 500});
-      }
+        final received = await allPubs;
+        for (var i = 0; i < count; i++) {
+          expect(jsonDecode(utf8.decode(received[i].data)), {
+            'index': i,
+            'padding': 'x' * 500,
+          });
+        }
 
-      await client.disconnect();
-    }, timeout: Timeout(Duration(seconds: 20)));
+        await client.disconnect();
+      },
+      timeout: Timeout(Duration(seconds: 20)),
+    );
   });
 
   group('Token auth', () {
@@ -766,12 +888,14 @@ void main() {
 
     test('connects with getToken callback', () async {
       var numTokenCalls = 0;
-      final client = createClient(centrifuge.ClientConfig(
-        getToken: (_) async {
-          numTokenCalls++;
-          return connectToken;
-        },
-      ));
+      final client = createClient(
+        centrifuge.ClientConfig(
+          getToken: (_) async {
+            numTokenCalls++;
+            return connectToken;
+          },
+        ),
+      );
       await client.connect();
       expect(client.state, centrifuge.State.connected);
       expect(numTokenCalls, 1);
@@ -779,14 +903,17 @@ void main() {
     });
 
     test('disconnected with unauthorized', () async {
-      final client = createClient(centrifuge.ClientConfig(
-        getToken: (_) async {
-          throw centrifuge.UnauthorizedException();
-        },
-      ));
+      final client = createClient(
+        centrifuge.ClientConfig(
+          getToken: (_) async {
+            throw centrifuge.UnauthorizedException();
+          },
+        ),
+      );
 
       final disconnectFuture = waitForEvent<centrifuge.DisconnectedEvent>(
-          client.disconnected);
+        client.disconnected,
+      );
 
       client.connect();
 
@@ -801,8 +928,7 @@ void main() {
     // getToken/getData error retry semantics that this client is expected to
     // share with the JS reference implementation.
 
-    test('rpc issued during connecting state queues until connected',
-        () async {
+    test('rpc issued during connecting state queues until connected', () async {
       // The dart client throws ClientDisconnectedError when ready() is called
       // from disconnected state — operations issued *before* connect() are
       // not queued (this differs from centrifuge-js). Once we're already in
@@ -824,17 +950,19 @@ void main() {
       await client.disconnect();
     });
 
-    test('publish issued during connecting state queues until connected',
-        () async {
-      final client = createClient();
-      final ch = randomChannel('buf');
-      // ignore: unawaited_futures
-      client.connect();
-      expect(client.state, centrifuge.State.connecting);
-      // Publish has to wait for the connection but should resolve OK.
-      await client.publish(ch, utf8.encode('hello'));
-      await client.disconnect();
-    });
+    test(
+      'publish issued during connecting state queues until connected',
+      () async {
+        final client = createClient();
+        final ch = randomChannel('buf');
+        // ignore: unawaited_futures
+        client.connect();
+        expect(client.state, centrifuge.State.connecting);
+        // Publish has to wait for the connection but should resolve OK.
+        await client.publish(ch, utf8.encode('hello'));
+        await client.disconnect();
+      },
+    );
 
     test('retries connection getToken transient error', () async {
       // First call to getToken throws — client must retry instead of giving
@@ -867,15 +995,19 @@ void main() {
       // First call to connect() returns once the *initial* attempt is done —
       // including the failed-getToken path that schedules a reconnect. Wait
       // for the actual `connected` event before asserting.
-      final connectedFuture =
-          waitForEvent<centrifuge.ConnectedEvent>(client.connected);
+      final connectedFuture = waitForEvent<centrifuge.ConnectedEvent>(
+        client.connected,
+      );
       // ignore: unawaited_futures
       client.connect();
       await connectedFuture.timeout(const Duration(seconds: 5));
       expect(client.state, centrifuge.State.connected);
       expect(calls, 2, reason: 'getToken should be retried exactly once');
-      expect(errors.length >= 1, true,
-          reason: 'an error event should fire for the failing call');
+      expect(
+        errors.isNotEmpty,
+        true,
+        reason: 'an error event should fire for the failing call',
+      );
       expect(errors.first.error, isA<centrifuge.RefreshError>());
       await client.disconnect();
     });
@@ -911,177 +1043,198 @@ void main() {
 
       // Listen for the eventual subscribed event before kicking subscribe()
       // so the retry result isn't missed.
-      final subscribedFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final subscribedFuture = waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
       // ignore: unawaited_futures
       sub.subscribe();
       await subscribedFuture.timeout(const Duration(seconds: 5));
       expect(sub.state, centrifuge.SubscriptionState.subscribed);
       expect(calls, 2, reason: 'sub getToken should be retried exactly once');
-      expect(subErrors.length >= 1, true,
-          reason: 'subscription error event should have fired for first call');
+      expect(
+        subErrors.isNotEmpty,
+        true,
+        reason: 'subscription error event should have fired for first call',
+      );
 
       await client.disconnect();
     });
 
-    test('subscription unauthorized: sub unsubscribed, client stays connected',
-        () async {
-      // Throwing UnauthorizedException from the subscription's getToken
-      // should put just the subscription into the unsubscribed state with
-      // code 1 (unauthorized) — the client itself must remain connected so
-      // other subscriptions are unaffected.
-      final client = createClient();
-      await client.connect();
+    test(
+      'subscription unauthorized: sub unsubscribed, client stays connected',
+      () async {
+        // Throwing UnauthorizedException from the subscription's getToken
+        // should put just the subscription into the unsubscribed state with
+        // code 1 (unauthorized) — the client itself must remain connected so
+        // other subscriptions are unaffected.
+        final client = createClient();
+        await client.connect();
 
-      final ch = randomChannel('sub-unauth');
-      final sub = client.newSubscription(
-        ch,
-        centrifuge.SubscriptionConfig(
-          getToken: (centrifuge.SubscriptionTokenEvent _) async {
-            throw centrifuge.UnauthorizedException();
-          },
-        ),
-      );
+        final ch = randomChannel('sub-unauth');
+        final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(
+            getToken: (centrifuge.SubscriptionTokenEvent _) async {
+              throw centrifuge.UnauthorizedException();
+            },
+          ),
+        );
 
-      final unsubscribed =
-          waitForEvent<centrifuge.UnsubscribedEvent>(sub.unsubscribed);
-      await sub.subscribe();
+        final unsubscribed = waitForEvent<centrifuge.UnsubscribedEvent>(
+          sub.unsubscribed,
+        );
+        await sub.subscribe();
 
-      final ctx = await unsubscribed.timeout(const Duration(seconds: 5));
-      expect(ctx.code, 1, reason: 'unsubscribedCodeUnauthorized');
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
-      // Client remains healthy.
-      expect(client.state, centrifuge.State.connected);
+        final ctx = await unsubscribed.timeout(const Duration(seconds: 5));
+        expect(ctx.code, 1, reason: 'unsubscribedCodeUnauthorized');
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+        // Client remains healthy.
+        expect(client.state, centrifuge.State.connected);
 
-      // A separate subscription on the same client still works.
-      final ok = client.newSubscription(randomChannel('sub-ok'));
-      await ok.subscribe();
-      expect(ok.state, centrifuge.SubscriptionState.subscribed);
+        // A separate subscription on the same client still works.
+        final ok = client.newSubscription(randomChannel('sub-ok'));
+        await ok.subscribe();
+        expect(ok.state, centrifuge.SubscriptionState.subscribed);
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('3014 disconnect: connection token cleared, getToken called again',
-        () async {
-      // Server-initiated disconnect with code 3014 ("state invalidated") must
-      // force the client to refetch the connection token via getToken on the
-      // automatic reconnect, AND wipe stream subscription positions so the
-      // resubscribe does a full re-sync. Mirrors centrifuge-js behaviour.
-      const validToken =
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzgwNzg4MjR9.MTb3higWfFW04E9-8wmTFOcf4MEm-rMDQaNKJ1VU_n4';
-      var calls = 0;
-      final client = centrifuge.createClient(
-        url,
-        centrifuge.ClientConfig(
-          minReconnectDelay: const Duration(milliseconds: 1),
-          getToken: (centrifuge.ConnectionTokenEvent _) async {
-            calls++;
-            return validToken;
-          },
-        ),
-      );
+    test(
+      '3014 disconnect: connection token cleared, getToken called again',
+      () async {
+        // Server-initiated disconnect with code 3014 ("state invalidated") must
+        // force the client to refetch the connection token via getToken on the
+        // automatic reconnect, AND wipe stream subscription positions so the
+        // resubscribe does a full re-sync. Mirrors centrifuge-js behaviour.
+        const validToken =
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzgwNzg4MjR9.MTb3higWfFW04E9-8wmTFOcf4MEm-rMDQaNKJ1VU_n4';
+        var calls = 0;
+        final client = centrifuge.createClient(
+          url,
+          centrifuge.ClientConfig(
+            minReconnectDelay: const Duration(milliseconds: 1),
+            getToken: (centrifuge.ConnectionTokenEvent _) async {
+              calls++;
+              return validToken;
+            },
+          ),
+        );
 
-      // Capture the assigned client id for targeting the kick.
-      String clientId = '';
-      final connectedListener =
-          client.connected.listen((e) => clientId = e.client);
-      addTearDown(() => connectedListener.cancel());
+        // Capture the assigned client id for targeting the kick.
+        String clientId = '';
+        final connectedListener = client.connected.listen(
+          (e) => clientId = e.client,
+        );
+        addTearDown(() => connectedListener.cancel());
 
-      await client.connect();
-      expect(calls, 1);
-      expect(client.state, centrifuge.State.connected);
+        await client.connect();
+        expect(calls, 1);
+        expect(client.state, centrifuge.State.connected);
 
-      // Wait for the next `connected` after the 3014 kick. Set the listener
-      // up first; broadcast streams don't replay past events.
-      final reconnected =
-          waitForEvent<centrifuge.ConnectedEvent>(client.connected);
-      await apiDisconnectClient(clientId, code: 3014, reason: 'invalidated');
+        // Wait for the next `connected` after the 3014 kick. Set the listener
+        // up first; broadcast streams don't replay past events.
+        final reconnected = waitForEvent<centrifuge.ConnectedEvent>(
+          client.connected,
+        );
+        await apiDisconnectClient(clientId, code: 3014, reason: 'invalidated');
 
-      await reconnected.timeout(const Duration(seconds: 5));
-      expect(client.state, centrifuge.State.connected);
-      expect(calls, 2,
+        await reconnected.timeout(const Duration(seconds: 5));
+        expect(client.state, centrifuge.State.connected);
+        expect(
+          calls,
+          2,
           reason:
-              'getToken must be called again after 3014 — state was invalidated');
+              'getToken must be called again after 3014 — state was invalidated',
+        );
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('unsubscribe while Subscribe in flight cleans up server-side sub',
-        () async {
-      // Race: subscribe() puts a SubscribeRequest on the wire (state=
-      // Subscribing, _inflight=true) and the test calls unsubscribe()
-      // before the SubscribeResult arrives. The server has likely created a
-      // subscription from our request — without a cleanup Unsubscribe the
-      // server keeps pushing publications to a sub the client already
-      // cancelled. We verify the cleanup by querying the channel presence:
-      // our client id must not appear there once the dust settles.
-      final client = createClient();
-      String clientId = '';
-      final connectedListener =
-          client.connected.listen((e) => clientId = e.client);
-      addTearDown(() => connectedListener.cancel());
+    test(
+      'unsubscribe while Subscribe in flight cleans up server-side sub',
+      () async {
+        // Race: subscribe() puts a SubscribeRequest on the wire (state=
+        // Subscribing, _inflight=true) and the test calls unsubscribe()
+        // before the SubscribeResult arrives. The server has likely created a
+        // subscription from our request — without a cleanup Unsubscribe the
+        // server keeps pushing publications to a sub the client already
+        // cancelled. We verify the cleanup by querying the channel presence:
+        // our client id must not appear there once the dust settles.
+        final client = createClient();
+        String clientId = '';
+        final connectedListener = client.connected.listen(
+          (e) => clientId = e.client,
+        );
+        addTearDown(() => connectedListener.cancel());
 
-      await client.connect();
-      expect(client.state, centrifuge.State.connected);
+        await client.connect();
+        expect(client.state, centrifuge.State.connected);
 
-      final ch = randomChannel('inflight-cancel');
-      final sub = client.newSubscription(ch);
+        final ch = randomChannel('inflight-cancel');
+        final sub = client.newSubscription(ch);
 
-      // Catch any spurious publications fired after unsubscribe.
-      final latePubs = <centrifuge.PublicationEvent>[];
-      final pubListener = sub.publication.listen(latePubs.add);
-      addTearDown(() => pubListener.cancel());
+        // Catch any spurious publications fired after unsubscribe.
+        final latePubs = <centrifuge.PublicationEvent>[];
+        final pubListener = sub.publication.listen(latePubs.add);
+        addTearDown(() => pubListener.cancel());
 
-      // Trigger the race: subscribe then unsubscribe synchronously, before
-      // the SubscribeResult can arrive.
-      // ignore: unawaited_futures
-      sub.subscribe();
-      expect(sub.state, centrifuge.SubscriptionState.subscribing);
-      final unsubscribed =
-          waitForEvent<centrifuge.UnsubscribedEvent>(sub.unsubscribed);
-      // ignore: unawaited_futures
-      sub.unsubscribe();
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+        // Trigger the race: subscribe then unsubscribe synchronously, before
+        // the SubscribeResult can arrive.
+        // ignore: unawaited_futures
+        sub.subscribe();
+        expect(sub.state, centrifuge.SubscriptionState.subscribing);
+        final unsubscribed = waitForEvent<centrifuge.UnsubscribedEvent>(
+          sub.unsubscribed,
+        );
+        // ignore: unawaited_futures
+        sub.unsubscribe();
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
 
-      await unsubscribed.timeout(const Duration(seconds: 5));
-      // Give the in-flight Subscribe + cleanup Unsubscribe a moment to
-      // round-trip to the server. The grace window is short — both messages
-      // are sent on the same connection so the server processes them in
-      // order.
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+        await unsubscribed.timeout(const Duration(seconds: 5));
+        // Give the in-flight Subscribe + cleanup Unsubscribe a moment to
+        // round-trip to the server. The grace window is short — both messages
+        // are sent on the same connection so the server processes them in
+        // order.
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
-      // Server-side ground truth: the channel presence for `ch` must not
-      // contain our client id. If the cleanup Unsubscribe was missing, the
-      // server-side sub would still be active and the client id would show
-      // up here.
-      final presenceResp = await http.post(
-        Uri.parse('$apiBase/presence'),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: jsonEncode({'channel': ch}),
-      );
-      expect(presenceResp.statusCode, 200);
-      final body = jsonDecode(presenceResp.body) as Map<String, dynamic>;
-      final result = (body['result'] as Map?) ?? const {};
-      final presence = (result['presence'] as Map?) ?? const {};
-      expect(presence.containsKey(clientId), false,
+        // Server-side ground truth: the channel presence for `ch` must not
+        // contain our client id. If the cleanup Unsubscribe was missing, the
+        // server-side sub would still be active and the client id would show
+        // up here.
+        final presenceResp = await http.post(
+          Uri.parse('$apiBase/presence'),
+          headers: {'Content-Type': 'application/json', 'X-API-Key': apiKey},
+          body: jsonEncode({'channel': ch}),
+        );
+        expect(presenceResp.statusCode, 200);
+        final body = jsonDecode(presenceResp.body) as Map<String, dynamic>;
+        final result = (body['result'] as Map?) ?? const {};
+        final presence = (result['presence'] as Map?) ?? const {};
+        expect(
+          presence.containsKey(clientId),
+          false,
           reason:
               'after subscribe/unsubscribe race, server-side presence must not '
-              'list this client on the channel — got: ${presence.keys}');
+              'list this client on the channel — got: ${presence.keys}',
+        );
 
-      // Publish to the channel — no PublicationEvent should reach the local
-      // (already-unsubscribed) subscription.
-      await apiPublish(ch, {'after': 'unsubscribe'});
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      expect(latePubs, isEmpty,
+        // Publish to the channel — no PublicationEvent should reach the local
+        // (already-unsubscribed) subscription.
+        await apiPublish(ch, {'after': 'unsubscribe'});
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(
+          latePubs,
+          isEmpty,
           reason:
               'publications must not be delivered to a subscription cancelled '
-              'mid-Subscribe');
+              'mid-Subscribe',
+        );
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
     test('unsubscribe right after connect: race resolves cleanly', () async {
       // Mirrors the JS test: subscribe → disconnect → connect → unsubscribe
@@ -1098,8 +1251,9 @@ void main() {
       // ignore: unawaited_futures
       client.connect();
 
-      final unsubscribed =
-          waitForEvent<centrifuge.UnsubscribedEvent>(sub.unsubscribed);
+      final unsubscribed = waitForEvent<centrifuge.UnsubscribedEvent>(
+        sub.unsubscribed,
+      );
       // ignore: unawaited_futures
       sub.unsubscribe();
 
@@ -1116,8 +1270,9 @@ void main() {
       expect(client.state, centrifuge.State.connected);
 
       // Fresh subscribe must work after the churn.
-      final subscribed =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final subscribed = waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
       await sub.subscribe();
       await subscribed.timeout(const Duration(seconds: 5));
       expect(sub.state, centrifuge.SubscriptionState.subscribed);
@@ -1127,21 +1282,24 @@ void main() {
   });
 
   group('Lifecycle ordering', () {
-    test('disconnect future resolves only after transport close completes', () async {
-      // Awaiting disconnect() must not return until _processDisconnect has
-      // closed the transport — guards against the previous fire-and-forget
-      // pattern in processDisconnect / _failUnauthorized that returned early.
-      final client = createClient();
-      await client.connect();
-      expect(client.state, centrifuge.State.connected);
+    test(
+      'disconnect future resolves only after transport close completes',
+      () async {
+        // Awaiting disconnect() must not return until _processDisconnect has
+        // closed the transport — guards against the previous fire-and-forget
+        // pattern in processDisconnect / _failUnauthorized that returned early.
+        final client = createClient();
+        await client.connect();
+        expect(client.state, centrifuge.State.connected);
 
-      final disconnectEventFuture = client.disconnected.first;
-      await client.disconnect();
-      // Event must have already been delivered by the time disconnect() resolves.
-      expect(client.state, centrifuge.State.disconnected);
-      // And awaiting the event future is now instant — it already fired.
-      await disconnectEventFuture.timeout(const Duration(milliseconds: 100));
-    });
+        final disconnectEventFuture = client.disconnected.first;
+        await client.disconnect();
+        // Event must have already been delivered by the time disconnect() resolves.
+        expect(client.state, centrifuge.State.disconnected);
+        // And awaiting the event future is now instant — it already fired.
+        await disconnectEventFuture.timeout(const Duration(milliseconds: 100));
+      },
+    );
 
     test('reconnect from inside disconnected handler succeeds', () async {
       // A sync stream listener calling connect() while still inside
@@ -1181,11 +1339,22 @@ void main() {
       expect(events.first.code, 4); // disconnectedCodeClientClosed
 
       // All public methods now throw ClientClosedError.
-      expect(() => client.connect(), throwsA(isA<centrifuge.ClientClosedError>()));
-      expect(() => client.disconnect(), throwsA(isA<centrifuge.ClientClosedError>()));
-      expect(() => client.ready(), throwsA(isA<centrifuge.ClientClosedError>()));
-      expect(() => client.newSubscription('x'),
-          throwsA(isA<centrifuge.ClientClosedError>()));
+      expect(
+        () => client.connect(),
+        throwsA(isA<centrifuge.ClientClosedError>()),
+      );
+      expect(
+        () => client.disconnect(),
+        throwsA(isA<centrifuge.ClientClosedError>()),
+      );
+      expect(
+        () => client.ready(),
+        throwsA(isA<centrifuge.ClientClosedError>()),
+      );
+      expect(
+        () => client.newSubscription('x'),
+        throwsA(isA<centrifuge.ClientClosedError>()),
+      );
 
       // close() is idempotent.
       await client.close();
@@ -1198,42 +1367,59 @@ void main() {
       client.connect();
       await client.close();
       expect(client.state, centrifuge.State.disconnected);
-      expect(() => client.connect(), throwsA(isA<centrifuge.ClientClosedError>()));
+      expect(
+        () => client.connect(),
+        throwsA(isA<centrifuge.ClientClosedError>()),
+      );
     });
 
-    test('close errors pending ready() futures instead of leaking them', () async {
-      // Don't connect — subscription stays in subscribing indefinitely so
-      // there is no race between "subscribe completes" and "close() fires".
-      final client = createClient();
+    test(
+      'close errors pending ready() futures instead of leaking them',
+      () async {
+        // Don't connect — subscription stays in subscribing indefinitely so
+        // there is no race between "subscribe completes" and "close() fires".
+        final client = createClient();
 
-      final sub = client.newSubscription(uniqueChannel('default'));
-      await sub.subscribe(); // moves to subscribing; no request sent (client not connected)
+        final sub = client.newSubscription(uniqueChannel('default'));
+        await sub
+            .subscribe(); // moves to subscribing; no request sent (client not connected)
 
-      // Attach listener before close() so the error is never unhandled.
-      final readyDone = expectLater(
-          sub.ready(), throwsA(isA<centrifuge.SubscriptionUnsubscribedError>()));
+        // Attach listener before close() so the error is never unhandled.
+        final readyDone = expectLater(
+          sub.ready(),
+          throwsA(isA<centrifuge.SubscriptionUnsubscribedError>()),
+        );
 
-      await client.close(); // subscription.close() must error the pending ready()
-      await readyDone;
-    });
+        await client
+            .close(); // subscription.close() must error the pending ready()
+        await readyDone;
+      },
+    );
 
-    test('ready() reports a failure through its future instead of throwing', () async {
-      final client = createClient();
-      final sub = client.newSubscription(uniqueChannel('default'));
-      final errors = <Object>[];
+    test(
+      'ready() reports a failure through its future instead of throwing',
+      () async {
+        final client = createClient();
+        final sub = client.newSubscription(uniqueChannel('default'));
+        final errors = <Object>[];
 
-      unawaited(client.ready().catchError((Object error) => errors.add(error)));
-      unawaited(sub.ready().catchError((Object error) => errors.add(error)));
-      await client.close();
-      unawaited(client.ready().catchError((Object error) => errors.add(error)));
-      await Future<void>.delayed(Duration.zero);
+        unawaited(
+          client.ready().catchError((Object error) => errors.add(error)),
+        );
+        unawaited(sub.ready().catchError((Object error) => errors.add(error)));
+        await client.close();
+        unawaited(
+          client.ready().catchError((Object error) => errors.add(error)),
+        );
+        await Future<void>.delayed(Duration.zero);
 
-      expect(errors, [
-        isA<centrifuge.ClientDisconnectedError>(),
-        isA<centrifuge.SubscriptionUnsubscribedError>(),
-        isA<centrifuge.ClientClosedError>(),
-      ]);
-    });
+        expect(errors, [
+          isA<centrifuge.ClientDisconnectedError>(),
+          isA<centrifuge.SubscriptionUnsubscribedError>(),
+          isA<centrifuge.ClientClosedError>(),
+        ]);
+      },
+    );
 
     test('removeSubscription after close does not throw StateError', () async {
       final client = createClient();
@@ -1249,68 +1435,70 @@ void main() {
       await expectLater(client.removeSubscription(sub), completes);
     });
 
-    test('unsubscribe during getToken does not create a server-side subscription', () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'unsubscribe during getToken does not create a server-side subscription',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final channel = uniqueChannel('default');
+        final channel = uniqueChannel('default');
 
-      // Block getToken until we explicitly release it so we can call
-      // unsubscribe() while the token fetch is in progress.
-      final tokenCompleter = Completer<String>();
+        // Block getToken until we explicitly release it so we can call
+        // unsubscribe() while the token fetch is in progress.
+        final tokenCompleter = Completer<String>();
 
-      final sub = client.newSubscription(
+        final sub = client.newSubscription(
           channel,
-          centrifuge.SubscriptionConfig(
-            getToken: (_) => tokenCompleter.future,
-          ));
+          centrifuge.SubscriptionConfig(getToken: (_) => tokenCompleter.future),
+        );
 
-      final publications = <centrifuge.PublicationEvent>[];
-      sub.publication.listen((p) => publications.add(p));
+        final publications = <centrifuge.PublicationEvent>[];
+        sub.publication.listen((p) => publications.add(p));
 
-      // Start subscribing — will block inside getToken.
-      // ignore: unawaited_futures
-      sub.subscribe();
+        // Start subscribing — will block inside getToken.
+        // ignore: unawaited_futures
+        sub.subscribe();
 
-      // Unsubscribe while getToken is still pending.
-      await sub.unsubscribe();
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+        // Unsubscribe while getToken is still pending.
+        await sub.unsubscribe();
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
 
-      // Release the token. Without the fix, _resubscribe() proceeds past the
-      // token block and sends a SubscribeRequest despite state=unsubscribed,
-      // leaving a server-side subscription that delivers publications.
-      tokenCompleter.complete('any-token');
+        // Release the token. Without the fix, _resubscribe() proceeds past the
+        // token block and sends a SubscribeRequest despite state=unsubscribed,
+        // leaving a server-side subscription that delivers publications.
+        tokenCompleter.complete('any-token');
 
-      // Give everything time to settle.
-      await Future<void>.delayed(Duration(milliseconds: 200));
+        // Give everything time to settle.
+        await Future<void>.delayed(Duration(milliseconds: 200));
 
-      // Publish to the channel from the server side.
-      await apiPublish(channel, {'msg': 'should-not-arrive'});
-      await Future<void>.delayed(Duration(milliseconds: 100));
+        // Publish to the channel from the server side.
+        await apiPublish(channel, {'msg': 'should-not-arrive'});
+        await Future<void>.delayed(Duration(milliseconds: 100));
 
-      // The subscription must still be unsubscribed and must not have received
-      // any publications from the spurious server-side subscription.
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
-      expect(publications, isEmpty);
+        // The subscription must still be unsubscribed and must not have received
+        // any publications from the spurious server-side subscription.
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+        expect(publications, isEmpty);
 
-      await client.close();
-    });
+        await client.close();
+      },
+    );
 
-    test('subscribe() on a closed subscription throws SubscriptionUnsubscribedError',
-        () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'subscribe() on a closed subscription throws SubscriptionUnsubscribedError',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final sub = client.newSubscription(uniqueChannel('default'));
-      await sub.subscribe();
-      await client.close();
+        final sub = client.newSubscription(uniqueChannel('default'));
+        await sub.subscribe();
+        await client.close();
 
-      // After close(), the subscription is closed. subscribe() must throw a
-      // meaningful error rather than a StateError on a closed stream controller.
-      expect(
-          sub.subscribe(),
-          throwsA(isA<centrifuge.ClientClosedError>()));
-    });
+        // After close(), the subscription is closed. subscribe() must throw a
+        // meaningful error rather than a StateError on a closed stream controller.
+        expect(sub.subscribe(), throwsA(isA<centrifuge.ClientClosedError>()));
+      },
+    );
   });
 
   group('Stream recovery (extended)', () {
@@ -1323,17 +1511,21 @@ void main() {
 
       final ch = uniqueChannel('recovery');
       final firstSub = client.newSubscription(ch);
-      final firstSubscribed =
-          waitForEvent<centrifuge.SubscribedEvent>(firstSub.subscribed);
-      final firstPub =
-          waitForEvent<centrifuge.PublicationEvent>(firstSub.publication);
+      final firstSubscribed = waitForEvent<centrifuge.SubscribedEvent>(
+        firstSub.subscribed,
+      );
+      final firstPub = waitForEvent<centrifuge.PublicationEvent>(
+        firstSub.publication,
+      );
       await firstSub.subscribe();
       await firstSubscribed;
       await apiPublish(ch, {'seq': 1});
       final firstPubEvent = await firstPub;
       // Position after seeing pub#1 — comes from the pub itself.
       final positionAfterFirst = centrifuge.StreamPosition(
-          firstPubEvent.offset, (await firstSubscribed).streamPosition!.epoch);
+        firstPubEvent.offset,
+        (await firstSubscribed).streamPosition!.epoch,
+      );
 
       // Drop the original subscription entirely (simulates app restart).
       await client.removeSubscription(firstSub);
@@ -1344,18 +1536,27 @@ void main() {
 
       // New subscription pinned to the recorded position.
       final newSub = client.newSubscription(
-          ch,
-          centrifuge.SubscriptionConfig(
-              recoverable: true, since: positionAfterFirst));
-      final newSubscribed =
-          waitForEvent<centrifuge.SubscribedEvent>(newSub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(newSub.publication, 2);
+        ch,
+        centrifuge.SubscriptionConfig(
+          recoverable: true,
+          since: positionAfterFirst,
+        ),
+      );
+      final newSubscribed = waitForEvent<centrifuge.SubscribedEvent>(
+        newSub.subscribed,
+      );
+      final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+        newSub.publication,
+        2,
+      );
       await newSub.subscribe();
 
       final newCtx = await newSubscribed;
-      expect(newCtx.wasRecovering, true,
-          reason: 'config.since should drive a recovering subscribe');
+      expect(
+        newCtx.wasRecovering,
+        true,
+        reason: 'config.since should drive a recovering subscribe',
+      );
       expect(newCtx.recovered, true);
 
       final pubs = await recoveredPubs;
@@ -1383,7 +1584,7 @@ void main() {
       await sub.subscribe();
       await apiPublish(ch, {'seq': 0});
       // Wait for live delivery of the priming pub.
-      while (allPublications.length < 1) {
+      while (allPublications.isEmpty) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
 
@@ -1401,13 +1602,15 @@ void main() {
           DateTime.now().isBefore(deadline)) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
-      expect(allPublications.length, 1 + total,
-          reason: 'expected priming pub + $total recovered pubs');
+      expect(
+        allPublications.length,
+        1 + total,
+        reason: 'expected priming pub + $total recovered pubs',
+      );
       // Validate ordering — every seq matches its index.
       for (var i = 0; i <= total; i++) {
         final got = jsonDecode(utf8.decode(allPublications[i].data));
-        expect(got, {'seq': i},
-            reason: 'pub at index $i out of order: $got');
+        expect(got, {'seq': i}, reason: 'pub at index $i out of order: $got');
       }
 
       await client.disconnect();
@@ -1446,8 +1649,7 @@ void main() {
       }
       // Wait for all priming pubs.
       final primingTotal = primingCounts.reduce((a, b) => a + b);
-      final primingDeadline =
-          DateTime.now().add(const Duration(seconds: 5));
+      final primingDeadline = DateTime.now().add(const Duration(seconds: 5));
       while (DateTime.now().isBefore(primingDeadline) &&
           pubLists.fold<int>(0, (acc, l) => acc + l.length) < primingTotal) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
@@ -1459,8 +1661,7 @@ void main() {
       const missedCounts = [4, 1, 2];
       for (var i = 0; i < channels.length; i++) {
         for (var j = 0; j < missedCounts[i]; j++) {
-          await apiPublish(channels[i],
-              {'ch': i, 'seq': primingCounts[i] + j});
+          await apiPublish(channels[i], {'ch': i, 'seq': primingCounts[i] + j});
         }
       }
 
@@ -1468,7 +1669,7 @@ void main() {
 
       final expectedTotals = [
         for (var i = 0; i < channels.length; i++)
-          primingCounts[i] + missedCounts[i]
+          primingCounts[i] + missedCounts[i],
       ];
       final deadline = DateTime.now().add(const Duration(seconds: 10));
       while (DateTime.now().isBefore(deadline) &&
@@ -1476,82 +1677,89 @@ void main() {
               expectedTotals) {
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
-      expect([for (var i = 0; i < subs.length; i++) pubLists[i].length],
-          expectedTotals);
+      expect([
+        for (var i = 0; i < subs.length; i++) pubLists[i].length,
+      ], expectedTotals);
 
       // Each per-channel list is monotonic in seq, indexed from 0.
       for (var i = 0; i < channels.length; i++) {
         for (var j = 0; j < pubLists[i].length; j++) {
-          expect(jsonDecode(utf8.decode(pubLists[i][j].data)),
-              {'ch': i, 'seq': j},
-              reason: 'channel $i slot $j out of order');
+          expect(
+            jsonDecode(utf8.decode(pubLists[i][j].data)),
+            {'ch': i, 'seq': j},
+            reason: 'channel $i slot $j out of order',
+          );
         }
       }
 
       await client.disconnect();
     });
 
-    test('subscription offset advances monotonically across reconnects',
-        () async {
-      // Walk through three connect/disconnect cycles and check that the
-      // streamPosition.offset reported on each successful (re)subscribe
-      // strictly increases as new publications land.
-      final client = createClient();
-      final ch = uniqueChannel('recovery');
-      final sub = client.newSubscription(ch);
-      final subscribedEvents = <centrifuge.SubscribedEvent>[];
-      final subListener = sub.subscribed.listen(subscribedEvents.add);
-      final pubs = <centrifuge.PublicationEvent>[];
-      final pubListener = sub.publication.listen(pubs.add);
-      addTearDown(() async {
-        await subListener.cancel();
-        await pubListener.cancel();
-      });
+    test(
+      'subscription offset advances monotonically across reconnects',
+      () async {
+        // Walk through three connect/disconnect cycles and check that the
+        // streamPosition.offset reported on each successful (re)subscribe
+        // strictly increases as new publications land.
+        final client = createClient();
+        final ch = uniqueChannel('recovery');
+        final sub = client.newSubscription(ch);
+        final subscribedEvents = <centrifuge.SubscribedEvent>[];
+        final subListener = sub.subscribed.listen(subscribedEvents.add);
+        final pubs = <centrifuge.PublicationEvent>[];
+        final pubListener = sub.publication.listen(pubs.add);
+        addTearDown(() async {
+          await subListener.cancel();
+          await pubListener.cancel();
+        });
 
-      await client.connect();
-      await sub.subscribe();
-
-      var sentTotal = 0;
-      Future<void> roundTrip(int batchSize) async {
-        await client.disconnect();
-        for (var i = 0; i < batchSize; i++) {
-          await apiPublish(ch, {'idx': sentTotal + i});
-        }
-        sentTotal += batchSize;
         await client.connect();
-        // Wait until all pubs are delivered.
-        final deadline = DateTime.now().add(const Duration(seconds: 5));
-        while (pubs.length < sentTotal && DateTime.now().isBefore(deadline)) {
-          await Future<void>.delayed(const Duration(milliseconds: 20));
+        await sub.subscribe();
+
+        var sentTotal = 0;
+        Future<void> roundTrip(int batchSize) async {
+          await client.disconnect();
+          for (var i = 0; i < batchSize; i++) {
+            await apiPublish(ch, {'idx': sentTotal + i});
+          }
+          sentTotal += batchSize;
+          await client.connect();
+          // Wait until all pubs are delivered.
+          final deadline = DateTime.now().add(const Duration(seconds: 5));
+          while (pubs.length < sentTotal && DateTime.now().isBefore(deadline)) {
+            await Future<void>.delayed(const Duration(milliseconds: 20));
+          }
         }
-      }
 
-      await roundTrip(2);
-      await roundTrip(3);
-      await roundTrip(1);
+        await roundTrip(2);
+        await roundTrip(3);
+        await roundTrip(1);
 
-      // 1 initial subscribed + 3 resubscribes = 4 events.
-      expect(subscribedEvents.length, 4);
-      // The first event has a baseline streamPosition; after each round-trip
-      // the resubscribe's streamPosition.offset must be >= previous.
-      var prev = subscribedEvents.first.streamPosition!.offset;
-      for (final e in subscribedEvents.skip(1)) {
-        final cur = e.streamPosition!.offset;
-        expect(cur >= prev, true,
-            reason: 'offset went backwards: $prev -> $cur');
-        prev = cur;
-      }
-      // All publications were eventually delivered, in insertion order.
-      expect(pubs.length, sentTotal);
-      for (var i = 0; i < pubs.length; i++) {
-        expect(jsonDecode(utf8.decode(pubs[i].data)), {'idx': i});
-      }
+        // 1 initial subscribed + 3 resubscribes = 4 events.
+        expect(subscribedEvents.length, 4);
+        // The first event has a baseline streamPosition; after each round-trip
+        // the resubscribe's streamPosition.offset must be >= previous.
+        var prev = subscribedEvents.first.streamPosition!.offset;
+        for (final e in subscribedEvents.skip(1)) {
+          final cur = e.streamPosition!.offset;
+          expect(
+            cur >= prev,
+            true,
+            reason: 'offset went backwards: $prev -> $cur',
+          );
+          prev = cur;
+        }
+        // All publications were eventually delivered, in insertion order.
+        expect(pubs.length, sentTotal);
+        for (var i = 0; i < pubs.length; i++) {
+          expect(jsonDecode(utf8.decode(pubs[i].data)), {'idx': i});
+        }
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('empty recovery: reconnect with no missed pubs is a no-op',
-        () async {
+    test('empty recovery: reconnect with no missed pubs is a no-op', () async {
       // No missed publications: resubscribe should still report
       // wasRecovering=true and recovered=true (history is empty up to current
       // position) and live delivery must continue working.
@@ -1578,143 +1786,158 @@ void main() {
       expect(resub.recovered, true);
 
       // Live delivery still works.
-      final livePub =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      final livePub = waitForEvent<centrifuge.PublicationEvent>(
+        sub.publication,
+      );
       await apiPublish(ch, {'live': 'after empty recovery'});
       final got = await livePub;
-      expect(jsonDecode(utf8.decode(got.data)),
-          {'live': 'after empty recovery'});
-
-      await client.disconnect();
-    });
-
-    test('delta + server disconnect: missed publications still decoded',
-        () async {
-      // Combines fossil delta encoding and a server-initiated retryable
-      // disconnect: the recovered publications must be applied against the
-      // pre-disconnect prevData buffer correctly.
-      final client = createClient();
-      final ch = uniqueChannel('delta');
-      final sub = client.newSubscription(
-          ch, centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
-
-      final allPubs = <centrifuge.PublicationEvent>[];
-      final pubListener = sub.publication.listen(allPubs.add);
-      final subscribedEvents = <centrifuge.SubscribedEvent>[];
-      final subListener = sub.subscribed.listen(subscribedEvents.add);
-      addTearDown(() async {
-        await pubListener.cancel();
-        await subListener.cancel();
+      expect(jsonDecode(utf8.decode(got.data)), {
+        'live': 'after empty recovery',
       });
 
-      // Capture connection client id so we can target the kick.
-      final connectedFuture = client.connected.first;
-      await client.connect();
-      final clientId = (await connectedFuture).client;
-      await sub.subscribe();
-
-      // Establish prevData with a baseline publication.
-      const baseline =
-          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-      await apiPublish(ch, {'body': baseline});
-      while (allPubs.length < 1) {
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-      expect(jsonDecode(utf8.decode(allPubs[0].data)), {'body': baseline});
-
-      // Kick via the server with a retryable code, then push two messages
-      // that differ only by a small suffix — the server should encode them
-      // as deltas against the previous publication.
-      final connectingFuture =
-          waitForEvent<centrifuge.ConnectingEvent>(client.connecting);
-      await apiDisconnectClient(clientId, code: 3001);
-      await connectingFuture.timeout(const Duration(seconds: 5));
-
-      await apiPublish(ch, {'body': baseline + 'X'});
-      await apiPublish(ch, {'body': baseline + 'XY'});
-
-      // Wait for resubscribe + 2 recovered pubs.
-      final deadline = DateTime.now().add(const Duration(seconds: 10));
-      while ((subscribedEvents.length < 2 || allPubs.length < 3) &&
-          DateTime.now().isBefore(deadline)) {
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-      expect(subscribedEvents.length, 2);
-      expect(subscribedEvents[1].recovered, true);
-      expect(allPubs.length, 3);
-      expect(jsonDecode(utf8.decode(allPubs[1].data)),
-          {'body': baseline + 'X'});
-      expect(jsonDecode(utf8.decode(allPubs[2].data)),
-          {'body': baseline + 'XY'});
-
       await client.disconnect();
     });
 
-    test('repeated server kicks: every missed pub recovered in order',
-        () async {
-      // Stress: 3 server-initiated retryable disconnects, with a publication
-      // landing in each "down" window. Final publication list must contain
-      // every message in order with no duplicates or losses.
-      final client = createClient();
-      final ch = uniqueChannel('recovery');
-      final sub = client.newSubscription(ch);
+    test(
+      'delta + server disconnect: missed publications still decoded',
+      () async {
+        // Combines fossil delta encoding and a server-initiated retryable
+        // disconnect: the recovered publications must be applied against the
+        // pre-disconnect prevData buffer correctly.
+        final client = createClient();
+        final ch = uniqueChannel('delta');
+        final sub = client.newSubscription(
+          ch,
+          centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+        );
 
-      final pubs = <centrifuge.PublicationEvent>[];
-      final pubListener = sub.publication.listen(pubs.add);
-      addTearDown(() => pubListener.cancel());
+        final allPubs = <centrifuge.PublicationEvent>[];
+        final pubListener = sub.publication.listen(allPubs.add);
+        final subscribedEvents = <centrifuge.SubscribedEvent>[];
+        final subListener = sub.subscribed.listen(subscribedEvents.add);
+        addTearDown(() async {
+          await pubListener.cancel();
+          await subListener.cancel();
+        });
 
-      // Capture initial id; we re-capture after each reconnect.
-      var clientId = '';
-      final idListener = client.connected.listen((e) => clientId = e.client);
-      addTearDown(() => idListener.cancel());
+        // Capture connection client id so we can target the kick.
+        final connectedFuture = client.connected.first;
+        await client.connect();
+        final clientId = (await connectedFuture).client;
+        await sub.subscribe();
 
-      await client.connect();
-      await sub.subscribe();
-
-      var seq = 0;
-      Future<void> publish(int n) async {
-        for (var i = 0; i < n; i++) {
-          await apiPublish(ch, {'n': seq++});
+        // Establish prevData with a baseline publication.
+        const baseline =
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        await apiPublish(ch, {'body': baseline});
+        while (allPubs.isEmpty) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
         }
-      }
+        expect(jsonDecode(utf8.decode(allPubs[0].data)), {'body': baseline});
 
-      await publish(1); // priming — live
-      // Allow the priming pub to arrive before kicking; otherwise it could
-      // be racing with the disconnect frame.
-      while (pubs.length < seq) {
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-
-      const kicks = 3;
-      for (var i = 0; i < kicks; i++) {
-        final id = clientId;
-        final connectingFuture =
-            waitForEvent<centrifuge.ConnectingEvent>(client.connecting);
-        await apiDisconnectClient(id, code: 3001);
+        // Kick via the server with a retryable code, then push two messages
+        // that differ only by a small suffix — the server should encode them
+        // as deltas against the previous publication.
+        final connectingFuture = waitForEvent<centrifuge.ConnectingEvent>(
+          client.connecting,
+        );
+        await apiDisconnectClient(clientId, code: 3001);
         await connectingFuture.timeout(const Duration(seconds: 5));
-        await publish(2); // 2 pubs while reconnecting
-        // Wait until the client is connected again before the next kick.
-        final deadline = DateTime.now().add(const Duration(seconds: 5));
-        while (client.state != centrifuge.State.connected &&
+
+        await apiPublish(ch, {'body': '${baseline}X'});
+        await apiPublish(ch, {'body': '${baseline}XY'});
+
+        // Wait for resubscribe + 2 recovered pubs.
+        final deadline = DateTime.now().add(const Duration(seconds: 10));
+        while ((subscribedEvents.length < 2 || allPubs.length < 3) &&
             DateTime.now().isBefore(deadline)) {
           await Future<void>.delayed(const Duration(milliseconds: 20));
         }
-        expect(client.state, centrifuge.State.connected);
-      }
+        expect(subscribedEvents.length, 2);
+        expect(subscribedEvents[1].recovered, true);
+        expect(allPubs.length, 3);
+        expect(jsonDecode(utf8.decode(allPubs[1].data)), {
+          'body': '${baseline}X',
+        });
+        expect(jsonDecode(utf8.decode(allPubs[2].data)), {
+          'body': '${baseline}XY',
+        });
 
-      // 1 priming + (3 kicks * 2 pubs) = 7 publications total.
-      final deadline = DateTime.now().add(const Duration(seconds: 10));
-      while (pubs.length < seq && DateTime.now().isBefore(deadline)) {
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-      expect(pubs.length, seq);
-      for (var i = 0; i < pubs.length; i++) {
-        expect(jsonDecode(utf8.decode(pubs[i].data)), {'n': i},
-            reason: 'pub $i out of order: ${utf8.decode(pubs[i].data)}');
-      }
+        await client.disconnect();
+      },
+    );
 
-      await client.disconnect();
-    });
+    test(
+      'repeated server kicks: every missed pub recovered in order',
+      () async {
+        // Stress: 3 server-initiated retryable disconnects, with a publication
+        // landing in each "down" window. Final publication list must contain
+        // every message in order with no duplicates or losses.
+        final client = createClient();
+        final ch = uniqueChannel('recovery');
+        final sub = client.newSubscription(ch);
+
+        final pubs = <centrifuge.PublicationEvent>[];
+        final pubListener = sub.publication.listen(pubs.add);
+        addTearDown(() => pubListener.cancel());
+
+        // Capture initial id; we re-capture after each reconnect.
+        var clientId = '';
+        final idListener = client.connected.listen((e) => clientId = e.client);
+        addTearDown(() => idListener.cancel());
+
+        await client.connect();
+        await sub.subscribe();
+
+        var seq = 0;
+        Future<void> publish(int n) async {
+          for (var i = 0; i < n; i++) {
+            await apiPublish(ch, {'n': seq++});
+          }
+        }
+
+        await publish(1); // priming — live
+        // Allow the priming pub to arrive before kicking; otherwise it could
+        // be racing with the disconnect frame.
+        while (pubs.length < seq) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+
+        const kicks = 3;
+        for (var i = 0; i < kicks; i++) {
+          final id = clientId;
+          final connectingFuture = waitForEvent<centrifuge.ConnectingEvent>(
+            client.connecting,
+          );
+          await apiDisconnectClient(id, code: 3001);
+          await connectingFuture.timeout(const Duration(seconds: 5));
+          await publish(2); // 2 pubs while reconnecting
+          // Wait until the client is connected again before the next kick.
+          final deadline = DateTime.now().add(const Duration(seconds: 5));
+          while (client.state != centrifuge.State.connected &&
+              DateTime.now().isBefore(deadline)) {
+            await Future<void>.delayed(const Duration(milliseconds: 20));
+          }
+          expect(client.state, centrifuge.State.connected);
+        }
+
+        // 1 priming + (3 kicks * 2 pubs) = 7 publications total.
+        final deadline = DateTime.now().add(const Duration(seconds: 10));
+        while (pubs.length < seq && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        expect(pubs.length, seq);
+        for (var i = 0; i < pubs.length; i++) {
+          expect(
+            jsonDecode(utf8.decode(pubs[i].data)),
+            {'n': i},
+            reason: 'pub $i out of order: ${utf8.decode(pubs[i].data)}',
+          );
+        }
+
+        await client.disconnect();
+      },
+    );
   });
 
   group('Server-initiated reconnection', () {
@@ -1738,35 +1961,47 @@ void main() {
       return completer.future.timeout(const Duration(seconds: 5));
     }
 
-    test('retryable server disconnect: client reconnects with new id', () async {
-      final client = createClient();
-      // Listen to events BEFORE connect so we don't miss anything.
-      final connectedEvents =
-          collectEvents<centrifuge.ConnectedEvent>(client.connected, 2);
-      final firstId = await connectAndCaptureId(client);
+    test(
+      'retryable server disconnect: client reconnects with new id',
+      () async {
+        final client = createClient();
+        // Listen to events BEFORE connect so we don't miss anything.
+        final connectedEvents = collectEvents<centrifuge.ConnectedEvent>(
+          client.connected,
+          2,
+        );
+        final firstId = await connectAndCaptureId(client);
 
-      await apiDisconnectClient(firstId,
-          code: retryableCode, reason: 'retryable test');
+        await apiDisconnectClient(
+          firstId,
+          code: retryableCode,
+          reason: 'retryable test',
+        );
 
-      final ids =
-          (await connectedEvents.timeout(const Duration(seconds: 10)))
-              .map((e) => e.client)
-              .toList();
-      expect(ids[0], firstId);
-      expect(ids[1], isNot(firstId), reason: 'reconnect should yield new id');
-      expect(client.state, centrifuge.State.connected);
+        final ids =
+            (await connectedEvents.timeout(
+              const Duration(seconds: 10),
+            )).map((e) => e.client).toList();
+        expect(ids[0], firstId);
+        expect(ids[1], isNot(firstId), reason: 'reconnect should yield new id');
+        expect(client.state, centrifuge.State.connected);
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
     test('terminal server disconnect: client stays disconnected', () async {
       final client = createClient();
-      final disconnectedFuture =
-          waitForEvent<centrifuge.DisconnectedEvent>(client.disconnected);
+      final disconnectedFuture = waitForEvent<centrifuge.DisconnectedEvent>(
+        client.disconnected,
+      );
       // Anything in [3500,4000) is terminal per the protocol code rule.
       final id = await connectAndCaptureId(client);
-      await apiDisconnectClient(id,
-          code: terminalCode, reason: 'terminal test');
+      await apiDisconnectClient(
+        id,
+        code: terminalCode,
+        reason: 'terminal test',
+      );
 
       final disc = await disconnectedFuture;
       expect(disc.code, terminalCode);
@@ -1783,84 +2018,100 @@ void main() {
       expect(client.state, centrifuge.State.disconnected);
     });
 
-    test('subscriptions auto-resubscribe after retryable server disconnect',
-        () async {
-      final client = createClient();
-      final ch = randomChannel('reconn');
-      final sub = client.newSubscription(ch);
+    test(
+      'subscriptions auto-resubscribe after retryable server disconnect',
+      () async {
+        final client = createClient();
+        final ch = randomChannel('reconn');
+        final sub = client.newSubscription(ch);
 
-      final subStates =
-          collectEvents<centrifuge.SubscribedEvent>(sub.subscribed, 2);
+        final subStates = collectEvents<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+          2,
+        );
 
-      final id = await connectAndCaptureId(client);
-      await sub.subscribe();
-      expect(sub.state, centrifuge.SubscriptionState.subscribed);
+        final id = await connectAndCaptureId(client);
+        await sub.subscribe();
+        expect(sub.state, centrifuge.SubscriptionState.subscribed);
 
-      await apiDisconnectClient(id, code: retryableCode);
+        await apiDisconnectClient(id, code: retryableCode);
 
-      // Two SubscribedEvents: original + after auto-resubscribe.
-      await subStates.timeout(const Duration(seconds: 10));
-      expect(sub.state, centrifuge.SubscriptionState.subscribed);
-      expect(client.state, centrifuge.State.connected);
+        // Two SubscribedEvents: original + after auto-resubscribe.
+        await subStates.timeout(const Duration(seconds: 10));
+        expect(sub.state, centrifuge.SubscriptionState.subscribed);
+        expect(client.state, centrifuge.State.connected);
 
-      // Live publication still flows on the resubscribed sub.
-      final livePub =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
-      await apiPublish(ch, {'msg': 'after-server-reconnect'});
-      final pub = await livePub;
-      expect(jsonDecode(utf8.decode(pub.data)),
-          {'msg': 'after-server-reconnect'});
+        // Live publication still flows on the resubscribed sub.
+        final livePub = waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
+        await apiPublish(ch, {'msg': 'after-server-reconnect'});
+        final pub = await livePub;
+        expect(jsonDecode(utf8.decode(pub.data)), {
+          'msg': 'after-server-reconnect',
+        });
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('many subscriptions all resubscribe after server disconnect',
-        () async {
-      final client = createClient();
-      final channels = List.generate(5, (_) => randomChannel('reconn'));
+    test(
+      'many subscriptions all resubscribe after server disconnect',
+      () async {
+        final client = createClient();
+        final channels = List.generate(5, (_) => randomChannel('reconn'));
 
-      // Capture per-sub second-Subscribed-event futures upfront. Each
-      // subscription will fire once on initial subscribe and once on auto
-      // resubscribe.
-      final subs = <centrifuge.Subscription>[];
-      final secondSubscribed = <Future<centrifuge.SubscribedEvent>>[];
-      for (final ch in channels) {
-        final s = client.newSubscription(ch);
-        subs.add(s);
-        secondSubscribed.add(collectEvents<centrifuge.SubscribedEvent>(
-                s.subscribed, 2)
-            .then((events) => events.last));
-      }
+        // Capture per-sub second-Subscribed-event futures upfront. Each
+        // subscription will fire once on initial subscribe and once on auto
+        // resubscribe.
+        final subs = <centrifuge.Subscription>[];
+        final secondSubscribed = <Future<centrifuge.SubscribedEvent>>[];
+        for (final ch in channels) {
+          final s = client.newSubscription(ch);
+          subs.add(s);
+          secondSubscribed.add(
+            collectEvents<centrifuge.SubscribedEvent>(
+              s.subscribed,
+              2,
+            ).then((events) => events.last),
+          );
+        }
 
-      final id = await connectAndCaptureId(client);
-      for (final s in subs) {
-        await s.subscribe();
-      }
-      for (final s in subs) {
-        expect(s.state, centrifuge.SubscriptionState.subscribed);
-      }
+        final id = await connectAndCaptureId(client);
+        for (final s in subs) {
+          await s.subscribe();
+        }
+        for (final s in subs) {
+          expect(s.state, centrifuge.SubscriptionState.subscribed);
+        }
 
-      await apiDisconnectClient(id, code: retryableCode);
+        await apiDisconnectClient(id, code: retryableCode);
 
-      await Future.wait(secondSubscribed)
-          .timeout(const Duration(seconds: 10));
-      for (final s in subs) {
-        expect(s.state, centrifuge.SubscriptionState.subscribed,
-            reason: 'sub ${s.channel} should be re-subscribed');
-      }
-      expect(client.state, centrifuge.State.connected);
+        await Future.wait(
+          secondSubscribed,
+        ).timeout(const Duration(seconds: 10));
+        for (final s in subs) {
+          expect(
+            s.state,
+            centrifuge.SubscriptionState.subscribed,
+            reason: 'sub ${s.channel} should be re-subscribed',
+          );
+        }
+        expect(client.state, centrifuge.State.connected);
 
-      // Cross-check live delivery on each channel post-reconnect.
-      for (var i = 0; i < channels.length; i++) {
-        final pubFuture =
-            waitForEvent<centrifuge.PublicationEvent>(subs[i].publication);
-        await apiPublish(channels[i], {'idx': i});
-        final got = await pubFuture;
-        expect(jsonDecode(utf8.decode(got.data)), {'idx': i});
-      }
+        // Cross-check live delivery on each channel post-reconnect.
+        for (var i = 0; i < channels.length; i++) {
+          final pubFuture = waitForEvent<centrifuge.PublicationEvent>(
+            subs[i].publication,
+          );
+          await apiPublish(channels[i], {'idx': i});
+          final got = await pubFuture;
+          expect(jsonDecode(utf8.decode(got.data)), {'idx': i});
+        }
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
     test('repeated server disconnects: client remains stable', () async {
       // Stress test: many server-initiated retryable disconnects in a row
@@ -1872,8 +2123,10 @@ void main() {
 
       // 1 initial subscribe + 5 resubscribes = 6 SubscribedEvents.
       const cycles = 5;
-      final allSubscribed =
-          collectEvents<centrifuge.SubscribedEvent>(sub.subscribed, 1 + cycles);
+      final allSubscribed = collectEvents<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+        1 + cycles,
+      );
 
       var id = await connectAndCaptureId(client);
       await sub.subscribe();
@@ -1881,9 +2134,10 @@ void main() {
       for (var i = 0; i < cycles; i++) {
         // Capture next id before kicking, so we have a fresh target for the
         // following iteration.
-        final nextId =
-            collectEvents<centrifuge.ConnectedEvent>(client.connected, 1)
-                .then((evts) => evts.first.client);
+        final nextId = collectEvents<centrifuge.ConnectedEvent>(
+          client.connected,
+          1,
+        ).then((evts) => evts.first.client);
         await apiDisconnectClient(id, code: retryableCode);
         id = await nextId.timeout(const Duration(seconds: 10));
       }
@@ -1893,8 +2147,9 @@ void main() {
       expect(client.state, centrifuge.State.connected);
 
       // Sanity: a live publish is still delivered after all the churn.
-      final livePub =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
+      final livePub = waitForEvent<centrifuge.PublicationEvent>(
+        sub.publication,
+      );
       await apiPublish(ch, {'final': true});
       final got = await livePub;
       expect(jsonDecode(utf8.decode(got.data)), {'final': true});
@@ -1902,71 +2157,81 @@ void main() {
       await client.disconnect();
     });
 
-    test('recovery delivers missed publications after server disconnect',
-        () async {
-      // Mirrors the existing client-initiated recovery test but uses a
-      // server-initiated retryable disconnect, plus publications during the
-      // reconnect window.
-      final client = createClient();
-      final ch = uniqueChannel('recovery');
-      final sub = client.newSubscription(ch);
+    test(
+      'recovery delivers missed publications after server disconnect',
+      () async {
+        // Mirrors the existing client-initiated recovery test but uses a
+        // server-initiated retryable disconnect, plus publications during the
+        // reconnect window.
+        final client = createClient();
+        final ch = uniqueChannel('recovery');
+        final sub = client.newSubscription(ch);
 
-      // Listen up-front to capture every event the subscription emits
-      // throughout its lifecycle. Sync broadcast streams deliver immediately,
-      // so attaching here means no event is missed.
-      final allSubscribedEvents = <centrifuge.SubscribedEvent>[];
-      final subscribedSub =
-          sub.subscribed.listen(allSubscribedEvents.add);
-      final allPublications = <centrifuge.PublicationEvent>[];
-      final pubSub = sub.publication.listen(allPublications.add);
-      addTearDown(() async {
-        await subscribedSub.cancel();
-        await pubSub.cancel();
-      });
+        // Listen up-front to capture every event the subscription emits
+        // throughout its lifecycle. Sync broadcast streams deliver immediately,
+        // so attaching here means no event is missed.
+        final allSubscribedEvents = <centrifuge.SubscribedEvent>[];
+        final subscribedSub = sub.subscribed.listen(allSubscribedEvents.add);
+        final allPublications = <centrifuge.PublicationEvent>[];
+        final pubSub = sub.publication.listen(allPublications.add);
+        addTearDown(() async {
+          await subscribedSub.cancel();
+          await pubSub.cancel();
+        });
 
-      final id = await connectAndCaptureId(client);
-      await sub.subscribe();
+        final id = await connectAndCaptureId(client);
+        await sub.subscribe();
 
-      await apiPublish(ch, {'seq': 1});
-      // Wait until the live publication arrives.
-      while (allPublications.length < 1) {
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
+        await apiPublish(ch, {'seq': 1});
+        // Wait until the live publication arrives.
+        while (allPublications.isEmpty) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
 
-      final connectingFuture =
-          waitForEvent<centrifuge.ConnectingEvent>(client.connecting);
+        final connectingFuture = waitForEvent<centrifuge.ConnectingEvent>(
+          client.connecting,
+        );
 
-      await apiDisconnectClient(id, code: retryableCode);
-      await connectingFuture.timeout(const Duration(seconds: 5));
+        await apiDisconnectClient(id, code: retryableCode);
+        await connectingFuture.timeout(const Duration(seconds: 5));
 
-      // Publish missed messages while the client is in connecting state.
-      await apiPublish(ch, {'seq': 2});
-      await apiPublish(ch, {'seq': 3});
+        // Publish missed messages while the client is in connecting state.
+        await apiPublish(ch, {'seq': 2});
+        await apiPublish(ch, {'seq': 3});
 
-      // Wait for the resubscribe (second SubscribedEvent) + the two recovered
-      // publications. Poll because the events accumulate in lists.
-      final deadline = DateTime.now().add(const Duration(seconds: 10));
-      while (DateTime.now().isBefore(deadline) &&
-          (allSubscribedEvents.length < 2 || allPublications.length < 3)) {
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-      }
-      expect(allSubscribedEvents.length, 2,
-          reason: 'expected initial + resubscribe SubscribedEvent');
-      final resubCtx = allSubscribedEvents[1];
-      expect(resubCtx.recovered, true,
-          reason: 'subscription should report recovered=true');
-      expect(resubCtx.wasRecovering, true);
+        // Wait for the resubscribe (second SubscribedEvent) + the two recovered
+        // publications. Poll because the events accumulate in lists.
+        final deadline = DateTime.now().add(const Duration(seconds: 10));
+        while (DateTime.now().isBefore(deadline) &&
+            (allSubscribedEvents.length < 2 || allPublications.length < 3)) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        }
+        expect(
+          allSubscribedEvents.length,
+          2,
+          reason: 'expected initial + resubscribe SubscribedEvent',
+        );
+        final resubCtx = allSubscribedEvents[1];
+        expect(
+          resubCtx.recovered,
+          true,
+          reason: 'subscription should report recovered=true',
+        );
+        expect(resubCtx.wasRecovering, true);
 
-      expect(allPublications.length, 3,
-          reason: 'expected initial seq=1 + recovered seq=2,3');
-      expect(jsonDecode(utf8.decode(allPublications[1].data)), {'seq': 2});
-      expect(jsonDecode(utf8.decode(allPublications[2].data)), {'seq': 3});
+        expect(
+          allPublications.length,
+          3,
+          reason: 'expected initial seq=1 + recovered seq=2,3',
+        );
+        expect(jsonDecode(utf8.decode(allPublications[1].data)), {'seq': 2});
+        expect(jsonDecode(utf8.decode(allPublications[2].data)), {'seq': 3});
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('server-side per-channel unsubscribe: connection survives',
-        () async {
+    test('server-side per-channel unsubscribe: connection survives', () async {
       // Server forcibly unsubscribes one channel; the subscription must move
       // to unsubscribed, but the connection and any other subscriptions stay
       // intact.
@@ -1980,8 +2245,9 @@ void main() {
       await keepSub.subscribe();
       await dropSub.subscribe();
 
-      final dropUnsub =
-          waitForEvent<centrifuge.UnsubscribedEvent>(dropSub.unsubscribed);
+      final dropUnsub = waitForEvent<centrifuge.UnsubscribedEvent>(
+        dropSub.unsubscribed,
+      );
       // /api/unsubscribe (no code) sends a terminal unsubscribe (code <2500),
       // which the client treats as moveToUnsubscribed.
       await apiUnsubscribeClient(id, dropCh);
@@ -1992,8 +2258,9 @@ void main() {
       expect(client.state, centrifuge.State.connected);
 
       // Live publication still works on the surviving subscription.
-      final livePub =
-          waitForEvent<centrifuge.PublicationEvent>(keepSub.publication);
+      final livePub = waitForEvent<centrifuge.PublicationEvent>(
+        keepSub.publication,
+      );
       await apiPublish(keepCh, {'still': 'alive'});
       final got = await livePub;
       expect(jsonDecode(utf8.decode(got.data)), {'still': 'alive'});
@@ -2001,33 +2268,39 @@ void main() {
       await client.disconnect();
     });
 
-    test('connect → server-disconnect → disconnect terminates cleanly',
-        () async {
-      // Pull on the state machine from both sides: the server initiates a
-      // retryable disconnect, while the client (mid-reconnect) calls
-      // disconnect(). The client must end up disconnected with no lingering
-      // reconnect attempts.
-      final client = createClient();
-      final id = await connectAndCaptureId(client);
+    test(
+      'connect → server-disconnect → disconnect terminates cleanly',
+      () async {
+        // Pull on the state machine from both sides: the server initiates a
+        // retryable disconnect, while the client (mid-reconnect) calls
+        // disconnect(). The client must end up disconnected with no lingering
+        // reconnect attempts.
+        final client = createClient();
+        final id = await connectAndCaptureId(client);
 
-      final connectingFuture =
-          waitForEvent<centrifuge.ConnectingEvent>(client.connecting);
-      await apiDisconnectClient(id, code: retryableCode);
-      // Wait until we see the connecting event triggered by the server kick,
-      // which means we're in the reconnect window.
-      await connectingFuture.timeout(const Duration(seconds: 5));
-      expect(client.state, centrifuge.State.connecting);
+        final connectingFuture = waitForEvent<centrifuge.ConnectingEvent>(
+          client.connecting,
+        );
+        await apiDisconnectClient(id, code: retryableCode);
+        // Wait until we see the connecting event triggered by the server kick,
+        // which means we're in the reconnect window.
+        await connectingFuture.timeout(const Duration(seconds: 5));
+        expect(client.state, centrifuge.State.connecting);
 
-      await client.disconnect();
-      expect(client.state, centrifuge.State.disconnected);
+        await client.disconnect();
+        expect(client.state, centrifuge.State.disconnected);
 
-      var sawConnecting = false;
-      final probe = client.connecting.listen((_) => sawConnecting = true);
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
-      await probe.cancel();
-      expect(sawConnecting, false,
-          reason: 'no reconnect should be scheduled after disconnect()');
-    });
+        var sawConnecting = false;
+        final probe = client.connecting.listen((_) => sawConnecting = true);
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        await probe.cancel();
+        expect(
+          sawConnecting,
+          false,
+          reason: 'no reconnect should be scheduled after disconnect()',
+        );
+      },
+    );
   });
 
   group('Multiple subscriptions', () {
@@ -2035,9 +2308,14 @@ void main() {
       final client = createClient();
       await client.connect();
 
-      final channels = ['test1', 'test2', 'test3', 'test4', 'test5']
-          .map(randomChannel)
-          .toList();
+      final channels =
+          [
+            'test1',
+            'test2',
+            'test3',
+            'test4',
+            'test5',
+          ].map(randomChannel).toList();
       final subs = <centrifuge.Subscription>[];
 
       for (final ch in channels) {
@@ -2074,170 +2352,200 @@ void main() {
     }
 
     test(
-        'unsubscribed event fires even when connection drops during cleanup send',
-        () async {
-      // Regression test for: when sendUnsubscribe() throws because the
-      // transport closed mid-flight, moveToUnsubscribed must still emit
-      // UnsubscribedEvent. Previously the early return for the reconnect path
-      // skipped _addUnsubscribe, leaving the subscription silently dead.
-      //
-      // We race unsubscribe() against a server-initiated disconnect. In some
-      // runs the sendUnsubscribe reply arrives first (normal path); in others
-      // the connection drops before the reply (the previously broken path). In
-      // both cases UnsubscribedEvent must fire with code 0 and the subscription
-      // must stay unsubscribed after the client auto-reconnects.
-      final client = createClient(centrifuge.ClientConfig(
-        minReconnectDelay: const Duration(milliseconds: 50),
-      ));
-      final id = await connectAndCaptureId(client);
+      'unsubscribed event fires even when connection drops during cleanup send',
+      () async {
+        // Regression test for: when sendUnsubscribe() throws because the
+        // transport closed mid-flight, moveToUnsubscribed must still emit
+        // UnsubscribedEvent. Previously the early return for the reconnect path
+        // skipped _addUnsubscribe, leaving the subscription silently dead.
+        //
+        // We race unsubscribe() against a server-initiated disconnect. In some
+        // runs the sendUnsubscribe reply arrives first (normal path); in others
+        // the connection drops before the reply (the previously broken path). In
+        // both cases UnsubscribedEvent must fire with code 0 and the subscription
+        // must stay unsubscribed after the client auto-reconnects.
+        final client = createClient(
+          centrifuge.ClientConfig(
+            minReconnectDelay: const Duration(milliseconds: 50),
+          ),
+        );
+        final id = await connectAndCaptureId(client);
 
-      final ch = randomChannel('unsub-race');
-      final sub = client.newSubscription(ch);
-      await sub.subscribe();
+        final ch = randomChannel('unsub-race');
+        final sub = client.newSubscription(ch);
+        await sub.subscribe();
 
-      final unsubFuture =
-          waitForEvent<centrifuge.UnsubscribedEvent>(sub.unsubscribed);
-      final reconnectedFuture =
-          waitForEvent<centrifuge.ConnectedEvent>(client.connected);
+        final unsubFuture = waitForEvent<centrifuge.UnsubscribedEvent>(
+          sub.unsubscribed,
+        );
+        final reconnectedFuture = waitForEvent<centrifuge.ConnectedEvent>(
+          client.connected,
+        );
 
-      // Fire-and-forget unsubscribe then immediately drop the server
-      // connection. This races the sendUnsubscribe reply against the
-      // disconnect.
-      // ignore: unawaited_futures
-      sub.unsubscribe();
-      await apiDisconnectClient(id, code: 3001);
+        // Fire-and-forget unsubscribe then immediately drop the server
+        // connection. This races the sendUnsubscribe reply against the
+        // disconnect.
+        // ignore: unawaited_futures
+        sub.unsubscribe();
+        await apiDisconnectClient(id, code: 3001);
 
-      // UnsubscribedEvent must arrive regardless of which race path was taken.
-      final ctx =
-          await unsubFuture.timeout(const Duration(seconds: 5));
-      expect(ctx.code, 0); // unsubscribedCodeUnsubscribeCalled
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+        // UnsubscribedEvent must arrive regardless of which race path was taken.
+        final ctx = await unsubFuture.timeout(const Duration(seconds: 5));
+        expect(ctx.code, 0); // unsubscribedCodeUnsubscribeCalled
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
 
-      // Client must auto-reconnect (3001 is retryable).
-      await reconnectedFuture.timeout(const Duration(seconds: 5));
-      expect(client.state, centrifuge.State.connected);
+        // Client must auto-reconnect (3001 is retryable).
+        await reconnectedFuture.timeout(const Duration(seconds: 5));
+        expect(client.state, centrifuge.State.connected);
 
-      // Subscription must NOT be auto-resubscribed — the user explicitly
-      // called unsubscribe(), so that intent must survive the reconnect.
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed,
-          reason: 'subscription must remain unsubscribed after reconnect');
+        // Subscription must NOT be auto-resubscribed — the user explicitly
+        // called unsubscribe(), so that intent must survive the reconnect.
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(
+          sub.state,
+          centrifuge.SubscriptionState.unsubscribed,
+          reason: 'subscription must remain unsubscribed after reconnect',
+        );
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('zero minReconnectDelay does not crash on retryable disconnect',
-        () async {
-      // Regression test for backoffDelay() panicking with RangeError when
-      // minReconnectDelay is Duration.zero: nextInt(0) is illegal. The guard
-      // added to backoffDelay() must return Duration.zero instead of throwing.
-      final client = centrifuge.createClient(
-        url,
-        centrifuge.ClientConfig(
-          minReconnectDelay: Duration.zero,
-          maxReconnectDelay: const Duration(milliseconds: 200),
-        ),
-      );
-      final id = await connectAndCaptureId(client);
+    test(
+      'zero minReconnectDelay does not crash on retryable disconnect',
+      () async {
+        // Regression test for backoffDelay() panicking with RangeError when
+        // minReconnectDelay is Duration.zero: nextInt(0) is illegal. The guard
+        // added to backoffDelay() must return Duration.zero instead of throwing.
+        final client = centrifuge.createClient(
+          url,
+          centrifuge.ClientConfig(
+            minReconnectDelay: Duration.zero,
+            maxReconnectDelay: const Duration(milliseconds: 200),
+          ),
+        );
+        final id = await connectAndCaptureId(client);
 
-      final reconnected =
-          waitForEvent<centrifuge.ConnectedEvent>(client.connected);
+        final reconnected = waitForEvent<centrifuge.ConnectedEvent>(
+          client.connected,
+        );
 
-      // A retryable server disconnect triggers _scheduleReconnect →
-      // backoffDelay(0, Duration.zero, ...). Without the fix this panics.
-      await apiDisconnectClient(id, code: 3001);
+        // A retryable server disconnect triggers _scheduleReconnect →
+        // backoffDelay(0, Duration.zero, ...). Without the fix this panics.
+        await apiDisconnectClient(id, code: 3001);
 
-      await reconnected.timeout(const Duration(seconds: 5));
-      expect(client.state, centrifuge.State.connected);
+        await reconnected.timeout(const Duration(seconds: 5));
+        expect(client.state, centrifuge.State.connected);
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
   });
 
   group('Stream getState', () {
-    test('getState is called on initial subscribe and position is used for recovery',
-        () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'getState is called on initial subscribe and position is used for recovery',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('recovery');
-      var getStateCalls = 0;
+        final ch = uniqueChannel('recovery');
+        var getStateCalls = 0;
 
-      // Publish 3 messages BEFORE subscribing.
-      await apiPublish(ch, {'i': 1});
-      await apiPublish(ch, {'i': 2});
-      await apiPublish(ch, {'i': 3});
+        // Publish 3 messages BEFORE subscribing.
+        await apiPublish(ch, {'i': 1});
+        await apiPublish(ch, {'i': 2});
+        await apiPublish(ch, {'i': 3});
 
-      // getState returns position 0 — recovery delivers all 3 publications.
-      final sub = client.newSubscription(
+        // getState returns position 0 — recovery delivers all 3 publications.
+        final sub = client.newSubscription(
           ch,
-          centrifuge.SubscriptionConfig(getState: () async {
-            getStateCalls++;
-            return centrifuge.StreamPosition(Int64(0), '');
-          }));
+          centrifuge.SubscriptionConfig(
+            getState: () async {
+              getStateCalls++;
+              return centrifuge.StreamPosition(Int64(0), '');
+            },
+          ),
+        );
 
-      final subscribedFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 3);
+        final subscribedFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
+        final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+          sub.publication,
+          3,
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      await subscribedFuture;
-      expect(getStateCalls, 1);
+        await subscribedFuture;
+        expect(getStateCalls, 1);
 
-      final pubs = await recoveredPubs;
-      expect(jsonDecode(utf8.decode(pubs[0].data)), {'i': 1});
-      expect(jsonDecode(utf8.decode(pubs[1].data)), {'i': 2});
-      expect(jsonDecode(utf8.decode(pubs[2].data)), {'i': 3});
+        final pubs = await recoveredPubs;
+        expect(jsonDecode(utf8.decode(pubs[0].data)), {'i': 1});
+        expect(jsonDecode(utf8.decode(pubs[1].data)), {'i': 2});
+        expect(jsonDecode(utf8.decode(pubs[2].data)), {'i': 3});
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
-    test('getState is NOT called on reconnect when recovery succeeds',
-        () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'getState is NOT called on reconnect when recovery succeeds',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('recovery');
-      var getStateCalls = 0;
+        final ch = uniqueChannel('recovery');
+        var getStateCalls = 0;
 
-      final sub = client.newSubscription(
+        final sub = client.newSubscription(
           ch,
-          centrifuge.SubscriptionConfig(getState: () async {
-            getStateCalls++;
-            return centrifuge.StreamPosition(Int64(0), '');
-          }));
+          centrifuge.SubscriptionConfig(
+            getState: () async {
+              getStateCalls++;
+              return centrifuge.StreamPosition(Int64(0), '');
+            },
+          ),
+        );
 
-      final subscribedFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      await sub.subscribe();
-      await subscribedFuture;
-      expect(getStateCalls, 1); // Called on initial subscribe.
+        final subscribedFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
+        await sub.subscribe();
+        await subscribedFuture;
+        expect(getStateCalls, 1); // Called on initial subscribe.
 
-      // Disconnect, publish while away, reconnect — SDK has a saved position
-      // and recovery succeeds, so getState must NOT be called again.
-      await client.disconnect();
+        // Disconnect, publish while away, reconnect — SDK has a saved position
+        // and recovery succeeds, so getState must NOT be called again.
+        await client.disconnect();
 
-      await apiPublish(ch, {'i': 1});
-      await apiPublish(ch, {'i': 2});
+        await apiPublish(ch, {'i': 1});
+        await apiPublish(ch, {'i': 2});
 
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+        final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
+        final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+          sub.publication,
+          2,
+        );
 
-      await client.connect();
+        await client.connect();
 
-      final resubCtx = await resubFuture;
-      expect(resubCtx.recovered, true);
-      await recoveredPubs;
+        final resubCtx = await resubFuture;
+        expect(resubCtx.recovered, true);
+        await recoveredPubs;
 
-      expect(getStateCalls, 1,
-          reason: 'getState must not be called when recovery succeeds');
+        expect(
+          getStateCalls,
+          1,
+          reason: 'getState must not be called when recovery succeeds',
+        );
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
 
     test('getState error triggers resubscribe with error event', () async {
       final client = createClient();
@@ -2247,25 +2555,28 @@ void main() {
       var getStateCalls = 0;
 
       final sub = client.newSubscription(
-          ch,
-          centrifuge.SubscriptionConfig(
-              minResubscribeDelay: const Duration(milliseconds: 100),
-              maxResubscribeDelay: const Duration(milliseconds: 100),
-              getState: () async {
-                getStateCalls++;
-                if (getStateCalls == 1) {
-                  throw Exception('simulated DB failure');
-                }
-                // Second call succeeds.
-                return centrifuge.StreamPosition(Int64(0), '');
-              }));
+        ch,
+        centrifuge.SubscriptionConfig(
+          minResubscribeDelay: const Duration(milliseconds: 100),
+          maxResubscribeDelay: const Duration(milliseconds: 100),
+          getState: () async {
+            getStateCalls++;
+            if (getStateCalls == 1) {
+              throw Exception('simulated DB failure');
+            }
+            // Second call succeeds.
+            return centrifuge.StreamPosition(Int64(0), '');
+          },
+        ),
+      );
 
       final errors = <centrifuge.SubscriptionErrorEvent>[];
       final errSubscription = sub.error.listen(errors.add);
       addTearDown(() => errSubscription.cancel());
 
-      final subscribedFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final subscribedFuture = waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
 
       await sub.subscribe();
 
@@ -2281,36 +2592,40 @@ void main() {
       await client.disconnect();
     });
 
-    test('getState persistent failure keeps retrying without unsubscribing',
-        () async {
-      final client = createClient();
-      await client.connect();
+    test(
+      'getState persistent failure keeps retrying without unsubscribing',
+      () async {
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('recovery');
-      var getStateCalls = 0;
+        final ch = uniqueChannel('recovery');
+        var getStateCalls = 0;
 
-      final sub = client.newSubscription(
+        final sub = client.newSubscription(
           ch,
           centrifuge.SubscriptionConfig(
-              minResubscribeDelay: const Duration(milliseconds: 50),
-              maxResubscribeDelay: const Duration(milliseconds: 50),
-              getState: () async {
-                getStateCalls++;
-                throw Exception('always fails');
-              }));
+            minResubscribeDelay: const Duration(milliseconds: 50),
+            maxResubscribeDelay: const Duration(milliseconds: 50),
+            getState: () async {
+              getStateCalls++;
+              throw Exception('always fails');
+            },
+          ),
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      // Wait for several retry cycles.
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+        // Wait for several retry cycles.
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      // Should have retried multiple times while staying in subscribing state.
-      expect(getStateCalls, greaterThan(2));
-      expect(sub.state, centrifuge.SubscriptionState.subscribing);
+        // Should have retried multiple times while staying in subscribing state.
+        expect(getStateCalls, greaterThan(2));
+        expect(sub.state, centrifuge.SubscriptionState.subscribing);
 
-      await sub.unsubscribe();
-      await client.disconnect();
-    });
+        await sub.unsubscribe();
+        await client.disconnect();
+      },
+    );
 
     test('unsubscribe during getState await cancels the subscribe', () async {
       final client = createClient();
@@ -2320,12 +2635,15 @@ void main() {
       var getStateCalls = 0;
 
       final sub = client.newSubscription(
-          ch,
-          centrifuge.SubscriptionConfig(getState: () async {
+        ch,
+        centrifuge.SubscriptionConfig(
+          getState: () async {
             getStateCalls++;
             await Future<void>.delayed(const Duration(milliseconds: 300));
             return centrifuge.StreamPosition(Int64(0), '');
-          }));
+          },
+        ),
+      );
 
       // ignore: unawaited_futures
       sub.subscribe().catchError((_) {});
@@ -2352,8 +2670,9 @@ void main() {
 
       // First, subscribe normally to get a valid epoch.
       final tempSub = client.newSubscription(ch);
-      final tempSubscribed =
-          waitForEvent<centrifuge.SubscribedEvent>(tempSub.subscribed);
+      final tempSubscribed = waitForEvent<centrifuge.SubscribedEvent>(
+        tempSub.subscribed,
+      );
       await tempSub.subscribe();
       final epoch = (await tempSubscribed).streamPosition?.epoch ?? '';
       await client.removeSubscription(tempSub);
@@ -2364,13 +2683,18 @@ void main() {
 
       // Subscribe with getState returning the position BEFORE the 2 messages.
       final sub = client.newSubscription(
-          ch,
-          centrifuge.SubscriptionConfig(getState: () async {
+        ch,
+        centrifuge.SubscriptionConfig(
+          getState: () async {
             return centrifuge.StreamPosition(Int64(0), epoch);
-          }));
+          },
+        ),
+      );
 
-      final recoveredPubs =
-          collectEvents<centrifuge.PublicationEvent>(sub.publication, 2);
+      final recoveredPubs = collectEvents<centrifuge.PublicationEvent>(
+        sub.publication,
+        2,
+      );
       await sub.subscribe();
 
       final pubs = await recoveredPubs;
@@ -2380,66 +2704,76 @@ void main() {
       await client.disconnect();
     });
 
-    test('getState is called again when recovery fails (unrecoverable position)',
-        () async {
-      // Uses "smallhistory" namespace with history_size=2. After publishing
-      // enough to evict old entries, reconnecting from an old position
-      // triggers error 112 (unrecoverable position) because the subscribe
-      // request carries the reject_unrecovered flag. The SDK must then call
-      // getState again to reload app state instead of delivering
-      // recovered=false on an active subscription.
-      final client = createClient();
-      await client.connect();
+    test(
+      'getState is called again when recovery fails (unrecoverable position)',
+      () async {
+        // Uses "smallhistory" namespace with history_size=2. After publishing
+        // enough to evict old entries, reconnecting from an old position
+        // triggers error 112 (unrecoverable position) because the subscribe
+        // request carries the reject_unrecovered flag. The SDK must then call
+        // getState again to reload app state instead of delivering
+        // recovered=false on an active subscription.
+        final client = createClient();
+        await client.connect();
 
-      final ch = uniqueChannel('smallhistory');
-      var getStateCalls = 0;
+        final ch = uniqueChannel('smallhistory');
+        var getStateCalls = 0;
 
-      // Simulate a real app: getState reads current stream position from
-      // the backend.
-      final sub = client.newSubscription(
+        // Simulate a real app: getState reads current stream position from
+        // the backend.
+        final sub = client.newSubscription(
           ch,
           centrifuge.SubscriptionConfig(
-              minResubscribeDelay: const Duration(milliseconds: 100),
-              maxResubscribeDelay: const Duration(milliseconds: 100),
-              getState: () async {
-                getStateCalls++;
-                return apiHistory(ch);
-              }));
+            minResubscribeDelay: const Duration(milliseconds: 100),
+            maxResubscribeDelay: const Duration(milliseconds: 100),
+            getState: () async {
+              getStateCalls++;
+              return apiHistory(ch);
+            },
+          ),
+        );
 
-      final subscribedFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
-      await sub.subscribe();
-      await subscribedFuture;
-      expect(getStateCalls, 1);
+        final subscribedFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
+        await sub.subscribe();
+        await subscribedFuture;
+        expect(getStateCalls, 1);
 
-      // Disconnect, then publish enough messages to push the stream beyond
-      // recovery (history_size=2, so 5 messages evict old entries).
-      await client.disconnect();
+        // Disconnect, then publish enough messages to push the stream beyond
+        // recovery (history_size=2, so 5 messages evict old entries).
+        await client.disconnect();
 
-      for (var i = 0; i < 5; i++) {
-        await apiPublish(ch, {'i': i});
-      }
+        for (var i = 0; i < 5; i++) {
+          await apiPublish(ch, {'i': i});
+        }
 
-      // Reconnect — SDK tries to recover from the old position, server
-      // returns error 112, SDK resets position and calls getState again.
-      final resubFuture =
-          waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+        // Reconnect — SDK tries to recover from the old position, server
+        // returns error 112, SDK resets position and calls getState again.
+        final resubFuture = waitForEvent<centrifuge.SubscribedEvent>(
+          sub.subscribed,
+        );
 
-      await client.connect();
+        await client.connect();
 
-      await resubFuture;
-      expect(getStateCalls, 2,
-          reason: 'getState must be called again after unrecoverable position');
+        await resubFuture;
+        expect(
+          getStateCalls,
+          2,
+          reason: 'getState must be called again after unrecoverable position',
+        );
 
-      // Verify live delivery works after the getState re-sync.
-      final livePubFuture =
-          waitForEvent<centrifuge.PublicationEvent>(sub.publication);
-      await apiPublish(ch, {'live': true});
-      final live = await livePubFuture;
-      expect(jsonDecode(utf8.decode(live.data)), {'live': true});
+        // Verify live delivery works after the getState re-sync.
+        final livePubFuture = waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
+        await apiPublish(ch, {'live': true});
+        final live = await livePubFuture;
+        expect(jsonDecode(utf8.decode(live.data)), {'live': true});
 
-      await client.disconnect();
-    });
+        await client.disconnect();
+      },
+    );
   });
 
   group('Connect attempts', () {
@@ -2456,179 +2790,253 @@ void main() {
       await server.stop();
     });
 
-    test('an unanswered websocket handshake times out and the client keeps reconnecting',
-        () async {
-      server.holdHandshake = true;
-      client = centrifuge.createClient(
+    test(
+      'an unanswered websocket handshake times out and the client keeps reconnecting',
+      () async {
+        server.holdHandshake = true;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             timeout: const Duration(milliseconds: 300),
             minReconnectDelay: const Duration(milliseconds: 50),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      unawaited(client.connect());
+          ),
+        );
+        unawaited(client.connect());
 
-      await waitUntil(() => server.handshakeRequests >= 2);
-      server.holdHandshake = false;
-      await waitUntil(() => client.state == centrifuge.State.connected);
-    });
+        await waitUntil(() => server.handshakeRequests >= 2);
+        server.holdHandshake = false;
+        await waitUntil(() => client.state == centrifuge.State.connected);
+      },
+    );
 
-    test('an unanswered websocket handshake is aborted when it times out', () async {
-      server.holdHandshake = true;
-      client = centrifuge.createClient(
+    test(
+      'an unanswered websocket handshake is aborted when it times out',
+      () async {
+        server.holdHandshake = true;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             timeout: const Duration(milliseconds: 200),
             minReconnectDelay: const Duration(milliseconds: 50),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      unawaited(client.connect());
+          ),
+        );
+        unawaited(client.connect());
 
-      await waitUntil(() => server.handshakeRequests >= 4);
-      // At most the attempt in progress and the one just aborted.
-      expect(server.heldHandshakes, lessThanOrEqualTo(2));
-    });
+        await waitUntil(() => server.handshakeRequests >= 4);
+        // At most the attempt in progress and the one just aborted.
+        expect(server.heldHandshakes, lessThanOrEqualTo(2));
+      },
+    );
 
-    test('disconnect() and close() abort an unanswered websocket handshake', () async {
-      server.holdHandshake = true;
-      // Without a timeout only disconnect() and close() can stop the handshake.
-      client = centrifuge.createClient(server.url, centrifuge.ClientConfig(timeout: Duration.zero));
+    test(
+      'disconnect() and close() abort an unanswered websocket handshake',
+      () async {
+        server.holdHandshake = true;
+        // Without a timeout only disconnect() and close() can stop the handshake.
+        client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(timeout: Duration.zero),
+        );
 
-      unawaited(client.connect());
-      await waitUntil(() => server.heldHandshakes == 1);
-      await client.disconnect();
-      await waitUntil(() => server.heldHandshakes == 0, timeout: const Duration(milliseconds: 500));
+        unawaited(client.connect());
+        await waitUntil(() => server.heldHandshakes == 1);
+        await client.disconnect();
+        await waitUntil(
+          () => server.heldHandshakes == 0,
+          timeout: const Duration(milliseconds: 500),
+        );
 
-      unawaited(client.connect());
-      await waitUntil(() => server.heldHandshakes == 1);
-      await client.close();
-      await waitUntil(() => server.heldHandshakes == 0, timeout: const Duration(milliseconds: 500));
-      expect(server.handshakeRequests, 2);
-    });
+        unawaited(client.connect());
+        await waitUntil(() => server.heldHandshakes == 1);
+        await client.close();
+        await waitUntil(
+          () => server.heldHandshakes == 0,
+          timeout: const Duration(milliseconds: 500),
+        );
+        expect(server.handshakeRequests, 2);
+      },
+    );
 
-    test('an HttpClient shared through HttpOverrides still works after connecting', () async {
-      final httpServer = await HttpServer.bind('localhost', 0);
-      httpServer.listen((request) => request.response.close());
-      final overrides = SharedHttpClientOverrides();
-      addTearDown(() async {
-        overrides.client.close(force: true);
-        await httpServer.close(force: true);
-      });
+    test(
+      'an HttpClient shared through HttpOverrides still works after connecting',
+      () async {
+        final httpServer = await HttpServer.bind('localhost', 0);
+        httpServer.listen((request) => request.response.close());
+        final overrides = SharedHttpClientOverrides();
+        addTearDown(() async {
+          overrides.client.close(force: true);
+          await httpServer.close(force: true);
+        });
 
-      await HttpOverrides.runWithHttpOverrides(() async {
+        await HttpOverrides.runWithHttpOverrides(() async {
+          client = centrifuge.createClient(
+            server.url,
+            centrifuge.ClientConfig(),
+          );
+          await client.connect();
+        }, overrides);
+
+        final request = await overrides.client.getUrl(
+          Uri.parse('http://localhost:${httpServer.port}/'),
+        );
+        final response = await request.close();
+        await response.drain<void>();
+        expect(response.statusCode, 200);
+      },
+    );
+
+    test(
+      'a websocket whose handshake completes after its timeout is closed',
+      () async {
         client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-        await client.connect();
-      }, overrides);
+        final handshake = Completer<WebSocket>();
+        var aborted = false;
 
-      final request = await overrides.client.getUrl(Uri.parse('http://localhost:${httpServer.port}/'));
-      final response = await request.close();
-      await response.drain<void>();
-      expect(response.statusCode, 200);
-    });
+        final connecting = handshakeWithTimeout(
+          handshake.future,
+          const Duration(milliseconds: 50),
+          abort: () => aborted = true,
+        );
+        await expectLater(connecting, throwsA(isA<TimeoutException>()));
+        // The handshake completes anyway, too late to be aborted.
+        final webSocket = await WebSocket.connect(
+          server.url,
+          protocols: ['centrifuge-protobuf'],
+        );
+        await waitUntil(() => server.openConnections == 1);
+        handshake.complete(webSocket);
 
-    test('a websocket whose handshake completes after its timeout is closed', () async {
-      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-      final handshake = Completer<WebSocket>();
-      var aborted = false;
+        await waitUntil(() => server.openConnections == 0);
+        expect(aborted, isTrue);
+      },
+    );
 
-      final connecting = handshakeWithTimeout(handshake.future, const Duration(milliseconds: 50),
-          abort: () => aborted = true);
-      await expectLater(connecting, throwsA(isA<TimeoutException>()));
-      // The handshake completes anyway, too late to be aborted.
-      final webSocket = await WebSocket.connect(server.url, protocols: ['centrifuge-protobuf']);
-      await waitUntil(() => server.openConnections == 1);
-      handshake.complete(webSocket);
-
-      await waitUntil(() => server.openConnections == 0);
-      expect(aborted, isTrue);
-    });
-
-    test('connect() with an endpoint that is not a websocket URL throws and stays disconnected', () async {
-      client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-      var getTokenCalls = 0;
-      final errors = <centrifuge.ErrorEvent>[];
-      for (final endpoint in [
-        'http://localhost/connection/websocket',
-        'localhost/connection/websocket',
-        'ws://[bad',
-        'ws://',
-        'ws://localhost:99999/connection/websocket',
-      ]) {
-        final invalid = centrifuge.createClient(
+    test(
+      'connect() with an endpoint that is not a websocket URL throws and stays disconnected',
+      () async {
+        client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
+        var getTokenCalls = 0;
+        final errors = <centrifuge.ErrorEvent>[];
+        for (final endpoint in [
+          'http://localhost/connection/websocket',
+          'localhost/connection/websocket',
+          'ws://[bad',
+          'ws://',
+          'ws://localhost:99999/connection/websocket',
+        ]) {
+          final invalid = centrifuge.createClient(
             endpoint,
-            centrifuge.ClientConfig(getToken: (_) async {
-              getTokenCalls++;
-              return 'token';
-            }));
-        addTearDown(invalid.close);
-        invalid.error.listen(errors.add);
+            centrifuge.ClientConfig(
+              getToken: (_) async {
+                getTokenCalls++;
+                return 'token';
+              },
+            ),
+          );
+          addTearDown(invalid.close);
+          invalid.error.listen(errors.add);
 
-        await expectLater(invalid.connect(), throwsA(isA<centrifuge.ConfigurationError>()), reason: endpoint);
-        expect(invalid.state, centrifuge.State.disconnected, reason: endpoint);
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+          await expectLater(
+            invalid.connect(),
+            throwsA(isA<centrifuge.ConfigurationError>()),
+            reason: endpoint,
+          );
+          expect(
+            invalid.state,
+            centrifuge.State.disconnected,
+            reason: endpoint,
+          );
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
-      expect(errors, isEmpty);
-      expect(getTokenCalls, 0);
-    });
+        expect(errors, isEmpty);
+        expect(getTokenCalls, 0);
+      },
+    );
 
-    test('data that is not the protocol while connecting reconnects without waiting for the connect timeout', () async {
-      var connects = 0;
-      server.holdReply = (cmd) => cmd.hasConnect() && ++connects == 1;
-      client = centrifuge.createClient(
+    test(
+      'data that is not the protocol while connecting reconnects without waiting for the connect timeout',
+      () async {
+        var connects = 0;
+        server.holdReply = (cmd) => cmd.hasConnect() && ++connects == 1;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             timeout: const Duration(seconds: 5),
             minReconnectDelay: const Duration(milliseconds: 50),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      final errors = <centrifuge.ErrorEvent>[];
-      final errorSubscription = client.error.listen(errors.add);
-      addTearDown(() => errorSubscription.cancel());
+          ),
+        );
+        final errors = <centrifuge.ErrorEvent>[];
+        final errorSubscription = client.error.listen(errors.add);
+        addTearDown(() => errorSubscription.cancel());
 
-      unawaited(client.connect());
-      await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
-      server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
+        unawaited(client.connect());
+        await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+        server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
 
-      await waitUntil(() => client.state == centrifuge.State.connected, timeout: const Duration(seconds: 2));
-      expect(server.handshakeRequests, 2);
-      await waitUntil(() => server.openConnections == 1, timeout: const Duration(milliseconds: 500));
-      expect(errors, hasLength(1));
-      expect(errors.single.error, isA<centrifuge.TransportError>());
-    });
+        await waitUntil(
+          () => client.state == centrifuge.State.connected,
+          timeout: const Duration(seconds: 2),
+        );
+        expect(server.handshakeRequests, 2);
+        await waitUntil(
+          () => server.openConnections == 1,
+          timeout: const Duration(milliseconds: 500),
+        );
+        expect(errors, hasLength(1));
+        expect(errors.single.error, isA<centrifuge.TransportError>());
+      },
+    );
 
-    test('a connect reply after data that is not the protocol is not used', () async {
-      var connects = 0;
-      server.holdReply = (cmd) => cmd.hasConnect() && ++connects == 1;
-      client = centrifuge.createClient(
+    test(
+      'a connect reply after data that is not the protocol is not used',
+      () async {
+        var connects = 0;
+        server.holdReply = (cmd) => cmd.hasConnect() && ++connects == 1;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             timeout: const Duration(seconds: 5),
             minReconnectDelay: const Duration(milliseconds: 50),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
+          ),
+        );
 
-      unawaited(client.connect());
-      await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
-      final connect = server.received.firstWhere((cmd) => cmd.hasConnect());
-      server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
-      server.sendReply(protocol.Reply()
-        ..id = connect.id
-        ..connect = server.connectResult);
+        unawaited(client.connect());
+        await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+        final connect = server.received.firstWhere((cmd) => cmd.hasConnect());
+        server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
+        server.sendReply(
+          protocol.Reply()
+            ..id = connect.id
+            ..connect = server.connectResult,
+        );
 
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected,
-          timeout: const Duration(seconds: 2));
-      await waitUntil(() => server.openConnections == 1, timeout: const Duration(milliseconds: 500));
-      expect(client.state, centrifuge.State.connected);
-    });
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+          timeout: const Duration(seconds: 2),
+        );
+        await waitUntil(
+          () => server.openConnections == 1,
+          timeout: const Duration(milliseconds: 500),
+        );
+        expect(client.state, centrifuge.State.connected);
+      },
+    );
 
     test('data that is not the protocol while connected reconnects', () async {
       client = centrifuge.createClient(
-          server.url,
-          centrifuge.ClientConfig(
-            minReconnectDelay: const Duration(milliseconds: 50),
-            maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
+        server.url,
+        centrifuge.ClientConfig(
+          minReconnectDelay: const Duration(milliseconds: 50),
+          maxReconnectDelay: const Duration(milliseconds: 100),
+        ),
+      );
       final connected = <centrifuge.ConnectedEvent>[];
       final connectedSubscription = client.connected.listen(connected.add);
       addTearDown(() => connectedSubscription.cancel());
@@ -2637,43 +3045,58 @@ void main() {
       await waitUntil(() => connected.length == 1);
       server.sendBytes([0xff, 0xff, 0xff, 0xff, 0xff, 0x01, 0x02]);
 
-      await waitUntil(() => connected.length == 2, timeout: const Duration(seconds: 2));
+      await waitUntil(
+        () => connected.length == 2,
+        timeout: const Duration(seconds: 2),
+      );
       expect(server.handshakeRequests, 2);
-      await waitUntil(() => server.openConnections == 1, timeout: const Duration(milliseconds: 500));
+      await waitUntil(
+        () => server.openConnections == 1,
+        timeout: const Duration(milliseconds: 500),
+      );
     });
 
-    test('connect after disconnect during a pending attempt uses the new token', () async {
-      final firstGetData = Completer<List<int>?>();
-      var getDataCalls = 0;
-      client = centrifuge.createClient(
+    test(
+      'connect after disconnect during a pending attempt uses the new token',
+      () async {
+        final firstGetData = Completer<List<int>?>();
+        var getDataCalls = 0;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             token: 'token-a',
             getData: () {
               getDataCalls++;
-              return getDataCalls == 1 ? firstGetData.future : Future<List<int>?>.value(null);
+              return getDataCalls == 1
+                  ? firstGetData.future
+                  : Future<List<int>?>.value(null);
             },
-          ));
-      unawaited(client.connect());
-      await waitUntil(() => getDataCalls == 1);
+          ),
+        );
+        unawaited(client.connect());
+        await waitUntil(() => getDataCalls == 1);
 
-      await client.disconnect();
-      client.setToken('token-b');
-      final connected = client.connected.first;
-      unawaited(client.connect());
-      firstGetData.complete(null);
-      await connected.timeout(const Duration(seconds: 5));
+        await client.disconnect();
+        client.setToken('token-b');
+        final connected = client.connected.first;
+        unawaited(client.connect());
+        firstGetData.complete(null);
+        await connected.timeout(const Duration(seconds: 5));
 
-      final tokens =
-          server.received.where((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token);
-      expect(tokens, ['token-b']);
-    });
+        final tokens = server.received
+            .where((cmd) => cmd.hasConnect())
+            .map((cmd) => cmd.connect.token);
+        expect(tokens, ['token-b']);
+      },
+    );
 
     test('disconnect closes the transport of a pending attempt', () async {
       var holdConnect = true;
       server.holdReply = (cmd) => cmd.hasConnect() && holdConnect;
       client = centrifuge.createClient(
-          server.url, centrifuge.ClientConfig(timeout: const Duration(seconds: 1)));
+        server.url,
+        centrifuge.ClientConfig(timeout: const Duration(seconds: 1)),
+      );
       final errors = <centrifuge.ErrorEvent>[];
       final errorSubscription = client.error.listen(errors.add);
       addTearDown(() => errorSubscription.cancel());
@@ -2683,7 +3106,10 @@ void main() {
       expect(server.openConnections, 1);
 
       await client.disconnect();
-      await waitUntil(() => server.openConnections == 0, timeout: const Duration(milliseconds: 500));
+      await waitUntil(
+        () => server.openConnections == 0,
+        timeout: const Duration(milliseconds: 500),
+      );
 
       holdConnect = false;
       await client.connect().timeout(const Duration(milliseconds: 500));
@@ -2699,16 +3125,19 @@ void main() {
       final firstGetData = Completer<List<int>?>();
       var getDataCalls = 0;
       client = centrifuge.createClient(
-          server.url,
-          centrifuge.ClientConfig(
-            timeout: const Duration(milliseconds: 500),
-            minReconnectDelay: const Duration(milliseconds: 50),
-            maxReconnectDelay: const Duration(milliseconds: 100),
-            getData: () {
-              getDataCalls++;
-              return getDataCalls == 1 ? firstGetData.future : Future<List<int>?>.value(null);
-            },
-          ));
+        server.url,
+        centrifuge.ClientConfig(
+          timeout: const Duration(milliseconds: 500),
+          minReconnectDelay: const Duration(milliseconds: 50),
+          maxReconnectDelay: const Duration(milliseconds: 100),
+          getData: () {
+            getDataCalls++;
+            return getDataCalls == 1
+                ? firstGetData.future
+                : Future<List<int>?>.value(null);
+          },
+        ),
+      );
       unawaited(client.connect());
       await waitUntil(() => getDataCalls == 1 && server.openConnections == 1);
 
@@ -2725,14 +3154,16 @@ void main() {
     late FakeCentrifugoServer server;
     late centrifuge.Client client;
 
-    centrifuge.ClientConfig fastConfig({String token = '', centrifuge.ConnectionTokenCallback? getToken}) =>
-        centrifuge.ClientConfig(
-          token: token,
-          getToken: getToken,
-          timeout: const Duration(seconds: 1),
-          minReconnectDelay: const Duration(milliseconds: 20),
-          maxReconnectDelay: const Duration(milliseconds: 100),
-        );
+    centrifuge.ClientConfig fastConfig({
+      String token = '',
+      centrifuge.ConnectionTokenCallback? getToken,
+    }) => centrifuge.ClientConfig(
+      token: token,
+      getToken: getToken,
+      timeout: const Duration(seconds: 1),
+      minReconnectDelay: const Duration(milliseconds: 20),
+      maxReconnectDelay: const Duration(milliseconds: 100),
+    );
 
     setUp(() async {
       server = FakeCentrifugoServer();
@@ -2744,245 +3175,314 @@ void main() {
       await server.stop();
     });
 
-    test('disconnect() from a subscribing listener during disconnect() emits one disconnected event',
-        () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
-      final disconnects = <centrifuge.DisconnectedEvent>[];
-      final disconnectedSubscription = client.disconnected.listen(disconnects.add);
-      addTearDown(() => disconnectedSubscription.cancel());
+    test(
+      'disconnect() from a subscribing listener during disconnect() emits one disconnected event',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
+        final disconnects = <centrifuge.DisconnectedEvent>[];
+        final disconnectedSubscription = client.disconnected.listen(
+          disconnects.add,
+        );
+        addTearDown(() => disconnectedSubscription.cancel());
 
-      onFirst(sub.subscribing, () => client.disconnect());
-      await client.disconnect();
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+        onFirst(sub.subscribing, () => client.disconnect());
+        await client.disconnect();
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
-      expect(disconnects, hasLength(1));
-      expect(client.state, centrifuge.State.disconnected);
-    });
+        expect(disconnects, hasLength(1));
+        expect(client.state, centrifuge.State.disconnected);
+      },
+    );
 
-    test('disconnect() from a subscribing listener during a server close is not overridden', () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
+    test(
+      'disconnect() from a subscribing listener during a server close is not overridden',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
 
-      onFirst(sub.subscribing, () => client.disconnect());
-      await server.closeConnection();
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+        onFirst(sub.subscribing, () => client.disconnect());
+        await server.closeConnection();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
 
-      expect(client.state, centrifuge.State.disconnected);
-      expect(server.handshakeRequests, 1);
-    });
+        expect(client.state, centrifuge.State.disconnected);
+        expect(server.handshakeRequests, 1);
+      },
+    );
 
-    test('newSubscription() from a subscribing listener during a server close still reconnects',
-        () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final sub = client.newSubscription('a');
-      client.newSubscription('b');
-      await sub.subscribe();
+    test(
+      'newSubscription() from a subscribing listener during a server close still reconnects',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        final sub = client.newSubscription('a');
+        client.newSubscription('b');
+        await sub.subscribe();
 
-      onFirst(sub.subscribing, () => client.newSubscription('c'));
-      await server.closeConnection();
+        onFirst(sub.subscribing, () => client.newSubscription('c'));
+        await server.closeConnection();
 
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
-    });
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
+      },
+    );
 
-    test('disconnect() and connect() from a connecting listener do not throw', () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      final connecting = <centrifuge.ConnectingEvent>[];
-      final connectingSubscription = client.connecting.listen(connecting.add);
-      addTearDown(() => connectingSubscription.cancel());
-      Object? thrown;
+    test(
+      'disconnect() and connect() from a connecting listener do not throw',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        final connecting = <centrifuge.ConnectingEvent>[];
+        final connectingSubscription = client.connecting.listen(connecting.add);
+        addTearDown(() => connectingSubscription.cancel());
+        Object? thrown;
 
-      onFirst(client.connecting, () {
-        client.disconnect();
-        client.connect().catchError((Object e) => thrown = e);
-      });
-      await client.connect();
+        onFirst(client.connecting, () {
+          client.disconnect();
+          client.connect().catchError((Object e) => thrown = e);
+        });
+        await client.connect();
 
-      await waitUntil(() => client.state == centrifuge.State.connected);
-      expect(thrown, isNull);
-      expect(connecting, hasLength(2));
-    });
+        await waitUntil(() => client.state == centrifuge.State.connected);
+        expect(thrown, isNull);
+        expect(connecting, hasLength(2));
+      },
+    );
 
-    test('disconnect() and connect() from a connecting listener start one connect attempt', () async {
-      var getTokenCalls = 0;
-      client = centrifuge.createClient(
+    test(
+      'disconnect() and connect() from a connecting listener start one connect attempt',
+      () async {
+        var getTokenCalls = 0;
+        client = centrifuge.createClient(
           server.url,
-          fastConfig(getToken: (_) async {
-            getTokenCalls++;
-            return 'token';
-          }));
+          fastConfig(
+            getToken: (_) async {
+              getTokenCalls++;
+              return 'token';
+            },
+          ),
+        );
 
-      onFirst(client.connecting, () {
-        client.disconnect();
-        client.connect();
-      });
-      await client.connect();
-
-      await waitUntil(() => client.state == centrifuge.State.connected);
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      expect(getTokenCalls, 1);
-      expect(server.handshakeRequests, 1);
-    });
-
-    test('events from listeners of different streams arrive in the order the state changed', () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final events = <String>[];
-      client.connecting.listen((_) => events.add('connecting ${client.state.name}'));
-      client.connected.listen((_) => events.add('connected ${client.state.name}'));
-      client.disconnected.listen((_) => events.add('disconnected ${client.state.name}'));
-
-      onFirst(client.disconnected, () {
         onFirst(client.connecting, () {
           client.disconnect();
           client.connect();
         });
-        client.connect();
-      });
-      await client.disconnect();
-      await waitUntil(() => client.state == centrifuge.State.connected);
+        await client.connect();
 
-      expect(events, [
-        'disconnected disconnected',
-        'connecting connecting',
-        'disconnected disconnected',
-        'connecting connecting',
-        'connected connected',
-      ]);
-    });
+        await waitUntil(() => client.state == centrifuge.State.connected);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        expect(getTokenCalls, 1);
+        expect(server.handshakeRequests, 1);
+      },
+    );
 
-    test('disconnect() and connect() from a connected listener leave one refresh chain', () async {
-      server.connectResult = protocol.ConnectResult()
-        ..client = 'fake-client'
-        ..expires = true
-        ..ttl = 1;
-      var getTokenCalls = 0;
-      client = centrifuge.createClient(
+    test(
+      'events from listeners of different streams arrive in the order the state changed',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        final events = <String>[];
+        client.connecting.listen(
+          (_) => events.add('connecting ${client.state.name}'),
+        );
+        client.connected.listen(
+          (_) => events.add('connected ${client.state.name}'),
+        );
+        client.disconnected.listen(
+          (_) => events.add('disconnected ${client.state.name}'),
+        );
+
+        onFirst(client.disconnected, () {
+          onFirst(client.connecting, () {
+            client.disconnect();
+            client.connect();
+          });
+          client.connect();
+        });
+        await client.disconnect();
+        await waitUntil(() => client.state == centrifuge.State.connected);
+
+        expect(events, [
+          'disconnected disconnected',
+          'connecting connecting',
+          'disconnected disconnected',
+          'connecting connecting',
+          'connected connected',
+        ]);
+      },
+    );
+
+    test(
+      'disconnect() and connect() from a connected listener leave one refresh chain',
+      () async {
+        server.connectResult =
+            protocol.ConnectResult()
+              ..client = 'fake-client'
+              ..expires = true
+              ..ttl = 1;
+        var getTokenCalls = 0;
+        client = centrifuge.createClient(
           server.url,
           fastConfig(
-              token: 'token',
-              getToken: (_) async {
-                getTokenCalls++;
-                return 'token';
-              }));
+            token: 'token',
+            getToken: (_) async {
+              getTokenCalls++;
+              return 'token';
+            },
+          ),
+        );
 
-      onFirst(client.connected, () {
-        client.disconnect();
-        client.connect();
-      });
-      await client.connect();
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+        onFirst(client.connected, () {
+          client.disconnect();
+          client.connect();
+        });
+        await client.connect();
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
 
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
-      expect(getTokenCalls, 1);
-    });
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        expect(getTokenCalls, 1);
+      },
+    );
 
-    test('disconnect() and connect() from a subscribed listener leave one subscription refresh chain',
-        () async {
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
-        ..expires = true
-        ..ttl = 1;
-      var getTokenCalls = 0;
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final sub = client.newSubscription(
+    test(
+      'disconnect() and connect() from a subscribed listener leave one subscription refresh chain',
+      () async {
+        server.onSubscribe =
+            (channel, req) =>
+                protocol.SubscribeResult()
+                  ..expires = true
+                  ..ttl = 1;
+        var getTokenCalls = 0;
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        final sub = client.newSubscription(
           'news',
           centrifuge.SubscriptionConfig(
-              token: 'token',
-              getToken: (_) async {
-                getTokenCalls++;
-                return 'token';
-              }));
+            token: 'token',
+            getToken: (_) async {
+              getTokenCalls++;
+              return 'token';
+            },
+          ),
+        );
 
-      onFirst(sub.subscribed, () {
-        client.disconnect();
-        client.connect();
-      });
-      await sub.subscribe();
-      await waitUntil(() => server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+        onFirst(sub.subscribed, () {
+          client.disconnect();
+          client.connect();
+        });
+        await sub.subscribe();
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              sub.state == centrifuge.SubscriptionState.subscribed,
+        );
 
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
-      expect(getTokenCalls, 1);
-    });
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        expect(getTokenCalls, 1);
+      },
+    );
 
-    test('disconnect() and connect() from an error listener after a rejected connect connect again',
-        () async {
-      var connects = 0;
-      server.onCommand = (cmd) => cmd.hasConnect() && ++connects == 1
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..error = (protocol.Error()
-              ..code = 101
-              ..message = 'unauthorized'))
-          : null;
-      client = centrifuge.createClient(server.url, fastConfig());
+    test(
+      'disconnect() and connect() from an error listener after a rejected connect connect again',
+      () async {
+        var connects = 0;
+        server.onCommand =
+            (cmd) =>
+                cmd.hasConnect() && ++connects == 1
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..error =
+                          (protocol.Error()
+                            ..code = 101
+                            ..message = 'unauthorized'))
+                    : null;
+        client = centrifuge.createClient(server.url, fastConfig());
 
-      onFirst(client.error, () {
-        client.disconnect();
-        client.connect();
-      });
-      unawaited(client.connect());
+        onFirst(client.error, () {
+          client.disconnect();
+          client.connect();
+        });
+        unawaited(client.connect());
 
-      await waitUntil(() => client.state == centrifuge.State.connected);
-      expect(connects, 2);
-    });
+        await waitUntil(() => client.state == centrifuge.State.connected);
+        expect(connects, 2);
+      },
+    );
 
-    test('unsubscribe() and subscribe() from an error listener after a rejected subscribe subscribe again',
-        () async {
-      var subscribes = 0;
-      server.onCommand = (cmd) => cmd.hasSubscribe() && ++subscribes == 1
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..error = (protocol.Error()
-              ..code = 103
-              ..message = 'permission denied'))
-          : null;
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      final sub = client.newSubscription('news');
+    test(
+      'unsubscribe() and subscribe() from an error listener after a rejected subscribe subscribe again',
+      () async {
+        var subscribes = 0;
+        server.onCommand =
+            (cmd) =>
+                cmd.hasSubscribe() && ++subscribes == 1
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..error =
+                          (protocol.Error()
+                            ..code = 103
+                            ..message = 'permission denied'))
+                    : null;
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        final sub = client.newSubscription('news');
 
-      onFirst(sub.error, () {
-        sub.unsubscribe();
-        sub.subscribe();
-      });
-      unawaited(sub.subscribe());
+        onFirst(sub.error, () {
+          sub.unsubscribe();
+          sub.subscribe();
+        });
+        unawaited(sub.subscribe());
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
+      },
+    );
 
-    test('a call from a connected listener that reconnects waits for the new connection', () async {
-      server.onCommand = (cmd) => cmd.hasRpc()
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..rpc = protocol.RPCResult())
-          : null;
-      client = centrifuge.createClient(server.url, fastConfig());
-      late Future<Object?> call;
+    test(
+      'a call from a connected listener that reconnects waits for the new connection',
+      () async {
+        server.onCommand =
+            (cmd) =>
+                cmd.hasRpc()
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..rpc = protocol.RPCResult())
+                    : null;
+        client = centrifuge.createClient(server.url, fastConfig());
+        late Future<Object?> call;
 
-      onFirst(client.connected, () {
-        client.disconnect();
-        client.connect();
-        call = client.rpc('method', [1]);
-      });
-      await client.connect();
+        onFirst(client.connected, () {
+          client.disconnect();
+          client.connect();
+          call = client.rpc('method', [1]);
+        });
+        await client.connect();
 
-      await expectLater(call, completes);
-    });
+        await expectLater(call, completes);
+      },
+    );
   });
 
   group('Subscription teardown', () {
     late FakeCentrifugoServer server;
     late centrifuge.Client client;
 
-    protocol.Publication publication(int offset) => protocol.Publication()
-      ..data = utf8.encode('$offset')
-      ..offset = Int64(offset);
+    protocol.Publication publication(int offset) =>
+        protocol.Publication()
+          ..data = utf8.encode('$offset')
+          ..offset = Int64(offset);
 
     setUp(() async {
       server = FakeCentrifugoServer();
@@ -2995,308 +3495,416 @@ void main() {
       await server.stop();
     });
 
-    test('subscribe() after unsubscribe() during a pending subscribe subscribes again on the server',
-        () async {
-      protocol.Command? heldSubscribe;
-      server.holdReply = (cmd) {
-        if (cmd.hasSubscribe() && heldSubscribe == null) {
-          heldSubscribe = cmd;
-          return true;
-        }
-        return false;
-      };
-      await client.connect();
-      final sub = client.newSubscription('news');
-      unawaited(sub.subscribe());
-      await waitUntil(() => heldSubscribe != null);
+    test(
+      'subscribe() after unsubscribe() during a pending subscribe subscribes again on the server',
+      () async {
+        protocol.Command? heldSubscribe;
+        server.holdReply = (cmd) {
+          if (cmd.hasSubscribe() && heldSubscribe == null) {
+            heldSubscribe = cmd;
+            return true;
+          }
+          return false;
+        };
+        await client.connect();
+        final sub = client.newSubscription('news');
+        unawaited(sub.subscribe());
+        await waitUntil(() => heldSubscribe != null);
 
-      await sub.unsubscribe();
-      unawaited(sub.subscribe());
-      server.sendReply(protocol.Reply()
-        ..id = heldSubscribe!.id
-        ..subscribe = protocol.SubscribeResult());
+        await sub.unsubscribe();
+        unawaited(sub.subscribe());
+        server.sendReply(
+          protocol.Reply()
+            ..id = heldSubscribe!.id
+            ..subscribe = protocol.SubscribeResult(),
+        );
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      final commands = server.received
-          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
-          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
-      expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        final commands = server.received
+            .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+            .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+        expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
+      },
+    );
 
-    test('unsubscribe() emits unsubscribed at once and drops pushes sent before the server handles it',
-        () async {
-      server.holdReply = (cmd) => cmd.hasUnsubscribe();
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
-      final events = <String>[];
-      sub.publication.listen((_) => events.add('publication'));
-      sub.join.listen((_) => events.add('join'));
-      sub.unsubscribed.listen((_) => events.add('unsubscribed'));
+    test(
+      'unsubscribe() emits unsubscribed at once and drops pushes sent before the server handles it',
+      () async {
+        server.holdReply = (cmd) => cmd.hasUnsubscribe();
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
+        final events = <String>[];
+        sub.publication.listen((_) => events.add('publication'));
+        sub.join.listen((_) => events.add('join'));
+        sub.unsubscribed.listen((_) => events.add('unsubscribed'));
 
-      unawaited(sub.unsubscribe());
-      server.publish(channel: 'news', data: utf8.encode('1'));
-      server.join(channel: 'news', client: 'other');
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+        unawaited(sub.unsubscribe());
+        server.publish(channel: 'news', data: utf8.encode('1'));
+        server.join(channel: 'news', client: 'other');
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
-      expect(events, ['unsubscribed']);
-    });
+        expect(events, ['unsubscribed']);
+      },
+    );
 
-    test('subscribe() from an unsubscribed listener reaches the server after the cleanup unsubscribe',
-        () async {
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
+    test(
+      'subscribe() from an unsubscribed listener reaches the server after the cleanup unsubscribe',
+      () async {
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
 
-      onFirst(sub.unsubscribed, () => sub.subscribe());
-      await sub.unsubscribe();
+        onFirst(sub.unsubscribed, () => sub.subscribe());
+        await sub.unsubscribe();
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      final commands = server.received
-          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
-          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
-      expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        final commands = server.received
+            .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+            .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+        expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
+      },
+    );
 
-    test('removeSubscription() with a subscription removed before leaves the newer one for its channel',
-        () async {
-      await client.connect();
-      final removed = client.newSubscription('news');
-      await client.removeSubscription(removed);
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
+    test(
+      'removeSubscription() with a subscription removed before leaves the newer one for its channel',
+      () async {
+        await client.connect();
+        final removed = client.newSubscription('news');
+        await client.removeSubscription(removed);
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
 
-      await client.removeSubscription(removed);
+        await client.removeSubscription(removed);
 
-      expect(client.getSubscription('news'), same(sub));
-      expect(sub.state, centrifuge.SubscriptionState.subscribed);
-      expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
-    });
+        expect(client.getSubscription('news'), same(sub));
+        expect(sub.state, centrifuge.SubscriptionState.subscribed);
+        expect(server.received.where((cmd) => cmd.hasUnsubscribe()), isEmpty);
+      },
+    );
 
-    test('a server unsubscribe push during a pending resubscribe does not end it', () async {
-      protocol.Command? heldSubscribe;
-      var subscribes = 0;
-      server.holdReply = (cmd) {
-        if (cmd.hasSubscribe() && ++subscribes == 2) {
-          heldSubscribe = cmd;
-          return true;
-        }
-        return false;
-      };
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
+    test(
+      'a server unsubscribe push during a pending resubscribe does not end it',
+      () async {
+        protocol.Command? heldSubscribe;
+        var subscribes = 0;
+        server.holdReply = (cmd) {
+          if (cmd.hasSubscribe() && ++subscribes == 2) {
+            heldSubscribe = cmd;
+            return true;
+          }
+          return false;
+        };
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
 
-      await sub.unsubscribe();
-      unawaited(sub.subscribe());
-      await waitUntil(() => heldSubscribe != null);
-      // The push ends the previous subscription: the server unsubscribes a
-      // subscription in progress only after replying to its subscribe.
-      server.unsubscribe('news', 2000, 'server unsubscribe');
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      server.sendReply(protocol.Reply()
-        ..id = heldSubscribe!.id
-        ..subscribe = protocol.SubscribeResult());
+        await sub.unsubscribe();
+        unawaited(sub.subscribe());
+        await waitUntil(() => heldSubscribe != null);
+        // The push ends the previous subscription: the server unsubscribes a
+        // subscription in progress only after replying to its subscribe.
+        server.unsubscribe('news', 2000, 'server unsubscribe');
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        server.sendReply(
+          protocol.Reply()
+            ..id = heldSubscribe!.id
+            ..subscribe = protocol.SubscribeResult(),
+        );
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      final commands = server.received
-          .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
-          .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
-      expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        final commands = server.received
+            .where((cmd) => cmd.hasSubscribe() || cmd.hasUnsubscribe())
+            .map((cmd) => cmd.hasSubscribe() ? 'subscribe' : 'unsubscribe');
+        expect(commands, ['subscribe', 'unsubscribe', 'subscribe']);
+      },
+    );
 
-    test('recovered publications are not delivered after unsubscribe() from a subscribed listener',
-        () async {
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
-        ..recoverable = true
-        ..epoch = 'e'
-        ..offset = Int64(3)
-        ..wasRecovering = true
-        ..recovered = true
-        ..publications.addAll([publication(1), publication(2), publication(3)]);
-      await client.connect();
-      final sub = client.newSubscription(
-          'news', centrifuge.SubscriptionConfig(since: centrifuge.StreamPosition(Int64(0), 'e')));
-      final publications = <centrifuge.PublicationEvent>[];
-      sub.publication.listen(publications.add);
+    test(
+      'recovered publications are not delivered after unsubscribe() from a subscribed listener',
+      () async {
+        server.onSubscribe =
+            (channel, req) =>
+                protocol.SubscribeResult()
+                  ..recoverable = true
+                  ..epoch = 'e'
+                  ..offset = Int64(3)
+                  ..wasRecovering = true
+                  ..recovered = true
+                  ..publications.addAll([
+                    publication(1),
+                    publication(2),
+                    publication(3),
+                  ]);
+        await client.connect();
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+            since: centrifuge.StreamPosition(Int64(0), 'e'),
+          ),
+        );
+        final publications = <centrifuge.PublicationEvent>[];
+        sub.publication.listen(publications.add);
 
-      onFirst(sub.subscribed, () => sub.unsubscribe());
-      await sub.subscribe();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        onFirst(sub.subscribed, () => sub.unsubscribe());
+        await sub.subscribe();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(publications, isEmpty);
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
-    });
+        expect(publications, isEmpty);
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+      },
+    );
 
-    test('recovered publications not delivered after unsubscribe() from a subscribed listener are recovered again',
-        () async {
-      server.onSubscribe = (channel, req) {
-        final result = protocol.SubscribeResult()
-          ..recoverable = true
-          ..epoch = 'e'
-          ..wasRecovering = true
-          ..recovered = true;
-        // Like Centrifugo: publications after the requested position with the
-        // requested offset, or the stream top without publications.
-        for (var offset = req.offset.toInt() + 1; offset <= 3; offset++) {
-          result.publications.add(publication(offset));
-        }
-        result.offset = result.publications.isEmpty ? Int64(3) : req.offset;
-        return result;
-      };
-      await client.connect();
-      final sub = client.newSubscription(
-          'news', centrifuge.SubscriptionConfig(since: centrifuge.StreamPosition(Int64(0), 'e')));
-      final publications = <String>[];
-      sub.publication.listen((event) => publications.add(utf8.decode(event.data)));
+    test(
+      'recovered publications not delivered after unsubscribe() from a subscribed listener are recovered again',
+      () async {
+        server.onSubscribe = (channel, req) {
+          final result =
+              protocol.SubscribeResult()
+                ..recoverable = true
+                ..epoch = 'e'
+                ..wasRecovering = true
+                ..recovered = true;
+          // Like Centrifugo: publications after the requested position with the
+          // requested offset, or the stream top without publications.
+          for (var offset = req.offset.toInt() + 1; offset <= 3; offset++) {
+            result.publications.add(publication(offset));
+          }
+          result.offset = result.publications.isEmpty ? Int64(3) : req.offset;
+          return result;
+        };
+        await client.connect();
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+            since: centrifuge.StreamPosition(Int64(0), 'e'),
+          ),
+        );
+        final publications = <String>[];
+        sub.publication.listen(
+          (event) => publications.add(utf8.decode(event.data)),
+        );
 
-      onFirst(sub.subscribed, () => sub.unsubscribe());
-      await sub.subscribe();
-      await sub.subscribe();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        onFirst(sub.subscribed, () => sub.unsubscribe());
+        await sub.subscribe();
+        await sub.subscribe();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(publications, ['1', '2', '3']);
-      await sub.unsubscribe();
-      await sub.subscribe();
-      expect(server.lastSubscribe!.offset, Int64(3));
-    });
+        expect(publications, ['1', '2', '3']);
+        await sub.unsubscribe();
+        await sub.subscribe();
+        expect(server.lastSubscribe!.offset, Int64(3));
+      },
+    );
 
     // A subscribe reply has no epoch when the channel had no stream yet: the
     // server sends the epoch with the first publication and checks it on
     // recovery.
-    test('a subscription recovers with the epoch of its first publication', () async {
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()..recoverable = true;
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
+    test(
+      'a subscription recovers with the epoch of its first publication',
+      () async {
+        server.onSubscribe =
+            (channel, req) => protocol.SubscribeResult()..recoverable = true;
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
 
-      final published = sub.publication.take(2).toList();
-      server.sendPush(protocol.Push()
-        ..channel = 'news'
-        ..pub = (publication(1)..epoch = 'e1'));
-      server.sendPush(protocol.Push()
-        ..channel = 'news'
-        ..pub = publication(2));
-      await published;
+        final published = sub.publication.take(2).toList();
+        server.sendPush(
+          protocol.Push()
+            ..channel = 'news'
+            ..pub = (publication(1)..epoch = 'e1'),
+        );
+        server.sendPush(
+          protocol.Push()
+            ..channel = 'news'
+            ..pub = publication(2),
+        );
+        await published;
 
-      await sub.unsubscribe();
-      await sub.subscribe();
-      final request = server.lastSubscribe!;
-      expect(request.recover, isTrue);
-      expect(request.offset, Int64(2));
-      expect(request.epoch, 'e1');
-    });
+        await sub.unsubscribe();
+        await sub.subscribe();
+        final request = server.lastSubscribe!;
+        expect(request.recover, isTrue);
+        expect(request.offset, Int64(2));
+        expect(request.epoch, 'e1');
+      },
+    );
 
-    test('a server-side subscription recovers with the epoch of its first publication', () async {
-      server.connectResult.subs['news'] = protocol.SubscribeResult()..recoverable = true;
-      final subscribed = client.subscribed.first;
-      final published = client.publication.first;
-      await client.connect();
-      await subscribed;
+    test(
+      'a server-side subscription recovers with the epoch of its first publication',
+      () async {
+        server.connectResult.subs['news'] =
+            protocol.SubscribeResult()..recoverable = true;
+        final subscribed = client.subscribed.first;
+        final published = client.publication.first;
+        await client.connect();
+        await subscribed;
 
-      server.sendPush(protocol.Push()
-        ..channel = 'news'
-        ..pub = (publication(1)..epoch = 'e1'));
-      await published;
+        server.sendPush(
+          protocol.Push()
+            ..channel = 'news'
+            ..pub = (publication(1)..epoch = 'e1'),
+        );
+        await published;
 
-      await client.disconnect();
-      await client.connect();
-      final request = server.received.lastWhere((cmd) => cmd.hasConnect()).connect.subs['news']!;
-      expect(request.recover, isTrue);
-      expect(request.offset, Int64(1));
-      expect(request.epoch, 'e1');
-    });
+        await client.disconnect();
+        await client.connect();
+        final request =
+            server.received
+                .lastWhere((cmd) => cmd.hasConnect())
+                .connect
+                .subs['news']!;
+        expect(request.recover, isTrue);
+        expect(request.offset, Int64(1));
+        expect(request.epoch, 'e1');
+      },
+    );
 
-    test('subscribe() from a publication listener recovers after that publication', () async {
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
-        ..recoverable = true
-        ..epoch = 'e'
-        ..offset = Int64(5);
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
+    test(
+      'subscribe() from a publication listener recovers after that publication',
+      () async {
+        server.onSubscribe =
+            (channel, req) =>
+                protocol.SubscribeResult()
+                  ..recoverable = true
+                  ..epoch = 'e'
+                  ..offset = Int64(5);
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
 
-      onFirst(sub.publication, () {
-        sub.unsubscribe();
-        sub.subscribe();
-      });
-      server.sendPush(protocol.Push()
-        ..channel = 'news'
-        ..pub = publication(6));
+        onFirst(sub.publication, () {
+          sub.unsubscribe();
+          sub.subscribe();
+        });
+        server.sendPush(
+          protocol.Push()
+            ..channel = 'news'
+            ..pub = publication(6),
+        );
 
-      await waitUntil(() => server.received.where((cmd) => cmd.hasSubscribe()).length == 2);
-      expect(server.lastSubscribe!.offset, Int64(6));
-    });
+        await waitUntil(
+          () => server.received.where((cmd) => cmd.hasSubscribe()).length == 2,
+        );
+        expect(server.lastSubscribe!.offset, Int64(6));
+      },
+    );
 
-    test('server-side subscription publications not delivered after disconnect() from its listener are recovered again',
-        () async {
-      var top = 0;
-      server.onCommand = (cmd) {
-        if (!cmd.hasConnect()) return null;
-        final subscribeResult = protocol.SubscribeResult()
-          ..recoverable = true
-          ..epoch = 'e';
-        // Like Centrifugo: publications after the requested position with the
-        // requested offset, or the stream top without publications.
-        final recovery = cmd.connect.subs['news'];
-        if (recovery != null) {
-          for (var offset = recovery.offset.toInt() + 1; offset <= top; offset++) {
-            subscribeResult.publications.add(publication(offset));
+    test(
+      'server-side subscription publications not delivered after disconnect() from its listener are recovered again',
+      () async {
+        var top = 0;
+        server.onCommand = (cmd) {
+          if (!cmd.hasConnect()) return null;
+          final subscribeResult =
+              protocol.SubscribeResult()
+                ..recoverable = true
+                ..epoch = 'e';
+          // Like Centrifugo: publications after the requested position with the
+          // requested offset, or the stream top without publications.
+          final recovery = cmd.connect.subs['news'];
+          if (recovery != null) {
+            for (
+              var offset = recovery.offset.toInt() + 1;
+              offset <= top;
+              offset++
+            ) {
+              subscribeResult.publications.add(publication(offset));
+            }
           }
-        }
-        subscribeResult.offset = subscribeResult.publications.isEmpty ? Int64(top) : recovery!.offset;
-        final result = protocol.ConnectResult()..client = 'fake-client';
-        result.subs['news'] = subscribeResult;
-        return protocol.Reply()
-          ..id = cmd.id
-          ..connect = result;
-      };
-      final publications = <String>[];
-      client.publication.listen((event) => publications.add(utf8.decode(event.data)));
-      await client.connect();
-      await client.disconnect();
-      top = 2;
+          subscribeResult.offset =
+              subscribeResult.publications.isEmpty
+                  ? Int64(top)
+                  : recovery!.offset;
+          final result = protocol.ConnectResult()..client = 'fake-client';
+          result.subs['news'] = subscribeResult;
+          return protocol.Reply()
+            ..id = cmd.id
+            ..connect = result;
+        };
+        final publications = <String>[];
+        client.publication.listen(
+          (event) => publications.add(utf8.decode(event.data)),
+        );
+        await client.connect();
+        await client.disconnect();
+        top = 2;
 
-      onFirst(client.subscribed, () => client.disconnect());
-      await client.connect();
-      await client.connect();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        onFirst(client.subscribed, () => client.disconnect());
+        await client.connect();
+        await client.connect();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(publications, ['1', '2']);
-      await client.disconnect();
-      await client.connect();
-      expect(server.received.where((cmd) => cmd.hasConnect()).last.connect.subs['news']!.offset, Int64(2));
-    });
+        expect(publications, ['1', '2']);
+        await client.disconnect();
+        await client.connect();
+        expect(
+          server.received
+              .where((cmd) => cmd.hasConnect())
+              .last
+              .connect
+              .subs['news']!
+              .offset,
+          Int64(2),
+        );
+      },
+    );
 
-    test('a subscription without a position still calls getState after state invalidation', () async {
-      await client.connect();
-      var getStateCalls = 0;
-      final sub = client.newSubscription(
+    test(
+      'a subscription without a position still calls getState after state invalidation',
+      () async {
+        await client.connect();
+        var getStateCalls = 0;
+        final sub = client.newSubscription(
           'news',
-          centrifuge.SubscriptionConfig(getState: () async {
-            getStateCalls++;
-            return centrifuge.StreamPosition(Int64(10), 'e');
-          }));
-      server.disconnect(3014, 'state invalidated');
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
+          centrifuge.SubscriptionConfig(
+            getState: () async {
+              getStateCalls++;
+              return centrifuge.StreamPosition(Int64(10), 'e');
+            },
+          ),
+        );
+        server.disconnect(3014, 'state invalidated');
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      expect(getStateCalls, 1);
-      expect(server.lastSubscribe!.recover, isTrue);
-      expect(server.lastSubscribe!.offset, Int64(10));
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        expect(getStateCalls, 1);
+        expect(server.lastSubscribe!.recover, isTrue);
+        expect(server.lastSubscribe!.offset, Int64(10));
+      },
+    );
 
     test('a subscription being removed can not be subscribed again', () async {
       await client.connect();
       final sub = client.newSubscription('news');
       await sub.subscribe();
       Object? listenerError;
-      onFirst(sub.unsubscribed, () => sub.subscribe().catchError((Object error) => listenerError = error));
+      onFirst(
+        sub.unsubscribed,
+        () =>
+            sub.subscribe().catchError((Object error) => listenerError = error),
+      );
 
       final removing = client.removeSubscription(sub);
-      await expectLater(sub.subscribe(), throwsA(isA<centrifuge.ClientClosedError>()));
+      await expectLater(
+        sub.subscribe(),
+        throwsA(isA<centrifuge.ClientClosedError>()),
+      );
       await removing;
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
@@ -3308,204 +3916,274 @@ void main() {
       expect(commands, ['subscribe', 'unsubscribe']);
     });
 
-    test('ready() does not complete when a subscribed listener disconnects the client', () async {
-      await client.connect();
-      final sub = client.newSubscription('news');
-      final subscribing = sub.subscribe();
-      var readyCompleted = false;
-      unawaited(sub.ready().then((_) => readyCompleted = true, onError: (Object _) => false));
+    test(
+      'ready() does not complete when a subscribed listener disconnects the client',
+      () async {
+        await client.connect();
+        final sub = client.newSubscription('news');
+        final subscribing = sub.subscribe();
+        var readyCompleted = false;
+        unawaited(
+          sub.ready().then(
+            (_) => readyCompleted = true,
+            onError: (Object _) => false,
+          ),
+        );
 
-      onFirst(sub.subscribed, () => client.disconnect());
-      await subscribing;
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        onFirst(sub.subscribed, () => client.disconnect());
+        await subscribing;
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(sub.state, centrifuge.SubscriptionState.subscribing);
-      expect(readyCompleted, isFalse);
-    });
+        expect(sub.state, centrifuge.SubscriptionState.subscribing);
+        expect(readyCompleted, isFalse);
+      },
+    );
 
-    test('subscriptions can be removed in a loop over subscriptions()', () async {
-      await client.connect();
-      for (final channel in ['a', 'b', 'c']) {
-        await client.newSubscription(channel).subscribe();
-      }
+    test(
+      'subscriptions can be removed in a loop over subscriptions()',
+      () async {
+        await client.connect();
+        for (final channel in ['a', 'b', 'c']) {
+          await client.newSubscription(channel).subscribe();
+        }
 
-      for (final sub in client.subscriptions().values) {
-        unawaited(client.removeSubscription(sub));
-      }
-      for (final channel in ['d', 'e']) {
-        await client.newSubscription(channel).subscribe();
-      }
-      for (final sub in client.subscriptions().values) {
-        await client.removeSubscription(sub);
-      }
+        for (final sub in client.subscriptions().values) {
+          unawaited(client.removeSubscription(sub));
+        }
+        for (final channel in ['d', 'e']) {
+          await client.newSubscription(channel).subscribe();
+        }
+        for (final sub in client.subscriptions().values) {
+          await client.removeSubscription(sub);
+        }
 
-      expect(client.subscriptions(), isEmpty);
-    });
+        expect(client.subscriptions(), isEmpty);
+      },
+    );
 
-    test('close() closes all streams when an onDone handler removes its subscription', () async {
-      await client.connect();
-      final a = client.newSubscription('a');
-      final b = client.newSubscription('b');
-      await a.subscribe();
-      await b.subscribe();
-      var aDone = false;
-      var bDone = false;
-      var clientDone = false;
-      a.publication.listen(null, onDone: () {
-        aDone = true;
-        client.removeSubscription(a);
-      });
-      b.publication.listen(null, onDone: () => bDone = true);
-      client.connected.listen(null, onDone: () => clientDone = true);
+    test(
+      'close() closes all streams when an onDone handler removes its subscription',
+      () async {
+        await client.connect();
+        final a = client.newSubscription('a');
+        final b = client.newSubscription('b');
+        await a.subscribe();
+        await b.subscribe();
+        var aDone = false;
+        var bDone = false;
+        var clientDone = false;
+        a.publication.listen(
+          null,
+          onDone: () {
+            aDone = true;
+            client.removeSubscription(a);
+          },
+        );
+        b.publication.listen(null, onDone: () => bDone = true);
+        client.connected.listen(null, onDone: () => clientDone = true);
 
-      await client.close();
+        await client.close();
 
-      expect([aDone, bDone, clientDone], [true, true, true]);
-    });
+        expect([aDone, bDone, clientDone], [true, true, true]);
+      },
+    );
 
-    test('a static subscription token is kept after state invalidation', () async {
-      // Like a channel that requires a subscription token.
-      server.onCommand = (cmd) => cmd.hasSubscribe() && cmd.subscribe.token != 'static'
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..error = (protocol.Error()
-              ..code = 103
-              ..message = 'permission denied'))
-          : null;
-      await client.connect();
-      final sub = client.newSubscription('news', centrifuge.SubscriptionConfig(token: 'static'));
-      await sub.subscribe();
+    test(
+      'a static subscription token is kept after state invalidation',
+      () async {
+        // Like a channel that requires a subscription token.
+        server.onCommand =
+            (cmd) =>
+                cmd.hasSubscribe() && cmd.subscribe.token != 'static'
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..error =
+                          (protocol.Error()
+                            ..code = 103
+                            ..message = 'permission denied'))
+                    : null;
+        await client.connect();
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(token: 'static'),
+        );
+        await sub.subscribe();
 
-      server.unsubscribe('news', 2502, 'state invalidated');
-      await waitUntil(() =>
-          server.received.where((cmd) => cmd.hasSubscribe()).length == 2 &&
-          sub.state == centrifuge.SubscriptionState.subscribed);
-      server.disconnect(3014, 'state invalidated');
-      await waitUntil(
-          () => server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+        server.unsubscribe('news', 2502, 'state invalidated');
+        await waitUntil(
+          () =>
+              server.received.where((cmd) => cmd.hasSubscribe()).length == 2 &&
+              sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        server.disconnect(3014, 'state invalidated');
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              sub.state == centrifuge.SubscriptionState.subscribed,
+        );
 
-      expect(server.received.where((cmd) => cmd.hasSubscribe()).map((cmd) => cmd.subscribe.token),
-          ['static', 'static', 'static']);
-    });
+        expect(
+          server.received
+              .where((cmd) => cmd.hasSubscribe())
+              .map((cmd) => cmd.subscribe.token),
+          ['static', 'static', 'static'],
+        );
+      },
+    );
 
-    test('listeners after one that removes the subscription still get its event', () async {
-      await client.connect();
-      final sub = client.newSubscription('news');
-      final events = <String>[];
-      onFirst(sub.subscribed, () => client.removeSubscription(sub));
-      sub.subscribed.listen((_) => events.add('subscribed'));
-      sub.unsubscribed.listen((event) => events.add('unsubscribed ${event.code}'));
+    test(
+      'listeners after one that removes the subscription still get its event',
+      () async {
+        await client.connect();
+        final sub = client.newSubscription('news');
+        final events = <String>[];
+        onFirst(sub.subscribed, () => client.removeSubscription(sub));
+        sub.subscribed.listen((_) => events.add('subscribed'));
+        sub.unsubscribed.listen(
+          (event) => events.add('unsubscribed ${event.code}'),
+        );
 
-      await sub.subscribe();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        await sub.subscribe();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(events, unorderedEquals(['subscribed', 'unsubscribed 0']));
-    });
+        expect(events, unorderedEquals(['subscribed', 'unsubscribed 0']));
+      },
+    );
 
-    test('a server unsubscribe push while waiting for getState does not end the subscribe', () async {
-      await client.connect();
-      final state = Completer<centrifuge.StreamPosition>();
-      final sub = client.newSubscription('news', centrifuge.SubscriptionConfig(getState: () => state.future));
-      final unsubscribed = <centrifuge.UnsubscribedEvent>[];
-      sub.unsubscribed.listen(unsubscribed.add);
-      unawaited(sub.subscribe());
+    test(
+      'a server unsubscribe push while waiting for getState does not end the subscribe',
+      () async {
+        await client.connect();
+        final state = Completer<centrifuge.StreamPosition>();
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(getState: () => state.future),
+        );
+        final unsubscribed = <centrifuge.UnsubscribedEvent>[];
+        sub.unsubscribed.listen(unsubscribed.add);
+        unawaited(sub.subscribe());
 
-      server.unsubscribe('news', 2000, 'server unsubscribe');
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      state.complete(centrifuge.StreamPosition(Int64(0), 'e'));
+        server.unsubscribe('news', 2000, 'server unsubscribe');
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        state.complete(centrifuge.StreamPosition(Int64(0), 'e'));
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      expect(unsubscribed, isEmpty);
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        expect(unsubscribed, isEmpty);
+      },
+    );
 
-    test('disconnect() or close() from an unsubscribed listener reports no uncaught error', () async {
-      final teardowns = <Future<void> Function(centrifuge.Client)>[
-        (client) => client.disconnect(),
-        (client) => client.close(),
-      ];
-      for (final teardown in teardowns) {
+    test(
+      'disconnect() or close() from an unsubscribed listener reports no uncaught error',
+      () async {
+        final teardowns = <Future<void> Function(centrifuge.Client)>[
+          (client) => client.disconnect(),
+          (client) => client.close(),
+        ];
+        for (final teardown in teardowns) {
+          final uncaught = <Object>[];
+          final torndown = centrifuge.createClient(
+            server.url,
+            centrifuge.ClientConfig(),
+          );
+          addTearDown(torndown.close);
+          await runZonedGuarded(() async {
+            await torndown.connect();
+            final sub = torndown.newSubscription('news');
+            await sub.subscribe();
+            // Not from the subscribe reply's data callback: like a user action.
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+
+            onFirst(sub.unsubscribed, () => teardown(torndown));
+            await sub.unsubscribe();
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+          }, (error, stackTrace) => uncaught.add(error));
+
+          expect(uncaught, isEmpty);
+          expect(torndown.state, centrifuge.State.disconnected);
+        }
+      },
+    );
+
+    test(
+      'a repeated connect() or subscribe() that is not awaited reports no uncaught error',
+      () async {
         final uncaught = <Object>[];
-        final torndown = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-        addTearDown(torndown.close);
+        var holdConnect = true;
+        server.holdReply =
+            (cmd) => (cmd.hasConnect() && holdConnect) || cmd.hasSubscribe();
+        final repeated = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(),
+        );
+        addTearDown(repeated.close);
         await runZonedGuarded(() async {
-          await torndown.connect();
-          final sub = torndown.newSubscription('news');
-          await sub.subscribe();
-          // Not from the subscribe reply's data callback: like a user action.
-          await Future<void>.delayed(const Duration(milliseconds: 50));
+          unawaited(repeated.connect());
+          unawaited(repeated.connect());
+          await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
+          await repeated.disconnect();
 
-          onFirst(sub.unsubscribed, () => teardown(torndown));
+          holdConnect = false;
+          await repeated.connect();
+          final sub = repeated.newSubscription('news');
+          unawaited(sub.subscribe());
+          unawaited(sub.subscribe());
+          await waitUntil(
+            () => server.received.any((cmd) => cmd.hasSubscribe()),
+          );
           await sub.unsubscribe();
           await Future<void>.delayed(const Duration(milliseconds: 100));
         }, (error, stackTrace) => uncaught.add(error));
 
         expect(uncaught, isEmpty);
-        expect(torndown.state, centrifuge.State.disconnected);
-      }
-    });
+      },
+    );
 
-    test('a repeated connect() or subscribe() that is not awaited reports no uncaught error', () async {
-      final uncaught = <Object>[];
-      var holdConnect = true;
-      server.holdReply = (cmd) => (cmd.hasConnect() && holdConnect) || cmd.hasSubscribe();
-      final repeated = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-      addTearDown(repeated.close);
-      await runZonedGuarded(() async {
-        unawaited(repeated.connect());
-        unawaited(repeated.connect());
-        await waitUntil(() => server.received.any((cmd) => cmd.hasConnect()));
-        await repeated.disconnect();
+    test(
+      'the rest of a message is not delivered after disconnect() from a publication listener',
+      () async {
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
+        final publications = <centrifuge.PublicationEvent>[];
+        onFirst(sub.publication, () => client.disconnect());
+        sub.publication.listen(publications.add);
 
-        holdConnect = false;
-        await repeated.connect();
-        final sub = repeated.newSubscription('news');
-        unawaited(sub.subscribe());
-        unawaited(sub.subscribe());
-        await waitUntil(() => server.received.any((cmd) => cmd.hasSubscribe()));
-        await sub.unsubscribe();
+        protocol.Reply push(int offset) =>
+            protocol.Reply()
+              ..push =
+                  (protocol.Push()
+                    ..channel = 'news'
+                    ..pub = publication(offset));
+        server.sendFrame([push(1), push(2), push(3)]);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(publications, hasLength(1));
+      },
+    );
+
+    test(
+      'server-side subscription publications are not delivered after disconnect() from its listener',
+      () async {
+        server.connectResult = protocol.ConnectResult()..client = 'fake-client';
+        server.connectResult.subs['news'] =
+            protocol.SubscribeResult()
+              ..recoverable = true
+              ..epoch = 'e'
+              ..offset = Int64(2)
+              ..publications.addAll([publication(1), publication(2)]);
+        final publications = <centrifuge.ServerPublicationEvent>[];
+        client.publication.listen(publications.add);
+
+        onFirst(client.subscribed, () => client.disconnect());
+        await client.connect();
         await Future<void>.delayed(const Duration(milliseconds: 100));
-      }, (error, stackTrace) => uncaught.add(error));
 
-      expect(uncaught, isEmpty);
-    });
-
-    test('the rest of a message is not delivered after disconnect() from a publication listener',
-        () async {
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
-      final publications = <centrifuge.PublicationEvent>[];
-      onFirst(sub.publication, () => client.disconnect());
-      sub.publication.listen(publications.add);
-
-      protocol.Reply push(int offset) => protocol.Reply()
-        ..push = (protocol.Push()
-          ..channel = 'news'
-          ..pub = publication(offset));
-      server.sendFrame([push(1), push(2), push(3)]);
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-
-      expect(publications, hasLength(1));
-    });
-
-    test('server-side subscription publications are not delivered after disconnect() from its listener',
-        () async {
-      server.connectResult = protocol.ConnectResult()..client = 'fake-client';
-      server.connectResult.subs['news'] = protocol.SubscribeResult()
-        ..recoverable = true
-        ..epoch = 'e'
-        ..offset = Int64(2)
-        ..publications.addAll([publication(1), publication(2)]);
-      final publications = <centrifuge.ServerPublicationEvent>[];
-      client.publication.listen(publications.add);
-
-      onFirst(client.subscribed, () => client.disconnect());
-      await client.connect();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      expect(publications, isEmpty);
-      expect(client.state, centrifuge.State.disconnected);
-    });
+        expect(publications, isEmpty);
+        expect(client.state, centrifuge.State.disconnected);
+      },
+    );
   });
 
   group('Token refresh', () {
@@ -3525,21 +4203,27 @@ void main() {
       await server.stop();
     });
 
-    test('a refresh started before a reconnect does not continue on the new connection', () async {
-      server.connectResult = protocol.ConnectResult()
-        ..client = 'fake-client'
-        ..expires = true
-        ..ttl = 1;
-      server.onCommand = (cmd) => cmd.hasRefresh()
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..refresh = (protocol.RefreshResult()
+    test(
+      'a refresh started before a reconnect does not continue on the new connection',
+      () async {
+        server.connectResult =
+            protocol.ConnectResult()
+              ..client = 'fake-client'
               ..expires = true
-              ..ttl = 1))
-          : null;
-      final slowToken = Completer<String>();
-      var getTokenCalls = 0;
-      client = centrifuge.createClient(
+              ..ttl = 1;
+        server.onCommand =
+            (cmd) =>
+                cmd.hasRefresh()
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..refresh =
+                          (protocol.RefreshResult()
+                            ..expires = true
+                            ..ttl = 1))
+                    : null;
+        final slowToken = Completer<String>();
+        var getTokenCalls = 0;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             token: 'token',
@@ -3547,75 +4231,102 @@ void main() {
             maxReconnectDelay: const Duration(milliseconds: 100),
             getToken: (_) {
               getTokenCalls++;
-              return getTokenCalls == 1 ? slowToken.future : Future.value('token');
+              return getTokenCalls == 1
+                  ? slowToken.future
+                  : Future.value('token');
             },
-          ));
-      await client.connect();
-      await waitUntil(() => getTokenCalls == 1);
+          ),
+        );
+        await client.connect();
+        await waitUntil(() => getTokenCalls == 1);
 
-      await server.closeConnection();
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
-      final refreshes = commands((cmd) => cmd.hasRefresh()).length;
-      slowToken.complete('token');
-      // Well before the new connection's own refresh, due 1s after it connected.
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+        await server.closeConnection();
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
+        final refreshes = commands((cmd) => cmd.hasRefresh()).length;
+        slowToken.complete('token');
+        // Well before the new connection's own refresh, due 1s after it connected.
+        await Future<void>.delayed(const Duration(milliseconds: 300));
 
-      expect(commands((cmd) => cmd.hasRefresh()), hasLength(refreshes));
-    });
+        expect(commands((cmd) => cmd.hasRefresh()), hasLength(refreshes));
+      },
+    );
 
-    test('a subscription refresh started before a resubscribe does not continue', () async {
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
-        ..expires = true
-        ..ttl = 1;
-      server.onCommand = (cmd) => cmd.hasSubRefresh()
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..subRefresh = (protocol.SubRefreshResult()
-              ..expires = true
-              ..ttl = 1))
-          : null;
-      client = centrifuge.createClient(
+    test(
+      'a subscription refresh started before a resubscribe does not continue',
+      () async {
+        server.onSubscribe =
+            (channel, req) =>
+                protocol.SubscribeResult()
+                  ..expires = true
+                  ..ttl = 1;
+        server.onCommand =
+            (cmd) =>
+                cmd.hasSubRefresh()
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..subRefresh =
+                          (protocol.SubRefreshResult()
+                            ..expires = true
+                            ..ttl = 1))
+                    : null;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             minReconnectDelay: const Duration(milliseconds: 20),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      await client.connect();
-      final slowToken = Completer<String>();
-      var getTokenCalls = 0;
-      final sub = client.newSubscription(
+          ),
+        );
+        await client.connect();
+        final slowToken = Completer<String>();
+        var getTokenCalls = 0;
+        final sub = client.newSubscription(
           'news',
           centrifuge.SubscriptionConfig(
-              token: 'token',
-              getToken: (_) {
-                getTokenCalls++;
-                return getTokenCalls == 1 ? slowToken.future : Future.value('token');
-              }));
-      await sub.subscribe();
-      await waitUntil(() => getTokenCalls == 1);
+            token: 'token',
+            getToken: (_) {
+              getTokenCalls++;
+              return getTokenCalls == 1
+                  ? slowToken.future
+                  : Future.value('token');
+            },
+          ),
+        );
+        await sub.subscribe();
+        await waitUntil(() => getTokenCalls == 1);
 
-      await server.closeConnection();
-      await waitUntil(() =>
-          server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
-      final refreshes = commands((cmd) => cmd.hasSubRefresh()).length;
-      slowToken.complete('token');
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+        await server.closeConnection();
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        final refreshes = commands((cmd) => cmd.hasSubRefresh()).length;
+        slowToken.complete('token');
+        await Future<void>.delayed(const Duration(milliseconds: 300));
 
-      expect(commands((cmd) => cmd.hasSubRefresh()), hasLength(refreshes));
-    });
+        expect(commands((cmd) => cmd.hasSubRefresh()), hasLength(refreshes));
+      },
+    );
 
-    test('a subscription getToken that times out retries the subscription without reconnecting', () async {
-      client = centrifuge.createClient(
+    test(
+      'a subscription getToken that times out retries the subscription without reconnecting',
+      () async {
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             minReconnectDelay: const Duration(milliseconds: 20),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      final connecting = <centrifuge.ConnectingEvent>[];
-      client.connecting.listen(connecting.add);
-      await client.connect();
-      var getTokenCalls = 0;
-      final sub = client.newSubscription(
+          ),
+        );
+        final connecting = <centrifuge.ConnectingEvent>[];
+        client.connecting.listen(connecting.add);
+        await client.connect();
+        var getTokenCalls = 0;
+        final sub = client.newSubscription(
           'news',
           centrifuge.SubscriptionConfig(
             minResubscribeDelay: const Duration(milliseconds: 20),
@@ -3628,29 +4339,38 @@ void main() {
               }
               return 'token';
             },
-          ));
-      final errors = <centrifuge.SubscriptionErrorEvent>[];
-      sub.error.listen(errors.add);
+          ),
+        );
+        final errors = <centrifuge.SubscriptionErrorEvent>[];
+        sub.error.listen(errors.add);
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      expect(server.handshakeRequests, 1);
-      expect(connecting.map((event) => event.code), [0]);
-      expect(errors, hasLength(1));
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        expect(server.handshakeRequests, 1);
+        expect(connecting.map((event) => event.code), [0]);
+        expect(errors, hasLength(1));
+      },
+    );
 
-    test('setToken() after an expired token still gets a new token from getToken', () async {
-      var connects = 0;
-      server.onCommand = (cmd) => cmd.hasConnect() && ++connects == 1
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..error = (protocol.Error()
-              ..code = 109
-              ..message = 'token expired'))
-          : null;
-      var getTokenCalls = 0;
-      client = centrifuge.createClient(
+    test(
+      'setToken() after an expired token still gets a new token from getToken',
+      () async {
+        var connects = 0;
+        server.onCommand =
+            (cmd) =>
+                cmd.hasConnect() && ++connects == 1
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..error =
+                          (protocol.Error()
+                            ..code = 109
+                            ..message = 'token expired'))
+                    : null;
+        var getTokenCalls = 0;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             token: 'stale',
@@ -3660,279 +4380,380 @@ void main() {
               getTokenCalls++;
               return 'fresh';
             },
-          ));
-      // E.g. an app putting back the token it has cached.
-      onFirst(client.error, () => client.setToken('stale'));
+          ),
+        );
+        // E.g. an app putting back the token it has cached.
+        onFirst(client.error, () => client.setToken('stale'));
 
-      unawaited(client.connect());
+        unawaited(client.connect());
 
-      await waitUntil(() => client.state == centrifuge.State.connected);
-      expect(getTokenCalls, 1);
-      expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['stale', 'fresh']);
-    });
+        await waitUntil(() => client.state == centrifuge.State.connected);
+        expect(getTokenCalls, 1);
+        expect(
+          commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token),
+          ['stale', 'fresh'],
+        );
+      },
+    );
 
-    test('an expired static token without getToken stops with a configuration error', () async {
-      server.onCommand = (cmd) => cmd.hasConnect()
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..error = (protocol.Error()
-              ..code = 109
-              ..message = 'token expired'))
-          : null;
-      client = centrifuge.createClient(
+    test(
+      'an expired static token without getToken stops with a configuration error',
+      () async {
+        server.onCommand =
+            (cmd) =>
+                cmd.hasConnect()
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..error =
+                          (protocol.Error()
+                            ..code = 109
+                            ..message = 'token expired'))
+                    : null;
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             token: 'expired',
             minReconnectDelay: const Duration(milliseconds: 20),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      final errors = <centrifuge.ErrorEvent>[];
-      client.error.listen(errors.add);
-      final disconnected = client.disconnected.first;
-      unawaited(client.connect());
+          ),
+        );
+        final errors = <centrifuge.ErrorEvent>[];
+        client.error.listen(errors.add);
+        final disconnected = client.disconnected.first;
+        unawaited(client.connect());
 
-      final event = await disconnected.timeout(const Duration(seconds: 3));
-      expect(event.code, 1);
-      expect(commands((cmd) => cmd.hasConnect()), hasLength(1));
-      expect(errors.map((e) => e.error), contains(isA<centrifuge.ConfigurationError>()));
+        final event = await disconnected.timeout(const Duration(seconds: 3));
+        expect(event.code, 1);
+        expect(commands((cmd) => cmd.hasConnect()), hasLength(1));
+        expect(
+          errors.map((e) => e.error),
+          contains(isA<centrifuge.ConfigurationError>()),
+        );
 
-      // A new token set by the app is used.
-      server.onCommand = null;
-      client.setToken('fresh');
-      await client.connect();
-      expect(client.state, centrifuge.State.connected);
-      expect(commands((cmd) => cmd.hasConnect()).last.connect.token, 'fresh');
-    });
+        // A new token set by the app is used.
+        server.onCommand = null;
+        client.setToken('fresh');
+        await client.connect();
+        expect(client.state, centrifuge.State.connected);
+        expect(commands((cmd) => cmd.hasConnect()).last.connect.token, 'fresh');
+      },
+    );
 
-    test('state invalidation without getToken reconnects with the token the client has', () async {
-      client = centrifuge.createClient(
+    test(
+      'state invalidation without getToken reconnects with the token the client has',
+      () async {
+        client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             token: 'static',
             minReconnectDelay: const Duration(milliseconds: 20),
             maxReconnectDelay: const Duration(milliseconds: 100),
-          ));
-      final errors = <centrifuge.ErrorEvent>[];
-      client.error.listen(errors.add);
-      await client.connect();
-      server.disconnect(3014, 'state invalidated');
+          ),
+        );
+        final errors = <centrifuge.ErrorEvent>[];
+        client.error.listen(errors.add);
+        await client.connect();
+        server.disconnect(3014, 'state invalidated');
 
-      await waitUntil(() =>
-          server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
-      expect(commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token), ['static', 'static']);
-      expect(errors.map((e) => e.error), isNot(contains(isA<centrifuge.ConfigurationError>())));
-    });
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
+        expect(
+          commands((cmd) => cmd.hasConnect()).map((cmd) => cmd.connect.token),
+          ['static', 'static'],
+        );
+        expect(
+          errors.map((e) => e.error),
+          isNot(contains(isA<centrifuge.ConfigurationError>())),
+        );
+      },
+    );
   });
 
   group('Calls', () {
-    test('calls racing disconnect() fail with ClientDisconnectedError', () async {
-      final server = FakeCentrifugoServer();
-      await server.start();
-      final client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-      addTearDown(() async {
-        await client.close();
-        await server.stop();
-      });
+    test(
+      'calls racing disconnect() fail with ClientDisconnectedError',
+      () async {
+        final server = FakeCentrifugoServer();
+        await server.start();
+        final client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(),
+        );
+        addTearDown(() async {
+          await client.close();
+          await server.stop();
+        });
 
-      final calls = <String, Future<Object?> Function()>{
-        'publish': () => client.publish('news', [1]),
-        'rpc': () => client.rpc('method', [1]),
-        'history': () => client.history('news'),
-        'presence': () => client.presence('news'),
-        'presenceStats': () => client.presenceStats('news'),
-        'send': () => client.send([1]),
-      };
-      for (final call in calls.entries) {
-        await client.connect();
-        final result = expectLater(
-            call.value(), throwsA(isA<centrifuge.ClientDisconnectedError>()),
-            reason: call.key);
-        await client.disconnect();
-        await result;
-      }
-    });
+        final calls = <String, Future<Object?> Function()>{
+          'publish': () => client.publish('news', [1]),
+          'rpc': () => client.rpc('method', [1]),
+          'history': () => client.history('news'),
+          'presence': () => client.presence('news'),
+          'presenceStats': () => client.presenceStats('news'),
+          'send': () => client.send([1]),
+        };
+        for (final call in calls.entries) {
+          await client.connect();
+          final result = expectLater(
+            call.value(),
+            throwsA(isA<centrifuge.ClientDisconnectedError>()),
+            reason: call.key,
+          );
+          await client.disconnect();
+          await result;
+        }
+      },
+    );
 
-    test('a reply received by the time the call timeout fires completes the call', () async {
-      final incoming = StreamController<dynamic>(sync: true);
-      addTearDown(incoming.close);
-      final transport = Transport(
-        () async => FakeWebSocketChannel(incoming.stream),
-        TransportConfig(timeout: const Duration(milliseconds: 100)),
-        ProtobufCommandEncoder(),
-        ProtobufReplyDecoder(),
-      );
-      await transport.open((push, isPing) {}, onDone: (code, reason, reconnect) {});
+    test(
+      'a reply received by the time the call timeout fires completes the call',
+      () async {
+        final incoming = StreamController<dynamic>(sync: true);
+        addTearDown(incoming.close);
+        final transport = Transport(
+          () async => FakeWebSocketChannel(incoming.stream),
+          TransportConfig(timeout: const Duration(milliseconds: 100)),
+          ProtobufCommandEncoder(),
+          ProtobufReplyDecoder(),
+        );
+        await transport.open(
+          (push, isPing) {},
+          onDone: (code, reason, reconnect) {},
+        );
 
-      final result =
-          transport.sendMessage(protocol.PublishRequest()..channel = 'news', protocol.PublishResult());
-      // Due right after the call timeout, like data read from the socket after
-      // a suspended process resumes and runs its overdue timers first.
-      Timer(const Duration(milliseconds: 100), () {
-        incoming.add(encodeReplies([
-          protocol.Reply()
-            ..id = 1
-            ..publish = protocol.PublishResult()
-        ]));
-      });
-      // The suspension: both timers are overdue when the event loop runs
-      // again, so they run together. Otherwise this one would be due a little
-      // after the timeout, and on a slow machine after the timeout's own
-      // follow-up too.
-      final suspended = Stopwatch()..start();
-      while (suspended.elapsedMilliseconds < 150) {}
+        final result = transport.sendMessage(
+          protocol.PublishRequest()..channel = 'news',
+          protocol.PublishResult(),
+        );
+        // Due right after the call timeout, like data read from the socket after
+        // a suspended process resumes and runs its overdue timers first.
+        Timer(const Duration(milliseconds: 100), () {
+          incoming.add(
+            encodeReplies([
+              protocol.Reply()
+                ..id = 1
+                ..publish = protocol.PublishResult(),
+            ]),
+          );
+        });
+        // The suspension: both timers are overdue when the event loop runs
+        // again, so they run together. Otherwise this one would be due a little
+        // after the timeout, and on a slow machine after the timeout's own
+        // follow-up too.
+        final suspended = Stopwatch()..start();
+        while (suspended.elapsedMilliseconds < 150) {}
 
-      await expectLater(result, completes);
-    });
+        await expectLater(result, completes);
+      },
+    );
 
-    test('a call made while calls fail on a closed connection fails, and the close is reported', () async {
-      final incoming = StreamController<dynamic>(sync: true);
-      final transport = Transport(
-        () async => FakeWebSocketChannel(incoming.stream),
-        TransportConfig(),
-        ProtobufCommandEncoder(),
-        ProtobufReplyDecoder(),
-      );
-      var closed = false;
-      await transport.open((push, isPing) {}, onDone: (code, reason, reconnect) => closed = true);
+    test(
+      'a call made while calls fail on a closed connection fails, and the close is reported',
+      () async {
+        final incoming = StreamController<dynamic>(sync: true);
+        final transport = Transport(
+          () async => FakeWebSocketChannel(incoming.stream),
+          TransportConfig(),
+          ProtobufCommandEncoder(),
+          ProtobufReplyDecoder(),
+        );
+        var closed = false;
+        await transport.open(
+          (push, isPing) {},
+          onDone: (code, reason, reconnect) => closed = true,
+        );
 
-      final callError = Completer<Object>();
-      final pending =
-          transport.sendMessage(protocol.PublishRequest()..channel = 'a', protocol.PublishResult());
-      // Runs synchronously when the pending call fails.
-      unawaited(pending.catchError((Object _) {
-        unawaited(transport
-            .sendMessage(protocol.PublishRequest()..channel = 'b', protocol.PublishResult())
-            .catchError((Object error) {
-          callError.complete(error);
-          return protocol.PublishResult();
-        }));
-        return protocol.PublishResult();
-      }));
-      await incoming.close();
+        final callError = Completer<Object>();
+        final pending = transport.sendMessage(
+          protocol.PublishRequest()..channel = 'a',
+          protocol.PublishResult(),
+        );
+        // Runs synchronously when the pending call fails.
+        unawaited(
+          pending.catchError((Object _) {
+            unawaited(
+              transport
+                  .sendMessage(
+                    protocol.PublishRequest()..channel = 'b',
+                    protocol.PublishResult(),
+                  )
+                  .catchError((Object error) {
+                    callError.complete(error);
+                    return protocol.PublishResult();
+                  }),
+            );
+            return protocol.PublishResult();
+          }),
+        );
+        await incoming.close();
 
-      expect(closed, isTrue);
-      expect(await callError.future.timeout(const Duration(seconds: 1)),
-          isA<centrifuge.ClientDisconnectedError>());
-    });
+        expect(closed, isTrue);
+        expect(
+          await callError.future.timeout(const Duration(seconds: 1)),
+          isA<centrifuge.ClientDisconnectedError>(),
+        );
+      },
+    );
 
-    test('a call that times out waiting for the connection or the subscription stops waiting', () async {
-      final server = FakeCentrifugoServer();
-      await server.start();
-      server.holdHandshake = true;
-      final client = centrifuge.createClient(
+    test(
+      'a call that times out waiting for the connection or the subscription stops waiting',
+      () async {
+        final server = FakeCentrifugoServer();
+        await server.start();
+        server.holdHandshake = true;
+        final client = centrifuge.createClient(
           server.url,
           centrifuge.ClientConfig(
             timeout: const Duration(milliseconds: 100),
             minReconnectDelay: const Duration(milliseconds: 20),
             maxReconnectDelay: const Duration(milliseconds: 50),
-          ));
-      addTearDown(() async {
-        await client.close();
-        await server.stop();
-      });
-      unawaited(client.connect());
-      for (var i = 0; i < 3; i++) {
-        await expectLater(client.publish('news', [1]), throwsA(isA<TimeoutException>()));
-      }
-      expect(readyWaiters(client), 0);
-
-      server.holdHandshake = false;
-      await waitUntil(() => client.state == centrifuge.State.connected);
-      // Stays subscribing: getState never completes.
-      final sub = client.newSubscription(
-          'news', centrifuge.SubscriptionConfig(getState: () => Completer<centrifuge.StreamPosition>().future));
-      unawaited(sub.subscribe());
-      for (var i = 0; i < 3; i++) {
-        await expectLater(sub.publish([1]), throwsA(isA<TimeoutException>()));
-      }
-      expect(readyWaiters(sub), 0);
-    });
-
-    test('with a zero timeout, calls wait for the connection and the subscription', () async {
-      final server = FakeCentrifugoServer();
-      await server.start();
-      protocol.Command? heldConnect;
-      server.holdReply = (cmd) {
-        if (cmd.hasConnect() && heldConnect == null) {
-          heldConnect = cmd;
-          return true;
+          ),
+        );
+        addTearDown(() async {
+          await client.close();
+          await server.stop();
+        });
+        unawaited(client.connect());
+        for (var i = 0; i < 3; i++) {
+          await expectLater(
+            client.publish('news', [1]),
+            throwsA(isA<TimeoutException>()),
+          );
         }
-        return false;
-      };
-      server.onCommand = (cmd) => cmd.hasPublish()
-          ? (protocol.Reply()
-            ..id = cmd.id
-            ..publish = protocol.PublishResult())
-          : null;
-      final client = centrifuge.createClient(server.url, centrifuge.ClientConfig(timeout: Duration.zero));
-      addTearDown(() async {
-        await client.close();
-        await server.stop();
-      });
+        expect(readyWaiters(client), 0);
 
-      unawaited(client.connect());
-      await waitUntil(() => heldConnect != null);
-      final clientPublish = client.publish('news', [1]);
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      server.sendReply(protocol.Reply()
-        ..id = heldConnect!.id
-        ..connect = (protocol.ConnectResult()..client = 'fake-client'));
-      await expectLater(clientPublish, completes);
+        server.holdHandshake = false;
+        await waitUntil(() => client.state == centrifuge.State.connected);
+        // Stays subscribing: getState never completes.
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+            getState: () => Completer<centrifuge.StreamPosition>().future,
+          ),
+        );
+        unawaited(sub.subscribe());
+        for (var i = 0; i < 3; i++) {
+          await expectLater(sub.publish([1]), throwsA(isA<TimeoutException>()));
+        }
+        expect(readyWaiters(sub), 0);
+      },
+    );
 
-      final state = Completer<centrifuge.StreamPosition>();
-      final sub = client.newSubscription('news', centrifuge.SubscriptionConfig(getState: () => state.future));
-      unawaited(sub.subscribe());
-      final subPublish = sub.publish([1]);
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      state.complete(centrifuge.StreamPosition(Int64(0), 'e'));
-      await expectLater(subPublish, completes);
-    });
+    test(
+      'with a zero timeout, calls wait for the connection and the subscription',
+      () async {
+        final server = FakeCentrifugoServer();
+        await server.start();
+        protocol.Command? heldConnect;
+        server.holdReply = (cmd) {
+          if (cmd.hasConnect() && heldConnect == null) {
+            heldConnect = cmd;
+            return true;
+          }
+          return false;
+        };
+        server.onCommand =
+            (cmd) =>
+                cmd.hasPublish()
+                    ? (protocol.Reply()
+                      ..id = cmd.id
+                      ..publish = protocol.PublishResult())
+                    : null;
+        final client = centrifuge.createClient(
+          server.url,
+          centrifuge.ClientConfig(timeout: Duration.zero),
+        );
+        addTearDown(() async {
+          await client.close();
+          await server.stop();
+        });
+
+        unawaited(client.connect());
+        await waitUntil(() => heldConnect != null);
+        final clientPublish = client.publish('news', [1]);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        server.sendReply(
+          protocol.Reply()
+            ..id = heldConnect!.id
+            ..connect = (protocol.ConnectResult()..client = 'fake-client'),
+        );
+        await expectLater(clientPublish, completes);
+
+        final state = Completer<centrifuge.StreamPosition>();
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(getState: () => state.future),
+        );
+        unawaited(sub.subscribe());
+        final subPublish = sub.publish([1]);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        state.complete(centrifuge.StreamPosition(Int64(0), 'e'));
+        await expectLater(subPublish, completes);
+      },
+    );
   });
 
   group('Message handling', () {
-    test('an exception while handling a push is reported and stops the client with badProtocol',
-        () async {
-      final server = FakeCentrifugoServer();
-      await server.start();
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()..delta = true;
-      late centrifuge.Client client;
-      addTearDown(() async {
-        await client.close();
-        await server.stop();
-      });
-      final uncaught = <Object>[];
-      final disconnected = Completer<centrifuge.DisconnectedEvent>();
-
-      await runZonedGuarded(() async {
-        client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
-        client.disconnected.listen((event) {
-          if (!disconnected.isCompleted) disconnected.complete(event);
+    test(
+      'an exception while handling a push is reported and stops the client with badProtocol',
+      () async {
+        final server = FakeCentrifugoServer();
+        await server.start();
+        server.onSubscribe =
+            (channel, req) => protocol.SubscribeResult()..delta = true;
+        late centrifuge.Client client;
+        addTearDown(() async {
+          await client.close();
+          await server.stop();
         });
-        await client.connect();
-        final sub = client.newSubscription(
-            'news', centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil));
-        await sub.subscribe();
-        // A delta publication without a previous publication to apply it to.
-        server.sendPush(protocol.Push()
-          ..channel = 'news'
-          ..pub = (protocol.Publication()
-            ..data = utf8.encode('delta')
-            ..delta = true));
-      }, (error, stackTrace) => uncaught.add(error));
+        final uncaught = <Object>[];
+        final disconnected = Completer<centrifuge.DisconnectedEvent>();
 
-      final event = await disconnected.future.timeout(const Duration(seconds: 3));
-      expect(event.code, 2);
-      expect(event.reason, startsWith('exception during message handling'));
-      expect(uncaught, hasLength(1));
-      expect(client.state, centrifuge.State.disconnected);
-    });
+        await runZonedGuarded(() async {
+          client = centrifuge.createClient(
+            server.url,
+            centrifuge.ClientConfig(),
+          );
+          client.disconnected.listen((event) {
+            if (!disconnected.isCompleted) disconnected.complete(event);
+          });
+          await client.connect();
+          final sub = client.newSubscription(
+            'news',
+            centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+          );
+          await sub.subscribe();
+          // A delta publication without a previous publication to apply it to.
+          server.sendPush(
+            protocol.Push()
+              ..channel = 'news'
+              ..pub =
+                  (protocol.Publication()
+                    ..data = utf8.encode('delta')
+                    ..delta = true),
+          );
+        }, (error, stackTrace) => uncaught.add(error));
+
+        final event = await disconnected.future.timeout(
+          const Duration(seconds: 3),
+        );
+        expect(event.code, 2);
+        expect(event.reason, startsWith('exception during message handling'));
+        expect(uncaught, hasLength(1));
+        expect(client.state, centrifuge.State.disconnected);
+      },
+    );
   });
 
   group('Slow transport close', () {
     late FakeCentrifugoServer server;
     late centrifuge.Client client;
 
-    centrifuge.ClientConfig fastConfig(Duration timeout) => centrifuge.ClientConfig(
+    centrifuge.ClientConfig fastConfig(Duration timeout) =>
+        centrifuge.ClientConfig(
           timeout: timeout,
           minReconnectDelay: const Duration(milliseconds: 20),
           maxReconnectDelay: const Duration(milliseconds: 100),
@@ -3948,76 +4769,105 @@ void main() {
       await server.stop();
     });
 
-    test('a subscribe pending when the connection is lost neither holds up nor tears down the next connection',
-        () async {
-      var subscribes = 0;
-      server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
-      client = ClientImpl(server.url, fastConfig(const Duration(seconds: 1)),
-          slowCloseTransportBuilder(const Duration(seconds: 2)));
-      final connecting = <centrifuge.ConnectingEvent>[];
-      client.connecting.listen(connecting.add);
-      await client.connect();
-      final sub = client.newSubscription('news');
-      unawaited(sub.subscribe());
-      await waitUntil(() => subscribes == 1);
+    test(
+      'a subscribe pending when the connection is lost neither holds up nor tears down the next connection',
+      () async {
+        var subscribes = 0;
+        server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
+        client = ClientImpl(
+          server.url,
+          fastConfig(const Duration(seconds: 1)),
+          slowCloseTransportBuilder(const Duration(seconds: 2)),
+        );
+        final connecting = <centrifuge.ConnectingEvent>[];
+        client.connecting.listen(connecting.add);
+        await client.connect();
+        final sub = client.newSubscription('news');
+        unawaited(sub.subscribe());
+        await waitUntil(() => subscribes == 1);
 
-      // E.g. an app reconnecting on a network change.
-      unawaited(client.disconnect());
-      unawaited(client.connect());
+        // E.g. an app reconnecting on a network change.
+        unawaited(client.disconnect());
+        unawaited(client.connect());
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed,
-          timeout: const Duration(milliseconds: 500));
-      // Past the call timeout of the subscribe sent on the lost connection.
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
-      expect(client.state, centrifuge.State.connected);
-      expect(server.handshakeRequests, 2);
-      expect(connecting.map((event) => event.code), isNot(contains(3)));
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+          timeout: const Duration(milliseconds: 500),
+        );
+        // Past the call timeout of the subscribe sent on the lost connection.
+        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        expect(client.state, centrifuge.State.connected);
+        expect(server.handshakeRequests, 2);
+        expect(connecting.map((event) => event.code), isNot(contains(3)));
+      },
+    );
 
-    test('a subscribe timeout resubscribes on the next connection before the old one closes', () async {
-      var subscribes = 0;
-      server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
-      client = ClientImpl(server.url, fastConfig(const Duration(milliseconds: 300)),
-          slowCloseTransportBuilder(const Duration(seconds: 2)));
-      await client.connect();
-      final sub = client.newSubscription('news');
-      unawaited(sub.subscribe());
+    test(
+      'a subscribe timeout resubscribes on the next connection before the old one closes',
+      () async {
+        var subscribes = 0;
+        server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
+        client = ClientImpl(
+          server.url,
+          fastConfig(const Duration(milliseconds: 300)),
+          slowCloseTransportBuilder(const Duration(seconds: 2)),
+        );
+        await client.connect();
+        final sub = client.newSubscription('news');
+        unawaited(sub.subscribe());
 
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed,
-          timeout: const Duration(milliseconds: 500));
-    });
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+          timeout: const Duration(milliseconds: 500),
+        );
+      },
+    );
 
-    test('a subscribe timeout does not close the connection that replaced the timed out one', () async {
-      var subscribes = 0;
-      server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
-      client = ClientImpl(server.url, fastConfig(const Duration(milliseconds: 300)),
-          slowCloseTransportBuilder(const Duration(seconds: 1)));
-      await client.connect();
-      final sub = client.newSubscription('news');
-      unawaited(sub.subscribe());
-      await waitUntil(
-          () => server.handshakeRequests == 2 && sub.state == centrifuge.SubscriptionState.subscribed);
+    test(
+      'a subscribe timeout does not close the connection that replaced the timed out one',
+      () async {
+        var subscribes = 0;
+        server.holdReply = (cmd) => cmd.hasSubscribe() && ++subscribes == 1;
+        client = ClientImpl(
+          server.url,
+          fastConfig(const Duration(milliseconds: 300)),
+          slowCloseTransportBuilder(const Duration(seconds: 1)),
+        );
+        await client.connect();
+        final sub = client.newSubscription('news');
+        unawaited(sub.subscribe());
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              sub.state == centrifuge.SubscriptionState.subscribed,
+        );
 
-      // Past the close of the timed out connection.
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
-      expect(server.openConnections, 1);
-      expect(server.handshakeRequests, 2);
-      expect(client.state, centrifuge.State.connected);
-    });
+        // Past the close of the timed out connection.
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        expect(server.openConnections, 1);
+        expect(server.handshakeRequests, 2);
+        expect(client.state, centrifuge.State.connected);
+      },
+    );
   });
 
   group('Connection closed with pending calls', () {
     late FakeCentrifugoServer server;
     late centrifuge.Client client;
 
-    centrifuge.ClientConfig fastConfig({centrifuge.ConnectionTokenCallback? getToken}) =>
-        centrifuge.ClientConfig(
-          token: getToken == null ? '' : 'token',
-          getToken: getToken,
-          minReconnectDelay: const Duration(milliseconds: 20),
-          maxReconnectDelay: const Duration(milliseconds: 100),
-        );
+    centrifuge.ClientConfig fastConfig({
+      centrifuge.ConnectionTokenCallback? getToken,
+    }) => centrifuge.ClientConfig(
+      token: getToken == null ? '' : 'token',
+      getToken: getToken,
+      minReconnectDelay: const Duration(milliseconds: 20),
+      maxReconnectDelay: const Duration(milliseconds: 100),
+    );
 
     setUp(() async {
       server = FakeCentrifugoServer();
@@ -4029,119 +4879,169 @@ void main() {
       await server.stop();
     });
 
-    test('a close code without reconnect is applied while a cleanup unsubscribe is pending', () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      final events = <String>[];
-      client.connecting.listen((event) => events.add('connecting ${event.code}'));
-      client.disconnected.listen((event) => events.add('disconnected ${event.code}'));
-      await client.connect();
-      final sub = client.newSubscription('news');
-      await sub.subscribe();
-      server.holdReply = (cmd) => cmd.hasUnsubscribe();
-      unawaited(sub.unsubscribe());
-      await waitUntil(() => server.received.any((cmd) => cmd.hasUnsubscribe()));
+    test(
+      'a close code without reconnect is applied while a cleanup unsubscribe is pending',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        final events = <String>[];
+        client.connecting.listen(
+          (event) => events.add('connecting ${event.code}'),
+        );
+        client.disconnected.listen(
+          (event) => events.add('disconnected ${event.code}'),
+        );
+        await client.connect();
+        final sub = client.newSubscription('news');
+        await sub.subscribe();
+        server.holdReply = (cmd) => cmd.hasUnsubscribe();
+        unawaited(sub.unsubscribe());
+        await waitUntil(
+          () => server.received.any((cmd) => cmd.hasUnsubscribe()),
+        );
 
-      await server.closeConnection(3501, 'bad request');
-      await waitUntil(() => client.state == centrifuge.State.disconnected);
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+        await server.closeConnection(3501, 'bad request');
+        await waitUntil(() => client.state == centrifuge.State.disconnected);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
 
-      expect(events, ['connecting 0', 'disconnected 3501']);
-      expect(server.handshakeRequests, 1);
-    });
+        expect(events, ['connecting 0', 'disconnected 3501']);
+        expect(server.handshakeRequests, 1);
+      },
+    );
 
     test('a close code below 3000 is reported as transport closed', () async {
       client = centrifuge.createClient(server.url, fastConfig());
       final events = <String>[];
-      client.connecting.listen((event) => events.add('${event.code} ${event.reason}'));
+      client.connecting.listen(
+        (event) => events.add('${event.code} ${event.reason}'),
+      );
       await client.connect();
 
       await server.closeConnection(1000, 'bye');
-      await waitUntil(() => events.length == 2 && client.state == centrifuge.State.connected);
+      await waitUntil(
+        () => events.length == 2 && client.state == centrifuge.State.connected,
+      );
       // No close code: a browser reports a dropped connection with an empty
       // reason, too.
       await server.closeConnection();
-      await waitUntil(() => events.length == 3 && client.state == centrifuge.State.connected);
+      await waitUntil(
+        () => events.length == 3 && client.state == centrifuge.State.connected,
+      );
 
-      expect(events, ['0 connect called', '1 transport closed', '1 transport closed']);
+      expect(events, [
+        '0 connect called',
+        '1 transport closed',
+        '1 transport closed',
+      ]);
     });
 
-    test('a subscribe failing on a closed connection reports no error', () async {
-      client = centrifuge.createClient(server.url, fastConfig());
-      await client.connect();
-      server.holdReply = (cmd) => cmd.hasSubscribe();
-      final sub = client.newSubscription('news');
-      final errors = <centrifuge.SubscriptionErrorEvent>[];
-      sub.error.listen(errors.add);
-      unawaited(sub.subscribe());
-      await waitUntil(() => server.received.any((cmd) => cmd.hasSubscribe()));
+    test(
+      'a subscribe failing on a closed connection reports no error',
+      () async {
+        client = centrifuge.createClient(server.url, fastConfig());
+        await client.connect();
+        server.holdReply = (cmd) => cmd.hasSubscribe();
+        final sub = client.newSubscription('news');
+        final errors = <centrifuge.SubscriptionErrorEvent>[];
+        sub.error.listen(errors.add);
+        unawaited(sub.subscribe());
+        await waitUntil(() => server.received.any((cmd) => cmd.hasSubscribe()));
 
-      server.holdReply = null;
-      await server.closeConnection();
+        server.holdReply = null;
+        await server.closeConnection();
 
-      await waitUntil(() => sub.state == centrifuge.SubscriptionState.subscribed);
-      expect(errors, isEmpty);
-    });
+        await waitUntil(
+          () => sub.state == centrifuge.SubscriptionState.subscribed,
+        );
+        expect(errors, isEmpty);
+      },
+    );
 
-    test('a token refresh failing on a closed connection reports no error', () async {
-      server.connectResult = protocol.ConnectResult()
-        ..client = 'fake-client'
-        ..expires = true
-        ..ttl = 1;
-      server.holdReply = (cmd) => cmd.hasRefresh();
-      client = centrifuge.createClient(server.url, fastConfig(getToken: (_) async => 'token'));
-      final errors = <centrifuge.ErrorEvent>[];
-      client.error.listen(errors.add);
-      await client.connect();
-      await waitUntil(() => server.received.any((cmd) => cmd.hasRefresh()));
+    test(
+      'a token refresh failing on a closed connection reports no error',
+      () async {
+        server.connectResult =
+            protocol.ConnectResult()
+              ..client = 'fake-client'
+              ..expires = true
+              ..ttl = 1;
+        server.holdReply = (cmd) => cmd.hasRefresh();
+        client = centrifuge.createClient(
+          server.url,
+          fastConfig(getToken: (_) async => 'token'),
+        );
+        final errors = <centrifuge.ErrorEvent>[];
+        client.error.listen(errors.add);
+        await client.connect();
+        await waitUntil(() => server.received.any((cmd) => cmd.hasRefresh()));
 
-      server.holdReply = null;
-      server.connectResult = protocol.ConnectResult()..client = 'fake-client';
-      await server.closeConnection();
+        server.holdReply = null;
+        server.connectResult = protocol.ConnectResult()..client = 'fake-client';
+        await server.closeConnection();
 
-      await waitUntil(() => server.handshakeRequests == 2 && client.state == centrifuge.State.connected);
-      expect(errors, isEmpty);
-    });
+        await waitUntil(
+          () =>
+              server.handshakeRequests == 2 &&
+              client.state == centrifuge.State.connected,
+        );
+        expect(errors, isEmpty);
+      },
+    );
   });
 
   group('Pings', () {
-    test('a ping received by the time the ping timer fires keeps the connection', () async {
-      final incoming = StreamController<dynamic>(sync: true);
-      addTearDown(incoming.close);
-      FakeWebSocketChannel? channel;
-      final client = ClientImpl(
+    test(
+      'a ping received by the time the ping timer fires keeps the connection',
+      () async {
+        final incoming = StreamController<dynamic>(sync: true);
+        addTearDown(incoming.close);
+        FakeWebSocketChannel? channel;
+        final client = ClientImpl(
           'ws://localhost',
-          centrifuge.ClientConfig(maxServerPingDelay: const Duration(milliseconds: 100)),
+          centrifuge.ClientConfig(
+            maxServerPingDelay: const Duration(milliseconds: 100),
+          ),
           ({required String url, required TransportConfig config}) => Transport(
-                () async => channel = FakeWebSocketChannel(incoming.stream),
-                config,
-                ProtobufCommandEncoder(),
-                ProtobufReplyDecoder(),
-              ));
-      addTearDown(client.close);
-      final connecting = <centrifuge.ConnectingEvent>[];
-      client.connecting.listen(connecting.add);
-      unawaited(client.connect());
-      await waitUntil(() => channel?.sent.isNotEmpty ?? false);
-      incoming.add(encodeReplies([
-        protocol.Reply()
-          ..id = 1
-          ..connect = (protocol.ConnectResult()
-            ..client = 'fake-client'
-            ..ping = 1)
-      ]));
-      expect(client.state, centrifuge.State.connected);
+            () async => channel = FakeWebSocketChannel(incoming.stream),
+            config,
+            ProtobufCommandEncoder(),
+            ProtobufReplyDecoder(),
+          ),
+        );
+        addTearDown(client.close);
+        final connecting = <centrifuge.ConnectingEvent>[];
+        client.connecting.listen(connecting.add);
+        unawaited(client.connect());
+        await waitUntil(() => channel?.sent.isNotEmpty ?? false);
+        incoming.add(
+          encodeReplies([
+            protocol.Reply()
+              ..id = 1
+              ..connect =
+                  (protocol.ConnectResult()
+                    ..client = 'fake-client'
+                    ..ping = 1),
+          ]),
+        );
+        expect(client.state, centrifuge.State.connected);
 
-      // Like a suspended process: the event loop is blocked past the ping
-      // timer's deadline (1100ms) and the ping's (1200ms), so on resume the
-      // ping timer runs first, then the ping. Blocking makes that order hold
-      // under CPU load, unless the ping is scheduled 100ms late.
-      Timer(const Duration(milliseconds: 1200), () => incoming.add(encodeReplies([protocol.Reply()])));
-      Timer(const Duration(milliseconds: 1000), () => sleep(const Duration(milliseconds: 500)));
-      await Future<void>.delayed(const Duration(milliseconds: 1800));
+        // Like a suspended process: the event loop is blocked past the ping
+        // timer's deadline (1100ms) and the ping's (1200ms), so on resume the
+        // ping timer runs first, then the ping. Blocking makes that order hold
+        // under CPU load, unless the ping is scheduled 100ms late.
+        Timer(
+          const Duration(milliseconds: 1200),
+          () => incoming.add(encodeReplies([protocol.Reply()])),
+        );
+        Timer(
+          const Duration(milliseconds: 1000),
+          () => sleep(const Duration(milliseconds: 500)),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 1800));
 
-      expect(client.state, centrifuge.State.connected);
-      expect(connecting.map((event) => event.code), [0]);
-    });
+        expect(client.state, centrifuge.State.connected);
+        expect(connecting.map((event) => event.code), [0]);
+      },
+    );
   });
 
   group('Event streams', () {
@@ -4166,17 +5066,20 @@ void main() {
       expect(sub.publication, sub.publication);
     });
 
-    test('a listener added after awaiting connected.first gets the rest of the connect reply', () async {
-      server.connectResult = protocol.ConnectResult()..client = 'fake-client';
-      server.connectResult.subs['news'] = protocol.SubscribeResult();
-      final channels = <String>[];
+    test(
+      'a listener added after awaiting connected.first gets the rest of the connect reply',
+      () async {
+        server.connectResult = protocol.ConnectResult()..client = 'fake-client';
+        server.connectResult.subs['news'] = protocol.SubscribeResult();
+        final channels = <String>[];
 
-      unawaited(client.connect());
-      await client.connected.first;
-      client.subscribed.listen((event) => channels.add(event.channel));
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        unawaited(client.connect());
+        await client.connected.first;
+        client.subscribed.listen((event) => channels.add(event.channel));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      expect(channels, ['news']);
-    });
+        expect(channels, ['news']);
+      },
+    );
   });
 }

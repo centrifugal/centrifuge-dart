@@ -28,7 +28,7 @@ WebSocketChannel connect(
     // used as before, and not closed, so a handshake can't be aborted.
     HttpClient? customClient;
     if (tlsSkipVerify) {
-      customClient = HttpClient()..badCertificateCallback = (_, __, ___) => true;
+      customClient = HttpClient()..badCertificateCallback = (_, _, _) => true;
     }
     return IOWebSocketChannel.connect(
       uri,
@@ -40,7 +40,7 @@ WebSocketChannel connect(
   // A client of its own, so that an unfinished handshake can be aborted.
   final client = HttpClient()..userAgent = WebSocket.userAgent;
   if (tlsSkipVerify) {
-    client.badCertificateCallback = (_, __, ___) => true;
+    client.badCertificateCallback = (_, _, _) => true;
   }
   var webSocket = WebSocket.connect(
     uri.toString(),
@@ -49,7 +49,11 @@ WebSocketChannel connect(
     customClient: client,
   );
   if (connectTimeout != null) {
-    webSocket = handshakeWithTimeout(webSocket, connectTimeout, abort: () => client.close(force: true));
+    webSocket = handshakeWithTimeout(
+      webSocket,
+      connectTimeout,
+      abort: () => client.close(force: true),
+    );
   }
   // The transport completes it only while the handshake is in progress; a
   // WebSocket that still completes is closed by the transport.
@@ -61,15 +65,24 @@ WebSocketChannel connect(
 /// [handshake] with a [timeout]. When it times out, [abort] stops it, and a
 /// WebSocket it still completes with, too late to be aborted, is closed.
 @visibleForTesting
-Future<WebSocket> handshakeWithTimeout(Future<WebSocket> handshake, Duration timeout,
-    {required void Function() abort}) {
-  return handshake.timeout(timeout, onTimeout: () {
-    abort();
-    // Future.timeout drops a value that comes after the timeout: the handshake
-    // may complete right now, after the client let go of its socket.
-    handshake.then((webSocket) => webSocket.close().catchError((Object _) {}), onError: (Object _) {});
-    throw TimeoutException('WebSocket handshake not completed', timeout);
-  });
+Future<WebSocket> handshakeWithTimeout(
+  Future<WebSocket> handshake,
+  Duration timeout, {
+  required void Function() abort,
+}) {
+  return handshake.timeout(
+    timeout,
+    onTimeout: () {
+      abort();
+      // Future.timeout drops a value that comes after the timeout: the handshake
+      // may complete right now, after the client let go of its socket.
+      handshake.then(
+        (webSocket) => webSocket.close().catchError((Object _) {}),
+        onError: (Object _) {},
+      );
+      throw TimeoutException('WebSocket handshake not completed', timeout);
+    },
+  );
 }
 
 /// Extends the web socket channel

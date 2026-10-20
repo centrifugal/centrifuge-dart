@@ -31,8 +31,11 @@ void main() {
         final result = applyDelta(origin, delta);
 
         // Verify the patched output matches expected target
-        expect(result, expected,
-            reason: 'Patched bytes do not match expected target for case #\$i');
+        expect(
+          result,
+          expected,
+          reason: 'Patched bytes do not match expected target for case #\$i',
+        );
       });
     }
   });

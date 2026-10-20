@@ -12,7 +12,9 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// A WebSocketChannel without a network, for tests that drive a Transport
 /// directly: messages from [stream] are received, sent data is kept in [sent].
-class FakeWebSocketChannel with StreamChannelMixin implements WebSocketChannel {
+class FakeWebSocketChannel
+    with StreamChannelMixin<dynamic>
+    implements WebSocketChannel {
   FakeWebSocketChannel(this.stream);
 
   final sent = <dynamic>[];
@@ -49,15 +51,15 @@ class _FakeWebSocketSink implements WebSocketSink {
   void addError(Object error, [StackTrace? stackTrace]) {}
 
   @override
-  Future addStream(Stream stream) => stream.forEach(sent.add);
+  Future<void> addStream(Stream<dynamic> stream) => stream.forEach(sent.add);
 
   @override
-  Future close([int? closeCode, String? closeReason]) async {
+  Future<void> close([int? closeCode, String? closeReason]) async {
     if (!_done.isCompleted) _done.complete();
   }
 
   @override
-  Future get done => _done.future;
+  Future<void> get done => _done.future;
 }
 
 /// Encodes replies the way the server frames them in one WebSocket message.
@@ -77,25 +79,34 @@ List<int> encodeReplies(List<protocol.Reply> replies) {
 /// the end of the stream come [closeDelay] after close() is called.
 TransportBuilder slowCloseTransportBuilder(Duration closeDelay) =>
     ({required String url, required TransportConfig config}) => Transport(
-          () async {
-            final channel = connect(Uri.parse(url), protocols: ['centrifuge-protobuf']);
-            await channel.ready;
-            return _SlowCloseWebSocketChannel(channel, closeDelay);
-          },
-          config,
-          ProtobufCommandEncoder(),
-          ProtobufReplyDecoder(),
+      () async {
+        final channel = connect(
+          Uri.parse(url),
+          protocols: ['centrifuge-protobuf'],
         );
+        await channel.ready;
+        return _SlowCloseWebSocketChannel(channel, closeDelay);
+      },
+      config,
+      ProtobufCommandEncoder(),
+      ProtobufReplyDecoder(),
+    );
 
-class _SlowCloseWebSocketChannel with StreamChannelMixin implements WebSocketChannel {
+class _SlowCloseWebSocketChannel
+    with StreamChannelMixin<dynamic>
+    implements WebSocketChannel {
   _SlowCloseWebSocketChannel(this._inner, this._closeDelay) {
-    _inner.stream.listen(_incoming.add, onError: _incoming.addError, onDone: () {
-      if (_closing) {
-        Timer(_closeDelay, _incoming.close);
-      } else {
-        _incoming.close();
-      }
-    });
+    _inner.stream.listen(
+      _incoming.add,
+      onError: _incoming.addError,
+      onDone: () {
+        if (_closing) {
+          Timer(_closeDelay, _incoming.close);
+        } else {
+          _incoming.close();
+        }
+      },
+    );
   }
 
   final WebSocketChannel _inner;
@@ -135,17 +146,18 @@ class _SlowCloseWebSocketSink implements WebSocketSink {
       _channel._inner.sink.addError(error, stackTrace);
 
   @override
-  Future addStream(Stream stream) => _channel._inner.sink.addStream(stream);
+  Future<void> addStream(Stream<dynamic> stream) =>
+      _channel._inner.sink.addStream(stream);
 
   @override
-  Future close([int? closeCode, String? closeReason]) async {
+  Future<void> close([int? closeCode, String? closeReason]) async {
     _channel._closing = true;
     unawaited(_channel._inner.sink.close(closeCode, closeReason));
     await Future<void>.delayed(_channel._closeDelay);
   }
 
   @override
-  Future get done => _channel._inner.sink.done;
+  Future<void> get done => _channel._inner.sink.done;
 }
 
 /// In-process Centrifugo fake server for tests, speaking the protobuf protocol
@@ -186,10 +198,11 @@ class FakeCentrifugoServer {
   final List<protocol.Command> received = <protocol.Command>[];
 
   /// connect reply fields. Override to set expires/ttl/data/etc.
-  protocol.ConnectResult connectResult = protocol.ConnectResult()
-    ..client = 'fake-client'
-    ..version = '0.0.0'
-    ..ping = 25;
+  protocol.ConnectResult connectResult =
+      protocol.ConnectResult()
+        ..client = 'fake-client'
+        ..version = '0.0.0'
+        ..ping = 25;
 
   /// Full override for any command — return a Reply to send, or null to fall
   /// through to default handling.
@@ -214,7 +227,11 @@ class FakeCentrifugoServer {
   int get heldHandshakes => _heldHandshakes.length;
 
   /// Customize the subscribe result per channel (default: empty result).
-  protocol.SubscribeResult Function(String channel, protocol.SubscribeRequest req)? onSubscribe;
+  protocol.SubscribeResult Function(
+    String channel,
+    protocol.SubscribeRequest req,
+  )?
+  onSubscribe;
 
   String get url => 'ws://localhost:${_httpServer!.port}/connection/websocket';
 
@@ -235,19 +252,27 @@ class FakeCentrifugoServer {
         // stops.
         final socket = await request.response.detachSocket(writeHeaders: false);
         _heldHandshakes.add(socket);
-        socket.listen((_) {}, onDone: () {
-          _heldHandshakes.remove(socket);
-          socket.destroy();
-        }, onError: (_) => _heldHandshakes.remove(socket));
+        socket.listen(
+          (_) {},
+          onDone: () {
+            _heldHandshakes.remove(socket);
+            socket.destroy();
+          },
+          onError: (_) => _heldHandshakes.remove(socket),
+        );
         return;
       }
-      final socket = await WebSocketTransformer.upgrade(request,
-          protocolSelector: (_) => 'centrifuge-protobuf');
+      final socket = await WebSocketTransformer.upgrade(
+        request,
+        protocolSelector: (_) => 'centrifuge-protobuf',
+      );
       _socket = socket;
       _connections.add(socket);
       _openConnections.add(socket);
-      socket.listen((dynamic data) => _onData(socket, data as List<int>),
-          onDone: () => _openConnections.remove(socket));
+      socket.listen(
+        (dynamic data) => _onData(socket, data as List<int>),
+        onDone: () => _openConnections.remove(socket),
+      );
     });
   }
 
@@ -294,25 +319,29 @@ class FakeCentrifugoServer {
 
     if (cmd.hasConnect()) {
       _reply(
-          socket,
-          protocol.Reply()
-            ..id = cmd.id
-            ..connect = connectResult);
+        socket,
+        protocol.Reply()
+          ..id = cmd.id
+          ..connect = connectResult,
+      );
     } else if (cmd.hasSubscribe()) {
-      final result = onSubscribe != null
-          ? onSubscribe!(cmd.subscribe.channel, cmd.subscribe)
-          : protocol.SubscribeResult();
+      final result =
+          onSubscribe != null
+              ? onSubscribe!(cmd.subscribe.channel, cmd.subscribe)
+              : protocol.SubscribeResult();
       _reply(
-          socket,
-          protocol.Reply()
-            ..id = cmd.id
-            ..subscribe = result);
+        socket,
+        protocol.Reply()
+          ..id = cmd.id
+          ..subscribe = result,
+      );
     } else if (cmd.hasUnsubscribe()) {
       _reply(
-          socket,
-          protocol.Reply()
-            ..id = cmd.id
-            ..unsubscribe = protocol.UnsubscribeResult());
+        socket,
+        protocol.Reply()
+          ..id = cmd.id
+          ..unsubscribe = protocol.UnsubscribeResult(),
+      );
     } else if (cmd.id != 0) {
       // Reply to anything else with an empty result to avoid client timeouts.
       _reply(socket, protocol.Reply()..id = cmd.id);
@@ -324,10 +353,11 @@ class FakeCentrifugoServer {
   /// is dropped, as a real server's would be.
   void _reply(WebSocket socket, protocol.Reply reply) {
     final replyData = reply.writeToBuffer();
-    final framed = (pb.CodedBufferWriter()
-          ..writeInt32NoTag(replyData.length)
-          ..writeRawBytes(replyData))
-        .toBuffer();
+    final framed =
+        (pb.CodedBufferWriter()
+              ..writeInt32NoTag(replyData.length)
+              ..writeRawBytes(replyData))
+            .toBuffer();
     try {
       socket.add(framed);
     } on StateError {
@@ -340,10 +370,11 @@ class FakeCentrifugoServer {
   /// Send a raw reply.
   void sendReply(protocol.Reply reply) {
     final replyData = reply.writeToBuffer();
-    final framed = (pb.CodedBufferWriter()
-          ..writeInt32NoTag(replyData.length)
-          ..writeRawBytes(replyData))
-        .toBuffer();
+    final framed =
+        (pb.CodedBufferWriter()
+              ..writeInt32NoTag(replyData.length)
+              ..writeRawBytes(replyData))
+            .toBuffer();
     _socket!.add(framed);
   }
 
@@ -384,31 +415,43 @@ class FakeCentrifugoServer {
   }
 
   void join({int? id, String? channel, required String client}) {
-    final push = protocol.Push()
-      ..join = (protocol.Join()..info = (protocol.ClientInfo()..client = client));
+    final push =
+        protocol.Push()
+          ..join =
+              (protocol.Join()
+                ..info = (protocol.ClientInfo()..client = client));
     _applyTarget(push, id, channel);
     sendPush(push);
   }
 
   void leave({int? id, String? channel, required String client}) {
-    final push = protocol.Push()
-      ..leave = (protocol.Leave()..info = (protocol.ClientInfo()..client = client));
+    final push =
+        protocol.Push()
+          ..leave =
+              (protocol.Leave()
+                ..info = (protocol.ClientInfo()..client = client));
     _applyTarget(push, id, channel);
     sendPush(push);
   }
 
   void unsubscribe(String channel, int code, String reason) {
-    sendPush(protocol.Push()
-      ..channel = channel
-      ..unsubscribe = (protocol.Unsubscribe()
-        ..code = code
-        ..reason = reason));
+    sendPush(
+      protocol.Push()
+        ..channel = channel
+        ..unsubscribe =
+            (protocol.Unsubscribe()
+              ..code = code
+              ..reason = reason),
+    );
   }
 
   void disconnect(int code, String reason) {
-    sendPush(protocol.Push()
-      ..disconnect = (protocol.Disconnect()
-        ..code = code
-        ..reason = reason));
+    sendPush(
+      protocol.Push()
+        ..disconnect =
+            (protocol.Disconnect()
+              ..code = code
+              ..reason = reason),
+    );
   }
 }

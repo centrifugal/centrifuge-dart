@@ -47,7 +47,7 @@ class JsonReplyDecoder extends ReplyDecoder {
   List<Reply> convert(List<int> input) {
     final replies = <Reply>[];
 
-    final List<Map<String, dynamic>> data = jsonDecode(utf8.decode(input));
+    final data = jsonDecode(utf8.decode(input)) as List<Map<String, dynamic>>;
     for (Map<String, dynamic> map in data) {
       final reply = Reply();
       reply.mergeFromJsonMap(map);

@@ -54,7 +54,8 @@ class ConnectedEvent {
   final String version;
   final List<int> data;
 
-  static ConnectedEvent from(proto.ConnectResult result) => ConnectedEvent(result.client, result.version, result.data);
+  static ConnectedEvent from(proto.ConnectResult result) =>
+      ConnectedEvent(result.client, result.version, result.data);
 
   @override
   String toString() {
@@ -93,8 +94,12 @@ class PublicationEvent {
   final ClientInfo? info;
   final Map<String, String> tags;
 
-  static PublicationEvent from(proto.Publication pub) =>
-      PublicationEvent(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null, pub.tags);
+  static PublicationEvent from(proto.Publication pub) => PublicationEvent(
+    pub.data,
+    pub.offset,
+    pub.hasInfo() ? ClientInfo.from(pub.info) : null,
+    pub.tags,
+  );
 
   @internal
   PublicationEvent copyWith({List<int>? data}) =>
@@ -107,7 +112,13 @@ class PublicationEvent {
 }
 
 class ServerPublicationEvent {
-  ServerPublicationEvent(this.channel, this.data, this.offset, this.info, this.tags);
+  ServerPublicationEvent(
+    this.channel,
+    this.data,
+    this.offset,
+    this.info,
+    this.tags,
+  );
 
   final String channel;
   final List<int> data;
@@ -116,7 +127,13 @@ class ServerPublicationEvent {
   final Map<String, String> tags;
 
   static ServerPublicationEvent from(String channel, proto.Publication pub) =>
-      ServerPublicationEvent(channel, pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null, pub.tags);
+      ServerPublicationEvent(
+        channel,
+        pub.data,
+        pub.offset,
+        pub.hasInfo() ? ClientInfo.from(pub.info) : null,
+        pub.tags,
+      );
 
   @override
   String toString() {
@@ -127,7 +144,8 @@ class ServerPublicationEvent {
 class ClientInfo {
   ClientInfo(this.client, this.user, this.connInfo, this.chanInfo);
 
-  static ClientInfo from(proto.ClientInfo info) => ClientInfo(info.client, info.user, info.connInfo, info.chanInfo);
+  static ClientInfo from(proto.ClientInfo info) =>
+      ClientInfo(info.client, info.user, info.connInfo, info.chanInfo);
 
   final String client;
   final String user;
@@ -143,8 +161,11 @@ class ClientInfo {
 class Publication {
   Publication(this.data, this.offset, this.info);
 
-  static Publication from(proto.Publication pub) =>
-      Publication(pub.data, pub.offset, pub.hasInfo() ? ClientInfo.from(pub.info) : null);
+  static Publication from(proto.Publication pub) => Publication(
+    pub.data,
+    pub.offset,
+    pub.hasInfo() ? ClientInfo.from(pub.info) : null,
+  );
 
   final List<int> data;
   final $fixnum.Int64 offset;
@@ -160,9 +181,9 @@ class HistoryResult {
 
   static HistoryResult from(proto.HistoryResult res) {
     final pubs = <Publication>[];
-    res.publications.forEach((element) {
+    for (final element in res.publications) {
       pubs.add(Publication.from(element));
-    });
+    }
     return HistoryResult(pubs, res.offset, res.epoch);
   }
 
@@ -182,9 +203,7 @@ class PresenceResult {
     res.presence.forEach((clientId, ci) {
       clients[clientId] = ClientInfo.from(ci);
     });
-    return PresenceResult(
-      clients,
-    );
+    return PresenceResult(clients);
   }
 
   @override
@@ -217,7 +236,8 @@ class JoinEvent {
   final List<int>? connInfo;
   final List<int>? chanInfo;
 
-  static JoinEvent from(proto.ClientInfo info) => JoinEvent(info.client, info.user, info.connInfo, info.chanInfo);
+  static JoinEvent from(proto.ClientInfo info) =>
+      JoinEvent(info.client, info.user, info.connInfo, info.chanInfo);
 
   @override
   String toString() {
@@ -226,7 +246,13 @@ class JoinEvent {
 }
 
 class ServerJoinEvent {
-  ServerJoinEvent(this.channel, this.client, this.user, this.connInfo, this.chanInfo);
+  ServerJoinEvent(
+    this.channel,
+    this.client,
+    this.user,
+    this.connInfo,
+    this.chanInfo,
+  );
 
   final String channel;
   final String client;
@@ -235,7 +261,13 @@ class ServerJoinEvent {
   final List<int>? chanInfo;
 
   static ServerJoinEvent from(String channel, proto.ClientInfo info) =>
-      ServerJoinEvent(channel, info.client, info.user, info.connInfo, info.chanInfo);
+      ServerJoinEvent(
+        channel,
+        info.client,
+        info.user,
+        info.connInfo,
+        info.chanInfo,
+      );
 
   @override
   String toString() {
@@ -251,7 +283,8 @@ class LeaveEvent {
   final List<int>? connInfo;
   final List<int>? chanInfo;
 
-  static LeaveEvent from(proto.ClientInfo info) => LeaveEvent(info.client, info.user, info.connInfo, info.chanInfo);
+  static LeaveEvent from(proto.ClientInfo info) =>
+      LeaveEvent(info.client, info.user, info.connInfo, info.chanInfo);
 
   @override
   String toString() {
@@ -260,7 +293,13 @@ class LeaveEvent {
 }
 
 class ServerLeaveEvent {
-  ServerLeaveEvent(this.channel, this.client, this.user, this.connInfo, this.chanInfo);
+  ServerLeaveEvent(
+    this.channel,
+    this.client,
+    this.user,
+    this.connInfo,
+    this.chanInfo,
+  );
 
   final String channel;
   final String client;
@@ -269,7 +308,13 @@ class ServerLeaveEvent {
   final List<int>? chanInfo;
 
   static ServerLeaveEvent from(String channel, proto.ClientInfo info) =>
-      ServerLeaveEvent(channel, info.client, info.user, info.connInfo, info.chanInfo);
+      ServerLeaveEvent(
+        channel,
+        info.client,
+        info.user,
+        info.connInfo,
+        info.chanInfo,
+      );
   @override
   String toString() {
     return 'ServerLeaveEvent{channel: $channel, user: $user, client: $client}';
@@ -278,7 +323,13 @@ class ServerLeaveEvent {
 
 class SubscribedEvent {
   SubscribedEvent(
-      this.wasRecovering, this.recovered, this.data, this.streamPosition, this.positioned, this.recoverable);
+    this.wasRecovering,
+    this.recovered,
+    this.data,
+    this.streamPosition,
+    this.positioned,
+    this.recoverable,
+  );
 
   final bool recovered;
   final bool wasRecovering;
@@ -293,7 +344,13 @@ class SubscribedEvent {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
     return SubscribedEvent(
-        result.wasRecovering, result.recovered, result.data, streamPosition, result.positioned, result.recoverable);
+      result.wasRecovering,
+      result.recovered,
+      result.data,
+      streamPosition,
+      result.positioned,
+      result.recoverable,
+    );
   }
 
   @override
@@ -303,8 +360,15 @@ class SubscribedEvent {
 }
 
 class ServerSubscribedEvent {
-  ServerSubscribedEvent(this.channel, this.wasRecovering, this.recovered, this.data, this.streamPosition,
-      this.positioned, this.recoverable);
+  ServerSubscribedEvent(
+    this.channel,
+    this.wasRecovering,
+    this.recovered,
+    this.data,
+    this.streamPosition,
+    this.positioned,
+    this.recoverable,
+  );
 
   final String channel;
   final bool recovered;
@@ -314,22 +378,43 @@ class ServerSubscribedEvent {
   final List<int> data;
   final StreamPosition? streamPosition;
 
-  static ServerSubscribedEvent fromSubscribeResult(String channel, proto.SubscribeResult result) {
-    StreamPosition? streamPosition;
-    if (result.positioned || result.recoverable) {
-      streamPosition = StreamPosition(result.offset, result.epoch);
-    }
-    return ServerSubscribedEvent(channel, result.wasRecovering, result.recovered, result.data, streamPosition,
-        result.positioned, result.recoverable);
-  }
-
-  static ServerSubscribedEvent fromSubscribePush(String channel, proto.Subscribe result, bool resubscribed) {
+  static ServerSubscribedEvent fromSubscribeResult(
+    String channel,
+    proto.SubscribeResult result,
+  ) {
     StreamPosition? streamPosition;
     if (result.positioned || result.recoverable) {
       streamPosition = StreamPosition(result.offset, result.epoch);
     }
     return ServerSubscribedEvent(
-        channel, false, false, result.data, streamPosition, result.positioned, result.recoverable);
+      channel,
+      result.wasRecovering,
+      result.recovered,
+      result.data,
+      streamPosition,
+      result.positioned,
+      result.recoverable,
+    );
+  }
+
+  static ServerSubscribedEvent fromSubscribePush(
+    String channel,
+    proto.Subscribe result,
+    bool resubscribed,
+  ) {
+    StreamPosition? streamPosition;
+    if (result.positioned || result.recoverable) {
+      streamPosition = StreamPosition(result.offset, result.epoch);
+    }
+    return ServerSubscribedEvent(
+      channel,
+      false,
+      false,
+      result.data,
+      streamPosition,
+      result.positioned,
+      result.recoverable,
+    );
   }
 
   @override
@@ -341,7 +426,8 @@ class ServerSubscribedEvent {
 class StreamPosition {
   StreamPosition(this.offset, this.epoch);
 
-  static StreamPosition from(proto.StreamPosition sp) => StreamPosition(sp.offset, sp.epoch);
+  static StreamPosition from(proto.StreamPosition sp) =>
+      StreamPosition(sp.offset, sp.epoch);
 
   final $fixnum.Int64 offset;
   final String epoch;
@@ -392,7 +478,8 @@ class ServerSubscribingEvent {
 
   final String channel;
 
-  static ServerSubscribingEvent from(String channel) => ServerSubscribingEvent(channel);
+  static ServerSubscribingEvent from(String channel) =>
+      ServerSubscribingEvent(channel);
 
   @override
   String toString() {
@@ -405,7 +492,8 @@ class ServerUnsubscribedEvent {
 
   final String channel;
 
-  static ServerUnsubscribedEvent from(String channel) => ServerUnsubscribedEvent(channel);
+  static ServerUnsubscribedEvent from(String channel) =>
+      ServerUnsubscribedEvent(channel);
 
   @override
   String toString() {

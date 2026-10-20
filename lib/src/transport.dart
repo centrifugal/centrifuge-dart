@@ -17,10 +17,8 @@ import 'codes.dart';
 import 'error.dart' as centrifuge;
 import 'proto/client.pb.dart' hide Error;
 
-typedef TransportBuilder = Transport Function({
-  required String url,
-  required TransportConfig config,
-});
+typedef TransportBuilder =
+    Transport Function({required String url, required TransportConfig config});
 
 typedef WebSocketBuilder = Future<WebSocketChannel> Function();
 
@@ -51,7 +49,8 @@ Transport protobufTransportBuilder({
         protocols: ['centrifuge-protobuf'],
         headers: config.headers,
         tlsSkipVerify: config.tlsSkipVerify,
-        connectTimeout: config.timeout.inMicroseconds > 0 ? config.timeout : null,
+        connectTimeout:
+            config.timeout.inMicroseconds > 0 ? config.timeout : null,
         abort: abort.future,
       );
       await channel.ready;
@@ -69,15 +68,21 @@ Transport protobufTransportBuilder({
 }
 
 abstract class GeneratedMessageSender {
-  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-      Req request, Rep result);
+  Future<Rep> sendMessage<
+    Req extends GeneratedMessage,
+    Rep extends GeneratedMessage
+  >(Req request, Rep result);
   Future<void> sendAsyncMessage<Req extends GeneratedMessage>(Req request);
 }
 
 class Transport implements GeneratedMessageSender {
-  Transport(this._socketBuilder, this._config, this._commandEncoder, this._replyDecoder,
-      {void Function()? abortOpen})
-      : _abortOpen = abortOpen;
+  Transport(
+    this._socketBuilder,
+    this._config,
+    this._commandEncoder,
+    this._replyDecoder, {
+    void Function()? abortOpen,
+  }) : _abortOpen = abortOpen;
 
   final WebSocketBuilder _socketBuilder;
   // Stops the websocket handshake that open() waits for.
@@ -91,20 +96,26 @@ class Transport implements GeneratedMessageSender {
   // The socket stream ended.
   bool _done = false;
 
-  Future open(void onPush(Push push, bool isPing),
-      {Function? onError, void onDone(int code, String reason, bool shouldReconnect)?}) async {
+  Future<void> open(
+    void Function(Push push, bool isPing) onPush, {
+    Function? onError,
+    void Function(int code, String reason, bool shouldReconnect)? onDone,
+  }) async {
     _onError = onError;
     final socketFuture = _socketBuilder();
     final WebSocketChannel socket;
     try {
       // A server that accepts the TCP connection but never answers the upgrade
       // would otherwise keep the connect attempt waiting forever.
-      socket = _config.timeout.inMicroseconds > 0
-          ? await socketFuture.timeout(_config.timeout)
-          : await socketFuture;
+      socket =
+          _config.timeout.inMicroseconds > 0
+              ? await socketFuture.timeout(_config.timeout)
+              : await socketFuture;
     } on TimeoutException {
       // Close the socket if it still connects later.
-      unawaited(socketFuture.then((socket) => socket.sink.close(), onError: (_) {}));
+      unawaited(
+        socketFuture.then((socket) => socket.sink.close(), onError: (_) {}),
+      );
       rethrow;
     }
     if (_closed) {
@@ -125,17 +136,18 @@ class Transport implements GeneratedMessageSender {
   var _completers = <int, Completer<GeneratedMessage>>{};
 
   @override
-  Future<Rep> sendMessage<Req extends GeneratedMessage, Rep extends GeneratedMessage>(
-    Req request,
-    Rep result,
-  ) async {
-    final command = _createCommand(
-      request,
-      false,
-    );
+  Future<Rep> sendMessage<
+    Req extends GeneratedMessage,
+    Rep extends GeneratedMessage
+  >(Req request, Rep result) async {
+    final command = _createCommand(request, false);
     final reply = await _sendCommand(command);
     if (reply.hasError()) {
-      throw centrifuge.Error.custom(reply.error.code, reply.error.message, reply.error.temporary);
+      throw centrifuge.Error.custom(
+        reply.error.code,
+        reply.error.message,
+        reply.error.temporary,
+      );
     }
     if (reply.hasConnect()) {
       result.mergeFromMessage(reply.connect);
@@ -171,7 +183,7 @@ class Transport implements GeneratedMessageSender {
       result.mergeFromMessage(reply.subRefresh);
       return result;
     }
-    throw ArgumentError("unknown reply type " + reply.toString());
+    throw ArgumentError("unknown reply type $reply");
   }
 
   @override
@@ -181,15 +193,12 @@ class Transport implements GeneratedMessageSender {
     if (_socket == null || _done) {
       throw centrifuge.ClientDisconnectedError();
     }
-    final command = _createCommand(
-      request,
-      true,
-    );
+    final command = _createCommand(request, true);
     final data = _commandEncoder.convert(command);
     _socket!.sendData(data);
   }
 
-  Future? close() {
+  Future<void>? close() {
     _closed = true;
     if (_socket == null) {
       // Still opening: stop the handshake, or its socket stays open until the
@@ -199,10 +208,7 @@ class Transport implements GeneratedMessageSender {
     return _socket?.sink.close();
   }
 
-  Command _createCommand(
-    GeneratedMessage request,
-    bool isAsync,
-  ) {
+  Command _createCommand(GeneratedMessage request, bool isAsync) {
     final cmd = Command();
     if (request is ConnectRequest) {
       cmd.connect = request;
@@ -261,11 +267,16 @@ class Transport implements GeneratedMessageSender {
           if (identical(_completers[command.id], completer)) {
             _completers.remove(command.id);
             // Same exception as Future.timeout used to throw here.
-            completer.completeError(TimeoutException('Future not completed', _config.timeout));
+            completer.completeError(
+              TimeoutException('Future not completed', _config.timeout),
+            );
           }
         });
       });
-      completer.future.then((_) => timer.cancel(), onError: (_) => timer.cancel());
+      completer.future.then(
+        (_) => timer.cancel(),
+        onError: (_) => timer.cancel(),
+      );
     }
 
     return completer.future;
@@ -277,12 +288,15 @@ class Transport implements GeneratedMessageSender {
       int code = connectingCodeTransportClosed;
       String reason = "transport closed";
       bool reconnect = true;
-      if (_socket != null && _socket!.closeCode != null && _socket!.closeCode! > 0) {
+      if (_socket != null &&
+          _socket!.closeCode != null &&
+          _socket!.closeCode! > 0) {
         code = _socket!.closeCode!;
         if (_socket!.closeReason != null) {
           reason = _socket!.closeReason!;
         }
-        reconnect = code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
+        reconnect =
+            code < 3500 || code >= 5000 || (code >= 4000 && code < 4500);
         if (code < 3000) {
           if (code == 1009) {
             code = disconnectCodeMessageSizeLimit;
@@ -312,24 +326,24 @@ class Transport implements GeneratedMessageSender {
     };
   }
 
-  void Function(dynamic) _onData(void onPush(Push push, bool isPing)) {
+  void Function(dynamic) _onData(void Function(Push push, bool isPing) onPush) {
     return (dynamic input) {
       final List<Reply> replies;
       try {
-        replies = _replyDecoder.convert(input);
+        replies = _replyDecoder.convert(input as List<int>);
       } catch (e) {
         if (_onError != null) {
           _onError!(e);
         }
         return;
       }
-      replies.forEach((reply) {
+      for (final reply in replies) {
         if (reply.id > 0) {
           _completers.remove(reply.id)?.complete(reply);
         } else {
           onPush(reply.push, !reply.hasPush());
         }
-      });
+      }
     };
   }
 }

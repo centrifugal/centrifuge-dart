@@ -5,7 +5,8 @@ import 'dart:collection';
 // is nothing to wait for. Stream.first, firstWhere and similar complete right
 // away, inside the event, only when cancel() returns this very future, so code
 // awaiting them can still listen to the events that follow in the same reply.
-final Future<void> _nothingToCancel = StreamController<void>.broadcast().stream.listen(null).cancel();
+final Future<void> _nothingToCancel =
+    StreamController<void>.broadcast().stream.listen(null).cancel();
 
 /// A synchronous broadcast event controller that allows nested events.
 ///
@@ -73,8 +74,12 @@ class _EventStream<T> extends Stream<T> {
   bool get isBroadcast => true;
 
   @override
-  StreamSubscription<T> listen(void Function(T event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<T> listen(
+    void Function(T event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     final subscription = _EventSubscription<T>(_controller, onData, onDone);
     if (_controller._closed) {
       scheduleMicrotask(subscription._close);
@@ -86,8 +91,11 @@ class _EventStream<T> extends Stream<T> {
 }
 
 class _EventSubscription<T> implements StreamSubscription<T> {
-  _EventSubscription(this._controller, void Function(T event)? onData, void Function()? onDone)
-      : _zone = Zone.current {
+  _EventSubscription(
+    this._controller,
+    void Function(T event)? onData,
+    void Function()? onDone,
+  ) : _zone = Zone.current {
     this.onData(onData);
     this.onDone(onDone);
   }
@@ -104,7 +112,10 @@ class _EventSubscription<T> implements StreamSubscription<T> {
 
   @override
   void onData(void Function(T data)? handleData) {
-    _onData = handleData == null ? null : _zone.registerUnaryCallback<void, T>(handleData);
+    _onData =
+        handleData == null
+            ? null
+            : _zone.registerUnaryCallback<void, T>(handleData);
   }
 
   @override
@@ -114,7 +125,8 @@ class _EventSubscription<T> implements StreamSubscription<T> {
 
   @override
   void onDone(void Function()? handleDone) {
-    _onDone = handleDone == null ? null : _zone.registerCallback<void>(handleDone);
+    _onDone =
+        handleDone == null ? null : _zone.registerCallback<void>(handleDone);
   }
 
   /// Returns false when the listener threw.

@@ -43,7 +43,10 @@ void main() {
 
   for (final endpoint in accepted) {
     test('connect() with $endpoint starts connecting', () async {
-      final client = centrifuge.createClient(endpoint, centrifuge.ClientConfig());
+      final client = centrifuge.createClient(
+        endpoint,
+        centrifuge.ClientConfig(),
+      );
       addTearDown(client.close);
       Object? thrown;
       unawaited(client.connect().catchError((Object error) => thrown = error));
@@ -55,9 +58,15 @@ void main() {
 
   for (final endpoint in rejected) {
     test('connect() with $endpoint throws and stays disconnected', () async {
-      final client = centrifuge.createClient(endpoint, centrifuge.ClientConfig());
+      final client = centrifuge.createClient(
+        endpoint,
+        centrifuge.ClientConfig(),
+      );
       addTearDown(client.close);
-      await expectLater(client.connect(), throwsA(isA<centrifuge.ConfigurationError>()));
+      await expectLater(
+        client.connect(),
+        throwsA(isA<centrifuge.ConfigurationError>()),
+      );
       expect(client.state, centrifuge.State.disconnected);
     });
   }

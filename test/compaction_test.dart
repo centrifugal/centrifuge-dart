@@ -14,7 +14,10 @@ import 'fake_server.dart';
 // subsequent pushes carry the ID instead of the channel name, exactly like the
 // real server does when compaction is enabled.
 
-Future<T> _waitForEvent<T>(Stream<T> stream, {Duration timeout = const Duration(seconds: 5)}) {
+Future<T> _waitForEvent<T>(
+  Stream<T> stream, {
+  Duration timeout = const Duration(seconds: 5),
+}) {
   return stream.first.timeout(timeout);
 }
 
@@ -46,56 +49,64 @@ void main() {
       await server.stop();
     });
 
-    test('subscribe offers compaction flag and pushes are routed by numeric id', () async {
-      await client.connect();
+    test(
+      'subscribe offers compaction flag and pushes are routed by numeric id',
+      () async {
+        await client.connect();
 
-      final sub = client.newSubscription('compacted-channel');
-      final pubFuture = _waitForEvent<centrifuge.PublicationEvent>(sub.publication);
-      final joinFuture = _waitForEvent<centrifuge.JoinEvent>(sub.join);
-      final leaveFuture = _waitForEvent<centrifuge.LeaveEvent>(sub.leave);
+        final sub = client.newSubscription('compacted-channel');
+        final pubFuture = _waitForEvent<centrifuge.PublicationEvent>(
+          sub.publication,
+        );
+        final joinFuture = _waitForEvent<centrifuge.JoinEvent>(sub.join);
+        final leaveFuture = _waitForEvent<centrifuge.LeaveEvent>(sub.leave);
 
-      await sub.subscribe();
+        await sub.subscribe();
 
-      // The subscribe request must carry the channelCompaction bit.
-      expect(server.lastSubscribe!.flag.toInt() & 1, 1);
+        // The subscribe request must carry the channelCompaction bit.
+        expect(server.lastSubscribe!.flag.toInt() & 1, 1);
 
-      // Publication push with numeric ID only (no channel name).
-      server.publish(id: 42, data: utf8.encode('{"compacted":true}'));
-      final pub = await pubFuture;
-      expect(jsonDecode(utf8.decode(pub.data)), {'compacted': true});
+        // Publication push with numeric ID only (no channel name).
+        server.publish(id: 42, data: utf8.encode('{"compacted":true}'));
+        final pub = await pubFuture;
+        expect(jsonDecode(utf8.decode(pub.data)), {'compacted': true});
 
-      // Join / leave pushes are compacted the same way.
-      server.join(id: 42, client: 'other-client');
-      final join = await joinFuture;
-      expect(join.client, 'other-client');
+        // Join / leave pushes are compacted the same way.
+        server.join(id: 42, client: 'other-client');
+        final join = await joinFuture;
+        expect(join.client, 'other-client');
 
-      server.leave(id: 42, client: 'other-client');
-      final leave = await leaveFuture;
-      expect(leave.client, 'other-client');
-    });
+        server.leave(id: 42, client: 'other-client');
+        final leave = await leaveFuture;
+        expect(leave.client, 'other-client');
+      },
+    );
 
-    test('push with unknown id is dropped without affecting other subscriptions', () async {
-      await client.connect();
+    test(
+      'push with unknown id is dropped without affecting other subscriptions',
+      () async {
+        await client.connect();
 
-      final sub = client.newSubscription('compacted-channel');
-      await sub.subscribe();
+        final sub = client.newSubscription('compacted-channel');
+        await sub.subscribe();
 
-      final received = <centrifuge.PublicationEvent>[];
-      final pubSubscription = sub.publication.listen(received.add);
-      addTearDown(() => pubSubscription.cancel());
+        final received = <centrifuge.PublicationEvent>[];
+        final pubSubscription = sub.publication.listen(received.add);
+        addTearDown(() => pubSubscription.cancel());
 
-      // Unknown ID — must not be delivered anywhere (and must not crash).
-      server.publish(id: 99, data: utf8.encode('{"stray":true}'));
-      // Known ID delivered after the stray one proves the client survived it.
-      server.publish(id: 42, data: utf8.encode('{"ok":true}'));
+        // Unknown ID — must not be delivered anywhere (and must not crash).
+        server.publish(id: 99, data: utf8.encode('{"stray":true}'));
+        // Known ID delivered after the stray one proves the client survived it.
+        server.publish(id: 42, data: utf8.encode('{"ok":true}'));
 
-      await Future<void>.delayed(Duration.zero);
-      while (received.isEmpty) {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-      }
-      expect(received, hasLength(1));
-      expect(jsonDecode(utf8.decode(received.first.data)), {'ok': true});
-    });
+        await Future<void>.delayed(Duration.zero);
+        while (received.isEmpty) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        expect(received, hasLength(1));
+        expect(jsonDecode(utf8.decode(received.first.data)), {'ok': true});
+      },
+    );
 
     test('same id is re-registered after disconnect/reconnect', () async {
       // Regression test: the client drops the ID registry on disconnect
@@ -109,7 +120,9 @@ void main() {
 
       await client.disconnect();
 
-      final resubscribed = _waitForEvent<centrifuge.SubscribedEvent>(sub.subscribed);
+      final resubscribed = _waitForEvent<centrifuge.SubscribedEvent>(
+        sub.subscribed,
+      );
       await client.connect();
       await resubscribed;
 
@@ -122,35 +135,40 @@ void main() {
       while (received.isEmpty) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
-      expect(jsonDecode(utf8.decode(received.first.data)), {'after_reconnect': true});
+      expect(jsonDecode(utf8.decode(received.first.data)), {
+        'after_reconnect': true,
+      });
     });
 
-    test('id mapping is dropped on unsubscribe and refreshed on resubscribe', () async {
-      await client.connect();
+    test(
+      'id mapping is dropped on unsubscribe and refreshed on resubscribe',
+      () async {
+        await client.connect();
 
-      final sub = client.newSubscription('compacted-channel');
-      await sub.subscribe();
+        final sub = client.newSubscription('compacted-channel');
+        await sub.subscribe();
 
-      final received = <centrifuge.PublicationEvent>[];
-      final pubSubscription = sub.publication.listen(received.add);
-      addTearDown(() => pubSubscription.cancel());
+        final received = <centrifuge.PublicationEvent>[];
+        final pubSubscription = sub.publication.listen(received.add);
+        addTearDown(() => pubSubscription.cancel());
 
-      await sub.unsubscribe();
+        await sub.unsubscribe();
 
-      // Old ID must no longer route to the unsubscribed subscription.
-      server.publish(id: 42, data: utf8.encode('{"stale":true}'));
+        // Old ID must no longer route to the unsubscribed subscription.
+        server.publish(id: 42, data: utf8.encode('{"stale":true}'));
 
-      // Resubscribe — the server assigns a fresh ID.
-      channelId = 43;
-      await sub.subscribe();
+        // Resubscribe — the server assigns a fresh ID.
+        channelId = 43;
+        await sub.subscribe();
 
-      server.publish(id: 43, data: utf8.encode('{"fresh":true}'));
-      while (received.isEmpty) {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-      }
-      expect(received, hasLength(1));
-      expect(jsonDecode(utf8.decode(received.first.data)), {'fresh': true});
-    });
+        server.publish(id: 43, data: utf8.encode('{"fresh":true}'));
+        while (received.isEmpty) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        expect(received, hasLength(1));
+        expect(jsonDecode(utf8.decode(received.first.data)), {'fresh': true});
+      },
+    );
 
     test('id mapping is dropped on temporary server-side unsubscribe', () async {
       // Regression test: a server-initiated unsubscribe with code >= 2500 tears
@@ -184,13 +202,16 @@ void main() {
         if (!cmd.hasSubscribe()) return null;
         return protocol.Reply()
           ..id = cmd.id
-          ..error = (protocol.Error()
-            ..code = 100
-            ..message = 'temporary'
-            ..temporary = true);
+          ..error =
+              (protocol.Error()
+                ..code = 100
+                ..message = 'temporary'
+                ..temporary = true);
       };
 
-      final subscribing = _waitForEvent<centrifuge.SubscribingEvent>(sub.subscribing);
+      final subscribing = _waitForEvent<centrifuge.SubscribingEvent>(
+        sub.subscribing,
+      );
       server.unsubscribe('compacted-channel', 2500, 'insufficient state');
       await subscribing;
       expect(sub.state, centrifuge.SubscriptionState.subscribing);

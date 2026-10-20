@@ -23,9 +23,11 @@ void main() {
     setUp(() async {
       server = FakeCentrifugoServer();
       await server.start();
-      server.onSubscribe = (channel, req) => protocol.SubscribeResult()
-        ..expires = true
-        ..ttl = 1;
+      server.onSubscribe =
+          (channel, req) =>
+              protocol.SubscribeResult()
+                ..expires = true
+                ..ttl = 1;
       client = centrifuge.createClient(server.url, centrifuge.ClientConfig());
     });
 
@@ -34,36 +36,43 @@ void main() {
       await server.stop();
     });
 
-    test('unsubscribes with the unauthorized code instead of sending SubRefresh', () async {
-      await client.connect();
+    test(
+      'unsubscribes with the unauthorized code instead of sending SubRefresh',
+      () async {
+        await client.connect();
 
-      var getTokenCalls = 0;
-      final sub = client.newSubscription(
-        'news',
-        centrifuge.SubscriptionConfig(getToken: (event) async {
-          getTokenCalls++;
-          // Real token for the initial subscribe, empty one on refresh.
-          return getTokenCalls == 1 ? 'sub-token' : '';
-        }),
-      );
+        var getTokenCalls = 0;
+        final sub = client.newSubscription(
+          'news',
+          centrifuge.SubscriptionConfig(
+            getToken: (event) async {
+              getTokenCalls++;
+              // Real token for the initial subscribe, empty one on refresh.
+              return getTokenCalls == 1 ? 'sub-token' : '';
+            },
+          ),
+        );
 
-      final unsubscribes = <centrifuge.UnsubscribedEvent>[];
-      final unsubscribedSubscription = sub.unsubscribed.listen(unsubscribes.add);
-      addTearDown(() => unsubscribedSubscription.cancel());
+        final unsubscribes = <centrifuge.UnsubscribedEvent>[];
+        final unsubscribedSubscription = sub.unsubscribed.listen(
+          unsubscribes.add,
+        );
+        addTearDown(() => unsubscribedSubscription.cancel());
 
-      await sub.subscribe();
-      expect(sub.state, centrifuge.SubscriptionState.subscribed);
+        await sub.subscribe();
+        expect(sub.state, centrifuge.SubscriptionState.subscribed);
 
-      // Wait past the 1-second TTL for the refresh timer to fire.
-      await Future<void>.delayed(const Duration(milliseconds: 1300));
+        // Wait past the 1-second TTL for the refresh timer to fire.
+        await Future<void>.delayed(const Duration(milliseconds: 1300));
 
-      expect(getTokenCalls, 2);
-      expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
-      expect(unsubscribes, hasLength(1));
-      expect(unsubscribes.single.code, 1); // unsubscribedCodeUnauthorized
-      expect(unsubscribes.single.reason, 'unauthorized');
-      expect(server.received.any((cmd) => cmd.hasSubRefresh()), isFalse);
-    });
+        expect(getTokenCalls, 2);
+        expect(sub.state, centrifuge.SubscriptionState.unsubscribed);
+        expect(unsubscribes, hasLength(1));
+        expect(unsubscribes.single.code, 1); // unsubscribedCodeUnauthorized
+        expect(unsubscribes.single.reason, 'unauthorized');
+        expect(server.received.any((cmd) => cmd.hasSubRefresh()), isFalse);
+      },
+    );
   });
 
   group('Connection token refresh returning an empty token', () {
@@ -73,12 +82,13 @@ void main() {
     setUp(() async {
       server = FakeCentrifugoServer();
       await server.start();
-      server.connectResult = protocol.ConnectResult()
-        ..client = 'fake-client'
-        ..version = '0.0.0'
-        ..ping = 25
-        ..expires = true
-        ..ttl = 1;
+      server.connectResult =
+          protocol.ConnectResult()
+            ..client = 'fake-client'
+            ..version = '0.0.0'
+            ..ping = 25
+            ..expires = true
+            ..ttl = 1;
     });
 
     tearDown(() async {
@@ -86,36 +96,41 @@ void main() {
       await server.stop();
     });
 
-    test('disconnects with the unauthorized code instead of sending Refresh', () async {
-      var getTokenCalls = 0;
-      client = centrifuge.createClient(
-        server.url,
-        // Initial token is set, so getToken is only called by the refresh timer.
-        centrifuge.ClientConfig(
-          token: 'initial-token',
-          getToken: (event) async {
-            getTokenCalls++;
-            return '';
-          },
-        ),
-      );
+    test(
+      'disconnects with the unauthorized code instead of sending Refresh',
+      () async {
+        var getTokenCalls = 0;
+        client = centrifuge.createClient(
+          server.url,
+          // Initial token is set, so getToken is only called by the refresh timer.
+          centrifuge.ClientConfig(
+            token: 'initial-token',
+            getToken: (event) async {
+              getTokenCalls++;
+              return '';
+            },
+          ),
+        );
 
-      final disconnects = <centrifuge.DisconnectedEvent>[];
-      final disconnectedSubscription = client.disconnected.listen(disconnects.add);
-      addTearDown(() => disconnectedSubscription.cancel());
+        final disconnects = <centrifuge.DisconnectedEvent>[];
+        final disconnectedSubscription = client.disconnected.listen(
+          disconnects.add,
+        );
+        addTearDown(() => disconnectedSubscription.cancel());
 
-      await client.connect();
-      expect(client.state, centrifuge.State.connected);
+        await client.connect();
+        expect(client.state, centrifuge.State.connected);
 
-      // Wait past the 1-second TTL for the refresh timer to fire.
-      await Future<void>.delayed(const Duration(milliseconds: 1300));
+        // Wait past the 1-second TTL for the refresh timer to fire.
+        await Future<void>.delayed(const Duration(milliseconds: 1300));
 
-      expect(getTokenCalls, 1);
-      expect(client.state, centrifuge.State.disconnected);
-      expect(disconnects, hasLength(1));
-      expect(disconnects.single.code, 1); // disconnectedCodeUnauthorized
-      expect(disconnects.single.reason, 'unauthorized');
-      expect(server.received.any((cmd) => cmd.hasRefresh()), isFalse);
-    });
+        expect(getTokenCalls, 1);
+        expect(client.state, centrifuge.State.disconnected);
+        expect(disconnects, hasLength(1));
+        expect(disconnects.single.code, 1); // disconnectedCodeUnauthorized
+        expect(disconnects.single.reason, 'unauthorized');
+        expect(server.received.any((cmd) => cmd.hasRefresh()), isFalse);
+      },
+    );
   });
 }

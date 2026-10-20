@@ -38,10 +38,16 @@ class FilterNode {
 /// ]);
 /// ```
 abstract final class Filter {
-  static FilterNode _leaf(String key, String cmp, {String? val, List<String>? vals}) {
-    final node = protocol.FilterNode()
-      ..key = key
-      ..cmp = cmp;
+  static FilterNode _leaf(
+    String key,
+    String cmp, {
+    String? val,
+    List<String>? vals,
+  }) {
+    final node =
+        protocol.FilterNode()
+          ..key = key
+          ..cmp = cmp;
     if (val != null) node.val = val;
     if (vals != null) node.vals.addAll(vals);
     return FilterNode._(node);
@@ -60,10 +66,12 @@ abstract final class Filter {
   static FilterNode neq(String key, String val) => _leaf(key, 'neq', val: val);
 
   /// Tag [key] is one of [vals].
-  static FilterNode inList(String key, List<String> vals) => _leaf(key, 'in', vals: vals);
+  static FilterNode inList(String key, List<String> vals) =>
+      _leaf(key, 'in', vals: vals);
 
   /// Tag [key] is not one of [vals].
-  static FilterNode notInList(String key, List<String> vals) => _leaf(key, 'nin', vals: vals);
+  static FilterNode notInList(String key, List<String> vals) =>
+      _leaf(key, 'nin', vals: vals);
 
   /// Tag [key] exists.
   static FilterNode exists(String key) => _leaf(key, 'ex');
@@ -72,13 +80,16 @@ abstract final class Filter {
   static FilterNode notExists(String key) => _leaf(key, 'nex');
 
   /// Tag [key] (string) starts with [val].
-  static FilterNode startsWith(String key, String val) => _leaf(key, 'sw', val: val);
+  static FilterNode startsWith(String key, String val) =>
+      _leaf(key, 'sw', val: val);
 
   /// Tag [key] (string) ends with [val].
-  static FilterNode endsWith(String key, String val) => _leaf(key, 'ew', val: val);
+  static FilterNode endsWith(String key, String val) =>
+      _leaf(key, 'ew', val: val);
 
   /// Tag [key] (string) contains [val].
-  static FilterNode contains(String key, String val) => _leaf(key, 'ct', val: val);
+  static FilterNode contains(String key, String val) =>
+      _leaf(key, 'ct', val: val);
 
   /// Tag [key] (numeric) is greater than [val].
   static FilterNode gt(String key, String val) => _leaf(key, 'gt', val: val);
