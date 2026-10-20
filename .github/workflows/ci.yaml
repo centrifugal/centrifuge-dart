@@ -55,9 +55,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Pinned, since dart format output changes between SDK versions.
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: stable
+          sdk: "3.13.6"
 
       - name: Install dependencies
         run: dart pub get

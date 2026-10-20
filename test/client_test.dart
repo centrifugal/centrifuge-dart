@@ -834,43 +834,39 @@ void main() {
       await client.disconnect();
     });
 
-    test(
-      'stream delta: many publications with small diffs',
-      () async {
-        final client = createClient();
-        await client.connect();
+    test('stream delta: many publications with small diffs', () async {
+      final client = createClient();
+      await client.connect();
 
-        final ch = uniqueChannel('delta');
-        final sub = client.newSubscription(
-          ch,
-          centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
-        );
+      final ch = uniqueChannel('delta');
+      final sub = client.newSubscription(
+        ch,
+        centrifuge.SubscriptionConfig(delta: centrifuge.DeltaType.fossil),
+      );
 
-        const count = 10;
-        final allPubs = collectEvents<centrifuge.PublicationEvent>(
-          sub.publication,
-          count,
-          timeout: Duration(seconds: 15),
-        );
+      const count = 10;
+      final allPubs = collectEvents<centrifuge.PublicationEvent>(
+        sub.publication,
+        count,
+        timeout: Duration(seconds: 15),
+      );
 
-        await sub.subscribe();
+      await sub.subscribe();
 
-        for (var i = 0; i < count; i++) {
-          await apiPublish(ch, {'index': i, 'padding': 'x' * 500});
-        }
+      for (var i = 0; i < count; i++) {
+        await apiPublish(ch, {'index': i, 'padding': 'x' * 500});
+      }
 
-        final received = await allPubs;
-        for (var i = 0; i < count; i++) {
-          expect(jsonDecode(utf8.decode(received[i].data)), {
-            'index': i,
-            'padding': 'x' * 500,
-          });
-        }
+      final received = await allPubs;
+      for (var i = 0; i < count; i++) {
+        expect(jsonDecode(utf8.decode(received[i].data)), {
+          'index': i,
+          'padding': 'x' * 500,
+        });
+      }
 
-        await client.disconnect();
-      },
-      timeout: Timeout(Duration(seconds: 20)),
-    );
+      await client.disconnect();
+    }, timeout: Timeout(Duration(seconds: 20)));
   });
 
   group('Token auth', () {
@@ -1684,11 +1680,10 @@ void main() {
       // Each per-channel list is monotonic in seq, indexed from 0.
       for (var i = 0; i < channels.length; i++) {
         for (var j = 0; j < pubLists[i].length; j++) {
-          expect(
-            jsonDecode(utf8.decode(pubLists[i][j].data)),
-            {'ch': i, 'seq': j},
-            reason: 'channel $i slot $j out of order',
-          );
+          expect(jsonDecode(utf8.decode(pubLists[i][j].data)), {
+            'ch': i,
+            'seq': j,
+          }, reason: 'channel $i slot $j out of order');
         }
       }
 
@@ -1928,11 +1923,9 @@ void main() {
         }
         expect(pubs.length, seq);
         for (var i = 0; i < pubs.length; i++) {
-          expect(
-            jsonDecode(utf8.decode(pubs[i].data)),
-            {'n': i},
-            reason: 'pub $i out of order: ${utf8.decode(pubs[i].data)}',
-          );
+          expect(jsonDecode(utf8.decode(pubs[i].data)), {
+            'n': i,
+          }, reason: 'pub $i out of order: ${utf8.decode(pubs[i].data)}');
         }
 
         await client.disconnect();
