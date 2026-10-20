@@ -13,7 +13,6 @@ Note that custom WebSocket connection Upgrade headers are sent natively on platf
 ## Examples
 
 * `example\flutter_app` simple chat application
-* `example\chat_app` one more chat example
 * `example\console` simple console application
 
 ## Usage in background

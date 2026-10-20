@@ -1,1 +1,0 @@
-String username = 'A User';
