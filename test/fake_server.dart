@@ -204,6 +204,13 @@ class FakeCentrifugoServer {
         ..version = '0.0.0'
         ..ping = 25;
 
+  /// Encodes every message sent after a connect reply that carried a
+  /// dictionary, as a server with dictionary compression does: set it to
+  /// compress against that dictionary. Messages from [sendBytes] are sent as
+  /// they are.
+  List<int> Function(List<int> frame)? compressFrame;
+  final _compressing = <WebSocket>{};
+
   /// Full override for any command — return a Reply to send, or null to fall
   /// through to default handling.
   protocol.Reply? Function(protocol.Command cmd)? onCommand;
@@ -352,43 +359,40 @@ class FakeCentrifugoServer {
   /// arrive on a connection that closeConnection() already closed: its reply
   /// is dropped, as a real server's would be.
   void _reply(WebSocket socket, protocol.Reply reply) {
-    final replyData = reply.writeToBuffer();
-    final framed =
-        (pb.CodedBufferWriter()
-              ..writeInt32NoTag(replyData.length)
-              ..writeRawBytes(replyData))
-            .toBuffer();
     try {
-      socket.add(framed);
+      _write(socket, encodeReplies([reply]));
     } on StateError {
       // Connection already closed.
     }
   }
 
+  // The frame carrying the dictionary is raw, every frame after it encoded.
+  void _write(WebSocket socket, List<int> frame) {
+    socket.add(_compressing.contains(socket) ? compressFrame!(frame) : frame);
+    if (compressFrame != null && _carriesDictionary(frame)) {
+      _compressing.add(socket);
+    }
+  }
+
+  bool _carriesDictionary(List<int> frame) {
+    final reader = pb.CodedBufferReader(frame);
+    while (!reader.isAtEnd()) {
+      final reply = protocol.Reply();
+      reader.readMessage(reply, pb.ExtensionRegistry.EMPTY);
+      if (reply.hasConnect() && reply.connect.hasDict()) return true;
+    }
+    return false;
+  }
+
   // --- raw escape hatches ---------------------------------------------------
 
   /// Send a raw reply.
-  void sendReply(protocol.Reply reply) {
-    final replyData = reply.writeToBuffer();
-    final framed =
-        (pb.CodedBufferWriter()
-              ..writeInt32NoTag(replyData.length)
-              ..writeRawBytes(replyData))
-            .toBuffer();
-    _socket!.add(framed);
-  }
+  void sendReply(protocol.Reply reply) =>
+      _write(_socket!, encodeReplies([reply]));
 
   /// Send several replies in one WebSocket message, as a server batches them.
-  void sendFrame(List<protocol.Reply> replies) {
-    final writer = pb.CodedBufferWriter();
-    for (final reply in replies) {
-      final replyData = reply.writeToBuffer();
-      writer
-        ..writeInt32NoTag(replyData.length)
-        ..writeRawBytes(replyData);
-    }
-    _socket!.add(writer.toBuffer());
-  }
+  void sendFrame(List<protocol.Reply> replies) =>
+      _write(_socket!, encodeReplies(replies));
 
   /// Send bytes as they are, e.g. data that isn't the protocol.
   void sendBytes(List<int> bytes) => _socket!.add(bytes);

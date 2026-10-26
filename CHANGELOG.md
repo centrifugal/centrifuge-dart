@@ -1,3 +1,7 @@
+## Unreleased
+
+* **Dictionary compression.** The client decodes frames the server compresses against a dictionary, on the VM and Flutter native platforms. It advertises the capability at connect, installs the dictionary the connect reply carries, and keeps it between connections so a reconnect is sent only its id. A dictionary it can't use, or a frame that fails to decode, closes the connection with code `2` (bad protocol) and reconnects without that dictionary. New `ClientConfig.profile` names the kind of client, which the server may use to choose a dictionary, and `Client.dictionaryCompressionStats()` reports what compression saves. The bundled protocol gains `Dictionary`, `ConnectRequest.profile`/`dict` and `ConnectResult.flag`/`dict`.
+
 ## [0.21.0]
 
 A stability release. Connection, subscription and token handling were reviewed against a validation harness and against centrifuge-js. The harness covers seeded chaos against a fake server, a real Centrifugo behind fault-injecting proxies, and browsers under dart2js and dart2wasm. Most fixes cover races between reconnects, event listeners calling back into the client, teardown, token refresh, and browser behaviour. Every fix comes with a regression test.

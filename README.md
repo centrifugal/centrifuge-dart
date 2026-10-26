@@ -28,6 +28,28 @@ Event listeners should not throw: catch errors in your listeners. The SDK can't 
 * the listeners after the failing one don't get that event; the SDK's own work completes as if the listener had returned;
 * a publication whose listener threw is not counted as delivered: after `connect()`, a recoverable subscription receives it again.
 
+## Dictionary compression
+
+A server can compress what it sends against a dictionary trained on your traffic. There is nothing to enable here: the client tells the server it can decode such frames, and the server decides whether this connection gets a dictionary. It arrives in the connect reply. A client that doesn't get one works exactly as before.
+
+The client keeps the dictionary in memory for its lifetime, so a reconnect is sent only its id.
+
+Supported on the VM and Flutter native platforms. Not in browsers (dart2js, dart2wasm), which have no DEFLATE with a preset dictionary to use: there the client doesn't offer it, and the server sends ordinary frames.
+
+Which dictionary a connection gets depends on its profile, best set by your backend in the connection token. A client may also ask for one by name with `ClientConfig.profile`, e.g. `'trading-dashboard'`; the server grants it only for profiles configured to allow that.
+
+To see what compression does for a connection:
+
+```dart
+final stats = client.dictionaryCompressionStats();
+// DictionaryCompressionStats{accepted: true, active: true, dictionaryId: …,
+//   frames: 102, bytesReceived: 2431, bytesDecompressed: 11390,
+//   dictionaryBytes: 215, bytesSaved: 8744, ratio: 4.69,
+//   transportBytesReceived: 2721}
+```
+
+`accepted` says the server enabled compression for this connection, `dictionaryBytes` what the dictionary cost to receive (zero when the client already held it), and `bytesSaved` the net saving after that cost.
+
 ## Alternative SDK
 
 See also [PlugFox/spinify](https://github.com/PlugFox/spinify) for an alternative Dart (Flutter) real-time client SDK implementation.

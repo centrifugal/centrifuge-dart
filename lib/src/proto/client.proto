@@ -88,6 +88,14 @@ message Push {
   Refresh refresh = 12;
 }
 
+// Dictionary is a shared compression dictionary for the frames that follow the
+// connect reply carrying it.
+message Dictionary {
+  string id = 1; // SHA-256 of the content, first 12 bytes, base64url without padding.
+  bytes data = 2; // DEFLATE compressed content, on Protobuf connections.
+  string data_b64 = 3; // The same, base64, on JSON connections.
+}
+
 // ClientInfo contains information about client connection.
 message ClientInfo {
   string user = 1;
@@ -174,6 +182,8 @@ message ConnectRequest {
   string version = 5;
   map<string, string> headers = 6;
   int64 flag = 7; // Enable connection level features.
+  string profile = 9; // Application context this connection belongs to, a hint.
+  string dict = 8; // Id of the dictionary the client holds.
 }
 
 message ConnectResult {
@@ -188,6 +198,8 @@ message ConnectResult {
   string session = 9;
   string node = 10;
   int64 time = 11; // Server time as Unix timestamp in milliseconds (not sent by default).
+  int64 flag = 12; // Connection level features the server enabled.
+  Dictionary dict = 13; // Compression dictionary for this connection.
 }
 
 message RefreshRequest {

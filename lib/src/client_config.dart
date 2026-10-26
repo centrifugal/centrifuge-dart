@@ -22,6 +22,7 @@ class ClientConfig {
     this.maxServerPingDelay = const Duration(seconds: 10),
     this.name = 'dart',
     this.version = '',
+    this.profile = '',
   });
 
   /// The initial token used for authentication
@@ -64,6 +65,14 @@ class ClientConfig {
 
   /// The current version
   final String version;
+
+  /// The kind of client this is, e.g. `trading-dashboard`, which the server
+  /// may use to choose a compression dictionary. It describes the client,
+  /// not the user: use a small fixed set of names, like [name]. The server
+  /// grants it only for profiles configured to allow that, and may ignore or
+  /// override it, so it must never be relied on to gate anything. A backend can
+  /// set the profile in the connection token instead, which takes precedence.
+  final String profile;
 }
 
 typedef ConnectionTokenCallback = Future<String> Function(ConnectionTokenEvent);
