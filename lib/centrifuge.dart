@@ -1,5 +1,6 @@
 export 'src/client.dart' show Client, createClient, State;
 export 'src/client_config.dart';
+export 'src/dictionary.dart' show DictionaryCompressionStats;
 export 'src/error.dart';
 export 'src/events.dart';
 export 'src/filter.dart' show Filter, FilterNode;

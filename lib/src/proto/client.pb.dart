@@ -872,6 +872,87 @@ class Push extends $pb.GeneratedMessage {
   Refresh ensureRefresh() => $_ensure(10);
 }
 
+/// Dictionary is a shared compression dictionary for the frames that follow the
+/// connect reply carrying it.
+class Dictionary extends $pb.GeneratedMessage {
+  factory Dictionary({
+    $core.String? id,
+    $core.List<$core.int>? data,
+    $core.String? dataB64,
+  }) {
+    final result = create();
+    if (id != null) result.id = id;
+    if (data != null) result.data = data;
+    if (dataB64 != null) result.dataB64 = dataB64;
+    return result;
+  }
+
+  Dictionary._();
+
+  factory Dictionary.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Dictionary.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Dictionary',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'centrifugal.centrifuge.protocol'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..aOS(3, _omitFieldNames ? '' : 'dataB64')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Dictionary clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Dictionary copyWith(void Function(Dictionary) updates) =>
+      super.copyWith((message) => updates(message as Dictionary)) as Dictionary;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Dictionary create() => Dictionary._();
+  @$core.override
+  Dictionary createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Dictionary getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Dictionary>(create);
+  static Dictionary? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.List<$core.int> value) => $_setBytes(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearData() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get dataB64 => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set dataB64($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDataB64() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDataB64() => $_clearField(3);
+}
+
 /// ClientInfo contains information about client connection.
 class ClientInfo extends $pb.GeneratedMessage {
   factory ClientInfo({
@@ -1781,6 +1862,8 @@ class ConnectRequest extends $pb.GeneratedMessage {
     $core.String? version,
     $core.Iterable<$core.MapEntry<$core.String, $core.String>>? headers,
     $fixnum.Int64? flag,
+    $core.String? dict,
+    $core.String? profile,
   }) {
     final result = create();
     if (token != null) result.token = token;
@@ -1790,6 +1873,8 @@ class ConnectRequest extends $pb.GeneratedMessage {
     if (version != null) result.version = version;
     if (headers != null) result.headers.addEntries(headers);
     if (flag != null) result.flag = flag;
+    if (dict != null) result.dict = dict;
+    if (profile != null) result.profile = profile;
     return result;
   }
 
@@ -1825,6 +1910,8 @@ class ConnectRequest extends $pb.GeneratedMessage {
         valueFieldType: $pb.PbFieldType.OS,
         packageName: const $pb.PackageName('centrifugal.centrifuge.protocol'))
     ..aInt64(7, _omitFieldNames ? '' : 'flag')
+    ..aOS(8, _omitFieldNames ? '' : 'dict')
+    ..aOS(9, _omitFieldNames ? '' : 'profile')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1896,6 +1983,24 @@ class ConnectRequest extends $pb.GeneratedMessage {
   $core.bool hasFlag() => $_has(6);
   @$pb.TagNumber(7)
   void clearFlag() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get dict => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set dict($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasDict() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearDict() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.String get profile => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set profile($core.String value) => $_setString(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasProfile() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearProfile() => $_clearField(9);
 }
 
 class ConnectResult extends $pb.GeneratedMessage {
@@ -1911,6 +2016,8 @@ class ConnectResult extends $pb.GeneratedMessage {
     $core.String? session,
     $core.String? node,
     $fixnum.Int64? time,
+    $fixnum.Int64? flag,
+    Dictionary? dict,
   }) {
     final result = create();
     if (client != null) result.client = client;
@@ -1924,6 +2031,8 @@ class ConnectResult extends $pb.GeneratedMessage {
     if (session != null) result.session = session;
     if (node != null) result.node = node;
     if (time != null) result.time = time;
+    if (flag != null) result.flag = flag;
+    if (dict != null) result.dict = dict;
     return result;
   }
 
@@ -1959,6 +2068,9 @@ class ConnectResult extends $pb.GeneratedMessage {
     ..aOS(9, _omitFieldNames ? '' : 'session')
     ..aOS(10, _omitFieldNames ? '' : 'node')
     ..aInt64(11, _omitFieldNames ? '' : 'time')
+    ..aInt64(12, _omitFieldNames ? '' : 'flag')
+    ..aOM<Dictionary>(13, _omitFieldNames ? '' : 'dict',
+        subBuilder: Dictionary.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2072,6 +2184,26 @@ class ConnectResult extends $pb.GeneratedMessage {
   $core.bool hasTime() => $_has(10);
   @$pb.TagNumber(11)
   void clearTime() => $_clearField(11);
+
+  @$pb.TagNumber(12)
+  $fixnum.Int64 get flag => $_getI64(11);
+  @$pb.TagNumber(12)
+  set flag($fixnum.Int64 value) => $_setInt64(11, value);
+  @$pb.TagNumber(12)
+  $core.bool hasFlag() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearFlag() => $_clearField(12);
+
+  @$pb.TagNumber(13)
+  Dictionary get dict => $_getN(12);
+  @$pb.TagNumber(13)
+  set dict(Dictionary value) => $_setField(13, value);
+  @$pb.TagNumber(13)
+  $core.bool hasDict() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearDict() => $_clearField(13);
+  @$pb.TagNumber(13)
+  Dictionary ensureDict() => $_ensure(12);
 }
 
 class RefreshRequest extends $pb.GeneratedMessage {

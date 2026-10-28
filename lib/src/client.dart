@@ -8,6 +8,7 @@ import 'package:centrifuge/src/transport.dart';
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:meta/meta.dart';
 
+import 'dictionary.dart';
 import 'event_controller.dart';
 import 'platform/vm.dart' if (dart.library.js_interop) 'platform/js.dart';
 import 'proto/client.pb.dart' as protocol;
@@ -114,6 +115,14 @@ abstract class Client {
   /// Get an unmodifiable copy of the map with all registered client-side
   /// subscriptions.
   Map<String, Subscription> subscriptions();
+
+  /// What dictionary compression did on the current connection.
+  ///
+  /// Byte counts are exact at the protocol frame level, measured on WebSocket
+  /// message payloads, so they leave out WebSocket and TCP framing. Frames
+  /// received before compression started are not counted: this reports steady
+  /// state rather than the whole connection.
+  DictionaryCompressionStats dictionaryCompressionStats();
 }
 
 class ClientImpl implements Client {
@@ -131,6 +140,9 @@ class ClientImpl implements Client {
   final _serverSubs = <String, ServerSubscription>{};
 
   Transport? _transport;
+  // The dictionary outlives connections, so a returning connection costs an
+  // id rather than a transfer.
+  final _dictionaryCache = DictionaryCache();
 
   final String _url;
   final ClientConfig _config;
@@ -697,6 +709,7 @@ class ClientImpl implements Client {
         headers: _headers,
         timeout: _config.timeout,
         tlsSkipVerify: _config.tlsSkipVerify,
+        dictionaryCache: _dictionaryCache,
       ),
     );
     _connectingTransport = transport;
@@ -791,6 +804,18 @@ class ClientImpl implements Client {
     }
     request.name = _config.name;
     request.version = _config.version;
+    request.flag = $fixnum.Int64(supportedConnectionFlags);
+    // The dictionary kept from an earlier connection. The server answers with
+    // an id alone when it recognises it, so a returning client is compressed
+    // from its first frame without paying for the transfer again. The connect
+    // reply itself is never compressed: it says which dictionary applies.
+    if (supportedConnectionFlags & connectionFlagDictionaryCompression != 0 &&
+        _dictionaryCache.id != '') {
+      request.dict = _dictionaryCache.id;
+    }
+    if (_config.profile != '') {
+      request.profile = _config.profile;
+    }
 
     if (isWeb) {
       // Use headers emulation in web context.
@@ -1313,6 +1338,11 @@ class ClientImpl implements Client {
   /// attempt starts and on every disconnect.
   @internal
   int get connectionId => _connectAttemptId;
+
+  @override
+  DictionaryCompressionStats dictionaryCompressionStats() =>
+      (_transport ?? _connectingTransport)?.dictionaryCompressionStats ??
+      const DictionaryCompressionStats();
 
   @internal
   Future<protocol.UnsubscribeResult> sendUnsubscribe(

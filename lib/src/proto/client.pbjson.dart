@@ -409,6 +409,21 @@ final $typed_data.Uint8List pushDescriptor = $convert.base64Decode(
     'gYDCABKAsyKC5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLlJlZnJlc2hSB3JlZnJl'
     'c2hKBAgDEAQ=');
 
+@$core.Deprecated('Use dictionaryDescriptor instead')
+const Dictionary$json = {
+  '1': 'Dictionary',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
+    {'1': 'data_b64', '3': 3, '4': 1, '5': 9, '10': 'dataB64'},
+  ],
+};
+
+/// Descriptor for `Dictionary`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List dictionaryDescriptor = $convert.base64Decode(
+    'CgpEaWN0aW9uYXJ5Eg4KAmlkGAEgASgJUgJpZBISCgRkYXRhGAIgASgMUgRkYXRhEhkKCGRhdG'
+    'FfYjY0GAMgASgJUgdkYXRhQjY0');
+
 @$core.Deprecated('Use clientInfoDescriptor instead')
 const ClientInfo$json = {
   '1': 'ClientInfo',
@@ -679,6 +694,8 @@ const ConnectRequest$json = {
       '10': 'headers'
     },
     {'1': 'flag', '3': 7, '4': 1, '5': 3, '10': 'flag'},
+    {'1': 'profile', '3': 9, '4': 1, '5': 9, '10': 'profile'},
+    {'1': 'dict', '3': 8, '4': 1, '5': 9, '10': 'dict'},
   ],
   '3': [ConnectRequest_SubsEntry$json, ConnectRequest_HeadersEntry$json],
 };
@@ -717,10 +734,11 @@ final $typed_data.Uint8List connectRequestDescriptor = $convert.base64Decode(
     'ZWN0UmVxdWVzdC5TdWJzRW50cnlSBHN1YnMSEgoEbmFtZRgEIAEoCVIEbmFtZRIYCgd2ZXJzaW'
     '9uGAUgASgJUgd2ZXJzaW9uElYKB2hlYWRlcnMYBiADKAsyPC5jZW50cmlmdWdhbC5jZW50cmlm'
     'dWdlLnByb3RvY29sLkNvbm5lY3RSZXF1ZXN0LkhlYWRlcnNFbnRyeVIHaGVhZGVycxISCgRmbG'
-    'FnGAcgASgDUgRmbGFnGmoKCVN1YnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRJHCgV2YWx1ZRgC'
-    'IAEoCzIxLmNlbnRyaWZ1Z2FsLmNlbnRyaWZ1Z2UucHJvdG9jb2wuU3Vic2NyaWJlUmVxdWVzdF'
-    'IFdmFsdWU6AjgBGjoKDEhlYWRlcnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1ZRgC'
-    'IAEoCVIFdmFsdWU6AjgB');
+    'FnGAcgASgDUgRmbGFnEhgKB3Byb2ZpbGUYCSABKAlSB3Byb2ZpbGUSEgoEZGljdBgIIAEoCVIE'
+    'ZGljdBpqCglTdWJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSRwoFdmFsdWUYAiABKAsyMS5jZW'
+    '50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLlN1YnNjcmliZVJlcXVlc3RSBXZhbHVlOgI4'
+    'ARo6CgxIZWFkZXJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSFAoFdmFsdWUYAiABKAlSBXZhbH'
+    'VlOgI4AQ==');
 
 @$core.Deprecated('Use connectResultDescriptor instead')
 const ConnectResult$json = {
@@ -744,6 +762,15 @@ const ConnectResult$json = {
     {'1': 'session', '3': 9, '4': 1, '5': 9, '10': 'session'},
     {'1': 'node', '3': 10, '4': 1, '5': 9, '10': 'node'},
     {'1': 'time', '3': 11, '4': 1, '5': 3, '10': 'time'},
+    {'1': 'flag', '3': 12, '4': 1, '5': 3, '10': 'flag'},
+    {
+      '1': 'dict',
+      '3': 13,
+      '4': 1,
+      '5': 11,
+      '6': '.centrifugal.centrifuge.protocol.Dictionary',
+      '10': 'dict'
+    },
   ],
   '3': [ConnectResult_SubsEntry$json],
 };
@@ -772,9 +799,11 @@ final $typed_data.Uint8List connectResultDescriptor = $convert.base64Decode(
     'CgRkYXRhGAUgASgMUgRkYXRhEkwKBHN1YnMYBiADKAsyOC5jZW50cmlmdWdhbC5jZW50cmlmdW'
     'dlLnByb3RvY29sLkNvbm5lY3RSZXN1bHQuU3Vic0VudHJ5UgRzdWJzEhIKBHBpbmcYByABKA1S'
     'BHBpbmcSEgoEcG9uZxgIIAEoCFIEcG9uZxIYCgdzZXNzaW9uGAkgASgJUgdzZXNzaW9uEhIKBG'
-    '5vZGUYCiABKAlSBG5vZGUSEgoEdGltZRgLIAEoA1IEdGltZRppCglTdWJzRW50cnkSEAoDa2V5'
-    'GAEgASgJUgNrZXkSRgoFdmFsdWUYAiABKAsyMC5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3'
-    'RvY29sLlN1YnNjcmliZVJlc3VsdFIFdmFsdWU6AjgB');
+    '5vZGUYCiABKAlSBG5vZGUSEgoEdGltZRgLIAEoA1IEdGltZRISCgRmbGFnGAwgASgDUgRmbGFn'
+    'Ej8KBGRpY3QYDSABKAsyKy5jZW50cmlmdWdhbC5jZW50cmlmdWdlLnByb3RvY29sLkRpY3Rpb2'
+    '5hcnlSBGRpY3QaaQoJU3Vic0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EkYKBXZhbHVlGAIgASgL'
+    'MjAuY2VudHJpZnVnYWwuY2VudHJpZnVnZS5wcm90b2NvbC5TdWJzY3JpYmVSZXN1bHRSBXZhbH'
+    'VlOgI4AQ==');
 
 @$core.Deprecated('Use refreshRequestDescriptor instead')
 const RefreshRequest$json = {

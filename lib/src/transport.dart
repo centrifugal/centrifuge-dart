@@ -14,6 +14,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'channel.dart' if (dart.library.js_interop) 'channel_html.dart';
 import 'codec.dart';
 import 'codes.dart';
+import 'dictionary.dart';
 import 'error.dart' as centrifuge;
 import 'proto/client.pb.dart' hide Error;
 
@@ -27,11 +28,15 @@ class TransportConfig {
     this.headers = const <String, dynamic>{},
     this.timeout = const Duration(seconds: 5),
     this.tlsSkipVerify = false,
-  });
+    DictionaryCache? dictionaryCache,
+  }) : dictionaryCache = dictionaryCache ?? DictionaryCache();
 
   final Map<String, dynamic> headers;
   final Duration timeout;
   final bool tlsSkipVerify;
+
+  /// Where a dictionary is kept between this client's connections.
+  final DictionaryCache dictionaryCache;
 }
 
 Transport protobufTransportBuilder({
@@ -92,9 +97,35 @@ class Transport implements GeneratedMessageSender {
   final ReplyDecoder _replyDecoder;
   final TransportConfig _config;
   Function? _onError;
+  void Function(int code, String reason, bool shouldReconnect)? _onClose;
   bool _closed = false;
   // The socket stream ended.
   bool _done = false;
+
+  // Dictionary compression of this connection: set up by the connect reply,
+  // which is the frame carrying the dictionary, and never replaced - a frame
+  // announcing another dictionary would have to be encoded against this one.
+  FrameCodec? _frameCodec;
+  bool _compressionAccepted = false;
+  // Everything the socket delivered, before decompression, in either mode.
+  int _transportBytesIn = 0;
+  // A frame failed: the connection is being closed, its data is not handled.
+  bool _failed = false;
+
+  /// What dictionary compression did on this connection.
+  DictionaryCompressionStats get dictionaryCompressionStats {
+    final codec = _frameCodec;
+    return DictionaryCompressionStats(
+      accepted: _compressionAccepted,
+      active: codec != null,
+      dictionaryId: codec?.id ?? '',
+      frames: codec?.frames ?? 0,
+      bytesReceived: codec?.bytesReceived ?? 0,
+      bytesDecompressed: codec?.bytesDecompressed ?? 0,
+      dictionaryBytes: codec?.transferred ?? 0,
+      transportBytesReceived: _transportBytesIn,
+    );
+  }
 
   Future<void> open(
     void Function(Push push, bool isPing) onPush, {
@@ -102,6 +133,7 @@ class Transport implements GeneratedMessageSender {
     void Function(int code, String reason, bool shouldReconnect)? onDone,
   }) async {
     _onError = onError;
+    _onClose = onDone;
     final socketFuture = _socketBuilder();
     final WebSocketChannel socket;
     try {
@@ -328,14 +360,56 @@ class Transport implements GeneratedMessageSender {
 
   void Function(dynamic) _onData(void Function(Push push, bool isPing) onPush) {
     return (dynamic input) {
+      if (_failed) return;
+      var data = input as List<int>;
+      _transportBytesIn += data.length;
+      final codec = _frameCodec;
+      if (codec != null) {
+        try {
+          data = codec.decode(data);
+        } on Exception catch (e) {
+          // A frame that doesn't decode is a protocol error, terminal like any
+          // other. The dictionary is forgotten, so a later connect() doesn't
+          // offer it again.
+          _config.dictionaryCache.forget(codec.id);
+          _fail(
+            'dictionary compression: frame does not decode with dictionary '
+            '${codec.id}: ${describeDecodeError(e)}',
+          );
+          return;
+        }
+      }
       final List<Reply> replies;
       try {
-        replies = _replyDecoder.convert(input as List<int>);
+        replies = _replyDecoder.convert(data);
       } catch (e) {
         if (_onError != null) {
           _onError!(e);
         }
         return;
+      }
+      // A dictionary in this frame applies from the next one: this frame is
+      // encoded with what was in use before. Installed here, before the replies
+      // are handled, so a frame that comes right after is decoded with it.
+      for (final reply in replies) {
+        if (!reply.hasConnect()) continue;
+        final result = reply.connect;
+        _compressionAccepted =
+            result.flag.toInt() & connectionFlagDictionaryCompression != 0;
+        if (!result.hasDict()) continue;
+        final FrameCodec next;
+        try {
+          next = frameCodecFromDictionary(result.dict, _config.dictionaryCache);
+        } on UnusableDictionaryException catch (e) {
+          // A dictionary this client doesn't hold or can't read: nothing after
+          // this frame can be decoded, a protocol error, terminal like any
+          // other. The id is forgotten, so a later connect() doesn't offer it
+          // again.
+          _config.dictionaryCache.forget(result.dict.id);
+          _fail('dictionary compression: ${e.message}');
+          return;
+        }
+        _frameCodec = next;
       }
       for (final reply in replies) {
         if (reply.id > 0) {
@@ -345,5 +419,12 @@ class Transport implements GeneratedMessageSender {
         }
       }
     };
+  }
+
+  // Closes the connection for data it can't decode: a protocol error, so the
+  // client disconnects and doesn't reconnect.
+  void _fail(String reason) {
+    _failed = true;
+    _onClose?.call(disconnectCodeBadProtocol, reason, false);
   }
 }
