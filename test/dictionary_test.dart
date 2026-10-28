@@ -355,31 +355,29 @@ void main() {
       expect(stats.frames, 1);
     });
 
-    // While connecting, a dictionary the client can't use closes the
-    // connection and starts the next attempt, which offers no dictionary: the
-    // client never connects with it.
-    Future<void> expectRetriedWithoutDictionary(String reason) async {
-      var connected = false;
-      client.connected.listen((_) => connected = true);
-      // Still connecting, so the reason comes as a connect error.
-      final error = _next(client.error);
-      unawaited(client.connect());
-      final event = await error;
-      expect(event.error, isA<centrifuge.ConnectError>());
-      expect(
-        (event.error as centrifuge.ConnectError).error,
-        startsWith(reason),
-      );
-      await _until(
-        () => server.received.where((c) => c.hasConnect()).length >= 2,
-      );
-      final connects = server.received.where((c) => c.hasConnect()).toList();
-      expect(connects.last.connect.hasDict(), isFalse);
-      expect(connected, isFalse);
-      expect(client.state, centrifuge.State.connecting);
+    // A dictionary the client can't use is a protocol error: the client stops
+    // with badProtocol, as for any other, and says why. It forgets the
+    // dictionary, so connecting again, as an application would, doesn't offer
+    // it.
+    Future<void> expectBadProtocol(
+      Future<centrifuge.DisconnectedEvent> disconnected,
+      String reason,
+    ) async {
+      final event = await disconnected;
+      expect(event.code, 2);
+      expect(event.reason, startsWith(reason));
+      expect(client.state, centrifuge.State.disconnected);
+      expect(server.received.where((c) => c.hasConnect()).length, 1);
     }
 
-    test('an id the client does not hold reconnects without it', () async {
+    Future<void> expectConnectsWithoutDictionary() async {
+      await client.connect();
+      final connects = server.received.where((c) => c.hasConnect()).toList();
+      expect(connects.length, 2);
+      expect(connects.last.connect.hasDict(), isFalse);
+    }
+
+    test('an id the client does not hold disconnects', () async {
       server.onCommand = (cmd) {
         if (!cmd.hasConnect()) return null;
         return protocol.Reply()
@@ -394,13 +392,18 @@ void main() {
         server.url,
         centrifuge.ClientConfig(minReconnectDelay: Duration.zero),
       );
-      await expectRetriedWithoutDictionary(
+      final disconnected = _next(client.disconnected);
+      unawaited(client.connect().catchError((_) {}));
+      await expectBadProtocol(
+        disconnected,
         'dictionary compression: server named dictionary never-sent, '
         'which this client does not hold',
       );
+      server.onCommand = null;
+      await expectConnectsWithoutDictionary();
     });
 
-    test('content that does not inflate reconnects without it', () async {
+    test('content that does not inflate disconnects', () async {
       server.onCommand = (cmd) {
         if (!cmd.hasConnect()) return null;
         return protocol.Reply()
@@ -418,42 +421,29 @@ void main() {
         server.url,
         centrifuge.ClientConfig(minReconnectDelay: Duration.zero),
       );
-      await expectRetriedWithoutDictionary(
+      final disconnected = _next(client.disconnected);
+      unawaited(client.connect().catchError((_) {}));
+      await expectBadProtocol(
+        disconnected,
         'dictionary compression: dictionary broken does not inflate: ',
       );
+      server.onCommand = null;
+      await expectConnectsWithoutDictionary();
     });
 
-    test('a frame that fails to decode forgets the dictionary', () async {
+    test('a frame that fails to decode disconnects', () async {
       client = centrifuge.createClient(
         server.url,
         centrifuge.ClientConfig(minReconnectDelay: Duration.zero),
       );
       await client.connect();
-      final connecting = _next(client.connecting);
+      final disconnected = _next(client.disconnected);
       server.sendBytes([frameCodecCompressed, 0xff, 0xff, 0xff]);
-      final event = await connecting;
-      expect(event.code, 2);
-      expect(
-        event.reason,
-        startsWith(
-          'dictionary compression: frame does not decode with dictionary ',
-        ),
+      await expectBadProtocol(
+        disconnected,
+        'dictionary compression: frame does not decode with dictionary ',
       );
-      await _until(
-        () => server.received.where((c) => c.hasConnect()).length >= 2,
-      );
-      final connects = server.received.where((c) => c.hasConnect()).toList();
-      expect(connects.last.connect.hasDict(), isFalse);
+      await expectConnectsWithoutDictionary();
     });
   });
-}
-
-Future<void> _until(bool Function() condition) async {
-  final deadline = DateTime.now().add(const Duration(seconds: 5));
-  while (!condition()) {
-    if (DateTime.now().isAfter(deadline)) {
-      throw TimeoutException('condition not met');
-    }
-    await Future<void>.delayed(const Duration(milliseconds: 5));
-  }
 }

@@ -746,14 +746,6 @@ class ClientImpl implements Client {
           // Ignore the close of a transport that was already torn down or whose
           // attempt was superseded.
           if (attemptId != _connectAttemptId) return;
-          if (code == disconnectCodeBadProtocol && state == State.connecting) {
-            // Still connecting, so no connecting event carries the reason: a
-            // connect reply this client couldn't use, such as a dictionary it
-            // can't read, would otherwise retry without a trace.
-            _errorController.add(ErrorEvent(ConnectError(reason)));
-            // Not after an error listener disconnected or started a new attempt.
-            if (attemptId != _connectAttemptId) return;
-          }
           _processDisconnect(code: code, reason: reason, reconnect: reconnect);
         },
       );

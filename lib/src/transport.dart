@@ -368,8 +368,9 @@ class Transport implements GeneratedMessageSender {
         try {
           data = codec.decode(data);
         } on Exception catch (e) {
-          // A dictionary that can't decode is stale or corrupted: forget it,
-          // so the next connection doesn't advertise it and fail in a loop.
+          // A frame that doesn't decode is a protocol error, terminal like any
+          // other. The dictionary is forgotten, so a later connect() doesn't
+          // offer it again.
           _config.dictionaryCache.forget(codec.id);
           _fail(
             'dictionary compression: frame does not decode with dictionary '
@@ -401,8 +402,9 @@ class Transport implements GeneratedMessageSender {
           next = frameCodecFromDictionary(result.dict, _config.dictionaryCache);
         } on UnusableDictionaryException catch (e) {
           // A dictionary this client doesn't hold or can't read: nothing after
-          // this frame can be decoded. Forget it and start over rather than
-          // misread everything that follows.
+          // this frame can be decoded, a protocol error, terminal like any
+          // other. The id is forgotten, so a later connect() doesn't offer it
+          // again.
           _config.dictionaryCache.forget(result.dict.id);
           _fail('dictionary compression: ${e.message}');
           return;
@@ -419,9 +421,10 @@ class Transport implements GeneratedMessageSender {
     };
   }
 
-  // Closes the connection for data it can't decode, to reconnect.
+  // Closes the connection for data it can't decode: a protocol error, so the
+  // client disconnects and doesn't reconnect.
   void _fail(String reason) {
     _failed = true;
-    _onClose?.call(disconnectCodeBadProtocol, reason, true);
+    _onClose?.call(disconnectCodeBadProtocol, reason, false);
   }
 }
