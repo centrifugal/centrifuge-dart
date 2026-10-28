@@ -367,11 +367,14 @@ class Transport implements GeneratedMessageSender {
       if (codec != null) {
         try {
           data = codec.decode(data);
-        } on Exception {
+        } on Exception catch (e) {
           // A dictionary that can't decode is stale or corrupted: forget it,
           // so the next connection doesn't advertise it and fail in a loop.
           _config.dictionaryCache.forget(codec.id);
-          _fail('frame decode error');
+          _fail(
+            'dictionary compression: frame does not decode with dictionary '
+            '${codec.id}: ${describeDecodeError(e)}',
+          );
           return;
         }
       }
@@ -393,16 +396,15 @@ class Transport implements GeneratedMessageSender {
         _compressionAccepted =
             result.flag.toInt() & connectionFlagDictionaryCompression != 0;
         if (!result.hasDict()) continue;
-        final next = frameCodecFromDictionary(
-          result.dict,
-          _config.dictionaryCache,
-        );
-        if (next == null) {
+        final FrameCodec next;
+        try {
+          next = frameCodecFromDictionary(result.dict, _config.dictionaryCache);
+        } on UnusableDictionaryException catch (e) {
           // A dictionary this client doesn't hold or can't read: nothing after
           // this frame can be decoded. Forget it and start over rather than
           // misread everything that follows.
           _config.dictionaryCache.forget(result.dict.id);
-          _fail('unknown dictionary');
+          _fail('dictionary compression: ${e.message}');
           return;
         }
         _frameCodec = next;

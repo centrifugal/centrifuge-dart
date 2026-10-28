@@ -153,7 +153,7 @@ class FrameCodec {
   /// [maxDecompressedFrameSize].
   List<int> decode(List<int> frame) {
     if (frame.isEmpty) {
-      throw const FormatException('centrifuge: empty frame');
+      throw const FormatException('empty frame');
     }
     final marker = frame[0];
     final body = frame.sublist(1);
@@ -168,7 +168,7 @@ class FrameCodec {
       );
     } else {
       // A codec that was never negotiated: guessing would corrupt the stream.
-      throw FormatException('centrifuge: unknown frame codec $marker');
+      throw FormatException('unknown frame codec $marker');
     }
     frames++;
     bytesReceived += frame.length;
@@ -177,13 +177,23 @@ class FrameCodec {
   }
 }
 
-/// Builds a codec from the dictionary of a connect reply, or returns null when
-/// this client can't use it: content that doesn't decode, or an id alone for
-/// a dictionary the [cache] doesn't hold.
+/// Thrown when the server sent a dictionary this client can't use, saying why.
+class UnusableDictionaryException implements Exception {
+  const UnusableDictionaryException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+/// Builds a codec from the dictionary of a connect reply. Throws
+/// [UnusableDictionaryException] when this client can't use it: content that
+/// doesn't decode, or an id alone for a dictionary the [cache] doesn't hold.
 ///
 /// Content is always DEFLATE compressed, as raw bytes on Protobuf connections
 /// and base64 on JSON ones, where a bytes field carries raw JSON.
-FrameCodec? frameCodecFromDictionary(
+FrameCodec frameCodecFromDictionary(
   protocol.Dictionary dictionary,
   DictionaryCache cache,
 ) {
@@ -199,23 +209,39 @@ FrameCodec? frameCodecFromDictionary(
     try {
       delivered = base64.decode(dictionary.dataB64);
     } on FormatException {
-      return null;
+      throw UnusableDictionaryException('dictionary $id is not valid base64');
     }
   }
   if (delivered == null) {
     // An id alone means "use the one you hold": the server recognised the id
     // this client advertised at connect, so there was nothing to send.
     final held = cache.get(id);
-    if (held == null) return null;
+    if (held == null) {
+      throw UnusableDictionaryException(
+        'server named dictionary $id, which this client does not hold',
+      );
+    }
     return FrameCodec(id, held, transferred: 0);
   }
   final List<int> content;
   try {
     content = inflateRaw(delivered, maxSize: maxDictionarySize);
-  } on Exception {
-    return null;
+  } on InflateLimitError {
+    throw UnusableDictionaryException(
+      'dictionary $id exceeds $maxDictionarySize bytes',
+    );
+  } on Exception catch (e) {
+    throw UnusableDictionaryException(
+      'dictionary $id does not inflate: ${describeDecodeError(e)}',
+    );
   }
-  if (content.isEmpty) return null;
+  if (content.isEmpty) {
+    throw UnusableDictionaryException('dictionary $id is empty');
+  }
   cache.put(id, content);
   return FrameCodec(id, content, transferred: wireBytes);
 }
+
+/// The text of a decode failure, without the exception type in front.
+String describeDecodeError(Object e) =>
+    e is FormatException ? e.message : e.toString();

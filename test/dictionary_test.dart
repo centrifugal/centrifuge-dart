@@ -102,74 +102,86 @@ void main() {
   group('frameCodecFromDictionary', () {
     test('inflates the dictionary the protocol delivers', () {
       final cache = DictionaryCache();
-      final codec =
-          frameCodecFromDictionary(
-            protocol.Dictionary()
-              ..id = vectorDictionaryId
-              ..data = vectorDictionaryDelivered,
-            cache,
-          )!;
+      final codec = frameCodecFromDictionary(
+        protocol.Dictionary()
+          ..id = vectorDictionaryId
+          ..data = vectorDictionaryDelivered,
+        cache,
+      );
       expect(codec.dictionary, vectorDictionary);
       expect(codec.transferred, vectorDictionaryDelivered.length);
       expect(cache.id, vectorDictionaryId);
     });
 
     test('reads base64 content and charges its encoded length', () {
-      final codec =
-          frameCodecFromDictionary(
-            protocol.Dictionary()
-              ..id = vectorDictionaryId
-              ..dataB64 = vectorDictionaryDeliveredB64,
-            DictionaryCache(),
-          )!;
+      final codec = frameCodecFromDictionary(
+        protocol.Dictionary()
+          ..id = vectorDictionaryId
+          ..dataB64 = vectorDictionaryDeliveredB64,
+        DictionaryCache(),
+      );
       expect(codec.dictionary, vectorDictionary);
       expect(codec.transferred, vectorDictionaryDeliveredB64.length);
     });
 
     test('takes an id alone from the cache, charging nothing', () {
       final cache = DictionaryCache()..put('d', vectorDictionary);
-      final codec =
-          frameCodecFromDictionary(protocol.Dictionary()..id = 'd', cache)!;
+      final codec = frameCodecFromDictionary(
+        protocol.Dictionary()..id = 'd',
+        cache,
+      );
       expect(codec.dictionary, vectorDictionary);
       expect(codec.transferred, 0);
     });
 
-    test('returns null for what it cannot use', () {
+    test('says why it cannot use a dictionary', () {
       final cache = DictionaryCache()..put('d', vectorDictionary);
+      Matcher unusable(String message) => throwsA(
+        isA<UnusableDictionaryException>().having(
+          (e) => e.message,
+          'message',
+          startsWith(message),
+        ),
+      );
       // An id this client doesn't hold.
       expect(
-        frameCodecFromDictionary(protocol.Dictionary()..id = 'other', cache),
-        isNull,
+        () => frameCodecFromDictionary(
+          protocol.Dictionary()..id = 'other',
+          cache,
+        ),
+        unusable(
+          'server named dictionary other, which this client does not hold',
+        ),
       );
       // Content that isn't base64, or isn't DEFLATE.
       expect(
-        frameCodecFromDictionary(
+        () => frameCodecFromDictionary(
           protocol.Dictionary()
             ..id = 'x'
             ..dataB64 = '%%%',
           cache,
         ),
-        isNull,
+        unusable('dictionary x is not valid base64'),
       );
       expect(
-        frameCodecFromDictionary(
+        () => frameCodecFromDictionary(
           protocol.Dictionary()
             ..id = 'x'
             ..data = [0xff, 0xff, 0xff, 0xff],
           cache,
         ),
-        isNull,
+        unusable('dictionary x does not inflate: '),
       );
       // Content past the limit.
       expect(
-        frameCodecFromDictionary(
+        () => frameCodecFromDictionary(
           deliveredDictionary(
             List<int>.filled(maxDictionarySize + 1, 0x61),
             id: 'x',
           ),
           cache,
         ),
-        isNull,
+        unusable('dictionary x exceeds $maxDictionarySize bytes'),
       );
       expect(cache.id, 'd');
     });
@@ -346,10 +358,18 @@ void main() {
     // While connecting, a dictionary the client can't use closes the
     // connection and starts the next attempt, which offers no dictionary: the
     // client never connects with it.
-    Future<void> expectRetriedWithoutDictionary() async {
+    Future<void> expectRetriedWithoutDictionary(String reason) async {
       var connected = false;
       client.connected.listen((_) => connected = true);
+      // Still connecting, so the reason comes as a connect error.
+      final error = _next(client.error);
       unawaited(client.connect());
+      final event = await error;
+      expect(event.error, isA<centrifuge.ConnectError>());
+      expect(
+        (event.error as centrifuge.ConnectError).error,
+        startsWith(reason),
+      );
       await _until(
         () => server.received.where((c) => c.hasConnect()).length >= 2,
       );
@@ -374,7 +394,10 @@ void main() {
         server.url,
         centrifuge.ClientConfig(minReconnectDelay: Duration.zero),
       );
-      await expectRetriedWithoutDictionary();
+      await expectRetriedWithoutDictionary(
+        'dictionary compression: server named dictionary never-sent, '
+        'which this client does not hold',
+      );
     });
 
     test('content that does not inflate reconnects without it', () async {
@@ -395,7 +418,9 @@ void main() {
         server.url,
         centrifuge.ClientConfig(minReconnectDelay: Duration.zero),
       );
-      await expectRetriedWithoutDictionary();
+      await expectRetriedWithoutDictionary(
+        'dictionary compression: dictionary broken does not inflate: ',
+      );
     });
 
     test('a frame that fails to decode forgets the dictionary', () async {
@@ -408,7 +433,12 @@ void main() {
       server.sendBytes([frameCodecCompressed, 0xff, 0xff, 0xff]);
       final event = await connecting;
       expect(event.code, 2);
-      expect(event.reason, 'frame decode error');
+      expect(
+        event.reason,
+        startsWith(
+          'dictionary compression: frame does not decode with dictionary ',
+        ),
+      );
       await _until(
         () => server.received.where((c) => c.hasConnect()).length >= 2,
       );
